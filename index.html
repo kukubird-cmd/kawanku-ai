@@ -474,7 +474,7 @@
                 <!-- Avatar Studio Panel -->
                 <section class="panel" id="studio-panel">
                     <div class="studio-layout">
-                        <!-- Preview Column -->
+                        <!-- Left Panel: Preview Column -->
                         <div class="studio-preview-card">
                             <div class="preview-header">
                                 <h3>Studio Preview</h3>
@@ -483,126 +483,97 @@
                                 </button>
                             </div>
                             
-                            <!-- Secondary viewport linked to main state -->
-                            <div class="studio-viewport">
-                                <div class="avatar-svg-container" id="studio-avatar-container">
+                            <!-- Customizer Live Viewport -->
+                            <div class="customizer-viewport scene-yellow" id="customizer-viewport">
+                                <div id="studio-avatar-container">
                                     <!-- Rendered dynamically by script -->
                                 </div>
-                            </div>
-                            
-                            <div class="avatar-manifesto">
-                                <p>This is your MindBuddy's physical projection. Make them look how you feel, or style them to represent a calm, grounding presence.</p>
+                                <!-- Pet Layer System -->
+                                <div class="pet-overlay-container" id="studio-pet-container">
+                                    <!-- Cat SVG -->
+                                    <svg id="pet-cat" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                        <ellipse cx="50" cy="70" rx="20" ry="25" fill="#f59e0b"/>
+                                        <circle cx="50" cy="40" r="16" fill="#f59e0b"/>
+                                        <!-- Ears -->
+                                        <polygon points="36,36 34,20 46,30" fill="#d97706"/>
+                                        <polygon points="64,36 66,20 54,30" fill="#d97706"/>
+                                        <!-- Eyes -->
+                                        <circle cx="44" cy="38" r="2.5" fill="#1e293b"/>
+                                        <circle cx="56" cy="38" r="2.5" fill="#1e293b"/>
+                                        <!-- Nose/Mouth -->
+                                        <polygon points="50,44 48,42 52,42" fill="#1e293b"/>
+                                        <!-- Tail -->
+                                        <path d="M68,75 Q85,75 80,50" fill="none" stroke="#f59e0b" stroke-width="5" stroke-linecap="round"/>
+                                    </svg>
+                                    <!-- Dog SVG -->
+                                    <svg id="pet-dog" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                        <ellipse cx="50" cy="70" rx="22" ry="24" fill="#78350f"/>
+                                        <circle cx="50" cy="42" r="16" fill="#78350f"/>
+                                        <!-- Ears -->
+                                        <path d="M34,34 Q22,40 28,55" fill="none" stroke="#78350f" stroke-width="8" stroke-linecap="round"/>
+                                        <path d="M66,34 Q78,40 72,55" fill="none" stroke="#78350f" stroke-width="8" stroke-linecap="round"/>
+                                        <!-- Eyes -->
+                                        <circle cx="44" cy="40" r="2.5" fill="#f8fafc"/>
+                                        <circle cx="56" cy="40" r="2.5" fill="#f8fafc"/>
+                                        <!-- Nose -->
+                                        <ellipse cx="50" cy="46" rx="3.5" ry="2" fill="#0f172a"/>
+                                        <!-- Tail -->
+                                        <path d="M68,78 Q82,85 88,72" fill="none" stroke="#78350f" stroke-width="5" stroke-linecap="round"/>
+                                    </svg>
+                                    <!-- Bird SVG -->
+                                    <svg id="pet-bird" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                        <ellipse cx="50" cy="65" rx="18" ry="20" fill="#3b82f6"/>
+                                        <circle cx="58" cy="42" r="12" fill="#3b82f6"/>
+                                        <!-- Beak -->
+                                        <polygon points="70,40 76,44 70,48" fill="#f59e0b"/>
+                                        <!-- Eye -->
+                                        <circle cx="58" cy="38" r="2" fill="#0f172a"/>
+                                        <!-- Wing -->
+                                        <path d="M38,62 Q45,55 52,70" fill="none" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                                        <!-- Tail -->
+                                        <path d="M34,75 L20,85 L28,70" fill="#3b82f6"/>
+                                    </svg>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Design Board Column -->
+                        <!-- Right Panel: Design Board Column -->
                         <div class="studio-options-card">
-                            <div class="options-header">
-                                <h3>Decorate Your Companion</h3>
-                                <p>Swap hair, clothes, glasses, skin tones, and accessory configurations.</p>
+                            <!-- Sub-Navigation Menu -->
+                            <div class="customizer-subnav" id="customizer-subnav">
+                                <button class="subnav-item active" data-category="Fashion">
+                                    <i data-lucide="shirt"></i>
+                                    <span>Fashion</span>
+                                </button>
+                                <button class="subnav-item" data-category="Selfie">
+                                    <i data-lucide="smile"></i>
+                                    <span>Selfie</span>
+                                </button>
+                                <button class="subnav-item" data-category="Pet">
+                                    <i data-lucide="dog"></i>
+                                    <span>Pet</span>
+                                </button>
+                                <button class="subnav-item" data-category="Scene">
+                                    <i data-lucide="image"></i>
+                                    <span>Scene</span>
+                                </button>
+                                <button class="subnav-item" data-category="Avatar">
+                                    <i data-lucide="user"></i>
+                                    <span>Avatar</span>
+                                </button>
                             </div>
 
-                            <div class="options-tabs">
-                                <button class="opt-tab-btn active" data-opt-group="features">Base Features</button>
-                                <button class="opt-tab-btn" data-opt-group="clothing">Style & Accs</button>
-                                <button class="opt-tab-btn" data-opt-group="colors">Color Swatches</button>
-                            </div>
-
-                            <div class="options-content">
-                                <!-- Group 1: Base Features -->
-                                <div class="options-panel-group active" id="opt-features">
-                                    <div class="control-row">
-                                        <label>Hairstyle</label>
-                                        <div class="selection-grid">
-                                            <button class="select-btn active" data-avatar-prop="hairStyle" data-val="crop">Sleek Crop</button>
-                                            <button class="select-btn" data-avatar-prop="hairStyle" data-val="curly">Curly Afro</button>
-                                            <button class="select-btn" data-avatar-prop="hairStyle" data-val="bob">Bob Cut</button>
-                                            <button class="select-btn" data-avatar-prop="hairStyle" data-val="long">Long Wave</button>
-                                            <button class="select-btn" data-avatar-prop="hairStyle" data-val="bald">Shaved</button>
-                                        </div>
+                            <!-- Customization Bottom Sheet -->
+                            <div class="customizer-bottom-sheet">
+                                <h4>Try a new look</h4>
+                                <div class="sheet-content">
+                                    <!-- Dynamic Secondary subtabs (e.g. Tops / Bottoms / Shoes) -->
+                                    <div class="sheet-subtabs" id="customizer-subtabs">
+                                        <!-- Rendered dynamically by script -->
                                     </div>
-                                    
-                                    <div class="control-row">
-                                        <label>Skin Tone Base</label>
-                                        <div class="selection-grid">
-                                            <button class="select-btn skin-swatch active" data-avatar-prop="skinTone" data-val="#ffdbac" style="background:#ffdbac"></button>
-                                            <button class="select-btn skin-swatch" data-avatar-prop="skinTone" data-val="#f1c27d" style="background:#f1c27d"></button>
-                                            <button class="select-btn skin-swatch" data-avatar-prop="skinTone" data-val="#e0ac69" style="background:#e0ac69"></button>
-                                            <button class="select-btn skin-swatch" data-avatar-prop="skinTone" data-val="#c68642" style="background:#c68642"></button>
-                                            <button class="select-btn skin-swatch" data-avatar-prop="skinTone" data-val="#8d5524" style="background:#8d5524"></button>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="control-row">
-                                        <label>Active Expression Mode</label>
-                                        <div class="selection-grid">
-                                            <button class="select-btn active" data-avatar-prop="expression" data-val="friendly">Friendly</button>
-                                            <button class="select-btn" data-avatar-prop="expression" data-val="thoughtful">Thoughtful</button>
-                                            <button class="select-btn" data-avatar-prop="expression" data-val="attentive">Attentive</button>
-                                            <button class="select-btn" data-avatar-prop="expression" data-val="excited">Excited</button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Group 2: Style & Accessories -->
-                                <div class="options-panel-group" id="opt-clothing">
-                                    <div class="control-row">
-                                        <label>Hoodie Chest Graphic</label>
-                                        <div class="selection-grid">
-                                            <button class="select-btn" data-avatar-prop="hoodieGraphic" data-val="none">None</button>
-                                            <button class="select-btn" data-avatar-prop="hoodieGraphic" data-val="pumpkin">🎃 Pumpkin</button>
-                                            <button class="select-btn" data-avatar-prop="hoodieGraphic" data-val="heart">❤️ Heart</button>
-                                            <button class="select-btn" data-avatar-prop="hoodieGraphic" data-val="wave">🌊 Wave</button>
-                                            <button class="select-btn active" data-avatar-prop="hoodieGraphic" data-val="star">⭐ Star</button>
-                                        </div>
-                                    </div>
-
-                                    <div class="control-row">
-                                        <label>Pants Style</label>
-                                        <div class="selection-grid">
-                                            <button class="select-btn active" data-avatar-prop="pantsStyle" data-val="shorts">Casual Shorts</button>
-                                            <button class="select-btn" data-avatar-prop="pantsStyle" data-val="cargo">Cargo Trousers</button>
-                                            <button class="select-btn" data-avatar-prop="pantsStyle" data-val="jogger">Jogger Pants</button>
-                                        </div>
-                                    </div>
-
-                                    <div class="control-row">
-                                        <label>Eyewear</label>
-                                        <div class="selection-grid">
-                                            <button class="select-btn active" data-avatar-prop="glasses" data-val="none">None</button>
-                                            <button class="select-btn" data-avatar-prop="glasses" data-val="green">Emerald Frames</button>
-                                            <button class="select-btn" data-avatar-prop="glasses" data-val="gold">Gold Round</button>
-                                        </div>
-                                    </div>
-
-                                    <div class="control-row">
-                                        <label>Accessories</label>
-                                        <div class="selection-grid">
-                                            <button class="select-btn active" data-avatar-prop="accessories" data-val="none">None</button>
-                                            <button class="select-btn" data-avatar-prop="accessories" data-val="headphones">DJ Headphones</button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Group 3: Color Palette Customizers -->
-                                <div class="options-panel-group" id="opt-colors">
-                                    <div class="color-picker-grid">
-                                        <div class="picker-control">
-                                            <label for="picker-hair">Hair Color</label>
-                                            <input type="color" id="picker-hair" value="#2d3748">
-                                        </div>
-                                        <div class="picker-control">
-                                            <label for="picker-shirt">Shirt Color</label>
-                                            <input type="color" id="picker-shirt" value="#4f46e5">
-                                        </div>
-                                        <div class="picker-control">
-                                            <label for="picker-glow1">Aura Glow Start</label>
-                                            <input type="color" id="picker-glow1" value="#8b5cf6">
-                                        </div>
-                                        <div class="picker-control">
-                                            <label for="picker-glow2">Aura Glow End</label>
-                                            <input type="color" id="picker-glow2" value="#ec4899">
-                                        </div>
+                                    <!-- Dynamic Grid view of catalog options -->
+                                    <div class="item-grid" id="customizer-item-grid">
+                                        <!-- Rendered dynamically by script -->
                                     </div>
                                 </div>
                             </div>

@@ -19,6 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
             accessories: 'none',
             hoodieGraphic: 'star',
             pantsStyle: 'shorts',
+            shoes: 'sneakers',
+            pet: 'none',
+            scene: 'yellow',
             hairColor: '#1e293b',
             shirtColor: '#4f46e5',
             glowColor1: '#8b5cf6',
@@ -209,13 +212,12 @@ document.addEventListener('DOMContentLoaded', () => {
         ],
         
         // Studio buttons / inputs
-        studioTabBtns: document.querySelectorAll('.opt-tab-btn'),
-        studioPanelGroups: document.querySelectorAll('.options-content .options-panel-group'),
         avatarRandomizeBtn: document.getElementById('avatar-randomize-btn'),
-        pickerHair: document.getElementById('picker-hair'),
-        pickerShirt: document.getElementById('picker-shirt'),
-        pickerGlow1: document.getElementById('picker-glow1'),
-        pickerGlow2: document.getElementById('picker-glow2'),
+        customizerSubnav: document.getElementById('customizer-subnav'),
+        customizerSubtabs: document.getElementById('customizer-subtabs'),
+        customizerItemGrid: document.getElementById('customizer-item-grid'),
+        customizerViewport: document.getElementById('customizer-viewport'),
+        studioPetContainer: document.getElementById('studio-pet-container'),
         
         // IoT biometric page
         bioLiveHR: document.getElementById('bio-live-hr'),
@@ -440,6 +442,48 @@ document.addEventListener('DOMContentLoaded', () => {
             pantsRight.setAttribute('fill', pantsColor);
         }
 
+        // ---- Shoes ----
+        const shoesGroup = svg.querySelector('#avatar-shoes');
+        if (shoesGroup && conf.shoes) {
+            const leftShoeMain = shoesGroup.querySelector('ellipse[cx="122"]');
+            const rightShoeMain = shoesGroup.querySelector('ellipse[cx="178"]');
+            const leftShoeBody = shoesGroup.querySelector('rect[x="100"][y="422"]');
+            const rightShoeBody = shoesGroup.querySelector('rect[x="156"][y="422"]');
+            const leftShoeSole = shoesGroup.querySelector('rect[x="99"][y="430"]');
+            const rightShoeSole = shoesGroup.querySelector('rect[x="155"][y="430"]');
+            const laces = shoesGroup.querySelectorAll('line');
+            const socks = svg.querySelector('#avatar-socks');
+            
+            if (conf.shoes === 'sneakers') {
+                if (leftShoeMain) leftShoeMain.setAttribute('fill', 'url(#shoe-grad-l)');
+                if (rightShoeMain) rightShoeMain.setAttribute('fill', 'url(#shoe-grad-r)');
+                if (leftShoeBody) leftShoeBody.setAttribute('fill', 'url(#shoe-grad-l)');
+                if (rightShoeBody) rightShoeBody.setAttribute('fill', 'url(#shoe-grad-r)');
+                if (leftShoeSole) leftShoeSole.setAttribute('fill', '#64748b');
+                if (rightShoeSole) rightShoeSole.setAttribute('fill', '#64748b');
+                if (socks) socks.setAttribute('opacity', '1');
+                laces.forEach(l => l.setAttribute('opacity', '1'));
+            } else if (conf.shoes === 'boots') {
+                if (leftShoeMain) leftShoeMain.setAttribute('fill', '#78350f');
+                if (rightShoeMain) rightShoeMain.setAttribute('fill', '#78350f');
+                if (leftShoeBody) leftShoeBody.setAttribute('fill', '#78350f');
+                if (rightShoeBody) rightShoeBody.setAttribute('fill', '#78350f');
+                if (leftShoeSole) leftShoeSole.setAttribute('fill', '#451a03');
+                if (rightShoeSole) rightShoeSole.setAttribute('fill', '#451a03');
+                if (socks) socks.setAttribute('opacity', '0.2');
+                laces.forEach(l => l.setAttribute('opacity', '0.5'));
+            } else if (conf.shoes === 'sandals') {
+                if (leftShoeMain) leftShoeMain.setAttribute('fill', conf.skinTone);
+                if (rightShoeMain) rightShoeMain.setAttribute('fill', conf.skinTone);
+                if (leftShoeBody) leftShoeBody.setAttribute('fill', '#1d4ed8');
+                if (rightShoeBody) rightShoeBody.setAttribute('fill', '#1d4ed8');
+                if (leftShoeSole) leftShoeSole.setAttribute('fill', '#1e3a8a');
+                if (rightShoeSole) rightShoeSole.setAttribute('fill', '#1e3a8a');
+                if (socks) socks.setAttribute('opacity', '0');
+                laces.forEach(l => l.setAttribute('opacity', '0'));
+            }
+        }
+
         // ---- Glasses ----
         const glasses = svg.querySelector('#avatar-glasses');
         if (glasses) {
@@ -506,7 +550,29 @@ document.addEventListener('DOMContentLoaded', () => {
         applyAvatarToSVG(studioSVG, conf);
 
         // Update expression badge label
-        DOM.avatarExpressionLabel.innerText = conf.expression.charAt(0).toUpperCase() + conf.expression.slice(1);
+        if (DOM.avatarExpressionLabel) {
+            DOM.avatarExpressionLabel.innerText = conf.expression.charAt(0).toUpperCase() + conf.expression.slice(1);
+        }
+
+        // Update Customizer Viewport scene background
+        const customizerViewport = DOM.customizerViewport;
+        if (customizerViewport && conf.scene) {
+            customizerViewport.className = 'customizer-viewport scene-' + conf.scene;
+        }
+
+        // Toggle Pet active layers
+        const petCat = document.getElementById('pet-cat');
+        const petDog = document.getElementById('pet-dog');
+        const petBird = document.getElementById('pet-bird');
+        if (petCat && petDog && petBird) {
+            petCat.classList.remove('active');
+            petDog.classList.remove('active');
+            petBird.classList.remove('active');
+            
+            if (conf.pet === 'cat') petCat.classList.add('active');
+            if (conf.pet === 'dog') petDog.classList.add('active');
+            if (conf.pet === 'bird') petBird.classList.add('active');
+        }
 
         // Expression class for CSS targeting
         [mainSVG, studioSVG].forEach(svg => {
@@ -1871,57 +1937,22 @@ Keep your conversational reply warm, human and concise. The student should feel 
         });
         DOM.closeCamBtn.addEventListener('click', stopWebcamAnalyzer);
 
-        // Studio Designer events
-        const selectBtns = document.querySelectorAll('.selection-grid .select-btn');
-        selectBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const prop = btn.getAttribute('data-avatar-prop');
-                const val = btn.getAttribute('data-val');
-
-                state.avatar[prop] = val;
-                
-                // Toggle active state in sibling button group
-                const row = btn.closest('.selection-grid');
-                row.querySelectorAll('.select-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
-                renderAvatarVisuals();
-            });
-        });
-
-        // Studio Designer Color Pickers
-        DOM.pickerHair.addEventListener('input', (e) => {
-            state.avatar.hairColor = e.target.value;
-            renderAvatarVisuals();
-        });
-        DOM.pickerShirt.addEventListener('input', (e) => {
-            state.avatar.shirtColor = e.target.value;
-            renderAvatarVisuals();
-        });
-        DOM.pickerGlow1.addEventListener('input', (e) => {
-            state.avatar.glowColor1 = e.target.value;
-            renderAvatarVisuals();
-        });
-        DOM.pickerGlow2.addEventListener('input', (e) => {
-            state.avatar.glowColor2 = e.target.value;
-            renderAvatarVisuals();
-        });
-
-        // Studio Swapping subtabs
-        DOM.studioTabBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                DOM.studioTabBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
-                const target = btn.getAttribute('data-opt-group');
-                DOM.studioPanelGroups.forEach(g => {
-                    g.classList.remove('active');
-                    if (g.id === `opt-${target}`) {
-                        g.classList.add('active');
-                    }
+        // Studio Customizer Category Switcher
+        if (DOM.customizerSubnav) {
+            DOM.customizerSubnav.querySelectorAll('.subnav-item').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    DOM.customizerSubnav.querySelectorAll('.subnav-item').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    activeCategory = btn.getAttribute('data-category');
+                    activeSubcategory = AVATAR_CATALOG[activeCategory].subcategories[0];
+                    renderCustomizerUI();
                 });
             });
-        });
+        }
+
+        // Initial customizer render
+        renderCustomizerUI();
 
         // Avatar Randomizer Dice
         DOM.avatarRandomizeBtn.addEventListener('click', randomizeAvatarConfig);
@@ -2014,6 +2045,191 @@ Keep your conversational reply warm, human and concise. The student should feel 
         processStudentMessage(text);
     }
 
+    // ----------------------------------------------------------------------
+    // AVATAR CUSTOMIZER SYSTEM (BITMOJI SYSTEM DEFINITIONS)
+    // ----------------------------------------------------------------------
+    let activeCategory = 'Fashion';
+    let activeSubcategory = 'Tops';
+
+    const AVATAR_CATALOG = {
+        Fashion: {
+            subcategories: ['Tops', 'Bottoms', 'Shoes'],
+            items: {
+                Tops: [
+                    { id: 'hoodie', label: 'Classic Hoodie', prop: 'shirtStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="40" width="40" height="40" rx="8" fill="#4f46e5"/><path d="M40,40 L50,30 L60,40 Z" fill="#3730a3"/></svg>' },
+                    { id: 'tshirt', label: 'Sporty T-Shirt', prop: 'shirtStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="40" width="36" height="40" rx="4" fill="#0d9488"/><rect x="24" y="40" width="52" height="12" rx="4" fill="#0d9488"/></svg>' },
+                    { id: 'sweater', label: 'Cozy Sweater', prop: 'shirtStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="28" y="38" width="44" height="44" rx="10" fill="#ea580c"/></svg>' }
+                ],
+                Bottoms: [
+                    { id: 'shorts', label: 'Casual Shorts', prop: 'pantsStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="45" width="16" height="24" rx="2" fill="#1e293b"/><rect x="52" y="45" width="16" height="24" rx="2" fill="#1e293b"/></svg>' },
+                    { id: 'cargo', label: 'Cargo Trousers', prop: 'pantsStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="40" width="16" height="45" rx="4" fill="#78716c"/><rect x="52" y="40" width="16" height="45" rx="4" fill="#78716c"/></svg>' },
+                    { id: 'jogger', label: 'Jogger Pants', prop: 'pantsStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="40" width="16" height="42" rx="4" fill="#374151"/><rect x="52" y="40" width="16" height="42" rx="4" fill="#374151"/></svg>' }
+                ],
+                Shoes: [
+                    { id: 'sneakers', label: 'Grey Sneakers', prop: 'shoes', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="48" width="40" height="18" rx="6" fill="#94a3b8"/><rect x="30" y="60" width="40" height="6" fill="#ffffff"/></svg>' },
+                    { id: 'boots', label: 'Outdoor Boots', prop: 'shoes', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="38" width="40" height="28" rx="8" fill="#78350f"/><rect x="30" y="60" width="40" height="6" fill="#451a03"/></svg>' },
+                    { id: 'sandals', label: 'Comfy Slides', prop: 'shoes', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="50" width="40" height="12" rx="4" fill="#1e3a8a"/><rect x="35" y="44" width="30" height="8" fill="#1d4ed8"/></svg>' }
+                ]
+            }
+        },
+        Selfie: {
+            subcategories: ['Expression'],
+            items: {
+                Expression: [
+                    { id: 'friendly', label: 'Friendly Smile', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="white" stroke-width="4"/><circle cx="40" cy="45" r="3.5" fill="white"/><circle cx="60" cy="45" r="3.5" fill="white"/><path d="M40,60 Q50,70 60,60" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>' },
+                    { id: 'thoughtful', label: 'Thinking Pose', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="white" stroke-width="4"/><circle cx="40" cy="45" r="3.5" fill="white"/><circle cx="60" cy="45" r="3.5" fill="white"/><line x1="42" y1="62" x2="58" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>' },
+                    { id: 'attentive', label: 'Focused Look', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="white" stroke-width="4"/><circle cx="40" cy="45" r="3" fill="white"/><circle cx="60" cy="45" r="3" fill="white"/><path d="M44,60 Q50,64 56,60" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>' },
+                    { id: 'excited', label: 'Excited Grin', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="white" stroke-width="4"/><circle cx="40" cy="45" r="3.5" fill="white"/><circle cx="60" cy="45" r="3.5" fill="white"/><path d="M38,58 Q50,72 62,58 Z" fill="white" stroke="white" stroke-width="1"/></svg>' }
+                ]
+            }
+        },
+        Pet: {
+            subcategories: ['Pets'],
+            items: {
+                Pets: [
+                    { id: 'none', label: 'No Pet', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="#64748b" stroke-width="4" stroke-dasharray="4,4"/><line x1="35" y1="35" x2="65" y2="65" stroke="#64748b" stroke-width="4"/></svg>' },
+                    { id: 'cat', label: 'Kitty Cat', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="22" fill="#f59e0b"/><polygon points="34,36 30,16 44,28" fill="#d97706"/><polygon points="66,36 70,16 56,28" fill="#d97706"/><circle cx="42" cy="48" r="2" fill="#1e293b"/><circle cx="58" cy="48" r="2" fill="#1e293b"/><polygon points="50,54 48,52 52,52" fill="#1e293b"/></svg>' },
+                    { id: 'dog', label: 'Loyal Pup', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="22" fill="#78350f"/><path d="M30,42 Q18,48 24,65" fill="none" stroke="#78350f" stroke-width="6"/><path d="M70,42 Q82,48 76,65" fill="none" stroke="#78350f" stroke-width="6"/><circle cx="42" cy="48" r="2" fill="#f8fafc"/><circle cx="58" cy="48" r="2" fill="#f8fafc"/><ellipse cx="50" cy="54" rx="3" ry="1.5" fill="#0f172a"/></svg>' },
+                    { id: 'bird', label: 'Blue Bird', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="20" fill="#3b82f6"/><polygon points="66,46 72,50 66,54" fill="#f59e0b"/><circle cx="56" cy="46" r="2" fill="#0f172a"/><path d="M38,48 Q44,42 50,56" fill="none" stroke="#2563eb" stroke-width="5" stroke-linecap="round"/></svg>' }
+                ]
+            }
+        },
+        Scene: {
+            subcategories: ['Backgrounds'],
+            items: {
+                Backgrounds: [
+                    { id: 'yellow', label: 'Sunny Yellow', prop: 'scene', color: '#ffd02c' },
+                    { id: 'purple', label: 'Dreamy Purple', prop: 'scene', color: 'linear-gradient(135deg, #a78bfa, #c084fc)' },
+                    { id: 'blue', label: 'Sky Blue', prop: 'scene', color: 'linear-gradient(135deg, #38bdf8, #0ea5e9)' },
+                    { id: 'green', label: 'Forest Green', prop: 'scene', color: 'linear-gradient(135deg, #34d399, #059669)' },
+                    { id: 'sunset', label: 'Sunset Orange', prop: 'scene', color: 'linear-gradient(135deg, #fb923c, #db2777)' }
+                ]
+            }
+        },
+        Avatar: {
+            subcategories: ['Hairstyles', 'Skin Tones', 'Hair Color', 'Shirt Color'],
+            items: {
+                Hairstyles: [
+                    { id: 'crop', label: 'Sleek Crop', prop: 'hairStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M25,60 C25,20 75,20 75,60 C65,40 55,30 50,30 C45,30 35,40 25,60 Z" fill="#1e293b"/></svg>' },
+                    { id: 'curly', label: 'Curly Afro', prop: 'hairStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="26" fill="#1e293b" stroke="#334155" stroke-width="3" stroke-dasharray="6,4"/></svg>' },
+                    { id: 'bob', label: 'Bob Cut', prop: 'hairStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M25,60 C25,25 75,25 75,60 L75,70 C65,75 55,78 50,78 C45,78 35,75 25,70 Z" fill="#1e293b"/></svg>' },
+                    { id: 'long', label: 'Long Wave', prop: 'hairStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M25,60 C25,20 75,20 75,60 M20,55 L20,80 C20,90 35,90 35,80 Z M80,55 L80,80 C80,90 65,90 65,80 Z" fill="#1e293b"/></svg>' },
+                    { id: 'bald', label: 'Shaved', prop: 'hairStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="55" r="24" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="4,4"/></svg>' }
+                ],
+                'Skin Tones': [
+                    { id: '#ffdbac', label: 'Fair', prop: 'skinTone', color: '#ffdbac' },
+                    { id: '#f1c27d', label: 'Peach', prop: 'skinTone', color: '#f1c27d' },
+                    { id: '#e0ac69', label: 'Honey', prop: 'skinTone', color: '#e0ac69' },
+                    { id: '#c68642', label: 'Bronze', prop: 'skinTone', color: '#c68642' },
+                    { id: '#8d5524', label: 'Deep', prop: 'skinTone', color: '#8d5524' }
+                ],
+                'Hair Color': [
+                    { id: '#1e293b', label: 'Dark Slate', prop: 'hairColor', color: '#1e293b' },
+                    { id: '#e2e8f0', label: 'Silver White', prop: 'hairColor', color: '#e2e8f0' },
+                    { id: '#b45309', label: 'Golden Brown', prop: 'hairColor', color: '#b45309' },
+                    { id: '#4f46e5', label: 'Bright Indigo', prop: 'hairColor', color: '#4f46e5' },
+                    { id: '#e11d48', label: 'Rose Red', prop: 'hairColor', color: '#e11d48' }
+                ],
+                'Shirt Color': [
+                    { id: '#4f46e5', label: 'Royal Blue', prop: 'shirtColor', color: '#4f46e5' },
+                    { id: '#0d9488', label: 'Teal Green', prop: 'shirtColor', color: '#0d9488' },
+                    { id: '#ea580c', label: 'Warm Orange', prop: 'shirtColor', color: '#ea580c' },
+                    { id: '#db2777', label: 'Hot Pink', prop: 'shirtColor', color: '#db2777' },
+                    { id: '#1e293b', label: 'Charcoal Black', prop: 'shirtColor', color: '#1e293b' }
+                ]
+            }
+        }
+    };
+
+    // Customizer State Management Hook Abstraction
+    const avatarState = {
+        subscribe(callback) {
+            this.listeners.push(callback);
+        },
+        listeners: [],
+        set(prop, val) {
+            state.avatar[prop] = val;
+            if (prop === 'shirtStyle') state.avatar.top = val;
+            if (prop === 'pantsStyle') state.avatar.bottom = val;
+            if (prop === 'shoes') state.avatar.shoes = val;
+            if (prop === 'hairStyle') state.avatar.hairStyle = val;
+            if (prop === 'expression') state.avatar.expression = val;
+
+            renderAvatarVisuals();
+            this.listeners.forEach(callback => callback(state.avatar));
+        },
+        get(prop) {
+            return state.avatar[prop];
+        }
+    };
+
+    function renderCustomizerUI() {
+        const subtabsContainer = DOM.customizerSubtabs;
+        const gridContainer = DOM.customizerItemGrid;
+        if (!subtabsContainer || !gridContainer) return;
+
+        // 1. Render Subtabs
+        subtabsContainer.innerHTML = '';
+        const categoryData = AVATAR_CATALOG[activeCategory];
+
+        if (categoryData.subcategories.length > 1) {
+            subtabsContainer.style.display = 'flex';
+            categoryData.subcategories.forEach(sub => {
+                const btn = document.createElement('button');
+                btn.className = `subtab-btn ${sub === activeSubcategory ? 'active' : ''}`;
+                btn.innerText = sub;
+                btn.addEventListener('click', () => {
+                    activeSubcategory = sub;
+                    renderCustomizerUI();
+                });
+                subtabsContainer.appendChild(btn);
+            });
+        } else {
+            subtabsContainer.style.display = 'none';
+        }
+
+        // 2. Render Grid Items
+        gridContainer.innerHTML = '';
+        const items = categoryData.items[activeSubcategory];
+        if (!items) return;
+
+        items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'catalog-card';
+
+            const currentVal = state.avatar[item.prop];
+            if (currentVal === item.id) {
+                card.classList.add('active');
+            }
+
+            const previewDiv = document.createElement('div');
+            previewDiv.className = 'catalog-card-preview';
+
+            if (item.svg) {
+                previewDiv.innerHTML = item.svg;
+            } else if (item.color) {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch-circle';
+                swatch.style.background = item.color;
+                previewDiv.appendChild(swatch);
+            }
+
+            card.appendChild(previewDiv);
+
+            const label = document.createElement('div');
+            label.className = 'catalog-card-label';
+            label.innerText = item.label;
+            card.appendChild(label);
+
+            card.addEventListener('click', () => {
+                avatarState.set(item.prop, item.id);
+                renderCustomizerUI();
+            });
+
+            gridContainer.appendChild(card);
+        });
+    }
+
     function randomizeAvatarConfig() {
         const hairOptions = ['crop', 'curly', 'bob', 'long', 'bald'];
         const shirtOptions = ['hoodie', 'tshirt', 'sweater'];
@@ -2023,6 +2239,9 @@ Keep your conversational reply warm, human and concise. The student should feel 
         const accOptions         = ['none', 'headphones'];
         const graphicOptions     = ['none', 'pumpkin', 'heart', 'wave', 'star'];
         const pantsOptions       = ['shorts', 'cargo', 'jogger'];
+        const shoeOptions        = ['sneakers', 'boots', 'sandals'];
+        const petOptions         = ['none', 'cat', 'dog', 'bird'];
+        const sceneOptions       = ['yellow', 'purple', 'blue', 'green', 'sunset'];
 
         state.avatar.hairStyle    = getRandomElement(hairOptions);
         state.avatar.shirtStyle   = getRandomElement(shirtOptions);
@@ -2032,36 +2251,26 @@ Keep your conversational reply warm, human and concise. The student should feel 
         state.avatar.accessories  = getRandomElement(accOptions);
         state.avatar.hoodieGraphic = getRandomElement(graphicOptions);
         state.avatar.pantsStyle   = getRandomElement(pantsOptions);
+        state.avatar.shoes        = getRandomElement(shoeOptions);
+        state.avatar.pet          = getRandomElement(petOptions);
+        state.avatar.scene        = getRandomElement(sceneOptions);
 
         state.avatar.hairColor   = getRandomHexColor();
         state.avatar.shirtColor  = getRandomHexColor();
         state.avatar.glowColor1  = getRandomHexColor();
         state.avatar.glowColor2  = getRandomHexColor();
 
-        DOM.pickerHair.value   = state.avatar.hairColor;
-        DOM.pickerShirt.value  = state.avatar.shirtColor;
-        DOM.pickerGlow1.value  = state.avatar.glowColor1;
-        DOM.pickerGlow2.value  = state.avatar.glowColor2;
+        // Populate dynamic schema fields
+        state.avatar.top = state.avatar.shirtStyle;
+        state.avatar.bottom = state.avatar.pantsStyle;
 
-        // Sync active class selections on designer studio grids
-        syncSelectorActiveStates();
-        
         renderAvatarVisuals();
+        
+        if (typeof renderCustomizerUI === 'function') {
+            renderCustomizerUI();
+        }
+        
         showToast("MindBuddy randomized!", "success");
-    }
-
-    function syncSelectorActiveStates() {
-        const selectBtns = document.querySelectorAll('.selection-grid .select-btn');
-        selectBtns.forEach(btn => {
-            const prop = btn.getAttribute('data-avatar-prop');
-            const val = btn.getAttribute('data-val');
-            
-            if (state.avatar[prop] === val) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
     }
 
     // ----------------------------------------------------------------------
