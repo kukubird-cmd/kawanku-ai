@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindBuddy - Your Empathetic AI Companion</title>
+    <meta name="description" content="MindBuddy is a customizable, supportive AI personal companion for students. Express your emotions, analyze speech rants, scan facial gestures, sync biometric trackers, and restore peace of mind.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">
+                    <i data-lucide="brain-circuit"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>MindBuddy</h1>
+                    <span class="status-indicator online">Companion Online</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <button class="nav-btn active" data-target="chat-panel" id="nav-chat">
+                    <i data-lucide="message-square"></i>
+                    <span>Chat & Rant</span>
+                </button>
+                <button class="nav-btn" data-target="studio-panel" id="nav-studio">
+                    <i data-lucide="palette"></i>
+                    <span>Avatar Studio</span>
+                </button>
+                <button class="nav-btn" data-target="bio-panel" id="nav-bio">
+                    <i data-lucide="activity"></i>
+                    <span>Biometric Link</span>
+                </button>
+                <button class="nav-btn" data-target="calm-panel" id="nav-calm">
+                    <i data-lucide="music"></i>
+                    <span>Calm Hub</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="profile-card">
+                    <div class="profile-avatar">
+                        <i data-lucide="user"></i>
+                    </div>
+                    <div class="profile-info">
+                        <span class="profile-name">Student Account</span>
+                        <span class="profile-role">Active Session</span>
+                    </div>
+                </div>
+                <button class="sos-trigger-btn" id="sos-open-btn">
+                    <i data-lucide="heart-handshake"></i>
+                    <span>SOS Counselor</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="content-header">
+                <div class="welcome-section">
+                    <h2 id="header-title">Hello there!</h2>
+                    <p id="header-subtitle">How are you holding up today?</p>
+                </div>
+                <div class="quick-status-bar">
+                    <div class="status-metric" id="status-sentiment">
+                        <span class="metric-label">Mood State</span>
+                        <span class="metric-value positive"><i data-lucide="smile"></i> Calm</span>
+                    </div>
+                    <div class="status-metric" id="status-stress">
+                        <span class="metric-label">Stress Level</span>
+                        <span class="metric-value low">Low</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Panels -->
+            <div class="panel-container">
+                
+                <!-- Chat & Rant Panel -->
+                <section class="panel active" id="chat-panel">
+                    <div class="chat-layout">
+                        <!-- Left Panel: Avatar Viewport -->
+                        <div class="avatar-card">
+                            <div class="avatar-card-header">
+                                <h3>Your Buddy</h3>
+                                <span class="expression-badge" id="avatar-expression-label">Friendly</span>
+                            </div>
+                            
+                            <div class="avatar-viewport-container">
+                                <!-- Customizable SVG Avatar Container -->
+                                <div class="avatar-svg-container" id="avatar-container">
+                                    <svg id="mindbuddy-svg" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
+                                        <defs>
+                                            <radialGradient id="floor-shadow" cx="50%" cy="50%" r="50%">
+                                                <stop offset="0%" stop-color="#000" stop-opacity="0.25"/>
+                                                <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+                                            </radialGradient>
+                                            <linearGradient id="avatar-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" stop-color="var(--glow-color-1,#8b5cf6)"/>
+                                                <stop offset="100%" stop-color="var(--glow-color-2,#ec4899)"/>
+                                            </linearGradient>
+                                            <linearGradient id="shoe-grad-l" x1="0%" y1="0%" x2="0%" y2="100%">
+                                                <stop offset="0%" stop-color="#e2e8f0"/>
+                                                <stop offset="100%" stop-color="#94a3b8"/>
+                                            </linearGradient>
+                                            <linearGradient id="shoe-grad-r" x1="0%" y1="0%" x2="0%" y2="100%">
+                                                <stop offset="0%" stop-color="#e2e8f0"/>
+                                                <stop offset="100%" stop-color="#94a3b8"/>
+                                            </linearGradient>
+                                        </defs>
+
+                                        <!-- Background ambient glow -->
+                                        <ellipse cx="150" cy="510" rx="100" ry="12" fill="url(#floor-shadow)"/>
+                                        <circle cx="150" cy="200" r="120" fill="url(#avatar-glow)" opacity="0.1" class="glow-pulse"/>
+
+                                        <!-- Full-body character group with float animation -->
+                                        <g class="character-group">
+
+                                            <!-- ===================== LEGS ===================== -->
+                                            <!-- Shorts / Cargo Pants -->
+                                            <g id="avatar-pants">
+                                                <!-- Default: Shorts -->
+                                                <rect id="pants-left" x="103" y="330" width="38" height="72" rx="6" fill="#1e293b"/>
+                                                <rect id="pants-right" x="159" y="330" width="38" height="72" rx="6" fill="#1e293b"/>
+                                                <!-- Shorts hem detail lines -->
+                                                <line x1="103" y1="400" x2="141" y2="400" stroke="#0f172a" stroke-width="2" id="hem-left"/>
+                                                <line x1="159" y1="400" x2="197" y2="400" stroke="#0f172a" stroke-width="2" id="hem-right"/>
+                                            </g>
+
+                                            <!-- SOCKS -->
+                                            <g id="avatar-socks">
+                                                <rect x="106" y="398" width="32" height="28" rx="4" fill="#f8fafc"/>
+                                                <rect x="162" y="398" width="32" height="28" rx="4" fill="#f8fafc"/>
+                                                <!-- Sock stripe -->
+                                                <rect x="106" y="405" width="32" height="4" rx="1" fill="#6366f1" opacity="0.7"/>
+                                                <rect x="162" y="405" width="32" height="4" rx="1" fill="#6366f1" opacity="0.7"/>
+                                            </g>
+
+                                            <!-- SNEAKERS -->
+                                            <g id="avatar-shoes">
+                                                <!-- Left shoe -->
+                                                <ellipse cx="122" cy="432" rx="22" ry="10" fill="url(#shoe-grad-l)"/>
+                                                <rect x="100" y="422" width="44" height="12" rx="6" fill="url(#shoe-grad-l)"/>
+                                                <rect x="100" y="420" width="44" height="6" rx="3" fill="#ffffff" opacity="0.6"/>
+                                                <!-- Shoe sole -->
+                                                <rect x="99" y="430" width="46" height="5" rx="2" fill="#64748b"/>
+                                                <!-- Laces -->
+                                                <line x1="110" y1="424" x2="110" y2="430" stroke="#64748b" stroke-width="1.5"/>
+                                                <line x1="118" y1="422" x2="118" y2="430" stroke="#64748b" stroke-width="1.5"/>
+                                                <line x1="126" y1="422" x2="126" y2="430" stroke="#64748b" stroke-width="1.5"/>
+                                                <line x1="134" y1="424" x2="134" y2="430" stroke="#64748b" stroke-width="1.5"/>
+                                                <!-- Right shoe -->
+                                                <ellipse cx="178" cy="432" rx="22" ry="10" fill="url(#shoe-grad-r)"/>
+                                                <rect x="156" y="422" width="44" height="12" rx="6" fill="url(#shoe-grad-r)"/>
+                                                <rect x="156" y="420" width="44" height="6" rx="3" fill="#ffffff" opacity="0.6"/>
+                                                <rect x="155" y="430" width="46" height="5" rx="2" fill="#64748b"/>
+                                                <line x1="166" y1="424" x2="166" y2="430" stroke="#64748b" stroke-width="1.5"/>
+                                                <line x1="174" y1="422" x2="174" y2="430" stroke="#64748b" stroke-width="1.5"/>
+                                                <line x1="182" y1="422" x2="182" y2="430" stroke="#64748b" stroke-width="1.5"/>
+                                                <line x1="190" y1="424" x2="190" y2="430" stroke="#64748b" stroke-width="1.5"/>
+                                            </g>
+
+                                            <!-- ===================== TORSO / HOODIE ===================== -->
+                                            <!-- Main hoodie body -->
+                                            <path id="avatar-clothes" d="M85,200 C72,215 68,240 70,280 L70,340 L230,340 L230,280 C232,240 228,215 215,200 L195,192 L150,192 L105,200 Z" fill="#4f46e5"/>
+                                            <!-- Hood collar -->
+                                            <path id="avatar-hood" d="M105,200 C110,185 130,178 150,178 C170,178 190,185 195,200 L188,195 L150,195 L112,195 Z" fill="#3730a3"/>
+                                            <!-- Hoodie pocket -->
+                                            <rect x="118" y="285" width="64" height="35" rx="8" fill="#3730a3" opacity="0.7"/>
+                                            <!-- Drawstring -->
+                                            <line x1="138" y1="205" x2="132" y2="240" stroke="#c7d2fe" stroke-width="2" stroke-linecap="round"/>
+                                            <line x1="162" y1="205" x2="168" y2="240" stroke="#c7d2fe" stroke-width="2" stroke-linecap="round"/>
+                                            <!-- Drawstring ends -->
+                                            <circle cx="132" cy="243" r="4" fill="#c7d2fe"/>
+                                            <circle cx="168" cy="243" r="4" fill="#c7d2fe"/>
+
+                                            <!-- Chest Graphic Layer (swappable) -->
+                                            <!-- Pumpkin graphic -->
+                                            <g id="graphic-pumpkin" opacity="0">
+                                                <ellipse cx="150" cy="263" rx="18" ry="16" fill="#f97316"/>
+                                                <path d="M137,258 Q150,248 163,258" fill="none" stroke="#ea580c" stroke-width="1.5"/>
+                                                <!-- Eyes -->
+                                                <polygon points="141,261 144,256 147,261" fill="#fef08a"/>
+                                                <polygon points="153,261 156,256 159,261" fill="#fef08a"/>
+                                                <!-- Mouth -->
+                                                <path d="M140,267 Q145,273 150,270 Q155,273 160,267" fill="#fef08a" stroke="none"/>
+                                                <!-- Stem -->
+                                                <rect x="148" y="247" width="4" height="8" rx="2" fill="#16a34a"/>
+                                            </g>
+                                            <!-- Heart graphic -->
+                                            <g id="graphic-heart" opacity="0">
+                                                <path d="M150,278 C150,278 130,264 130,253 C130,246 136,242 143,245 C146,246 148,248 150,251 C152,248 154,246 157,245 C164,242 170,246 170,253 C170,264 150,278 150,278 Z" fill="#f43f5e"/>
+                                            </g>
+                                            <!-- Wave graphic -->
+                                            <g id="graphic-wave" opacity="0">
+                                                <path d="M130,260 Q138,252 146,260 Q154,268 162,260 Q170,252 178,260" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+                                                <path d="M130,270 Q138,262 146,270 Q154,278 162,270 Q170,262 178,270" fill="none" stroke="#7dd3fc" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+                                            </g>
+                                            <!-- Star graphic -->
+                                            <g id="graphic-star" opacity="1">
+                                                <polygon points="150,248 153,258 163,258 155,264 158,274 150,268 142,274 145,264 137,258 147,258" fill="#fbbf24"/>
+                                            </g>
+
+                                            <!-- ===================== ARMS (Thinking Pose) ===================== -->
+                                            <!-- Left arm (folded across chest) -->
+                                            <g id="avatar-left-arm">
+                                                <!-- Upper left arm -->
+                                                <path d="M85,210 C68,220 62,245 68,265 L90,265 C88,248 90,228 105,215 Z" fill="#4f46e5"/>
+                                                <!-- Forearm going right across -->
+                                                <path d="M68,255 C68,248 72,244 80,244 L170,244 C178,244 180,250 178,256 L80,258 C72,260 68,262 68,255 Z" fill="#4f46e5"/>
+                                                <!-- Left hand (fist) -->
+                                                <ellipse cx="175" cy="251" rx="14" ry="10" fill="#ffdbac" id="avatar-hand-l"/>
+                                                <!-- Knuckle hints -->
+                                                <line x1="167" y1="244" x2="167" y2="258" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
+                                                <line x1="173" y1="243" x2="173" y2="259" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
+                                                <line x1="179" y1="244" x2="179" y2="258" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
+                                            </g>
+                                            <!-- Right arm (elbow up, hand touching chin) -->
+                                            <g id="avatar-right-arm">
+                                                <!-- Upper right arm -->
+                                                <path d="M215,210 C230,222 234,245 228,268 L208,265 C212,248 210,228 195,215 Z" fill="#4f46e5"/>
+                                                <!-- Forearm going up to chin -->
+                                                <path d="M218,262 C222,258 224,248 220,235 L210,220 C205,212 200,210 196,214 L200,226 C204,238 208,252 208,265 Z" fill="#4f46e5"/>
+                                                <!-- Right hand at chin -->
+                                                <ellipse cx="207" cy="185" rx="13" ry="10" fill="#ffdbac" id="avatar-hand-r"/>
+                                                <line x1="200" y1="179" x2="200" y2="191" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
+                                                <line x1="206" y1="178" x2="206" y2="192" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
+                                                <line x1="212" y1="179" x2="212" y2="191" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
+                                            </g>
+
+                                            <!-- ===================== NECK ===================== -->
+                                            <rect id="avatar-neck" x="138" y="152" width="24" height="28" rx="8" fill="#ffdbac"/>
+
+                                            <!-- ===================== HEAD ===================== -->
+                                            <!-- Head base (slightly oval) -->
+                                            <ellipse id="avatar-head" cx="150" cy="110" rx="58" ry="62" fill="#ffdbac"/>
+
+                                            <!-- Ear left -->
+                                            <ellipse cx="93" cy="112" rx="10" ry="13" fill="#ffdbac" id="ear-l"/>
+                                            <ellipse cx="93" cy="112" rx="5" ry="8" fill="#e0a96d" opacity="0.5"/>
+                                            <!-- Ear right -->
+                                            <ellipse cx="207" cy="112" rx="10" ry="13" fill="#ffdbac" id="ear-r"/>
+                                            <ellipse cx="207" cy="112" rx="5" ry="8" fill="#e0a96d" opacity="0.5"/>
+
+                                            <!-- Hair back layer -->
+                                            <path id="avatar-hair-back" d="" fill="var(--hair-color, #1e293b)"/>
+
+                                            <!-- ===================== FACE FEATURES ===================== -->
+                                            <g id="avatar-face-features">
+                                                <!-- Eyebrows -->
+                                                <path id="left-brow" d="M118,88 Q130,83 140,88" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+                                                <path id="right-brow" d="M160,88 Q170,83 182,88" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+
+                                                <!-- Eyes -->
+                                                <g id="left-eye-group">
+                                                    <ellipse cx="130" cy="103" rx="10" ry="11" fill="#1e293b" class="avatar-eye"/>
+                                                    <circle cx="127" cy="99" r="3.5" fill="#ffffff"/>
+                                                    <circle cx="132" cy="107" r="2" fill="#ffffff" opacity="0.3"/>
+                                                </g>
+                                                <g id="right-eye-group">
+                                                    <ellipse cx="170" cy="103" rx="10" ry="11" fill="#1e293b" class="avatar-eye"/>
+                                                    <circle cx="167" cy="99" r="3.5" fill="#ffffff"/>
+                                                    <circle cx="172" cy="107" r="2" fill="#ffffff" opacity="0.3"/>
+                                                </g>
+
+                                                <!-- Blush cheeks -->
+                                                <ellipse cx="112" cy="122" rx="10" ry="7" fill="#f43f5e" opacity="0.25"/>
+                                                <ellipse cx="188" cy="122" rx="10" ry="7" fill="#f43f5e" opacity="0.25"/>
+
+                                                <!-- Nose -->
+                                                <path id="avatar-nose" d="M150,108 C148,116 145,120 143,122 C146,124 154,124 157,122 C155,120 152,116 150,108 Z" fill="#e0a96d" opacity="0.7"/>
+
+                                                <!-- Mouth (base smile) -->
+                                                <path id="avatar-mouth" d="M138,133 Q150,143 162,133" stroke="#1e293b" stroke-width="3" stroke-linecap="round" fill="none"/>
+                                                <!-- Teeth hint (shows on open smile / excited) -->
+                                                <path id="avatar-teeth" d="M140,134 Q150,140 160,134 L160,138 Q150,144 140,138 Z" fill="white" opacity="0"/>
+                                            </g>
+
+                                            <!-- Hair front layer -->
+                                            <path id="avatar-hair-front" d="M93,108 C93,50 207,50 207,108 C195,72 175,60 150,60 C125,60 105,72 93,108 Z" fill="var(--hair-color, #1e293b)"/>
+
+                                            <!-- Glasses overlay -->
+                                            <g id="avatar-glasses" opacity="0">
+                                                <rect x="112" y="95" width="28" height="20" rx="6" stroke="#10b981" stroke-width="2.5" fill="rgba(16,185,129,0.08)"/>
+                                                <rect x="160" y="95" width="28" height="20" rx="6" stroke="#10b981" stroke-width="2.5" fill="rgba(16,185,129,0.08)"/>
+                                                <line x1="140" y1="105" x2="160" y2="105" stroke="#10b981" stroke-width="2"/>
+                                                <!-- Side arms -->
+                                                <line x1="93" y1="105" x2="112" y2="105" stroke="#10b981" stroke-width="2"/>
+                                                <line x1="188" y1="105" x2="207" y2="105" stroke="#10b981" stroke-width="2"/>
+                                            </g>
+
+                                            <!-- Headphone accessories -->
+                                            <g id="avatar-accessories" opacity="0">
+                                                <path d="M93,110 A57,57 0 0,1 207,110" stroke="#f59e0b" stroke-width="7" fill="none" stroke-linecap="round"/>
+                                                <rect x="80" y="102" width="16" height="28" rx="8" fill="#f59e0b"/>
+                                                <rect x="204" y="102" width="16" height="28" rx="8" fill="#f59e0b"/>
+                                                <!-- Speaker mesh -->
+                                                <ellipse cx="88" cy="116" rx="4" ry="6" fill="#d97706"/>
+                                                <ellipse cx="212" cy="116" rx="4" ry="6" fill="#d97706"/>
+                                            </g>
+
+                                        </g>
+                                    </svg>
+                                </div>
+
+                                <!-- Speech bubble display -->
+                                <div class="avatar-bubble" id="avatar-speech-bubble">
+                                    <span>Hey! I'm here for you. Tell me what's on your mind.</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Companion Mini Stats -->
+                            <div class="avatar-quick-stats">
+                                <div class="mini-stat">
+                                    <span class="mini-label">Connection</span>
+                                    <span class="mini-val text-mint">Empathetic Link</span>
+                                </div>
+                                <div class="mini-stat">
+                                    <span class="mini-label">Mood Trend</span>
+                                    <span class="mini-val" id="mini-mood-trend">Stable</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Panel: Conversation Stream & Inputs -->
+                        <div class="chat-window-card">
+                            <div class="chat-messages-container" id="chat-messages">
+                                <!-- Welcome Message -->
+                                <div class="message buddy-msg">
+                                    <div class="msg-avatar-icon">MB</div>
+                                    <div class="msg-body">
+                                        <p>Hey there! I'm MindBuddy, your personal companion. You can tell me anything. No judgments, just a friendly ear. School driving you crazy, or just having a weird day? Let's talk.</p>
+                                        <span class="msg-time">Just now</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Floating Face Scan Frame (Toggled from inputs) -->
+                            <div class="webcam-scan-overlay hidden" id="webcam-overlay">
+                                <div class="scan-frame-header">
+                                    <span><i data-lucide="video" class="pulse-icon text-rose"></i> Visual Expression Analysis</span>
+                                    <button class="close-scan-btn" id="close-cam-btn">&times;</button>
+                                </div>
+                                <div class="webcam-viewport">
+                                    <video id="webcam-element" autoplay playsinline muted></video>
+                                    <canvas id="face-tracker-canvas"></canvas>
+                                    
+                                    <!-- Scan animation guidelines -->
+                                    <div class="scanner-laser"></div>
+                                    <div class="scanner-corners"></div>
+                                </div>
+                                <div class="scan-metrics">
+                                    <div class="scan-metric-item">
+                                        <span class="lbl">Tension Indicators</span>
+                                        <div class="progress-bar-container">
+                                            <div class="progress-fill" id="cam-metric-tension" style="width: 25%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="scan-metric-item">
+                                        <span class="lbl">Micro-expression</span>
+                                        <span class="val text-mint" id="cam-metric-mood">Calm / Neutral</span>
+                                    </div>
+                                    <div class="scan-metric-item">
+                                        <span class="lbl">Saccadic Eye Action</span>
+                                        <span class="val text-purple" id="cam-metric-saccadic">Low (Focused)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Input Area -->
+                            <div class="chat-input-bar">
+                                <button class="input-action-btn" id="cam-toggle-btn" title="Open webcam analyzer">
+                                    <i data-lucide="camera"></i>
+                                </button>
+                                
+                                <textarea class="chat-input" id="chat-text-input" placeholder="Type a message or press 'Start Rant Mode' below to speak your mind..." rows="1"></textarea>
+                                
+                                <button class="chat-send-btn" id="chat-send-btn">
+                                    <i data-lucide="send"></i>
+                                </button>
+                            </div>
+
+                            <!-- Speech Rant Mode Controller -->
+                            <div class="rant-mode-bar">
+                                <button class="rant-toggle-btn" id="rant-start-btn">
+                                    <i data-lucide="mic"></i>
+                                    <span>Start Rant Mode (Talk Freely)</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Rant Room Active Panel Overlay (Shows when Rant Mode starts) -->
+                <div class="rant-room-overlay hidden" id="rant-room-overlay">
+                    <div class="rant-room-card">
+                        <div class="rant-header">
+                            <div class="rant-title-group">
+                                <h2><i data-lucide="audio-lines" class="text-rose pulse-icon"></i> Active Rant Session</h2>
+                                <p>Take your time. Talk, shout, cry, or complain. We are listening and evaluating your stress levels. There is no time limit.</p>
+                            </div>
+                            <button class="rant-stop-btn" id="rant-stop-btn">
+                                <i data-lucide="square"></i>
+                                <span>Finish Ranting</span>
+                            </button>
+                        </div>
+
+                        <!-- Central Waveform Container -->
+                        <div class="waveform-container">
+                            <canvas id="waveform-canvas"></canvas>
+                            <div class="rant-timer" id="rant-duration-display">00:00</div>
+                        </div>
+
+                        <!-- Real-time metrics grid -->
+                        <div class="rant-metrics-grid">
+                            <div class="rant-stat-card">
+                                <div class="stat-icon text-indigo">
+                                    <i data-lucide="volume-2"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-lbl">Volume (RMS)</span>
+                                    <span class="stat-val" id="rant-metric-volume">0.0 dB</span>
+                                </div>
+                            </div>
+                            <div class="rant-stat-card">
+                                <div class="stat-icon text-pink">
+                                    <i data-lucide="timer-off"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-lbl">Pauses / Silence</span>
+                                    <span class="stat-val" id="rant-metric-pauses">0</span>
+                                </div>
+                            </div>
+                            <div class="rant-stat-card">
+                                <div class="stat-icon text-rose">
+                                    <i data-lucide="activity"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-lbl">Tremors / Jitter</span>
+                                    <span class="stat-val" id="rant-metric-tremor">0% (Stable)</span>
+                                </div>
+                            </div>
+                            <div class="rant-stat-card">
+                                <div class="stat-icon text-mint">
+                                    <i data-lucide="gauge"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-lbl">Speech Speed</span>
+                                    <span class="stat-val" id="rant-metric-speed">0 wpm</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Live transcript feedback block -->
+                        <div class="rant-transcript-feedback">
+                            <h4>Live Speech Transcription (Streaming)</h4>
+                            <div class="transcript-box" id="rant-transcript-box">
+                                <span class="placeholder-text">Listening for speech... (Start talking to see live transcript)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Avatar Studio Panel -->
+                <section class="panel" id="studio-panel">
+                    <div class="studio-layout">
+                        <!-- Preview Column -->
+                        <div class="studio-preview-card">
+                            <div class="preview-header">
+                                <h3>Studio Preview</h3>
+                                <button class="random-avatar-btn" id="avatar-randomize-btn">
+                                    <i data-lucide="dices"></i> Randomize
+                                </button>
+                            </div>
+                            
+                            <!-- Secondary viewport linked to main state -->
+                            <div class="studio-viewport">
+                                <div class="avatar-svg-container" id="studio-avatar-container">
+                                    <!-- Rendered dynamically by script -->
+                                </div>
+                            </div>
+                            
+                            <div class="avatar-manifesto">
+                                <p>This is your MindBuddy's physical projection. Make them look how you feel, or style them to represent a calm, grounding presence.</p>
+                            </div>
+                        </div>
+
+                        <!-- Design Board Column -->
+                        <div class="studio-options-card">
+                            <div class="options-header">
+                                <h3>Decorate Your Companion</h3>
+                                <p>Swap hair, clothes, glasses, skin tones, and accessory configurations.</p>
+                            </div>
+
+                            <div class="options-tabs">
+                                <button class="opt-tab-btn active" data-opt-group="features">Base Features</button>
+                                <button class="opt-tab-btn" data-opt-group="clothing">Style & Accs</button>
+                                <button class="opt-tab-btn" data-opt-group="colors">Color Swatches</button>
+                            </div>
+
+                            <div class="options-content">
+                                <!-- Group 1: Base Features -->
+                                <div class="options-panel-group active" id="opt-features">
+                                    <div class="control-row">
+                                        <label>Hairstyle</label>
+                                        <div class="selection-grid">
+                                            <button class="select-btn active" data-avatar-prop="hairStyle" data-val="crop">Sleek Crop</button>
+                                            <button class="select-btn" data-avatar-prop="hairStyle" data-val="curly">Curly Afro</button>
+                                            <button class="select-btn" data-avatar-prop="hairStyle" data-val="bob">Bob Cut</button>
+                                            <button class="select-btn" data-avatar-prop="hairStyle" data-val="long">Long Wave</button>
+                                            <button class="select-btn" data-avatar-prop="hairStyle" data-val="bald">Shaved</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="control-row">
+                                        <label>Skin Tone Base</label>
+                                        <div class="selection-grid">
+                                            <button class="select-btn skin-swatch active" data-avatar-prop="skinTone" data-val="#ffdbac" style="background:#ffdbac"></button>
+                                            <button class="select-btn skin-swatch" data-avatar-prop="skinTone" data-val="#f1c27d" style="background:#f1c27d"></button>
+                                            <button class="select-btn skin-swatch" data-avatar-prop="skinTone" data-val="#e0ac69" style="background:#e0ac69"></button>
+                                            <button class="select-btn skin-swatch" data-avatar-prop="skinTone" data-val="#c68642" style="background:#c68642"></button>
+                                            <button class="select-btn skin-swatch" data-avatar-prop="skinTone" data-val="#8d5524" style="background:#8d5524"></button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="control-row">
+                                        <label>Active Expression Mode</label>
+                                        <div class="selection-grid">
+                                            <button class="select-btn active" data-avatar-prop="expression" data-val="friendly">Friendly</button>
+                                            <button class="select-btn" data-avatar-prop="expression" data-val="thoughtful">Thoughtful</button>
+                                            <button class="select-btn" data-avatar-prop="expression" data-val="attentive">Attentive</button>
+                                            <button class="select-btn" data-avatar-prop="expression" data-val="excited">Excited</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Group 2: Style & Accessories -->
+                                <div class="options-panel-group" id="opt-clothing">
+                                    <div class="control-row">
+                                        <label>Hoodie Chest Graphic</label>
+                                        <div class="selection-grid">
+                                            <button class="select-btn" data-avatar-prop="hoodieGraphic" data-val="none">None</button>
+                                            <button class="select-btn" data-avatar-prop="hoodieGraphic" data-val="pumpkin">🎃 Pumpkin</button>
+                                            <button class="select-btn" data-avatar-prop="hoodieGraphic" data-val="heart">❤️ Heart</button>
+                                            <button class="select-btn" data-avatar-prop="hoodieGraphic" data-val="wave">🌊 Wave</button>
+                                            <button class="select-btn active" data-avatar-prop="hoodieGraphic" data-val="star">⭐ Star</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="control-row">
+                                        <label>Pants Style</label>
+                                        <div class="selection-grid">
+                                            <button class="select-btn active" data-avatar-prop="pantsStyle" data-val="shorts">Casual Shorts</button>
+                                            <button class="select-btn" data-avatar-prop="pantsStyle" data-val="cargo">Cargo Trousers</button>
+                                            <button class="select-btn" data-avatar-prop="pantsStyle" data-val="jogger">Jogger Pants</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="control-row">
+                                        <label>Eyewear</label>
+                                        <div class="selection-grid">
+                                            <button class="select-btn active" data-avatar-prop="glasses" data-val="none">None</button>
+                                            <button class="select-btn" data-avatar-prop="glasses" data-val="green">Emerald Frames</button>
+                                            <button class="select-btn" data-avatar-prop="glasses" data-val="gold">Gold Round</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="control-row">
+                                        <label>Accessories</label>
+                                        <div class="selection-grid">
+                                            <button class="select-btn active" data-avatar-prop="accessories" data-val="none">None</button>
+                                            <button class="select-btn" data-avatar-prop="accessories" data-val="headphones">DJ Headphones</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Group 3: Color Palette Customizers -->
+                                <div class="options-panel-group" id="opt-colors">
+                                    <div class="color-picker-grid">
+                                        <div class="picker-control">
+                                            <label for="picker-hair">Hair Color</label>
+                                            <input type="color" id="picker-hair" value="#2d3748">
+                                        </div>
+                                        <div class="picker-control">
+                                            <label for="picker-shirt">Shirt Color</label>
+                                            <input type="color" id="picker-shirt" value="#4f46e5">
+                                        </div>
+                                        <div class="picker-control">
+                                            <label for="picker-glow1">Aura Glow Start</label>
+                                            <input type="color" id="picker-glow1" value="#8b5cf6">
+                                        </div>
+                                        <div class="picker-control">
+                                            <label for="picker-glow2">Aura Glow End</label>
+                                            <input type="color" id="picker-glow2" value="#ec4899">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Biometrics Link (IoT Mock Dashboard) -->
+                <section class="panel" id="bio-panel">
+                    <div class="biometrics-layout">
+                        <!-- Left Panel: Biometrics Graph Stream -->
+                        <div class="biometrics-card">
+                            <div class="card-header-with-badge">
+                                <div>
+                                    <h3>Simulated Smart Wearable Stream</h3>
+                                    <p>Live health sync reporting physiological anomalies associated with anxiety or insomnia.</p>
+                                </div>
+                                <span class="sync-badge status-connected" id="iot-sync-status"><i data-lucide="check-circle"></i> Linked</span>
+                            </div>
+
+                            <!-- Live Heart Rate Area -->
+                            <div class="chart-section">
+                                <div class="chart-info-header">
+                                    <h4>Heart Rate Monitor</h4>
+                                    <span class="value-display text-rose" id="bio-live-hr">72 bpm</span>
+                                </div>
+                                <div class="biometric-chart-container">
+                                    <svg class="biometric-svg-chart" id="hr-chart-svg" viewBox="0 0 500 150">
+                                        <!-- Chart path will be updated by JS -->
+                                        <path d="M 0 75" fill="none" stroke="#f43f5e" stroke-width="3" id="hr-chart-path"/>
+                                        <path d="M 0 75 L 500 75" fill="none" stroke="#f43f5e" stroke-width="1" stroke-dasharray="4,4" opacity="0.3" id="hr-high-threshold"/>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- Sleep Rate Monitor -->
+                            <div class="sleep-metrics-summary">
+                                <h4>Sleep Quality Summary (Past 24 Hours)</h4>
+                                <div class="sleep-grid">
+                                    <div class="sleep-metric-box">
+                                        <span class="lbl">Total Rest</span>
+                                        <span class="val text-indigo" id="bio-sleep-duration">7.8 hrs</span>
+                                    </div>
+                                    <div class="sleep-metric-box">
+                                        <span class="lbl">Deep Sleep</span>
+                                        <span class="val text-purple" id="bio-sleep-deep">2.1 hrs</span>
+                                    </div>
+                                    <div class="sleep-metric-box">
+                                        <span class="lbl">Sleep Efficiency</span>
+                                        <span class="val text-mint" id="bio-sleep-efficiency">92%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Panel: IoT Sandbox Controls -->
+                        <div class="iot-controls-card">
+                            <div class="controls-header">
+                                <h3>IoT device sandbox</h3>
+                                <p>Simulate abnormal physiological data to see how MindBuddy reacts behind the scenes.</p>
+                            </div>
+
+                            <div class="slider-control-group">
+                                <div class="slider-header">
+                                    <span class="slider-title">Resting Heart Rate</span>
+                                    <span class="slider-val-bubble" id="slider-val-hr">72 BPM</span>
+                                </div>
+                                <input type="range" class="iot-range-slider" id="control-hr" min="50" max="150" value="72">
+                                <div class="slider-labels">
+                                    <span>Bradycardia (50)</span>
+                                    <span>Normal (70)</span>
+                                    <span>Tachycardia/Panic (150)</span>
+                                </div>
+                            </div>
+
+                            <div class="slider-control-group">
+                                <div class="slider-header">
+                                    <span class="slider-title">Sleep Duration</span>
+                                    <span class="slider-val-bubble" id="slider-val-sleep">7.8 Hrs</span>
+                                </div>
+                                <input type="range" class="iot-range-slider" id="control-sleep" min="2" max="12" step="0.1" value="7.8">
+                                <div class="slider-labels">
+                                    <span>Insomnia (2)</span>
+                                    <span>Target (8)</span>
+                                    <span>Oversleeping (12)</span>
+                                </div>
+                            </div>
+
+                            <!-- Warning notification alert box -->
+                            <div class="biometric-alert-banner alert-normal" id="biometric-anomaly-banner">
+                                <div class="alert-icon">
+                                    <i data-lucide="info" id="anomaly-banner-icon"></i>
+                                </div>
+                                <div class="alert-details">
+                                    <h4 id="anomaly-banner-title">Biometrics Stabilized</h4>
+                                    <p id="anomaly-banner-desc">Physiological metrics indicate normal autonomic responses. No insomnia or panic states triggered.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Calm Hub Panel -->
+                <section class="panel" id="calm-panel">
+                    <div class="calm-layout">
+                        <!-- Audio Synthesizer mixer panel -->
+                        <div class="mixer-card">
+                            <div class="mixer-header">
+                                <h3>Sound Sanctuary</h3>
+                                <p>Direct browser-synthesized audio tones using the Web Audio API. Perfect for grounding during stress episodes.</p>
+                            </div>
+
+                            <div class="sound-mixer-list">
+                                <!-- Sound 1: Binaural Beat -->
+                                <div class="mixer-row">
+                                    <div class="mixer-sound-info">
+                                        <i data-lucide="waveform" class="text-purple"></i>
+                                        <div>
+                                            <span class="sound-title">Binaural Calm Beats (432Hz)</span>
+                                            <span class="sound-desc">Encourages theta brainwaves for anxiety relief.</span>
+                                        </div>
+                                    </div>
+                                    <div class="mixer-controls">
+                                        <input type="range" class="volume-slider" id="vol-binaural" min="0" max="1" step="0.05" value="0.5">
+                                        <button class="synth-toggle-btn" id="btn-play-binaural">Play</button>
+                                    </div>
+                                </div>
+
+                                <!-- Sound 2: Rain Sound -->
+                                <div class="mixer-row">
+                                    <div class="mixer-sound-info">
+                                        <i data-lucide="cloud-rain" class="text-indigo"></i>
+                                        <div>
+                                            <span class="sound-title">Synthesized Pink Rain</span>
+                                            <span class="sound-desc">Continuous soothing white noise spectrum filter.</span>
+                                        </div>
+                                    </div>
+                                    <div class="mixer-controls">
+                                        <input type="range" class="volume-slider" id="vol-rain" min="0" max="1" step="0.05" value="0.5">
+                                        <button class="synth-toggle-btn" id="btn-play-rain">Play</button>
+                                    </div>
+                                </div>
+
+                                <!-- Sound 3: Zen Drone -->
+                                <div class="mixer-row">
+                                    <div class="mixer-sound-info">
+                                        <i data-lucide="music-4" class="text-mint"></i>
+                                        <div>
+                                            <span class="sound-title">Zen Meditation Drone</span>
+                                            <span class="sound-desc">Deep harmonic chord oscillations for grounding.</span>
+                                        </div>
+                                    </div>
+                                    <div class="mixer-controls">
+                                        <input type="range" class="volume-slider" id="vol-drone" min="0" max="1" step="0.05" value="0.5">
+                                        <button class="synth-toggle-btn" id="btn-play-drone">Play</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quiz / Mindfulness Interactive Cards -->
+                        <div class="mindfulness-card">
+                            <div class="quiz-header">
+                                <h3>Adaptive Wellness Quizzes</h3>
+                                <p id="quiz-subtitle">MindBuddy auto-generates mini-quizzes customized to your biometric and chat-analysis stress triggers.</p>
+                            </div>
+
+                            <div class="quiz-workspace" id="quiz-box">
+                                <!-- Quiz Intro State -->
+                                <div class="quiz-state-intro" id="quiz-intro-state">
+                                    <div class="quiz-recommendation-badge" id="quiz-rec-badge">
+                                        Recommended Quiz: General Mindfulness
+                                    </div>
+                                    <h4 id="quiz-rec-title">Self-Alignment Focus</h4>
+                                    <p>Feeling overloaded by studies or peer anxieties? Take a quick 4-question check-in to clear mental clutter.</p>
+                                    <button class="quiz-action-btn" id="quiz-start-btn">Begin Mini Quiz</button>
+                                </div>
+
+                                <!-- Quiz Active State (Hidden initially) -->
+                                <div class="quiz-state-active hidden" id="quiz-active-state">
+                                    <div class="quiz-progress-bar">
+                                        <span class="quiz-prog-lbl" id="quiz-q-counter">Question 1 of 4</span>
+                                        <div class="progress-bar-container">
+                                            <div class="progress-fill" id="quiz-progress-fill" style="width: 25%"></div>
+                                        </div>
+                                    </div>
+                                    <h4 class="quiz-question-text" id="quiz-question-title">How has your academic focus felt over the past 48 hours?</h4>
+                                    <div class="quiz-options-list" id="quiz-options-container">
+                                        <!-- Dynamic options -->
+                                    </div>
+                                </div>
+
+                                <!-- Quiz Completion State (Hidden initially) -->
+                                <div class="quiz-state-results hidden" id="quiz-results-state">
+                                    <div class="results-badge">
+                                        <i data-lucide="award"></i> Completed
+                                    </div>
+                                    <h4>Your Alignment Assessment</h4>
+                                    <p id="quiz-result-feedback">Great job checking in with yourself. Mindfulness starts with acknowledging how your thoughts behave. We've adjusted your companion's voice to be slightly more encouraging.</p>
+                                    <button class="quiz-action-btn" id="quiz-restart-btn">Try Another Quiz</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- SOS Counselor Confirmation Modal Overlay (Globally accessibility) -->
+    <div class="sos-modal-overlay hidden" id="sos-modal">
+        <div class="sos-modal-card">
+            <div class="sos-modal-header">
+                <h2><i data-lucide="shield-alert" class="text-rose pulse-icon"></i> Emergency SOS counselor Dispatch</h2>
+                <button class="close-sos-btn" id="sos-close-btn">&times;</button>
+            </div>
+            
+            <div class="sos-modal-body">
+                <div class="sos-alert-callout">
+                    <p><strong>Immediate Professional Assistance:</strong> Pressing the dispatch button notifies the school counselor department. Your current wellness profile summary (analyzed sentiment indicators, biometrics, and voice analysis overview) will be compiled and securely emailed to counselors for immediate outreach.</p>
+                </div>
+
+                <div class="sos-profile-preview">
+                    <h4>Counselor Referral Package Preview</h4>
+                    <div class="sos-report-box">
+                        <div class="report-row">
+                            <span class="lbl">Student Status:</span>
+                            <span class="val text-rose" id="sos-preview-status">Elevated Academic Stress</span>
+                        </div>
+                        <div class="report-row">
+                            <span class="lbl">Primary Sentiment:</span>
+                            <span class="val" id="sos-preview-sentiment">Negative / Stressed</span>
+                        </div>
+                        <div class="report-row">
+                            <span class="lbl">Average Heart Rate:</span>
+                            <span class="val" id="sos-preview-hr">72 bpm</span>
+                        </div>
+                        <div class="report-row">
+                            <span class="lbl">Last Rant Duration:</span>
+                            <span class="val" id="sos-preview-rant">No recent speech session</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Helpline Numbers Section -->
+                <div class="emergency-helpline-box">
+                    <h4>Direct Emergency Lines (Available 24/7)</h4>
+                    <ul>
+                        <li><strong>National Crisis Hotline:</strong> 988 (Call or Text)</li>
+                        <li><strong>The Trevor Project:</strong> 1-866-488-7386</li>
+                        <li><strong>Crisis Text Line:</strong> Text HOME to 741741</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="sos-modal-footer">
+                <button class="sos-cancel-btn" id="sos-cancel-btn">Cancel</button>
+                <button class="sos-confirm-dispatch-btn" id="sos-confirm-btn">
+                    <i data-lucide="send"></i> Dispatch to Counselor
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Local Configuration (API Keys, etc.) -->
+    <script src="config.js"></script>
+    <!-- Main JavaScript App module -->
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+# Ignore the actual local configuration file containing the API key
+config.js
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+node_modules/
+.system_generated/
+*.log
