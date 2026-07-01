@@ -734,46 +734,146 @@
                             </div>
                         </div>
 
-                        <!-- Quiz / Mindfulness Interactive Cards -->
-                        <div class="mindfulness-card">
-                            <div class="quiz-header">
-                                <h3>Adaptive Wellness Quizzes</h3>
-                                <p id="quiz-subtitle">MindBuddy auto-generates mini-quizzes customized to your biometric and chat-analysis stress triggers.</p>
+                        <!-- Mental Streak Engine Quiz -->
+                        <div class="streak-engine-card" id="streak-engine-card">
+                            <!-- === PHASE: INTRO === -->
+                            <div class="streak-phase" id="streak-phase-intro">
+                                <div class="streak-header-logo">
+                                    <span class="streak-logo-icon">📦</span>
+                                    <h3>Mental Streak Engine</h3>
+                                    <p>Your daily 60-second blind box mental check-in</p>
+                                </div>
+                                <div class="streak-status-grid">
+                                    <div class="streak-status-item" id="ssi-streak">
+                                        <span class="ssi-icon">⚡</span>
+                                        <div><span class="ssi-label">Daily Streak</span><span class="ssi-val" id="streak-day-display">Day 1</span></div>
+                                    </div>
+                                    <div class="streak-status-item" id="ssi-pass">
+                                        <span class="ssi-icon">💳</span>
+                                        <div><span class="ssi-label">Lay-Flat Passes</span><span class="ssi-val" id="streak-pass-display">2/2</span></div>
+                                    </div>
+                                    <div class="streak-status-item" id="ssi-coins">
+                                        <span class="ssi-icon">🪙</span>
+                                        <div><span class="ssi-label">Kawan Coins</span><span class="ssi-val" id="streak-coins-display">0</span></div>
+                                    </div>
+                                    <div class="streak-status-item" id="ssi-hr">
+                                        <span class="ssi-icon">⌚</span>
+                                        <div><span class="ssi-label">Heart Rate</span><span class="ssi-val" id="streak-hr-display">-- bpm</span></div>
+                                    </div>
+                                </div>
+                                <div class="streak-bgm-bar" id="streak-bgm-bar">
+                                    <span class="bgm-pulse-dot"></span>
+                                    <span id="streak-bgm-label">🌿 Rainforest Lo-Fi Chill (Loading...)</span>
+                                    <button class="bgm-mute-btn" id="bgm-mute-btn" title="Toggle Haptic/Silent Mode">🔇 Silent Mode</button>
+                                </div>
+                                <div class="streak-tip-bar">🔇 In class? Tap <strong>Silent Mode</strong> to hide sounds & haptics!</div>
+                                <button class="streak-start-btn" id="streak-start-btn">
+                                    <span>Open Today's Blind Box 📦</span>
+                                </button>
                             </div>
 
-                            <div class="quiz-workspace" id="quiz-box">
-                                <!-- Quiz Intro State -->
-                                <div class="quiz-state-intro" id="quiz-intro-state">
-                                    <div class="quiz-recommendation-badge" id="quiz-rec-badge">
-                                        Recommended Quiz: General Mindfulness
+                            <!-- === PHASE: QUESTION === -->
+                            <div class="streak-phase hidden" id="streak-phase-question">
+                                <div class="streak-q-topbar">
+                                    <div class="streak-q-step-dots">
+                                        <span class="step-dot active" id="sdot-1"></span>
+                                        <span class="step-dot" id="sdot-2"></span>
+                                        <span class="step-dot" id="sdot-3"></span>
                                     </div>
-                                    <h4 id="quiz-rec-title">Self-Alignment Focus</h4>
-                                    <p>Feeling overloaded by studies or peer anxieties? Take a quick 4-question check-in to clear mental clutter.</p>
-                                    <button class="quiz-action-btn" id="quiz-start-btn">Begin Mini Quiz</button>
+                                    <span class="streak-q-pass-badge">💳 <span id="sq-pass-remaining">2</span>/2 Passes Left</span>
                                 </div>
+                                <div class="streak-story-box" id="streak-story-box">
+                                    <!-- Story narrative rendered here -->
+                                </div>
+                                <div class="streak-q-block">
+                                    <p class="streak-q-label">Your move:</p>
+                                    <div class="streak-options-grid" id="streak-options-grid">
+                                        <!-- Options rendered dynamically -->
+                                    </div>
+                                </div>
+                                <div class="streak-pass-warning hidden" id="streak-pass-warning">
+                                    🦥 <strong>Lay-Flat Pass maxed out!</strong> KawanKu blocks your escape — face the beast head-on! Choose from the active options above!
+                                </div>
+                            </div>
 
-                                <!-- Quiz Active State (Hidden initially) -->
-                                <div class="quiz-state-active hidden" id="quiz-active-state">
-                                    <div class="quiz-progress-bar">
-                                        <span class="quiz-prog-lbl" id="quiz-q-counter">Question 1 of 4</span>
-                                        <div class="progress-bar-container">
-                                            <div class="progress-fill" id="quiz-progress-fill" style="width: 25%"></div>
+                            <!-- === PHASE: LOADING === -->
+                            <div class="streak-phase hidden" id="streak-phase-loading">
+                                <div class="streak-loading-anim">
+                                    <div class="streak-spinner"></div>
+                                    <p id="streak-loading-text">KawanKu is generating your blind box...</p>
+                                </div>
+                            </div>
+
+                            <!-- === PHASE: MONSTER BASH === -->
+                            <div class="streak-phase hidden" id="streak-phase-monster">
+                                <div class="monster-bgm-alert">
+                                    🎵 BGM Switch: <strong>🔥 Hype Anime Battle Theme Activated!</strong>
+                                </div>
+                                <div class="monster-arena">
+                                    <div class="monster-avatar" id="monster-avatar">
+                                        <div class="monster-body" id="monster-body">
+                                            <span class="monster-emoji" id="monster-emoji">👾</span>
                                         </div>
+                                        <div class="monster-cracks" id="monster-cracks"></div>
                                     </div>
-                                    <h4 class="quiz-question-text" id="quiz-question-title">How has your academic focus felt over the past 48 hours?</h4>
-                                    <div class="quiz-options-list" id="quiz-options-container">
-                                        <!-- Dynamic options -->
+                                    <div class="monster-info">
+                                        <p class="monster-title">⚔️ Today's Mega Boss</p>
+                                        <p class="monster-name" id="monster-name">The Exam Panic Goblin</p>
+                                        <div class="monster-hp-bar-wrap">
+                                            <div class="monster-hp-bar" id="monster-hp-bar" style="width:100%"></div>
+                                        </div>
+                                        <p class="monster-hp-text" id="monster-hp-text">HP: 100 / 100</p>
                                     </div>
                                 </div>
+                                <div class="monster-instructions">
+                                    <p>🤜 <strong>TAP / SMASH the monster</strong> to defeat it!</p>
+                                    <p class="monster-hint">Or type: <em>smash / punch / destroy / dieeee</em></p>
+                                </div>
+                                <div class="monster-smash-input-row">
+                                    <input type="text" class="monster-type-input" id="monster-type-input" placeholder="Type smash / punch / destroy...">
+                                    <button class="monster-smash-btn" id="monster-smash-btn">💥 SMASH</button>
+                                </div>
+                                <div class="monster-combo-display hidden" id="monster-combo">
+                                    <span id="monster-combo-text">COMBO x1!</span>
+                                </div>
+                            </div>
 
-                                <!-- Quiz Completion State (Hidden initially) -->
-                                <div class="quiz-state-results hidden" id="quiz-results-state">
-                                    <div class="results-badge">
-                                        <i data-lucide="award"></i> Completed
+                            <!-- === PHASE: REPORT === -->
+                            <div class="streak-phase hidden" id="streak-phase-report">
+                                <div class="report-bgm-switch">
+                                    🎵 BGM Switch: <strong>🍃 Calming Tibetan Singing Bowls</strong>
+                                </div>
+                                <div class="report-card">
+                                    <div class="report-victory-badge">🏆 Monster Defeated!</div>
+                                    <div class="report-content" id="report-content">
+                                        <!-- Rendered by JS -->
                                     </div>
-                                    <h4>Your Alignment Assessment</h4>
-                                    <p id="quiz-result-feedback">Great job checking in with yourself. Mindfulness starts with acknowledging how your thoughts behave. We've adjusted your companion's voice to be slightly more encouraging.</p>
-                                    <button class="quiz-action-btn" id="quiz-restart-btn">Try Another Quiz</button>
+                                </div>
+                                <div class="sticky-note-section">
+                                    <p class="sticky-note-prompt">✉️ <strong>Leave Today's Sticky Note</strong> — saved to your Mental Journal:</p>
+                                    <textarea class="sticky-note-input" id="sticky-note-input" placeholder="Write something to your future self... (optional)" rows="3" maxlength="280"></textarea>
+                                    <div class="sticky-note-actions">
+                                        <span class="sticky-char-count"><span id="sticky-chars">0</span>/280</span>
+                                        <button class="sticky-save-btn" id="sticky-save-btn">💾 Save to Journal</button>
+                                    </div>
+                                    <div class="sticky-saved-msg hidden" id="sticky-saved-msg">✅ Sticky note saved to your Mental Journal!</div>
+                                </div>
+                                <button class="streak-restart-btn" id="streak-restart-btn">🔄 Start Tomorrow's Blind Box</button>
+                            </div>
+
+                            <!-- === PHASE: CRISIS === -->
+                            <div class="streak-phase hidden" id="streak-phase-crisis">
+                                <div class="crisis-shield">
+                                    <div class="crisis-shield-icon">🛡️</div>
+                                    <h3>KawanKu Guardian Shield Activated</h3>
+                                    <p>Hey there, I can hear the immense pain you're carrying right now. KawanKu wants to step away from the game because you <strong>matter to us</strong>. Please remember, you are absolutely not alone. We have prepared a safe space for you.</p>
+                                    <div class="crisis-hotlines">
+                                        <a class="crisis-btn" href="tel:15999" id="crisis-talian-kasih">📞 Talian Kasih: 15999</a>
+                                        <a class="crisis-btn" href="tel:+60376272929" id="crisis-befrienders">💬 Befrienders KL: 03-7627 2929</a>
+                                        <button class="crisis-btn crisis-anon" id="crisis-counselor-btn">🏫 Notify School Counselor (Anonymous)</button>
+                                    </div>
+                                    <p class="crisis-footer">You can also always reach out to your school counselors or the Ministry of Education (MOE) support channels. We are always here with you. 🫂</p>
+                                    <button class="crisis-back-btn" id="crisis-back-btn">I'm okay, go back</button>
                                 </div>
                             </div>
                         </div>

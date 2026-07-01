@@ -2289,6 +2289,770 @@ Keep your conversational reply warm, human and concise. The student should feel 
         return color;
     }
 
+    // =========================================================================
+    // MENTAL STREAK ENGINE — Gamified Mental Health Quiz System
+    // =========================================================================
+    (function MentalStreakEngine() {
+
+        // ── State persisted in localStorage ──────────────────────────────────
+        const STORE_KEY = 'kawanku_streak';
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORE_KEY);
+                if (raw) return JSON.parse(raw);
+            } catch (e) {}
+            return {
+                streakDay: 1,
+                coins: 0,
+                passesUsed: 0,          // resets each Mon
+                passesWeekReset: null,  // ISO date string of last Mon reset
+                journal: []
+            };
+        }
+        function saveState(s) {
+            localStorage.setItem(STORE_KEY, JSON.stringify(s));
+        }
+        function getWeekStart() {
+            const d = new Date();
+            const day = d.getDay(); // 0=Sun
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            const mon = new Date(d.setDate(diff));
+            return mon.toISOString().split('T')[0];
+        }
+        function resetPassesIfNewWeek(s) {
+            const thisWeek = getWeekStart();
+            if (s.passesWeekReset !== thisWeek) {
+                s.passesUsed = 0;
+                s.passesWeekReset = thisWeek;
+            }
+        }
+
+        const MAX_PASSES = 2;
+
+        // ── Per-session quiz variables ────────────────────────────────────────
+        let state = loadState();
+        resetPassesIfNewWeek(state);
+
+        let currentQuestion = 0;   // 1-3
+        let answers = [];          // user's chosen option texts
+        let monsterData = {};      // { emoji, name }
+        let monsterHP = 100;
+        let monsterMaxHP = 100;
+        let comboCount = 0;
+        let bgmMuted = false;
+        let bgmNodes = {};         // Web Audio nodes
+        let currentPhase = 'intro';
+        let simulatedHR = Math.floor(Math.random() * 30 + 72); // 72-101 bpm
+
+        // ── DOM references ────────────────────────────────────────────────────
+        const $ = id => document.getElementById(id);
+        const phases = {
+            intro:   $('streak-phase-intro'),
+            question:$('streak-phase-question'),
+            loading: $('streak-phase-loading'),
+            monster: $('streak-phase-monster'),
+            report:  $('streak-phase-report'),
+            crisis:  $('streak-phase-crisis')
+        };
+
+        function showPhase(name) {
+            currentPhase = name;
+            Object.entries(phases).forEach(([k, el]) => {
+                if (!el) return;
+                if (k === name) el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
+        }
+
+        // ── Intro population ─────────────────────────────────────────────────
+        function populateIntro() {
+            const passLeft = MAX_PASSES - state.passesUsed;
+            const passStr = `${passLeft}/${MAX_PASSES}`;
+            const hrLabel = simulatedHR > 90 ? '😤 Looking a bit stressed!' : '😌 Cool as a cucumber!';
+            if ($('streak-day-display'))   $('streak-day-display').textContent   = `Day ${state.streakDay}`;
+            if ($('streak-pass-display'))  $('streak-pass-display').textContent  = passStr;
+            if ($('streak-coins-display')) $('streak-coins-display').textContent = state.coins;
+            if ($('streak-hr-display'))    $('streak-hr-display').textContent    = `${simulatedHR} bpm ${hrLabel}`;
+            if ($('streak-bgm-label'))     $('streak-bgm-label').textContent     = '🌿 Rainforest Lo-Fi Chill — Active';
+        }
+
+        // ── Web Audio BGM ─────────────────────────────────────────────────────
+        let audioCtx = null;
+        function getAudioCtx() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            return audioCtx;
+        }
+
+        function stopAllBGM() {
+            Object.values(bgmNodes).forEach(n => { try { n.stop(); } catch(e){} });
+            bgmNodes = {};
+        }
+
+        function playCalmBGM() {
+            if (bgmMuted) return;
+            stopAllBGM();
+            try {
+                const ctx = getAudioCtx();
+                // Soft sine pad at 174Hz (healing frequency)
+                [174, 220, 261].forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0, ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.04 - i * 0.01, ctx.currentTime + 2);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    bgmNodes[`calm_${i}`] = osc;
+                });
+                if ($('streak-bgm-label')) $('streak-bgm-label').textContent = '🌿 Lo-Fi Healing Pads — Playing';
+            } catch(e) {}
+        }
+
+        function playBattleBGM() {
+            if (bgmMuted) return;
+            stopAllBGM();
+            try {
+                const ctx = getAudioCtx();
+                // Punchy percussive rhythm
+                function beatTick() {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.value = 80 + Math.random() * 40;
+                    gain.gain.setValueAtTime(0.18, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.2);
+                }
+                const interval = setInterval(beatTick, 280);
+                bgmNodes['battle_interval'] = { stop: () => clearInterval(interval) };
+                if ($('streak-bgm-label')) $('streak-bgm-label').textContent = '🔥 Hype Battle Theme — Active!';
+            } catch(e) {}
+        }
+
+        function playHealingBGM() {
+            if (bgmMuted) return;
+            stopAllBGM();
+            try {
+                const ctx = getAudioCtx();
+                // Tibetan-style sustained tones
+                [396, 528].forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0, ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.035 - i * 0.01, ctx.currentTime + 3);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    bgmNodes[`heal_${i}`] = osc;
+                });
+                if ($('streak-bgm-label')) $('streak-bgm-label').textContent = '🍃 Tibetan Singing Bowls — Playing';
+            } catch(e) {}
+        }
+
+        function playSmashSFX() {
+            if (bgmMuted) return;
+            try {
+                const ctx = getAudioCtx();
+                const buf = ctx.createBuffer(1, ctx.sampleRate * 0.12, ctx.sampleRate);
+                const data = buf.getChannelData(0);
+                for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+                const src = ctx.createBufferSource();
+                const gain = ctx.createGain();
+                src.buffer = buf;
+                gain.gain.value = 0.3;
+                src.connect(gain);
+                gain.connect(ctx.destination);
+                src.start();
+            } catch(e) {}
+        }
+
+        // ── Crisis detection ─────────────────────────────────────────────────
+        const CRISIS_WORDS = [
+            'suicide','kill myself','end my life','want to die','self harm',
+            'cut myself','hurt myself','no point living','can\'t go on',
+            'don\'t want to be here','disappear forever','everyone better without me'
+        ];
+        function detectCrisis(text) {
+            const lower = text.toLowerCase();
+            return CRISIS_WORDS.some(w => lower.includes(w));
+        }
+
+        // ── Gemini API call ──────────────────────────────────────────────────
+        const MENTAL_STREAK_SYSTEM = `You are the Mental Streak Engine inside KawanKu AI — a mental health companion for Malaysian secondary school students.
+Your job is to run a 3-question gamified "blind box" mental check-in quiz, one step at a time.
+Always respond in JSON only. No markdown fences around the JSON.
+
+Tone: Gen-Z savvy, witty, warm, Malaysian-relatable. Use Manglish/Malaysian school references naturally.
+Language mix: Mostly English, sprinkle BM words (e.g. "haiyah", "confirm", "siaaa", "jangan", "eh", "lah").
+
+IMPORTANT SAFETY RULE: If ANY user input contains signs of crisis (suicidal thoughts, self-harm), respond with:
+{ "crisis": true }
+
+For Step 1 (first question), respond with:
+{
+  "step": 1,
+  "story": "<2-3 sentence scene-setting story relevant to today's school stressor. Witty and fast-paced.>",
+  "question": "<The actual question text>",
+  "options": [
+    { "type": "positive", "emoji": "📖", "text": "<Positive coping option>" },
+    { "type": "neutral",  "emoji": "😰", "text": "<Realistic middle-ground option>" },
+    { "type": "layflat",  "emoji": "🦥", "text": "<Funny defeated/rebellious 'lay flat' option>" }
+  ],
+  "theme": "<A short 2-4 word theme name for today e.g. 'The Pop Quiz Panic'>"
+}
+
+For Step 2 (second question), respond with:
+{
+  "step": 2,
+  "reaction": "<Witty 1-2 sentence banter responding to the user's previous answer. Validate their feeling.>",
+  "story": "<Advance the plot. 2-3 sentences. Build tension.>",
+  "question": "<Second question text>",
+  "options": [
+    { "type": "positive", "emoji": "🧠", "text": "<Positive option>" },
+    { "type": "neutral",  "emoji": "🧐", "text": "<Neutral option>" },
+    { "type": "layflat",  "emoji": "🦥", "text": "<Lay flat option>" }
+  ]
+}
+
+For Step 3 (third question), respond with:
+{
+  "step": 3,
+  "reaction": "<1-2 sentence banter on Q2 answer.>",
+  "story": "<Climax! The stress monster is about to emerge. 2-3 dramatic sentences.>",
+  "question": "<Final question text>",
+  "options": [
+    { "type": "positive", "emoji": "💪", "text": "<Positive option>" },
+    { "type": "neutral",  "emoji": "😤", "text": "<Neutral option>" },
+    { "type": "layflat",  "emoji": "🦥", "text": "<Lay flat option>" }
+  ],
+  "monster": {
+    "emoji": "<Single monster emoji e.g. 👾 🐙 😈 👻 🦖 🤡>",
+    "name": "<Creative goofy monster name e.g. 'The Balding Final Exam Beast' or 'The Exam Panic Goblin'>"
+  }
+}
+
+For the Report (after monster defeat), respond with:
+{
+  "step": "report",
+  "persona": "<Funny humorous title e.g. 'The Calm-on-Outside Screaming-Inside Academic Ninja'>",
+  "defense_pct": <integer 40-100 based on positivity of answers>,
+  "treehouse": "<2-3 sentence empathetic paragraph unpacking the psychology of their choices + 1 super easy micro-action tip>",
+  "coins_earned": 10,
+  "streak_day": <current streak day + 1>,
+  "wardrobe_tip": "<FOMO-inducing wardrobe unlock hint e.g. '2 more days to unlock the 🦸 Exam-Immunity Golden Cape!'>"
+}`;
+
+        async function callGemini(userMsg) {
+            const apiKey = window.GEMINI_API_KEY || '';
+            if (!apiKey) {
+                // Return a fallback if no API key
+                return null;
+            }
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            const body = {
+                system_instruction: { parts: [{ text: MENTAL_STREAK_SYSTEM }] },
+                contents: [{ role: 'user', parts: [{ text: userMsg }] }],
+                generationConfig: { temperature: 0.85, maxOutputTokens: 1024 }
+            };
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                // Strip potential markdown fences
+                const cleaned = text.replace(/^```json\s*/i,'').replace(/```\s*$/,'').trim();
+                return JSON.parse(cleaned);
+            } catch(e) {
+                console.warn('[StreakEngine] Gemini parse error:', e);
+                return null;
+            }
+        }
+
+        // ── Fallback content (when no API key) ───────────────────────────────
+        const FALLBACKS = [
+            {
+                step: 1,
+                theme: "The Monday Morning Mayhem",
+                story: "You walk into school Monday morning and Cikgu drops the bomb — pop quiz in 10 minutes! ⚡ Your brain is still buffering from the weekend. The student next to you pulls out a 10-page cheat sheet. Classic.",
+                question: "How does your brain respond to the surprise pop quiz?",
+                options: [
+                    { type: 'positive', emoji: '📖', text: "Let's goooo! I actually studied (a little). Time to shine!" },
+                    { type: 'neutral',  emoji: '😰', text: "Okay okay okay... stay calm. Write SOMETHING. Partial marks exist, right?" },
+                    { type: 'layflat',  emoji: '🦥', text: "Close eyes. If I can't see the paper, the quiz can't hurt me. Nap time." }
+                ]
+            },
+            {
+                step: 2,
+                reaction: "Okay okay, we see you! Whether you're crushing it or surviving it, KawanKu's got your back. 💪",
+                story: "Halfway through the quiz — your pen runs out of ink. The horror. You borrow from your friend but now you owe them bubble tea. As if life wasn't already stressful enough.",
+                question: "Your pen just died. What's your next move?",
+                options: [
+                    { type: 'positive', emoji: '🧠', text: "No biggie, I always carry a backup. Prepared is my middle name." },
+                    { type: 'neutral',  emoji: '🧐', text: "Borrow from bae, negotiate the bubble tea debt later. Problems for future me." },
+                    { type: 'layflat',  emoji: '🦥', text: "Sign the quiz with blood. Metaphorically. I'm done with this universe." }
+                ]
+            },
+            {
+                step: 3,
+                reaction: "Valid reaction tbh. The universe clearly had it out for you today. 😤",
+                story: "The quiz is FINALLY over but then... your teacher announces the results will count for 30% of your grade. The stress has reached MAXIMUM OVERDRIVE. A dark energy is forming... a monster shaped from all your academic anxiety is materializing! 🚨",
+                question: "The grade reveal is tomorrow. How do you handle tonight?",
+                options: [
+                    { type: 'positive', emoji: '💪', text: "Review my answers, accept whatever comes, and sleep by 11pm. Growth mindset!" },
+                    { type: 'neutral',  emoji: '😤', text: "Doomscroll TikTok until 2am, then panic-text my study group. Classic me." },
+                    { type: 'layflat',  emoji: '🦥', text: "Enter emotional shutdown mode. The grades are not real. Nothing is real. Goodnight." }
+                ],
+                monster: { emoji: '👾', name: 'The Balding Final Exam Beast' }
+            }
+        ];
+
+        function getFallbackReport(answers) {
+            const posCount = answers.filter(a => a.type === 'positive').length;
+            const pct = 40 + posCount * 20;
+            return {
+                step: 'report',
+                persona: posCount >= 2 ? 'The "Calm Under Fire" Academic Warrior 🏹' : posCount === 1 ? 'The "Surviving But Make It Aesthetic" Realist 🌙' : 'The "Full Send on Lay Flat Mode" Chaos Champion 🦥',
+                defense_pct: pct,
+                treehouse: `You tackled today's stress with ${posCount >= 2 ? 'real resilience' : 'honest realness'} — and that actually takes courage. ${posCount < 2 ? 'Choosing to laugh at the chaos is a valid coping strategy too. Humour is a superpower.' : 'Staying grounded when things spiral is a real skill.'} Micro-action for tonight: spend exactly 2 minutes writing down one thing that went okay today, no matter how small. ✏️`,
+                coins_earned: 10,
+                streak_day: state.streakDay + 1,
+                wardrobe_tip: `Maintain your streak for ${3 - (state.streakDay % 3)} more days to unlock the legendary 🦸 【Exam-Immunity Golden Cape】 skin!`
+            };
+        }
+
+        // ── Render a question phase ───────────────────────────────────────────
+        function renderQuestion(data) {
+            showPhase('question');
+            const q = currentQuestion;
+
+            // Update step dots
+            [1,2,3].forEach(i => {
+                const dot = $(`sdot-${i}`);
+                if (!dot) return;
+                dot.classList.remove('active','done');
+                if (i < q) dot.classList.add('done');
+                else if (i === q) dot.classList.add('active');
+            });
+
+            // Pass count
+            const passLeft = MAX_PASSES - state.passesUsed;
+            if ($('sq-pass-remaining')) $('sq-pass-remaining').textContent = passLeft;
+
+            // Story box
+            let storyText = '';
+            if (data.reaction) storyText += data.reaction + '\n\n';
+            storyText += data.story || '';
+            if ($('streak-story-box')) $('streak-story-box').textContent = storyText;
+
+            // Options
+            const grid = $('streak-options-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            data.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = `streak-option-btn opt-${opt.type}`;
+                btn.textContent = `${opt.emoji}  ${opt.text}`;
+                if (opt.type === 'layflat' && passLeft <= 0) {
+                    btn.classList.add('disabled');
+                }
+                btn.addEventListener('click', () => handleOptionClick(opt, data));
+                grid.appendChild(btn);
+            });
+
+            // Hide pass warning
+            const warn = $('streak-pass-warning');
+            if (warn) warn.classList.add('hidden');
+        }
+
+        async function handleOptionClick(opt, stepData) {
+            // Crisis check on option text
+            if (detectCrisis(opt.text)) { showPhase('crisis'); stopAllBGM(); return; }
+
+            // Lay flat pass logic
+            if (opt.type === 'layflat') {
+                const passLeft = MAX_PASSES - state.passesUsed;
+                if (passLeft <= 0) {
+                    const warn = $('streak-pass-warning');
+                    if (warn) warn.classList.remove('hidden');
+                    return;
+                }
+                state.passesUsed++;
+                saveState(state);
+                const pl = MAX_PASSES - state.passesUsed;
+                if ($('sq-pass-remaining')) $('sq-pass-remaining').textContent = pl;
+                if ($('streak-pass-display')) $('streak-pass-display').textContent = `${pl}/${MAX_PASSES}`;
+            }
+
+            answers.push({ type: opt.type, text: opt.text });
+
+            if (currentQuestion < 3) {
+                currentQuestion++;
+                await loadNextQuestion(stepData);
+            } else {
+                // All 3 done → show monster
+                await loadMonsterPhase(stepData);
+            }
+        }
+
+        async function loadNextQuestion(prevStepData) {
+            showPhase('loading');
+            if ($('streak-loading-text')) $('streak-loading-text').textContent = `KawanKu is building Question ${currentQuestion}...`;
+
+            // Build prompt context
+            const answerSummary = answers.map((a,i) => `Q${i+1} answer (${a.type}): "${a.text}"`).join('\n');
+            const prompt = `The student has answered ${answers.length} question(s) so far:\n${answerSummary}\n\nNow generate Step ${currentQuestion} of the quiz.`;
+
+            let data = await callGemini(prompt);
+            if (!data) data = FALLBACKS[currentQuestion - 1];
+            if (data.crisis) { showPhase('crisis'); stopAllBGM(); return; }
+
+            renderQuestion(data);
+        }
+
+        async function loadMonsterPhase(lastStepData) {
+            // Extract monster from last step data or fallback
+            let monster = lastStepData?.monster || { emoji: '👾', name: 'The Exam Panic Goblin' };
+            monsterData = monster;
+            monsterHP = 100;
+            monsterMaxHP = 100;
+            comboCount = 0;
+
+            if ($('monster-emoji')) $('monster-emoji').textContent = monster.emoji;
+            if ($('monster-name'))  $('monster-name').textContent  = monster.name;
+            updateMonsterHP(100);
+
+            showPhase('monster');
+            stopAllBGM();
+            playBattleBGM();
+        }
+
+        // ── Monster HP ────────────────────────────────────────────────────────
+        function updateMonsterHP(pct) {
+            const bar  = $('monster-hp-bar');
+            const text = $('monster-hp-text');
+            if (bar)  bar.style.width = `${Math.max(0, pct)}%`;
+            const hp = Math.round(pct);
+            if (text) text.textContent = `HP: ${hp} / 100`;
+        }
+
+        function smashMonster() {
+            if (monsterHP <= 0) return;
+            playSmashSFX();
+            comboCount++;
+
+            // Damage: 20-35 per hit
+            const dmg = 20 + Math.floor(Math.random() * 16);
+            monsterHP = Math.max(0, monsterHP - dmg);
+            updateMonsterHP(monsterHP);
+
+            // Hit animation
+            const body = $('monster-body');
+            if (body) {
+                body.classList.remove('hit');
+                void body.offsetWidth; // reflow
+                body.classList.add('hit');
+                setTimeout(() => body.classList.remove('hit'), 280);
+            }
+
+            // Shake arena
+            const arena = document.querySelector('.monster-arena');
+            if (arena) {
+                arena.classList.remove('shaking');
+                void arena.offsetWidth;
+                arena.classList.add('shaking');
+                setTimeout(() => arena.classList.remove('shaking'), 370);
+            }
+
+            // Add crack
+            addCrack();
+
+            // Combo display
+            const comboEl = $('monster-combo');
+            const comboText = $('monster-combo-text');
+            if (comboEl && comboText) {
+                comboText.textContent = comboCount === 1 ? '💥 SMASH!' : comboCount === 2 ? '🔥 DOUBLE SMASH!' : comboCount >= 3 ? `⚡ COMBO x${comboCount}!!!` : `💥 HIT!`;
+                comboEl.classList.remove('hidden');
+                comboEl.style.animation = 'none';
+                void comboEl.offsetWidth;
+                comboEl.style.animation = 'combo-pop 0.4s ease';
+                clearTimeout(comboEl._hideTimer);
+                comboEl._hideTimer = setTimeout(() => comboEl.classList.add('hidden'), 1400);
+            }
+
+            // Death?
+            if (monsterHP <= 0) {
+                setTimeout(triggerMonsterDeath, 400);
+            }
+        }
+
+        function addCrack() {
+            const cracksDiv = $('monster-cracks');
+            if (!cracksDiv || cracksDiv.children.length >= 5) return;
+            const crack = document.createElement('div');
+            crack.className = 'crack';
+            crack.style.cssText = `
+                left: ${20 + Math.random() * 60}%;
+                top: ${20 + Math.random() * 60}%;
+                width: ${15 + Math.random() * 30}px;
+                transform: rotate(${Math.random() * 180}deg);
+            `;
+            cracksDiv.appendChild(crack);
+        }
+
+        async function triggerMonsterDeath() {
+            stopAllBGM();
+            const body = $('monster-body');
+            if (body) {
+                body.classList.add('dead');
+            }
+            // Coin burst visual
+            const arena = document.querySelector('.monster-arena');
+            if (arena) {
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        const coin = document.createElement('span');
+                        coin.className = 'coin-burst';
+                        coin.textContent = '🪙';
+                        coin.style.left = `${Math.random() * 80 + 10}%`;
+                        arena.style.position = 'relative';
+                        arena.appendChild(coin);
+                        setTimeout(() => coin.remove(), 900);
+                    }, i * 120);
+                }
+            }
+
+            // Wait then show report
+            setTimeout(async () => {
+                await loadReport();
+            }, 1000);
+        }
+
+        async function loadReport() {
+            showPhase('loading');
+            if ($('streak-loading-text')) $('streak-loading-text').textContent = 'Generating your 60-Second Mental Audit Report...';
+
+            const answerSummary = answers.map((a,i) => `Q${i+1} answer (${a.type}): "${a.text}"`).join('\n');
+            const prompt = `The student finished all 3 questions. Their answers:\n${answerSummary}\n\nNow generate the final Report (step: "report").`;
+
+            let data = await callGemini(prompt);
+            if (!data || data.crisis) data = getFallbackReport(answers);
+
+            // Update state
+            state.streakDay = data.streak_day || state.streakDay + 1;
+            state.coins += (data.coins_earned || 10);
+            saveState(state);
+
+            renderReport(data);
+            playHealingBGM();
+        }
+
+        function renderReport(data) {
+            showPhase('report');
+            const pct = data.defense_pct || 70;
+            const progressBlocks = Math.round(pct / 20);
+            const bar = '■'.repeat(progressBlocks) + '□'.repeat(5 - progressBlocks);
+
+            const html = `<div class="report-section">
+  <div class="report-section-title">🏆 Today's Soul Persona</div>
+  <strong>${data.persona}</strong>
+</div>
+<div class="report-section">
+  <div class="report-section-title">📊 Mental Defense Rating</div>
+  <code style="color:#a78bfa;font-size:1.1rem;">[${bar}] ${pct}%</code>
+  <div class="report-progress-bar-wrap"><div class="report-progress-fill" id="report-prog-fill" style="width:0%"></div></div>
+</div>
+<div class="report-section">
+  <div class="report-section-title">💌 Hidden Soul Treehouse</div>
+  <p style="font-size:0.87rem;line-height:1.7;color:var(--color-text-primary)">${data.treehouse}</p>
+</div>
+<div class="report-section">
+  <div class="report-section-title">🎁 Streak &amp; Loot Summary</div>
+  <div class="report-loot-row">💥 Monster Defeated! <span class="report-coins-badge">+${data.coins_earned || 10} 🪙 Kawan Coins</span></div>
+  <div class="report-loot-row">💰 Wallet: <span class="report-coins-badge">${state.coins} 🪙</span></div>
+  <div class="report-loot-row">⚡ Streak: <strong>Day ${state.streakDay}!</strong> KawanKu sends a finger heart 🫶</div>
+  <div class="report-loot-row" style="margin-top:8px;font-size:0.82rem;color:#fbbf24;">👕 ${data.wardrobe_tip}</div>
+</div>`;
+
+            const content = $('report-content');
+            if (content) content.innerHTML = html;
+
+            // Animate progress bar
+            setTimeout(() => {
+                const fill = $('report-prog-fill');
+                if (fill) fill.style.width = `${pct}%`;
+            }, 300);
+
+            // Update intro counters for next time
+            if ($('streak-coins-display')) $('streak-coins-display').textContent = state.coins;
+        }
+
+        // ── Sticky note ───────────────────────────────────────────────────────
+        function initStickyNote() {
+            const input  = $('sticky-note-input');
+            const chars  = $('sticky-chars');
+            const btn    = $('sticky-save-btn');
+            const saved  = $('sticky-saved-msg');
+            if (!input) return;
+            input.addEventListener('input', () => {
+                if (chars) chars.textContent = input.value.length;
+            });
+            if (btn) btn.addEventListener('click', () => {
+                const note = input.value.trim();
+                if (!note) return;
+                state.journal.push({ date: new Date().toISOString(), note });
+                saveState(state);
+                if (saved) saved.classList.remove('hidden');
+                btn.disabled = true;
+                btn.textContent = '✅ Saved!';
+            });
+        }
+
+        // ── BGM mute toggle ──────────────────────────────────────────────────
+        function initMuteBtn() {
+            const btn = $('bgm-mute-btn');
+            if (!btn) return;
+            btn.addEventListener('click', () => {
+                bgmMuted = !bgmMuted;
+                if (bgmMuted) {
+                    stopAllBGM();
+                    btn.classList.add('muted');
+                    btn.textContent = '🔔 Sound On';
+                } else {
+                    btn.classList.remove('muted');
+                    btn.textContent = '🔇 Silent Mode';
+                    if (currentPhase === 'question' || currentPhase === 'intro') playCalmBGM();
+                    else if (currentPhase === 'monster') playBattleBGM();
+                    else if (currentPhase === 'report') playHealingBGM();
+                }
+            });
+        }
+
+        // ── Monster bash events ───────────────────────────────────────────────
+        function initMonsterBash() {
+            // Tap on monster body
+            const monsterAvatar = $('monster-avatar');
+            if (monsterAvatar) {
+                monsterAvatar.addEventListener('click', (e) => {
+                    if (monsterHP > 0) smashMonster();
+                });
+                monsterAvatar.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    if (monsterHP > 0) smashMonster();
+                }, { passive: false });
+            }
+
+            // Type input smash
+            const typeInput = $('monster-type-input');
+            const smashBtn  = $('monster-smash-btn');
+            const SMASH_WORDS = ['smash','punch','hit','destroy','dieeee','die','die!!!','bonk','bash','yeet','kill','obliterate'];
+
+            function doTypeSmash() {
+                const val = (typeInput?.value || '').trim().toLowerCase();
+                if (detectCrisis(val)) { showPhase('crisis'); stopAllBGM(); return; }
+                if (val && (SMASH_WORDS.some(w => val.includes(w)) || val.length > 0)) {
+                    smashMonster();
+                    if (typeInput) typeInput.value = '';
+                }
+            }
+
+            if (typeInput) {
+                typeInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') doTypeSmash();
+                });
+            }
+            if (smashBtn) smashBtn.addEventListener('click', doTypeSmash);
+        }
+
+        // ── Start quiz flow ───────────────────────────────────────────────────
+        async function startQuiz() {
+            currentQuestion = 1;
+            answers = [];
+            monsterHP = 100;
+            comboCount = 0;
+
+            // Clear cracks
+            const cracksDiv = $('monster-cracks');
+            if (cracksDiv) cracksDiv.innerHTML = '';
+            const monsterBody = $('monster-body');
+            if (monsterBody) monsterBody.classList.remove('dead');
+
+            showPhase('loading');
+            if ($('streak-loading-text')) $('streak-loading-text').textContent = 'Opening your Mental Blind Box...';
+            playCalmBGM();
+
+            const today = new Date();
+            const themes = ['pop quiz panic','canteen food running out','group project member ghosting','presentation slides corrupted','homework deadline tonight','comparison trap with classmates'];
+            const todayTheme = themes[today.getDay() % themes.length];
+
+            const prompt = `Today's theme hint: "${todayTheme}". Student streak day: ${state.streakDay}. Heart rate: ${simulatedHR} bpm. Generate Step 1 of the quiz.`;
+
+            let data = await callGemini(prompt);
+            if (!data) data = FALLBACKS[0];
+            if (data.crisis) { showPhase('crisis'); stopAllBGM(); return; }
+
+            renderQuestion(data);
+        }
+
+        // ── Restart ───────────────────────────────────────────────────────────
+        function resetToIntro() {
+            stopAllBGM();
+            simulatedHR = Math.floor(Math.random() * 30 + 72);
+            populateIntro();
+            showPhase('intro');
+            // Reset sticky note
+            const input = $('sticky-note-input');
+            const saved = $('sticky-saved-msg');
+            const btn   = $('sticky-save-btn');
+            if (input) { input.value = ''; }
+            if (saved) saved.classList.add('hidden');
+            if (btn)   { btn.disabled = false; btn.textContent = '💾 Save to Journal'; }
+            const chars = $('sticky-chars');
+            if (chars) chars.textContent = '0';
+        }
+
+        // ── Crisis back ───────────────────────────────────────────────────────
+        function initCrisisBack() {
+            const backBtn = $('crisis-back-btn');
+            if (backBtn) backBtn.addEventListener('click', resetToIntro);
+        }
+
+        // ── Boot ──────────────────────────────────────────────────────────────
+        function boot() {
+            // Only init if the quiz card is present in DOM
+            if (!$('streak-engine-card')) return;
+
+            populateIntro();
+            showPhase('intro');
+            initMuteBtn();
+            initMonsterBash();
+            initStickyNote();
+            initCrisisBack();
+
+            const startBtn   = $('streak-start-btn');
+            const restartBtn = $('streak-restart-btn');
+            if (startBtn)   startBtn.addEventListener('click', startQuiz);
+            if (restartBtn) restartBtn.addEventListener('click', resetToIntro);
+        }
+
+        // Wait for DOM then boot
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', boot);
+        } else {
+            boot();
+        }
+
+    })(); // END MentalStreakEngine
+
     // Run launcher
     init();
 });
