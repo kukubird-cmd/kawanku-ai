@@ -1,5 +1,7 @@
 # Ignore the actual local configuration file containing the API key
 config.js
+backend/.env
+.env
 
 # Ignore system files
 .DS_Store
