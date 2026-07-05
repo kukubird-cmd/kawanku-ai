@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="lucide.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -32,6 +32,14 @@
                     <i data-lucide="message-square"></i>
                     <span>Chat & Rant</span>
                 </button>
+                <button class="nav-btn" data-target="quiz-panel" id="nav-quiz">
+                    <i data-lucide="help-circle"></i>
+                    <span>Emotion Quiz</span>
+                </button>
+                <button class="nav-btn" data-target="shop-panel" id="nav-shop">
+                    <i data-lucide="shopping-bag"></i>
+                    <span>Spark Shop</span>
+                </button>
                 <button class="nav-btn" data-target="studio-panel" id="nav-studio">
                     <i data-lucide="palette"></i>
                     <span>Avatar Studio</span>
@@ -45,6 +53,11 @@
                     <span>Calm Hub</span>
                 </button>
             </nav>
+
+            <div class="api-key-config-box">
+                <label for="sidebar-api-key">🔑 Gemini API Key</label>
+                <input type="password" id="sidebar-api-key" placeholder="AIzaSy..." />
+            </div>
 
             <div class="sidebar-footer">
                 <div class="profile-card">
@@ -676,6 +689,119 @@
                     </div>
                 </section>
 
+                <!-- ============================================
+                     EMOTION QUIZ PANEL (Gemini-Powered)
+                     ============================================ -->
+                <section class="panel" id="quiz-panel">
+                    <div class="quiz-page-layout">
+                        <!-- Left: Spark Status Card -->
+                        <div class="quiz-status-card">
+                            <div class="spark-hero">
+                                <span class="spark-fire-icon">🔥</span>
+                                <div class="spark-count" id="quiz-spark-count">1</div>
+                                <span class="spark-label">Day Streak</span>
+                            </div>
+                            <div class="spark-stats-grid">
+                                <div class="spark-stat-item">
+                                    <span class="spark-stat-icon">📦</span>
+                                    <span class="spark-stat-label">Blind Boxes Opened</span>
+                                    <span class="spark-stat-val" id="quiz-boxes-opened">0</span>
+                                </div>
+                                <div class="spark-stat-item">
+                                    <span class="spark-stat-icon">🧠</span>
+                                    <span class="spark-stat-label">Last Diagnosis</span>
+                                    <span class="spark-stat-val" id="quiz-last-diagnosis">—</span>
+                                </div>
+                                <div class="spark-stat-item">
+                                    <span class="spark-stat-icon">🏷️</span>
+                                    <span class="spark-stat-label">Personality Tag</span>
+                                    <span class="spark-stat-val" id="quiz-personality-tag">—</span>
+                                </div>
+                            </div>
+                            <button class="quiz-start-btn" id="quiz-ai-start-btn">
+                                <i data-lucide="sparkles"></i>
+                                <span>Open Today's Blind Box 📦</span>
+                            </button>
+                            <button class="quiz-restart-btn hidden" id="quiz-ai-restart-btn">
+                                <i data-lucide="rotate-ccw"></i>
+                                <span>Start New Session</span>
+                            </button>
+                        </div>
+
+                        <!-- Right: Conversational Chat Stream -->
+                        <div class="quiz-chat-card">
+                            <div class="quiz-chat-header">
+                                <div class="quiz-chat-title">
+                                    <i data-lucide="bot" class="text-violet"></i>
+                                    <h3>Kawanku AI · Emotion Blind Box</h3>
+                                </div>
+                                <span class="quiz-chat-badge" id="quiz-universe-badge">Awaiting Launch...</span>
+                            </div>
+                            <div class="quiz-chat-messages" id="quiz-chat-messages">
+                                <div class="quiz-welcome-msg">
+                                    <p>Hey! 👋 Press <strong>"Open Today's Blind Box"</strong> to start your daily emotion check-in.</p>
+                                    <p>I'll randomly pick a universe theme and walk you through 3 immersive questions. At the end you'll receive your personalised mental state report card!</p>
+                                </div>
+                            </div>
+                            <div class="quiz-chat-options hidden" id="quiz-chat-options"></div>
+                            <div class="quiz-chat-input-bar">
+                                <textarea class="quiz-chat-input" id="quiz-chat-input" placeholder="Type your answer or pick an option above..." rows="1"></textarea>
+                                <button class="quiz-chat-send-btn" id="quiz-chat-send-btn">
+                                    <i data-lucide="send"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ============================================
+                     SPARK SHOP PANEL (Gemini-Powered)
+                     ============================================ -->
+                <section class="panel" id="shop-panel">
+                    <div class="shop-page-layout">
+                        <!-- Left: Product Shelf -->
+                        <div class="shop-shelf-card">
+                            <div class="shop-shelf-header">
+                                <h3>🛒 Kawan Spark Shop</h3>
+                                <div class="shop-week-tabs">
+                                    <button class="shop-week-tab active" data-week="1">Week 1</button>
+                                    <button class="shop-week-tab" data-week="2">Week 2</button>
+                                    <button class="shop-week-tab" data-week="3">Week 3</button>
+                                    <button class="shop-week-tab" data-week="4">Week 4</button>
+                                </div>
+                            </div>
+                            <div class="shop-balance-bar">
+                                <span>Your Sparks: 🔥 <strong id="shop-spark-balance">1</strong> days</span>
+                            </div>
+                            <div class="shop-items-grid" id="shop-items-grid">
+                                <!-- Items rendered by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Right: Shop Chat Stream -->
+                        <div class="shop-chat-card">
+                            <div class="shop-chat-header">
+                                <div class="shop-chat-title">
+                                    <i data-lucide="shopping-bag" class="text-amber"></i>
+                                    <h3>Kawanku AI · Shop Host</h3>
+                                </div>
+                            </div>
+                            <div class="shop-chat-messages" id="shop-chat-messages">
+                                <div class="shop-welcome-msg">
+                                    <p>Welcome to the Kawan Spark Shop! 🛍️</p>
+                                    <p>Browse the weekly shelves on the left, or just tell me what you'd like. I'll check your spark balance and help you redeem items for your avatar!</p>
+                                </div>
+                            </div>
+                            <div class="shop-chat-input-bar">
+                                <textarea class="shop-chat-input" id="shop-chat-input" placeholder="Tell the shop host what you want..." rows="1"></textarea>
+                                <button class="shop-chat-send-btn" id="shop-chat-send-btn">
+                                    <i data-lucide="send"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- Calm Hub Panel -->
                 <section class="panel" id="calm-panel">
                     <div class="calm-layout">
@@ -734,149 +860,6 @@
                             </div>
                         </div>
 
-                        <!-- Mental Streak Engine Quiz -->
-                        <div class="streak-engine-card" id="streak-engine-card">
-                            <!-- === PHASE: INTRO === -->
-                            <div class="streak-phase" id="streak-phase-intro">
-                                <div class="streak-header-logo">
-                                    <span class="streak-logo-icon">📦</span>
-                                    <h3>Mental Streak Engine</h3>
-                                    <p>Your daily 60-second blind box mental check-in</p>
-                                </div>
-                                <div class="streak-status-grid">
-                                    <div class="streak-status-item" id="ssi-streak">
-                                        <span class="ssi-icon">⚡</span>
-                                        <div><span class="ssi-label">Daily Streak</span><span class="ssi-val" id="streak-day-display">Day 1</span></div>
-                                    </div>
-                                    <div class="streak-status-item" id="ssi-pass">
-                                        <span class="ssi-icon">💳</span>
-                                        <div><span class="ssi-label">Lay-Flat Passes</span><span class="ssi-val" id="streak-pass-display">2/2</span></div>
-                                    </div>
-                                    <div class="streak-status-item" id="ssi-coins">
-                                        <span class="ssi-icon">🪙</span>
-                                        <div><span class="ssi-label">Kawan Coins</span><span class="ssi-val" id="streak-coins-display">0</span></div>
-                                    </div>
-                                    <div class="streak-status-item" id="ssi-hr">
-                                        <span class="ssi-icon">⌚</span>
-                                        <div><span class="ssi-label">Heart Rate</span><span class="ssi-val" id="streak-hr-display">-- bpm</span></div>
-                                    </div>
-                                </div>
-                                <div class="streak-bgm-bar" id="streak-bgm-bar">
-                                    <span class="bgm-pulse-dot"></span>
-                                    <span id="streak-bgm-label">🌿 Rainforest Lo-Fi Chill (Loading...)</span>
-                                    <button class="bgm-mute-btn" id="bgm-mute-btn" title="Toggle Haptic/Silent Mode">🔇 Silent Mode</button>
-                                </div>
-                                <div class="streak-tip-bar">🔇 In class? Tap <strong>Silent Mode</strong> to hide sounds & haptics!</div>
-                                <button class="streak-start-btn" id="streak-start-btn">
-                                    <span>Open Today's Blind Box 📦</span>
-                                </button>
-                            </div>
-
-                            <!-- === PHASE: QUESTION === -->
-                            <div class="streak-phase hidden" id="streak-phase-question">
-                                <div class="streak-q-topbar">
-                                    <div class="streak-q-step-dots">
-                                        <span class="step-dot active" id="sdot-1"></span>
-                                        <span class="step-dot" id="sdot-2"></span>
-                                        <span class="step-dot" id="sdot-3"></span>
-                                    </div>
-                                    <span class="streak-q-pass-badge">💳 <span id="sq-pass-remaining">2</span>/2 Passes Left</span>
-                                </div>
-                                <div class="streak-story-box" id="streak-story-box">
-                                    <!-- Story narrative rendered here -->
-                                </div>
-                                <div class="streak-q-block">
-                                    <p class="streak-q-label">Your move:</p>
-                                    <div class="streak-options-grid" id="streak-options-grid">
-                                        <!-- Options rendered dynamically -->
-                                    </div>
-                                </div>
-                                <div class="streak-pass-warning hidden" id="streak-pass-warning">
-                                    🦥 <strong>Lay-Flat Pass maxed out!</strong> KawanKu blocks your escape — face the beast head-on! Choose from the active options above!
-                                </div>
-                            </div>
-
-                            <!-- === PHASE: LOADING === -->
-                            <div class="streak-phase hidden" id="streak-phase-loading">
-                                <div class="streak-loading-anim">
-                                    <div class="streak-spinner"></div>
-                                    <p id="streak-loading-text">KawanKu is generating your blind box...</p>
-                                </div>
-                            </div>
-
-                            <!-- === PHASE: MONSTER BASH === -->
-                            <div class="streak-phase hidden" id="streak-phase-monster">
-                                <div class="monster-bgm-alert">
-                                    🎵 BGM Switch: <strong>🔥 Hype Anime Battle Theme Activated!</strong>
-                                </div>
-                                <div class="monster-arena">
-                                    <div class="monster-avatar" id="monster-avatar">
-                                        <div class="monster-body" id="monster-body">
-                                            <span class="monster-emoji" id="monster-emoji">👾</span>
-                                        </div>
-                                        <div class="monster-cracks" id="monster-cracks"></div>
-                                    </div>
-                                    <div class="monster-info">
-                                        <p class="monster-title">⚔️ Today's Mega Boss</p>
-                                        <p class="monster-name" id="monster-name">The Exam Panic Goblin</p>
-                                        <div class="monster-hp-bar-wrap">
-                                            <div class="monster-hp-bar" id="monster-hp-bar" style="width:100%"></div>
-                                        </div>
-                                        <p class="monster-hp-text" id="monster-hp-text">HP: 100 / 100</p>
-                                    </div>
-                                </div>
-                                <div class="monster-instructions">
-                                    <p>🤜 <strong>TAP / SMASH the monster</strong> to defeat it!</p>
-                                    <p class="monster-hint">Or type: <em>smash / punch / destroy / dieeee</em></p>
-                                </div>
-                                <div class="monster-smash-input-row">
-                                    <input type="text" class="monster-type-input" id="monster-type-input" placeholder="Type smash / punch / destroy...">
-                                    <button class="monster-smash-btn" id="monster-smash-btn">💥 SMASH</button>
-                                </div>
-                                <div class="monster-combo-display hidden" id="monster-combo">
-                                    <span id="monster-combo-text">COMBO x1!</span>
-                                </div>
-                            </div>
-
-                            <!-- === PHASE: REPORT === -->
-                            <div class="streak-phase hidden" id="streak-phase-report">
-                                <div class="report-bgm-switch">
-                                    🎵 BGM Switch: <strong>🍃 Calming Tibetan Singing Bowls</strong>
-                                </div>
-                                <div class="report-card">
-                                    <div class="report-victory-badge">🏆 Monster Defeated!</div>
-                                    <div class="report-content" id="report-content">
-                                        <!-- Rendered by JS -->
-                                    </div>
-                                </div>
-                                <div class="sticky-note-section">
-                                    <p class="sticky-note-prompt">✉️ <strong>Leave Today's Sticky Note</strong> — saved to your Mental Journal:</p>
-                                    <textarea class="sticky-note-input" id="sticky-note-input" placeholder="Write something to your future self... (optional)" rows="3" maxlength="280"></textarea>
-                                    <div class="sticky-note-actions">
-                                        <span class="sticky-char-count"><span id="sticky-chars">0</span>/280</span>
-                                        <button class="sticky-save-btn" id="sticky-save-btn">💾 Save to Journal</button>
-                                    </div>
-                                    <div class="sticky-saved-msg hidden" id="sticky-saved-msg">✅ Sticky note saved to your Mental Journal!</div>
-                                </div>
-                                <button class="streak-restart-btn" id="streak-restart-btn">🔄 Start Tomorrow's Blind Box</button>
-                            </div>
-
-                            <!-- === PHASE: CRISIS === -->
-                            <div class="streak-phase hidden" id="streak-phase-crisis">
-                                <div class="crisis-shield">
-                                    <div class="crisis-shield-icon">🛡️</div>
-                                    <h3>KawanKu Guardian Shield Activated</h3>
-                                    <p>Hey there, I can hear the immense pain you're carrying right now. KawanKu wants to step away from the game because you <strong>matter to us</strong>. Please remember, you are absolutely not alone. We have prepared a safe space for you.</p>
-                                    <div class="crisis-hotlines">
-                                        <a class="crisis-btn" href="tel:15999" id="crisis-talian-kasih">📞 Talian Kasih: 15999</a>
-                                        <a class="crisis-btn" href="tel:+60376272929" id="crisis-befrienders">💬 Befrienders KL: 03-7627 2929</a>
-                                        <button class="crisis-btn crisis-anon" id="crisis-counselor-btn">🏫 Notify School Counselor (Anonymous)</button>
-                                    </div>
-                                    <p class="crisis-footer">You can also always reach out to your school counselors or the Ministry of Education (MOE) support channels. We are always here with you. 🫂</p>
-                                    <button class="crisis-back-btn" id="crisis-back-btn">I'm okay, go back</button>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </section>
             </div>

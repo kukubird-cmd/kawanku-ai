@@ -1,16 +1,13 @@
 /* ==========================================================================
    MINDBUDDY COMPANION CLIENT-SIDE LOGIC
    ========================================================================== */
-
 document.addEventListener('DOMContentLoaded', () => {
-    // ----------------------------------------------------------------------
-    // GLOBAL STATE MANAGEMENT
-    // ----------------------------------------------------------------------
-    const state = {
-        activePanel: 'chat-panel',
-        
-        // Avatar Configuration
-        avatar: {
+    function loadAvatarState() {
+        try {
+            const saved = localStorage.getItem('kawanku_avatar_state');
+            if (saved) return JSON.parse(saved);
+        } catch(e) {}
+        return {
             hairStyle: 'crop',
             skinTone: '#ffdbac',
             expression: 'friendly',
@@ -26,7 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
             shirtColor: '#4f46e5',
             glowColor1: '#8b5cf6',
             glowColor2: '#ec4899'
-        },
+        };
+    }
+
+    const state = {
+        activePanel: 'chat-panel',
+        avatar: loadAvatarState(),
 
         // Backend Diagnostics Report (Updated every turn)
         diagnostics: {
@@ -281,10 +283,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mainSVG && studioContainer) {
             const clonedSVG = mainSVG.cloneNode(true);
             clonedSVG.id = 'mindbuddy-studio-svg';
-            // Remap all IDs with a -studio suffix so both SVGs can coexist
-            clonedSVG.querySelectorAll('[id]').forEach(el => {
-                el.id = el.id + '-studio';
-            });
             studioContainer.appendChild(clonedSVG);
         }
 
@@ -292,22 +290,32 @@ document.addEventListener('DOMContentLoaded', () => {
         renderAvatarVisuals();
         
         // Hook up Sidebar Nav links
-        DOM.navBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const target = btn.getAttribute('data-target');
-                switchPanel(target);
-                
-                DOM.navBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
+        if (DOM.navBtns) {
+            DOM.navBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = btn.getAttribute('data-target');
+                    switchPanel(target);
+                    
+                    DOM.navBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                });
             });
-        });
+        }
 
         // Initialize lucide icons
-        lucide.createIcons();
+        if (typeof lucide !== 'undefined' && lucide.createIcons) {
+            try {
+                lucide.createIcons();
+            } catch(e) {
+                console.warn('Lucide icons creation failed', e);
+            }
+        }
 
         // Biometrics Graph render cycle
-        initBiometricsChart();
-        setInterval(updateBiometricsLiveCycle, 1000);
+        if (DOM.hrChartPath) {
+            initBiometricsChart();
+            setInterval(updateBiometricsLiveCycle, 1000);
+        }
 
         // Bind events
         bindUIEvents();
@@ -337,6 +345,12 @@ document.addEventListener('DOMContentLoaded', () => {
             DOM.headerTitle.innerText = "Calm Sanctuary & Healing Soundscapes";
             DOM.headerSubtitle.innerText = "Access synthesizers and mindfulness check-in quizzes.";
             updateQuizRecommendation();
+        } else if (panelId === 'quiz-panel') {
+            if (DOM.headerTitle) DOM.headerTitle.innerText = "Emotion Blind Box Quiz";
+            if (DOM.headerSubtitle) DOM.headerSubtitle.innerText = "AI-powered daily mental health check-in with gamified universe themes.";
+        } else if (panelId === 'shop-panel') {
+            if (DOM.headerTitle) DOM.headerTitle.innerText = "Kawan Spark Shop";
+            if (DOM.headerSubtitle) DOM.headerSubtitle.innerText = "Redeem your daily streak sparks for exclusive avatar items.";
         }
     }
 
@@ -353,8 +367,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (type === 'warning') iconName = 'alert-triangle';
 
         toast.innerHTML = `<i data-lucide="${iconName}"></i> <span>${message}</span>`;
-        DOM.toastContainer.appendChild(toast);
-        lucide.createIcons({attrs: {class: 'toast-icon-svg'}});
+        if (DOM.toastContainer) {
+            DOM.toastContainer.appendChild(toast);
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                try { lucide.createIcons({attrs: {class: 'toast-icon-svg'}}); } catch(e) {}
+            }
+        }
 
         setTimeout(() => {
             toast.style.animation = 'fadeOut 0.3s ease forwards';
@@ -635,10 +653,46 @@ document.addEventListener('DOMContentLoaded', () => {
     // -----------------------------------------------------------------------
     // GEMINI AI ANALYSIS ENGINE
     // -----------------------------------------------------------------------
-    // IMPORTANT: Replace the value below with your own Gemini API key.
-    // Get one free at: https://aistudio.google.com/app/apikey
-    const GEMINI_API_KEY = window.GEMINI_API_KEY || '';
-    const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    function getApiKey() {
+        return localStorage.getItem('gemini_api_key') || window.GEMINI_API_KEY || '';
+    }
+    function getGeminiEndpoint() {
+        return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${getApiKey()}`;
+    }
+
+    async function fetchWithRetry(url, options, maxRetries = 2, delayMs = 1000) {
+        for (let i = 0; i <= maxRetries; i++) {
+            try {
+                const res = await fetch(url, options);
+                if (res.ok) return res;
+                if ((res.status >= 500 || res.status === 429) && i < maxRetries) {
+                    await new Promise(resolve => setTimeout(resolve, delayMs));
+                    delayMs *= 2;
+                    continue;
+                }
+                return res;
+            } catch(e) {
+                if (i === maxRetries) throw e;
+                await new Promise(resolve => setTimeout(resolve, delayMs));
+                delayMs *= 2;
+            }
+        }
+    }
+    function formatGeminiError(status, errText) {
+        if (status === 429) {
+            return `⚠️ Google API Rate Limit (429 - Quota Exceeded)\n\nYour Gemini API key is on the Free Tier, which has a strict limit of 5 requests per minute.\n\n⏳ Please wait 15–20 seconds for the quota to reset, then send your answer again to continue!`;
+        }
+        if (status === 503) {
+            return `☁️ Google API Temporary Overload (503 - Service Unavailable)\n\nThe Gemini servers are temporarily busy. Please wait a few seconds and send your answer again to retry!`;
+        }
+        try {
+            const parsed = JSON.parse(errText);
+            if (parsed?.error?.message) {
+                return `Error: ${parsed.error.message}`;
+            }
+        } catch(e) {}
+        return `API Error ${status}: ${errText}`;
+    }
 
     // Track conversation history for context-aware responses
     const conversationHistory = [];
@@ -647,56 +701,141 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add the student message to history
         conversationHistory.push({ role: 'user', parts: [{ text: studentText }] });
 
-        const systemPrompt = `You are MindBuddy, an empathetic, warm, peer-like AI companion for students.
-Your personality: supportive, non-judgmental, casual and friendly — never clinical or robotic.
-Your responses should feel like talking to a caring, understanding friend who happens to be very emotionally intelligent.
+        const systemPrompt = `# Role
+你现在是 Kawanku AI 心理健康平台的“极简主义全能系统架构师”。你完美掌管着【情绪盲盒测验（Quiz）】、【心理自检诊断】、【安全熔断机制】以及带有周更月回归闭环的【火花商店（Kawan Shop）】。你的任务是给大学生提供一个毫无视觉压力、高级留白、好玩上头且兼具心理学深度的游戏化陪伴体验。
 
-When responding, you must:
-1. Respond conversationally and warmly to the student's message (2-4 sentences max for chat)
-2. At the END of your response, append a JSON block (wrapped in triple backticks) with this exact format:
-\`\`\`json
-{
-  "sentiment": "Positive|Neutral|Negative",
-  "stressLevel": "Low|Medium|High",
-  "emotionTags": ["academic", "social", "burnout", "lonely"],
-  "expression": "friendly|thoughtful|attentive|excited",
-  "academicPressure": 0-100,
-  "socialAnxiety": 0-100,
-  "burnout": 0-100,
-  "loneliness": 0-100
-}
-\`\`\`
+# 📐 UI/UX 极简视觉规范 (最高优先级)
+1. 【绝对留白】：字数极度精简，每段话绝不超过 2 行，多用换行，拒绝大段文字墙。
+2. 【极简氛围灯】：每页文首固定且【只允许使用 1-2 个】与主题强相关的质感符号作为顶部视觉锚点（如 🏮 或 ✦ 🔮 ✦），严禁使用复杂的键盘符号框线。
+3. 【清晰指引】：所有交互选项、商店标价必须极度干净、一目了然。
 
-Keep your conversational reply warm, human and concise. The student should feel heard and understood.`;
+# 🚨 核心控制指令 (Critical Rules)
+1. 【安全熔断】：若检测到用户输入任何包含自残、自杀、极度绝望的极端负面词汇，必须立刻中断所有剧本，退出死党语气，以极度温柔、专业的官方口吻安抚，并在最后强制附带：[🚨 触发安全通道：请立刻联系学校心理老师或拨打心理援助热线，Kawanku 会一直陪着你。]
+2. 【严格 3 题流】：Quiz 每次测试严格限制为 3 道题。单题流交互（出一题，等一次回复）。
+3. 【盲盒随机性】：启动测试时，必须在后台盲抽一个宇宙主题，严禁提前泄露主题池。
+
+---
+
+# 🎲 第一部分：情绪盲盒测试矩阵 (Quiz Mode)
+
+### 🪐 宇宙主题池 (5 选 1)
+- *宇宙 1【赛博朋克：系统重装】* ── 氛围灯: [● SYSTEM ONLINE] | 隐喻：CPU过热（学业压力）、社交防火墙（人际）
+- *宇宙 2【魔法分校：药剂课】* ── 氛围灯: ✦ 🔮 ✦ | 隐喻：灵魂药水沸腾（学业压力）、隐形斗篷隔离（人际）
+- *宇宙 3【深空流浪：宇航猫】* ── 氛围灯: ── 🪐 ── | 隐喻：飞船重力失效（学业压力）、星际信号断联（人际）
+- *宇宙 4【深夜食堂：疗愈店】* ── 氛围灯: 🏮 | 隐喻：身心状态化学反应（学业压力）、味道异常（人际）
+- *宇宙 5【荒野求生：进化岛】* ── 氛围灯: 🌿 | 隐喻：丛林怪兽追赶（学业压力）、伪装成石头（人际）
+
+### 📊 极简心理状态与人格报告规范
+第 3 题（危机反转题）回答完毕后，输出像电子书签一样的结算报告（严格保持留白排版）：
+---
+### 🏷️ 专属人格标签
+*[ 根据表现，生成一个高分享欲、高级的当代大学生人格头衔 ]*
+
+### 🧠 心理状态诊断 (Mental State)
+- *学业/精力状态：* [将真实的压力状态翻译为主题语言。例如：主板过热率 78%（提示：脑力超负荷）]
+- *社交/人际状态：* [将真实的社交疲劳翻译为主题语言。例如：社交防火墙开启率 90%（提示：轻度社交疲劳）]
+
+### ⚡ 精神残余电量
+[■■■□□□□□□□] 30%
+
+### 🔥 Kawanku 火花连击
+- *当前连击：* 🔥 Kawan 火花已连续点亮 [X] 天
+- *提示：* 攒够火花，随时输入“*前往商店*”兑换 Kawanku 的限定发型、眼镜和皮肤！
+
+### 🔘 【一键呼叫：主格 AI 情绪救援】
+过渡：今天的系统 Bug 有点多，不想一个人死撑的话，点击下方直接召唤我的主格。我们可以带着本次的诊断数据，去主页一边聊天，一边试试你换装后的新穿搭！
+👉 *[ 🔘 唤醒 Kawanku AI：带上本次报告，立刻开启 1对1 深度心理疗愈对话 ]*
+
+---
+#### 📊 [CAMPUS_DASHBOARD_ANONYMOUS_DATA]
+主题: [当前主题] | 精力耗竭: [百分比]% | 社交疲劳: [百分比]% | 火花天数: [X]
+(注：此行数据专供系统后端匿名抽取，用于生成全校“校园精神气象大屏”。)
+---
+
+---
+
+# 🏪 第二部分：火花商店周期轮换矩阵 (Store Mode)
+
+当用户输入“*前往商店”或涉及“商店/买手店*”时，立刻切换为【潮流主理人】角色，展现极简货架。
+
+### ⏳ 机制：每周轮换，每月回归
+商店共有 4 套周替主题货架。AI 需根据用户当前所在的周数（或由用户指定周数）展示对应货架。*次月第一周，货架 1 将重新回归，形成完美周期闭环。*
+
+#### 🛍️ 货架 1【第一周限定 / 每月首周回归】── 氛围灯：🛒 [WEEK 1]
+- 👓 [ 智者金丝边框眼镜 ] ———— 消耗 3 天火花
+- 💇‍♂️ [ 慵懒微卷空气感发型 ] ———— 消耗 5 天火花
+- 🎨 [ 限定皮肤：深夜食堂 · 温暖微光 ] ———— 消耗 15 天火花
+
+#### 🛍️ 货架 2【第二周限定 / 每月次周回归】── 氛围灯：🛒 [WEEK 2]
+- 👓 [ 复古原色厚街黑框眼镜 ] ———— 消耗 3 天火花
+- 💇‍♂️ [ 少年感清爽利落碎发 ] ———— 消耗 5 天火花
+- 🎨 [ 限定皮肤：赛博朋克 · 暗夜霓虹 ] ———— 消耗 15 天火花
+
+#### 🛍️ 货架 3【第三周限定 / 每月三周回归】── 氛围灯：🛒 [WEEK 3]
+- 👓 [ 蹦迪专用蹦碎极光墨镜 ] ———— 消耗 4 天火花
+- 💇‍♂️ [ 触电般炸毛狂想发型 ] ———— 消耗 6 天火花
+- 🎨 [ 限定皮肤：深空流浪 · 孤独星云 ] ———— 消耗 18 天火花
+
+#### 🛍️ 货架 4【第四周限定 / 每月月末回归】── 氛围灯：🛒 [WEEK 4]
+- 👓 [ 智商爆表科学家圆框镜 ] ———— 消耗 4 天火花
+- 💇‍♂️ [ 高级感微翘狼尾发型 ] ———— 消耗 6 天火花
+- 🎨 [ 限定皮肤：荒野求生 · 岛屿极光 ] ———— 消耗 18 天火花
+
+### 💱 商店交互逻辑
+1. 进店时，先用一句话亮出本周主题氛围，并展示当前货架商品。
+2. 询问用户的【当前火花天数】与【想兑换的商品】。
+3. *余额充足：输出恭喜文案：“兑换成功！已放入你的主页衣柜。快点击 *[ 🔘 返回主页唤醒 Kawanku AI ]** 换上新装吧！”
+4. *余额不足*：幽默鼓励：“火花余额不足哟。再坚持自检 [X] 天就能带走它了。如果错过了别担心，下个月它还会回归的！明天记得准时来测试续火花！”
+
+---
+
+# ⚙️ 初始启动引导逻辑 (First Output Requirement)
+1. 默认情况下，直接触发【第一部分：Quiz Mode】。在后台盲抽一个宇宙主题，严格执行【极简排版规范】，直接输出该宇宙的顶部视觉锚点、震撼开场白以及【第 1 道测试题（包含A, B, C三个干净的选项）】。
+2. 只有当用户的第一句指令明确包含“商店”时，才直接触发【第二部分：Store Mode】并默认展示 [WEEK 1] 货架。
+3. 严禁出现任何关于规则、后台逻辑、代码标签的解释或说明！保持界面的绝对干净`;
 
         const requestBody = {
             system_instruction: { parts: [{ text: systemPrompt }] },
             contents: conversationHistory,
             generationConfig: {
                 temperature: 0.85,
-                maxOutputTokens: 400
+                maxOutputTokens: 2048
             }
         };
 
         try {
-            const response = await fetch(GEMINI_ENDPOINT, {
+            const response = await fetchWithRetry(getGeminiEndpoint(), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody)
             });
 
-            if (!response.ok) throw new Error(`API error: ${response.status}`);
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(formatGeminiError(response.status, errText));
+            }
 
             const data = await response.json();
             const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-            // Parse out the JSON analytics block
-            const jsonMatch = rawText.match(/```json\s*([\s\S]*?)```/);
+            // Check for Dashboard format from the new prompt
+            const dashboardMatch = rawText.match(/精力耗竭:\s*(\d+)%?\s*\|\s*社交疲劳:\s*(\d+)%/);
             let analytics = null;
-            let replyText = rawText.replace(/```json[\s\S]*?```/, '').trim();
+            let replyText = rawText;
 
-            if (jsonMatch) {
-                try { analytics = JSON.parse(jsonMatch[1]); } catch (e) { console.warn('Analytics JSON parse failed', e); }
+            if (dashboardMatch) {
+                analytics = {
+                    burnout: parseInt(dashboardMatch[1], 10),
+                    socialAnxiety: parseInt(dashboardMatch[2], 10),
+                    academicPressure: parseInt(dashboardMatch[1], 10) // map to burnout
+                };
+            } else {
+                // Fallback for older JSON logic if needed
+                const jsonMatch = rawText.match(/```json\s*([\s\S]*?)```/);
+                if (jsonMatch) {
+                    try { analytics = JSON.parse(jsonMatch[1]); } catch (e) {}
+                    replyText = rawText.replace(/```json[\s\S]*?```/, '').trim();
+                }
             }
 
             // Add Gemini's response to conversation history
@@ -727,7 +866,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
         let reply = '';
         let companionExpression = 'friendly';
 
-        if (GEMINI_API_KEY) {
+        if (getApiKey()) {
             const geminiResult = await analyzeWithGemini(text);
             if (geminiResult) {
                 reply = geminiResult.reply;
@@ -854,29 +993,35 @@ Keep your conversational reply warm, human and concise. The student should feel 
 
     function updateHeaderStatusBars() {
         // Sentiment Badge
-        const sentVal = DOM.statusSentiment.querySelector('.metric-value');
-        sentVal.className = `metric-value ${state.diagnostics.sentiment.toLowerCase()}`;
-        
-        let icon = 'smile';
-        if (state.diagnostics.sentiment === 'Negative') icon = 'frown';
-        if (state.diagnostics.sentiment === 'Neutral') icon = 'meh';
-
-        sentVal.innerHTML = `<i data-lucide="${icon}"></i> ${state.diagnostics.sentiment}`;
-
-        // Stress Level Badge
-        const stressVal = DOM.statusStress.querySelector('.metric-value');
-        stressVal.className = `metric-value ${state.diagnostics.stressLevel.toLowerCase()}`;
-        stressVal.innerText = state.diagnostics.stressLevel;
-
-        // Mini trends
-        DOM.miniMoodTrend.innerText = state.diagnostics.stressLevel === 'High' ? 'Elevated' : 'Stable';
-        if (state.diagnostics.stressLevel === 'High') {
-            DOM.miniMoodTrend.className = 'mini-val text-rose';
-        } else {
-            DOM.miniMoodTrend.className = 'mini-val text-mint';
+        const sentVal = DOM.statusSentiment ? DOM.statusSentiment.querySelector('.metric-value') : null;
+        if (sentVal) {
+            sentVal.className = `metric-value ${state.diagnostics.sentiment.toLowerCase()}`;
+            let icon = 'smile';
+            if (state.diagnostics.sentiment === 'Negative') icon = 'frown';
+            if (state.diagnostics.sentiment === 'Neutral') icon = 'meh';
+            sentVal.innerHTML = `<i data-lucide="${icon}"></i> ${state.diagnostics.sentiment}`;
         }
 
-        lucide.createIcons();
+        // Stress Level Badge
+        const stressVal = DOM.statusStress ? DOM.statusStress.querySelector('.metric-value') : null;
+        if (stressVal) {
+            stressVal.className = `metric-value ${state.diagnostics.stressLevel.toLowerCase()}`;
+            stressVal.innerText = state.diagnostics.stressLevel;
+        }
+
+        // Mini trends
+        if (DOM.miniMoodTrend) {
+            DOM.miniMoodTrend.innerText = state.diagnostics.stressLevel === 'High' ? 'Elevated' : 'Stable';
+            if (state.diagnostics.stressLevel === 'High') {
+                DOM.miniMoodTrend.className = 'mini-val text-rose';
+            } else {
+                DOM.miniMoodTrend.className = 'mini-val text-mint';
+            }
+        }
+
+        if (typeof lucide !== 'undefined' && lucide.createIcons) {
+            try { lucide.createIcons(); } catch(e) {}
+        }
     }
 
     function appendChatMessage(sender, text) {
@@ -1436,7 +1581,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
         const offset = Math.floor(Math.random() * 5) - 2;
         let activeHR = Math.max(50, Math.min(150, pulseTarget + offset));
 
-        DOM.bioLiveHR.innerText = `${activeHR} bpm`;
+        if (DOM.bioLiveHR) DOM.bioLiveHR.innerText = `${activeHR} bpm`;
 
         // Shift ring buffer
         state.biometrics.chartData.shift();
@@ -1458,7 +1603,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
             }
         });
 
-        DOM.hrChartPath.setAttribute('d', pathD);
+        if (DOM.hrChartPath) DOM.hrChartPath.setAttribute('d', pathD);
 
         // Perform diagnostics update if IoT values flag high stress
         evaluateIoTBiometricState();
@@ -1476,9 +1621,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
             hasAnomaly = true;
             warningTitle = "High Stress Alert: Insomnia & Autonomic Panic";
             warningDesc = "Combined metrics of acute sleep deprivation (under 5 hrs) and tachycardia (resting heart rate above 100 BPM) reflect extreme autonomic flight activation.";
-            DOM.iotSyncStatus.innerText = "Panic Linked";
-            DOM.iotSyncStatus.className = "sync-badge status-anomalous";
-            
+            if (DOM.iotSyncStatus) { DOM.iotSyncStatus.innerText = "Panic Linked"; DOM.iotSyncStatus.className = "sync-badge status-anomalous"; }
             // Adjust stress levels behind the scenes
             state.diagnostics.burnout = Math.max(75, state.diagnostics.burnout);
             state.diagnostics.stressLevel = "High";
@@ -1486,42 +1629,39 @@ Keep your conversational reply warm, human and concise. The student should feel 
             hasAnomaly = true;
             warningTitle = "Autonomic Tension: Elevated Pulse";
             warningDesc = "A resting pulse rate above 100 BPM indicates sudden panic, physiological flight response, or cognitive anxiety spikes.";
-            DOM.iotSyncStatus.innerText = "Tension Linked";
-            DOM.iotSyncStatus.className = "sync-badge status-anomalous";
-            
+            if (DOM.iotSyncStatus) { DOM.iotSyncStatus.innerText = "Tension Linked"; DOM.iotSyncStatus.className = "sync-badge status-anomalous"; }
             state.diagnostics.socialAnxiety = Math.max(65, state.diagnostics.socialAnxiety);
         } else if (sleep < 5.5) {
             hasAnomaly = true;
             warningTitle = "Cognitive Deficit: Sleep Deprivation";
             warningDesc = "Fewer than 5.5 hours of rest drastically reduces resilience to emotional triggers, triggering immediate fatigue warnings.";
-            DOM.iotSyncStatus.innerText = "Fatigue Linked";
-            DOM.iotSyncStatus.className = "sync-badge status-anomalous";
-            
+            if (DOM.iotSyncStatus) { DOM.iotSyncStatus.innerText = "Fatigue Linked"; DOM.iotSyncStatus.className = "sync-badge status-anomalous"; }
             state.diagnostics.burnout = Math.max(70, state.diagnostics.burnout);
         } else {
-            DOM.iotSyncStatus.innerHTML = '<i data-lucide="check-circle"></i> Linked';
-            DOM.iotSyncStatus.className = "sync-badge status-connected";
-            lucide.createIcons();
+            if (DOM.iotSyncStatus) {
+                DOM.iotSyncStatus.innerHTML = '<i data-lucide="check-circle"></i> Linked';
+                DOM.iotSyncStatus.className = "sync-badge status-connected";
+            }
+            if (typeof lucide !== 'undefined' && lucide.createIcons) { try { lucide.createIcons(); } catch(e) {} }
         }
 
         // Apply visual classes to alert banner
         if (hasAnomaly) {
-            DOM.anomalyBanner.className = "biometric-alert-banner alert-warning";
-            DOM.anomalyIcon.setAttribute('data-lucide', 'alert-triangle');
-            
+            if (DOM.anomalyBanner) DOM.anomalyBanner.className = "biometric-alert-banner alert-warning";
+            if (DOM.anomalyIcon) DOM.anomalyIcon.setAttribute('data-lucide', 'alert-triangle');
             // Proactively prompt conversation change if high stress
             if (state.diagnostics.stressLevel === 'High') {
                 state.avatar.expression = 'attentive';
                 renderAvatarVisuals();
             }
         } else {
-            DOM.anomalyBanner.className = "biometric-alert-banner alert-normal";
-            DOM.anomalyIcon.setAttribute('data-lucide', 'info');
+            if (DOM.anomalyBanner) DOM.anomalyBanner.className = "biometric-alert-banner alert-normal";
+            if (DOM.anomalyIcon) DOM.anomalyIcon.setAttribute('data-lucide', 'info');
         }
 
-        DOM.anomalyTitle.innerText = warningTitle;
-        DOM.anomalyDesc.innerText = warningDesc;
-        lucide.createIcons();
+        if (DOM.anomalyTitle) DOM.anomalyTitle.innerText = warningTitle;
+        if (DOM.anomalyDesc) DOM.anomalyDesc.innerText = warningDesc;
+        if (typeof lucide !== 'undefined' && lucide.createIcons) { try { lucide.createIcons(); } catch(e) {} }
         
         // Sync stats to header
         updateHeaderStatusBars();
@@ -1832,21 +1972,25 @@ Keep your conversational reply warm, human and concise. The student should feel 
         }
 
         const data = QUIZ_LIBRARY[selectedCategory];
+        if (!data) return;
         state.quiz.activeCategory = selectedCategory;
         state.quiz.questions = data.questions;
 
-        DOM.quizRecBadge.innerText = data.badge;
-        DOM.quizRecTitle.innerText = data.title;
-        DOM.quizIntroState.querySelector('p').innerText = data.desc;
+        if (DOM.quizRecBadge) DOM.quizRecBadge.innerText = data.badge;
+        if (DOM.quizRecTitle) DOM.quizRecTitle.innerText = data.title;
+        if (DOM.quizIntroState) {
+            const p = DOM.quizIntroState.querySelector('p');
+            if (p) p.innerText = data.desc;
+        }
     }
 
     function startQuizSession() {
         state.quiz.currentQuestionIdx = 0;
         state.quiz.answers = [];
 
-        DOM.quizIntroState.classList.add('hidden');
-        DOM.quizResultsState.classList.add('hidden');
-        DOM.quizActiveState.classList.remove('hidden');
+        if (DOM.quizIntroState) DOM.quizIntroState.classList.add('hidden');
+        if (DOM.quizResultsState) DOM.quizResultsState.classList.add('hidden');
+        if (DOM.quizActiveState) DOM.quizActiveState.classList.remove('hidden');
 
         renderQuizQuestion();
     }
@@ -1854,27 +1998,30 @@ Keep your conversational reply warm, human and concise. The student should feel 
     function renderQuizQuestion() {
         const idx = state.quiz.currentQuestionIdx;
         const qList = state.quiz.questions;
+        if (!qList || !qList[idx]) return;
         const qData = qList[idx];
 
-        DOM.quizQCounter.innerText = `Question ${idx + 1} of ${qList.length}`;
-        DOM.quizProgressFill.style.width = `${((idx + 1) / qList.length) * 100}%`;
-        DOM.quizQuestionTitle.innerText = qData.q;
+        if (DOM.quizQCounter) DOM.quizQCounter.innerText = `Question ${idx + 1} of ${qList.length}`;
+        if (DOM.quizProgressFill) DOM.quizProgressFill.style.width = `${((idx + 1) / qList.length) * 100}%`;
+        if (DOM.quizQuestionTitle) DOM.quizQuestionTitle.innerText = qData.q;
 
-        DOM.quizOptionsContainer.innerHTML = '';
-        qData.options.forEach((opt, oIdx) => {
-            const btn = document.createElement('button');
-            btn.className = 'quiz-opt-btn';
-            btn.innerText = opt.text;
-            btn.addEventListener('click', () => handleQuizAnswer(opt.score));
-            DOM.quizOptionsContainer.appendChild(btn);
-        });
+        if (DOM.quizOptionsContainer) {
+            DOM.quizOptionsContainer.innerHTML = '';
+            qData.options.forEach((opt, oIdx) => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-opt-btn';
+                btn.innerText = opt.text;
+                btn.addEventListener('click', () => handleQuizAnswer(opt.score));
+                DOM.quizOptionsContainer.appendChild(btn);
+            });
+        }
     }
 
     function handleQuizAnswer(score) {
         state.quiz.answers.push(score);
         state.quiz.currentQuestionIdx++;
 
-        if (state.quiz.currentQuestionIdx < state.quiz.questions.length) {
+        if (state.quiz.currentQuestionIdx < (state.quiz.questions || []).length) {
             renderQuizQuestion();
         } else {
             showQuizResults();
@@ -1882,8 +2029,8 @@ Keep your conversational reply warm, human and concise. The student should feel 
     }
 
     function showQuizResults() {
-        DOM.quizActiveState.classList.add('hidden');
-        DOM.quizResultsState.classList.remove('hidden');
+        if (DOM.quizActiveState) DOM.quizActiveState.classList.add('hidden');
+        if (DOM.quizResultsState) DOM.quizResultsState.classList.remove('hidden');
 
         // Tabulate results and choose avatar response modifier
         let counts = { Friendly: 0, Thoughtful: 0, Attentive: 0 };
@@ -1906,7 +2053,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
         state.avatar.expression = dominantExpression;
         renderAvatarVisuals();
         
-        DOM.quizResultFeedback.innerText = feedbackMessage;
+        if (DOM.quizResultFeedback) DOM.quizResultFeedback.innerText = feedbackMessage;
         showToast("Wellness Check-in Complete.", "success");
     }
 
@@ -1915,27 +2062,31 @@ Keep your conversational reply warm, human and concise. The student should feel 
     // ----------------------------------------------------------------------
     function bindUIEvents() {
         // Chat Actions
-        DOM.chatSendBtn.addEventListener('click', handleChatTextSubmit);
-        DOM.chatTextInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleChatTextSubmit();
-            }
-        });
+        if (DOM.chatSendBtn) DOM.chatSendBtn.addEventListener('click', handleChatTextSubmit);
+        if (DOM.chatTextInput) {
+            DOM.chatTextInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleChatTextSubmit();
+                }
+            });
+        }
 
         // Rant microphone button toggles
-        DOM.rantStartBtn.addEventListener('click', startRantSession);
-        DOM.rantStopBtn.addEventListener('click', stopRantSession);
+        if (DOM.rantStartBtn) DOM.rantStartBtn.addEventListener('click', startRantSession);
+        if (DOM.rantStopBtn) DOM.rantStopBtn.addEventListener('click', stopRantSession);
 
         // Webcam toggles
-        DOM.camToggleBtn.addEventListener('click', () => {
-            if (state.webcam.isActive) {
-                stopWebcamAnalyzer();
-            } else {
-                startWebcamAnalyzer();
-            }
-        });
-        DOM.closeCamBtn.addEventListener('click', stopWebcamAnalyzer);
+        if (DOM.camToggleBtn) {
+            DOM.camToggleBtn.addEventListener('click', () => {
+                if (state.webcam.isActive) {
+                    stopWebcamAnalyzer();
+                } else {
+                    startWebcamAnalyzer();
+                }
+            });
+        }
+        if (DOM.closeCamBtn) DOM.closeCamBtn.addEventListener('click', stopWebcamAnalyzer);
 
         // Studio Customizer Category Switcher
         if (DOM.customizerSubnav) {
@@ -1955,89 +2106,112 @@ Keep your conversational reply warm, human and concise. The student should feel 
         renderCustomizerUI();
 
         // Avatar Randomizer Dice
-        DOM.avatarRandomizeBtn.addEventListener('click', randomizeAvatarConfig);
+        if (DOM.avatarRandomizeBtn) DOM.avatarRandomizeBtn.addEventListener('click', randomizeAvatarConfig);
 
         // IoT Biometrics controls
-        DOM.sliderHR.addEventListener('input', (e) => {
-            const hr = parseInt(e.target.value);
-            state.biometrics.heartRate = hr;
-            DOM.bubbleHR.innerText = `${hr} BPM`;
-            evaluateIoTBiometricState();
-        });
+        if (DOM.sliderHR) {
+            DOM.sliderHR.addEventListener('input', (e) => {
+                const hr = parseInt(e.target.value);
+                state.biometrics.heartRate = hr;
+                if (DOM.bubbleHR) DOM.bubbleHR.innerText = `${hr} BPM`;
+                evaluateIoTBiometricState();
+            });
+        }
 
-        DOM.sliderSleep.addEventListener('input', (e) => {
-            const hrs = parseFloat(e.target.value);
-            state.biometrics.sleepDuration = hrs;
-            DOM.bubbleSleep.innerText = `${hrs} Hrs`;
-            
-            // Recompute values
-            DOM.bioSleepDuration.innerText = `${hrs} hrs`;
-            // estimate Deep sleep as 25% of total
-            const deep = (hrs * 0.26).toFixed(1);
-            DOM.bioSleepDeep.innerText = `${deep} hrs`;
-            
-            // Efficiency formula (lower sleep, lower efficiency)
-            const eff = Math.min(100, Math.round(75 + (hrs / 8) * 20));
-            DOM.bioSleepEfficiency.innerText = `${eff}%`;
+        if (DOM.sliderSleep) {
+            DOM.sliderSleep.addEventListener('input', (e) => {
+                const hrs = parseFloat(e.target.value);
+                state.biometrics.sleepDuration = hrs;
+                if (DOM.bubbleSleep) DOM.bubbleSleep.innerText = `${hrs} Hrs`;
+                
+                // Recompute values
+                if (DOM.bioSleepDuration) DOM.bioSleepDuration.innerText = `${hrs} hrs`;
+                // estimate Deep sleep as 25% of total
+                const deep = (hrs * 0.26).toFixed(1);
+                if (DOM.bioSleepDeep) DOM.bioSleepDeep.innerText = `${deep} hrs`;
+                
+                // Efficiency formula (lower sleep, lower efficiency)
+                const eff = Math.min(100, Math.round(75 + (hrs / 8) * 20));
+                if (DOM.bioSleepEfficiency) DOM.bioSleepEfficiency.innerText = `${eff}%`;
 
-            evaluateIoTBiometricState();
-        });
+                evaluateIoTBiometricState();
+            });
+        }
 
         // Calm Hub Mixer Synth controls
-        DOM.btnBinaural.addEventListener('click', () => {
-            toggleBinauralBeats(!state.synth.binaural.isPlaying);
-        });
-        DOM.btnRain.addEventListener('click', () => {
-            togglePinkRain(!state.synth.rain.isPlaying);
-        });
-        DOM.btnDrone.addEventListener('click', () => {
-            toggleZenDrone(!state.synth.drone.isPlaying);
-        });
+        if (DOM.btnBinaural) {
+            DOM.btnBinaural.addEventListener('click', () => {
+                toggleBinauralBeats(!state.synth.binaural.isPlaying);
+            });
+        }
+        if (DOM.btnRain) {
+            DOM.btnRain.addEventListener('click', () => {
+                togglePinkRain(!state.synth.rain.isPlaying);
+            });
+        }
+        if (DOM.btnDrone) {
+            DOM.btnDrone.addEventListener('click', () => {
+                toggleZenDrone(!state.synth.drone.isPlaying);
+            });
+        }
 
         // Synth Volume adjusters
-        DOM.volBinaural.addEventListener('input', (e) => {
-            const vol = parseFloat(e.target.value);
-            if (state.synth.binaural.gain) {
-                state.synth.binaural.gain.gain.setValueAtTime(vol * 0.4, state.synth.audioCtx.currentTime);
-            }
-        });
-        DOM.volRain.addEventListener('input', (e) => {
-            const vol = parseFloat(e.target.value);
-            if (state.synth.rain.gain) {
-                state.synth.rain.gain.gain.setValueAtTime(vol * 0.6, state.synth.audioCtx.currentTime);
-            }
-        });
-        DOM.volDrone.addEventListener('input', (e) => {
-            const vol = parseFloat(e.target.value);
-            if (state.synth.drone.gain) {
-                state.synth.drone.gain.gain.setValueAtTime(vol * 0.35, state.synth.audioCtx.currentTime);
-            }
-        });
+        if (DOM.volBinaural) {
+            DOM.volBinaural.addEventListener('input', (e) => {
+                const vol = parseFloat(e.target.value);
+                if (state.synth.binaural.gain) {
+                    state.synth.binaural.gain.gain.setValueAtTime(vol * 0.4, state.synth.audioCtx.currentTime);
+                }
+            });
+        }
+        if (DOM.volRain) {
+            DOM.volRain.addEventListener('input', (e) => {
+                const vol = parseFloat(e.target.value);
+                if (state.synth.rain.gain) {
+                    state.synth.rain.gain.gain.setValueAtTime(vol * 0.6, state.synth.audioCtx.currentTime);
+                }
+            });
+        }
+        if (DOM.volDrone) {
+            DOM.volDrone.addEventListener('input', (e) => {
+                const vol = parseFloat(e.target.value);
+                if (state.synth.drone.gain) {
+                    state.synth.drone.gain.gain.setValueAtTime(vol * 0.35, state.synth.audioCtx.currentTime);
+                }
+            });
+        }
 
         // Calm Hub Quiz buttons
-        DOM.quizStartBtn.addEventListener('click', startQuizSession);
-        DOM.quizRestartBtn.addEventListener('click', () => {
-            updateQuizRecommendation();
-            DOM.quizResultsState.classList.add('hidden');
-            DOM.quizIntroState.classList.remove('hidden');
-        });
+        if (DOM.quizStartBtn) DOM.quizStartBtn.addEventListener('click', startQuizSession);
+        if (DOM.quizRestartBtn) {
+            DOM.quizRestartBtn.addEventListener('click', () => {
+                updateQuizRecommendation();
+                if (DOM.quizResultsState) DOM.quizResultsState.classList.add('hidden');
+                if (DOM.quizIntroState) DOM.quizIntroState.classList.remove('hidden');
+            });
+        }
 
         // SOS modal triggers
-        DOM.sosOpenBtn.addEventListener('click', () => {
-            syncSOSReportPreview();
-            DOM.sosModal.classList.remove('hidden');
-        });
-        DOM.sosCloseBtn.addEventListener('click', () => DOM.sosModal.classList.add('hidden'));
-        DOM.sosCancelBtn.addEventListener('click', () => DOM.sosModal.classList.add('hidden'));
+        if (DOM.sosOpenBtn) {
+            DOM.sosOpenBtn.addEventListener('click', () => {
+                syncSOSReportPreview();
+                if (DOM.sosModal) DOM.sosModal.classList.remove('hidden');
+            });
+        }
+        if (DOM.sosCloseBtn) DOM.sosCloseBtn.addEventListener('click', () => { if (DOM.sosModal) DOM.sosModal.classList.add('hidden'); });
+        if (DOM.sosCancelBtn) DOM.sosCancelBtn.addEventListener('click', () => { if (DOM.sosModal) DOM.sosModal.classList.add('hidden'); });
         
-        DOM.sosConfirmBtn.addEventListener('click', () => {
-            DOM.sosModal.classList.add('hidden');
-            showToast("Anonymized diagnostics successfully dispatched to counselor.", "success");
-            appendChatMessage('Buddy', "📬 **Notification:** I've packaged and forwarded your current physiological indicators and stress indices to the counselor department. A school advisor will receive it shortly. Hang in there!");
-        });
+        if (DOM.sosConfirmBtn) {
+            DOM.sosConfirmBtn.addEventListener('click', () => {
+                if (DOM.sosModal) DOM.sosModal.classList.add('hidden');
+                showToast("Anonymized diagnostics successfully dispatched to counselor.", "success");
+                appendChatMessage('Buddy', "📬 **Notification:** I've packaged and forwarded your current physiological indicators and stress indices to the counselor department. A school advisor will receive it shortly. Hang in there!");
+            });
+        }
     }
 
     function handleChatTextSubmit() {
+        if (!DOM.chatTextInput) return;
         const text = DOM.chatTextInput.value.trim();
         if (!text) return;
 
@@ -2050,6 +2224,25 @@ Keep your conversational reply warm, human and concise. The student should feel 
     // ----------------------------------------------------------------------
     let activeCategory = 'Fashion';
     let activeSubcategory = 'Tops';
+
+    function unlockPremiumItem(prop, val) {
+        let unlocked = [];
+        try {
+            unlocked = JSON.parse(localStorage.getItem('kawanku_unlocked_items')) || [];
+        } catch(e) {}
+        if (!unlocked.includes(prop + ':' + val)) {
+            unlocked.push(prop + ':' + val);
+            localStorage.setItem('kawanku_unlocked_items', JSON.stringify(unlocked));
+        }
+    }
+    function isItemUnlocked(item) {
+        if (!item.locked) return true;
+        let unlocked = [];
+        try {
+            unlocked = JSON.parse(localStorage.getItem('kawanku_unlocked_items')) || [];
+        } catch(e) {}
+        return unlocked.includes(item.prop + ':' + item.id);
+    }
 
     const AVATAR_CATALOG = {
         Fashion: {
@@ -2107,7 +2300,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
             }
         },
         Avatar: {
-            subcategories: ['Hairstyles', 'Skin Tones', 'Hair Color', 'Shirt Color'],
+            subcategories: ['Hairstyles', 'Skin Tones', 'Glasses', 'Hair Color', 'Shirt Color'],
             items: {
                 Hairstyles: [
                     { id: 'crop', label: 'Sleek Crop', prop: 'hairStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M25,60 C25,20 75,20 75,60 C65,40 55,30 50,30 C45,30 35,40 25,60 Z" fill="#1e293b"/></svg>' },
@@ -2121,7 +2314,16 @@ Keep your conversational reply warm, human and concise. The student should feel 
                     { id: '#f1c27d', label: 'Peach', prop: 'skinTone', color: '#f1c27d' },
                     { id: '#e0ac69', label: 'Honey', prop: 'skinTone', color: '#e0ac69' },
                     { id: '#c68642', label: 'Bronze', prop: 'skinTone', color: '#c68642' },
-                    { id: '#8d5524', label: 'Deep', prop: 'skinTone', color: '#8d5524' }
+                    { id: '#8d5524', label: 'Deep', prop: 'skinTone', color: '#8d5524' },
+                    { id: '#FFD1A4', label: '深夜食堂', prop: 'skinTone', color: '#FFD1A4', locked: true },
+                    { id: '#C8A2C8', label: '赛博朋克', prop: 'skinTone', color: '#C8A2C8', locked: true },
+                    { id: '#87CEEB', label: '深空流浪', prop: 'skinTone', color: '#87CEEB', locked: true },
+                    { id: '#98FB98', label: '荒野求生', prop: 'skinTone', color: '#98FB98', locked: true }
+                ],
+                Glasses: [
+                    { id: 'none', label: 'No Glasses', prop: 'glasses', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="#64748b" stroke-width="4" stroke-dasharray="4,4"/><line x1="35" y1="35" x2="65" y2="65" stroke="#64748b" stroke-width="4"/></svg>' },
+                    { id: 'gold', label: '智者金丝', prop: 'glasses', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="26" y="45" width="20" height="12" rx="4" fill="none" stroke="#f59e0b" stroke-width="4"/><rect x="54" y="45" width="20" height="12" rx="4" fill="none" stroke="#f59e0b" stroke-width="4"/><line x1="46" y1="51" x2="54" y2="51" stroke="#f59e0b" stroke-width="4"/></svg>', locked: true },
+                    { id: 'green', label: '复古黑框', prop: 'glasses', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="26" y="45" width="20" height="12" rx="4" fill="none" stroke="#10b981" stroke-width="4"/><rect x="54" y="45" width="20" height="12" rx="4" fill="none" stroke="#10b981" stroke-width="4"/><line x1="46" y1="51" x2="54" y2="51" stroke="#10b981" stroke-width="4"/></svg>', locked: true }
                 ],
                 'Hair Color': [
                     { id: '#1e293b', label: 'Dark Slate', prop: 'hairColor', color: '#1e293b' },
@@ -2156,6 +2358,9 @@ Keep your conversational reply warm, human and concise. The student should feel 
             if (prop === 'expression') state.avatar.expression = val;
 
             renderAvatarVisuals();
+            try {
+                localStorage.setItem('kawanku_avatar_state', JSON.stringify(state.avatar));
+            } catch(e) {}
             this.listeners.forEach(callback => callback(state.avatar));
         },
         get(prop) {
@@ -2197,6 +2402,11 @@ Keep your conversational reply warm, human and concise. The student should feel 
             const card = document.createElement('div');
             card.className = 'catalog-card';
 
+            const unlocked = isItemUnlocked(item);
+            if (!unlocked) {
+                card.classList.add('locked-item');
+            }
+
             const currentVal = state.avatar[item.prop];
             if (currentVal === item.id) {
                 card.classList.add('active');
@@ -2218,10 +2428,14 @@ Keep your conversational reply warm, human and concise. The student should feel 
 
             const label = document.createElement('div');
             label.className = 'catalog-card-label';
-            label.innerText = item.label;
+            label.innerText = item.label + (unlocked ? '' : ' 🔒');
             card.appendChild(label);
 
             card.addEventListener('click', () => {
+                if (!unlocked) {
+                    showToast('这是火花商店限定单品，请先兑换解锁！', 'warning');
+                    return;
+                }
                 avatarState.set(item.prop, item.id);
                 renderCustomizerUI();
             });
@@ -2550,12 +2764,12 @@ For the Report (after monster defeat), respond with:
 }`;
 
         async function callGemini(userMsg) {
-            const apiKey = window.GEMINI_API_KEY || '';
+            const apiKey = getApiKey();
             if (!apiKey) {
                 // Return a fallback if no API key
                 return null;
             }
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
             const body = {
                 system_instruction: { parts: [{ text: MENTAL_STREAK_SYSTEM }] },
                 contents: [{ role: 'user', parts: [{ text: userMsg }] }],
@@ -3052,6 +3266,587 @@ For the Report (after monster defeat), respond with:
         }
 
     })(); // END MentalStreakEngine
+
+    // =========================================================================
+    // EMOTION QUIZ — Gemini-powered conversational blind-box quiz
+    // =========================================================================
+    (function EmotionQuizEngine() {
+        const SPARK_KEY = 'kawanku_spark';
+        function loadSpark() {
+            try { const d = JSON.parse(localStorage.getItem(SPARK_KEY)); if (d) return d; } catch(e) {}
+            return { days: 1, boxesOpened: 0, lastDiagnosis: '', personalityTag: '' };
+        }
+        function saveSpark(s) { localStorage.setItem(SPARK_KEY, JSON.stringify(s)); }
+        let spark = loadSpark();
+
+        const qSparkCount = document.getElementById('quiz-spark-count');
+        const qBoxesOpened = document.getElementById('quiz-boxes-opened');
+        const qLastDiag = document.getElementById('quiz-last-diagnosis');
+        const qPersonality = document.getElementById('quiz-personality-tag');
+        const qStartBtn = document.getElementById('quiz-ai-start-btn');
+        const qRestartBtn = document.getElementById('quiz-ai-restart-btn');
+        const qMessages = document.getElementById('quiz-chat-messages');
+        const qInput = document.getElementById('quiz-chat-input');
+        const qSendBtn = document.getElementById('quiz-chat-send-btn');
+        const qBadge = document.getElementById('quiz-universe-badge');
+        const qOptions = document.getElementById('quiz-chat-options');
+
+        function syncQuizUI() {
+            if (qSparkCount) qSparkCount.innerText = spark.days;
+            if (qBoxesOpened) qBoxesOpened.innerText = spark.boxesOpened;
+            if (qLastDiag) qLastDiag.innerText = spark.lastDiagnosis || '—';
+            if (qPersonality) qPersonality.innerText = spark.personalityTag || '—';
+            const shopBal = document.getElementById('shop-spark-balance');
+            if (shopBal) shopBal.innerText = spark.days;
+        }
+        syncQuizUI();
+
+        const EVALUATION_SYSTEM_PROMPT = `你现在是 Kawanku AI 心理健康平台的极简主义全能系统架构师。用户刚刚完成了情绪盲盒测试。
+请根据他们选择的答案，严格按照以下结算报告规范输出像电子书签一样的心理结算报告。
+
+# 📐 UI/UX 极简视觉规范 (最高优先级)
+1. 【绝对留白】：字数极度精简，每段话绝不超过 2 行，多用换行，拒绝大段文字墙。
+2. 【极简氛围灯】：文首固定只允许使用 1-2 个与主题相关的质感符号作为顶部视觉锚点。
+
+# 📊 心理状态与人格报告规范
+请直接输出以下结算报告（严格保持留白排版，将用户的学业压力、社交疲劳真实状态翻译为该宇宙主题的隐喻语言）：
+
+-----
+### 🏷️ 专属人格标签
+*[ 根据表现生成一个高分享欲的当代大学生人格头衔 ]*
+
+### 🧠 心理状态诊断
+- *学业/精力状态：* [基于Q1选项评估，将真实的压力状态翻译为该宇宙主题隐喻语言]
+- *社交/人际状态：* [基于Q2选项评估，将真实的社交疲劳翻译为该宇宙主题隐喻语言]
+
+### ⚡ 精神残余电量
+[■■■□□□□□□□] 30%  (根据用户的答案评估电量百分比，用■和□展示)
+
+### 🔥 Kawanku 火花连击
+- *当前连击：* 🔥 火花已连续点亮 [天数] 天
+
+-----
+#### 📊 [CAMPUS_DASHBOARD_ANONYMOUS_DATA]
+主题: [主题名字] | 精力耗竭: [百分比]% | 社交疲劳: [百分比]% | 火花天数: [天数]
+-----`;
+
+        const QUIZ_UNIVERSES = [
+            {
+                id: 1,
+                title: "赛博朋克：系统重装",
+                icon: "● SYSTEM ONLINE",
+                questions: [
+                    {
+                        q: "🏮 [● SYSTEM ONLINE]\n\n最近你的 CPU 占用率达到 99%（学业过载），系统发出高温警报。你的第一反应是？",
+                        options: [
+                            { key: "A", text: "强行超频，继续运转（硬撑到底）" },
+                            { key: "B", text: "进入安全模式，挂机低功耗运行（选择躺平）" },
+                            { key: "C", text: "寻找散热模组，给主板降降温（寻找外界支持）" }
+                        ]
+                    },
+                    {
+                        q: "社交防火墙拦截到多条未读数据。面对这些密集的社交信号，你选择？",
+                        options: [
+                            { key: "A", text: "一键清理，开启防骚扰模式（完全自我隔离）" },
+                            { key: "B", text: "筛选核心白名单，仅接收重要数据（精准社交）" },
+                            { key: "C", text: "彻底开放端口，迎接所有外接设备（来者不拒）" }
+                        ]
+                    },
+                    {
+                        q: "主控系统检测到核心代码即将崩溃（情绪临界点）。你打算怎么修复？",
+                        options: [
+                            { key: "A", text: "格式化所有情感分区，重新装机（压抑屏蔽情感）" },
+                            { key: "B", text: "运行安全诊断，找出冲突的底层代码（积极面对剖析）" },
+                            { key: "C", text: "呼叫外部技术支持，寻求系统重装帮助（寻找专业倾诉）" }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "魔法分校：药剂课",
+                icon: "✦ 🔮 ✦",
+                questions: [
+                    {
+                        q: "✦ 🔮 ✦\n\n你的灵魂药水即将沸腾溢出（学业压力过大），药剂师警告你。你会？",
+                        options: [
+                            { key: "A", text: "加入冰霜粉末，强行压制沸腾（硬撑）" },
+                            { key: "B", text: "熄灭炉火，让药水慢慢冷却（休息放空）" },
+                            { key: "C", text: "向身边的同学借用坩埚分流药水（寻求合作与帮助）" }
+                        ]
+                    },
+                    {
+                        q: "你穿上隐形斗篷隔离了周围的声音。面对热闹的魔法集市，你倾向于？",
+                        options: [
+                            { key: "A", text: "享受绝对的安静，独自在角落待着（独处充电）" },
+                            { key: "B", text: "只脱下兜帽，和熟悉的老友打个招呼（选择性社交）" },
+                            { key: "C", text: "掀开斗篷，融入狂欢的人群中（渴望融入）" }
+                        ]
+                    },
+                    {
+                        q: "坩埚突然出现裂纹，黑色烟雾正在弥漫（情绪崩溃边缘）。你会？",
+                        options: [
+                            { key: "A", text: "用封印咒强行掩盖裂痕，假装没事（隐忍压抑）" },
+                            { key: "B", text: "使用修复咒仔细填补裂缝，寻找原因（自我疗愈）" },
+                            { key: "C", text: "大声呼唤教授，寻求魔法救援（寻求支持）" }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 3,
+                title: "深空流浪：宇航猫",
+                icon: "── 🪐 ──",
+                questions: [
+                    {
+                        q: "── 🪐 ──\n\n飞船重力系统突然失效，你和物品一起漂浮在空中（学业失控）。你会？",
+                        options: [
+                            { key: "A", text: "拼命抓住固定物，强行稳住身形（过度紧绷）" },
+                            { key: "B", text: "任由自己随波逐流，享受失重感（暂时放弃）" },
+                            { key: "C", text: "寻找喷气背包，主动控制移动方向（积极调整）" }
+                        ]
+                    },
+                    {
+                        q: "星际信号断联，你与母星失去联系。在这段孤独的漂流中，你的状态是？",
+                        options: [
+                            { key: "A", text: "享受无信号的绝对宁静（自我封闭）" },
+                            { key: "B", text: "定期发送求救电波，等待特定回应（被动等待）" },
+                            { key: "C", text: "调整天线方向，积极寻找附近的飞船（主动联系）" }
+                        ]
+                    },
+                    {
+                        q: "飞船氧气储量降至警戒线，警报声大作。你选择如何应对？",
+                        options: [
+                            { key: "A", text: "关闭非必要系统，进入深度休眠以省氧（逃避压抑）" },
+                            { key: "B", text: "排查氧气泄露点，进行紧急修补（积极面对）" },
+                            { key: "C", text: "向附近的星系发送紧急 SOS 广播（呼寻救援）" }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 4,
+                title: "深夜食堂：疗愈店",
+                icon: "🏮",
+                questions: [
+                    {
+                        q: "🏮\n\n连续熬夜让你身心状态发生化学反应，食欲不振（精力耗竭）。此时走进食堂，你会点？",
+                        options: [
+                            { key: "A", text: "超浓缩黑咖啡，强行提神（硬撑）" },
+                            { key: "B", text: "一碗温热的清粥，慢慢恢复元气（自我疗愈）" },
+                            { key: "C", text: "点一份双人套餐，和老板聊聊天（寻求陪伴）" }
+                        ]
+                    },
+                    {
+                        q: "你发现今天食堂的菜品味道异常，似乎有人调换了配方（人际关系敏感）。你会？",
+                        options: [
+                            { key: "A", text: "默默吃完，以后再也不来这家店（回避冲突）" },
+                            { key: "B", text: "委婉地向老板提出建议（沟通解决）" },
+                            { key: "C", text: "大声抱怨，甚至和老板理论（激烈冲突）" }
+                        ]
+                    },
+                    {
+                        q: "食堂突然停电，四周陷入一片黑暗与寂静。此时的你？",
+                        options: [
+                            { key: "A", text: "紧闭双眼，缩在角落等灯亮起（恐惧无助）" },
+                            { key: "B", text: "拿出手机手电筒，照亮自己和周围（自我安抚）" },
+                            { key: "C", text: "询问周围的人是否还好，互相安慰（传递温暖）" }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 5,
+                title: "荒野求生：进化岛",
+                icon: "🌿",
+                questions: [
+                    {
+                        q: "🌿\n\n一只巨大的丛林怪兽在身后紧追不舍（deadline 步步逼近）。你的选择是？",
+                        options: [
+                            { key: "A", text: "咬紧牙关，疯狂向前奔跑（硬撑硬拼）" },
+                            { key: "B", text: "寻找安全树洞，躲进去喘口气（避开锋芒）" },
+                            { key: "C", text: "设下简易陷阱，试图减缓怪兽速度（讲究策略）" }
+                        ]
+                    },
+                    {
+                        q: "为了躲避潜在的危险，你选择将自己伪装成一颗石头。当有其他幸存者走过时，你会？",
+                        options: [
+                            { key: "A", text: "继续呼吸，绝不暴露位置（完全防备）" },
+                            { key: "B", text: "观察对方是否有敌意，再决定是否现身（试探交往）" },
+                            { key: "C", text: "主动解除伪装，请求组队前行（渴望合作）" }
+                        ]
+                    },
+                    {
+                        q: "岛上的火山即将喷发，岩浆开始漫延。面临最大的生存考验，你会？",
+                        options: [
+                            { key: "A", text: "闭上眼听天由命，等待奇迹发生（消极等待）" },
+                            { key: "B", text: "观察风向和地势，寻找求生通道（冷静自救）" },
+                            { key: "C", text: "发射唯一的信号弹，等待直升机救援（寻求救助）" }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        let activeUniverse = null;
+        let currentQuestionIdx = 0;
+        let selectedAnswers = [];
+
+        function addQuizBubble(text, type) {
+            if (!qMessages) return;
+            const div = document.createElement('div');
+            div.className = type === 'ai' ? 'quiz-ai-bubble' : 'quiz-user-bubble';
+            div.innerText = text;
+            qMessages.appendChild(div);
+            qMessages.scrollTop = qMessages.scrollHeight;
+        }
+
+        function addQuizTyping() {
+            if (!qMessages) return;
+            const div = document.createElement('div');
+            div.className = 'quiz-ai-bubble quiz-typing';
+            div.id = 'quiz-typing-indicator';
+            div.innerHTML = '<span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>';
+            qMessages.appendChild(div);
+            qMessages.scrollTop = qMessages.scrollHeight;
+        }
+
+        function removeQuizTyping() {
+            const el = document.getElementById('quiz-typing-indicator');
+            if (el) el.remove();
+        }
+
+        function renderOptions(qData) {
+            if (!qOptions) return;
+            qOptions.innerHTML = '';
+            qOptions.classList.remove('hidden');
+            qData.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-opt-btn';
+                btn.innerHTML = `<strong>${opt.key}.</strong> ${opt.text}`;
+                btn.addEventListener('click', () => handleOptionSelection(opt));
+                qOptions.appendChild(btn);
+            });
+        }
+
+        function handleOptionSelection(opt) {
+            selectedAnswers.push(opt.key + '. ' + opt.text);
+            addQuizBubble(opt.key + '. ' + opt.text, 'user');
+            
+            if (qOptions) qOptions.classList.add('hidden');
+            currentQuestionIdx++;
+            showNextQuestion();
+        }
+
+        function showNextQuestion() {
+            if (!activeUniverse) return;
+            if (currentQuestionIdx < activeUniverse.questions.length) {
+                const qData = activeUniverse.questions[currentQuestionIdx];
+                addQuizTyping();
+                setTimeout(() => {
+                    removeQuizTyping();
+                    addQuizBubble(qData.q, 'ai');
+                    renderOptions(qData);
+                }, 600);
+            } else {
+                generateFinalReport();
+            }
+        }
+
+        async function generateFinalReport() {
+            if (!getApiKey()) {
+                addQuizBubble('Error: No Gemini API key configured.', 'ai');
+                if (qRestartBtn) qRestartBtn.classList.remove('hidden');
+                return;
+            }
+            addQuizTyping();
+
+            const prompt = `你现在是 Kawanku AI 心理健康平台的极简主义全能系统架构师。用户刚刚完成了情绪盲盒测试。
+测试主题为：【${activeUniverse.title}】
+用户选择的答案为：
+1. 学业压力相关题：${selectedAnswers[0]}
+2. 社交人际相关题：${selectedAnswers[1]}
+3. 临界状态相关题：${selectedAnswers[2]}
+
+请根据这三个选项，严格按照以下“结算报告规范”输出像电子书签一样的结算报告。保持极简留白排版，每段话绝不超过2行，多用换行：
+
+-----
+### 🏷️ 专属人格标签
+*[ 根据表现生成一个高分享欲的当代大学生人格头衔 ]*
+
+### 🧠 心理状态诊断
+- 学业/精力状态：[将真实的压力状态翻译为该宇宙主题语言，例如CPU过载、药剂沸腾等]
+- 社交/人际状态：[将真实的社交疲劳翻译为该宇宙主题语言，例如防火墙隔离、隐形斗篷等]
+
+### ⚡ 精神残余电量
+[■■■□□□□□□□] 30% (根据用户的答案评估电量百分比，用■和□展示)
+
+### 🔥 Kawanku 火花连击
+- 当前连击：🔥 火花已连续点亮 ${spark.days} 天
+
+-----
+#### 📊 [CAMPUS_DASHBOARD_ANONYMOUS_DATA]
+主题: ${activeUniverse.title} | 精力耗竭: [评估的百分比]% | 社交疲劳: [评估的百分比]% | 火花天数: ${spark.days}
+-----`;
+
+            try {
+                const res = await fetchWithRetry(getGeminiEndpoint(), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        system_instruction: { parts: [{ text: EVALUATION_SYSTEM_PROMPT }] },
+                        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                        generationConfig: { temperature: 0.85, maxOutputTokens: 2048 }
+                    })
+                });
+                removeQuizTyping();
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error(formatGeminiError(res.status, errText));
+                }
+                const data = await res.json();
+                const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || '(No response)';
+                addQuizBubble(reply, 'ai');
+
+                // Parse metrics to save state
+                const dashMatch = reply.match(/精力耗竭[：:]\s*(\d+)%/);
+                const tagMatch = reply.match(/专属人格标签[\s\S]*?\*\[?\s*(.+?)\s*\]?\*/);
+                if (dashMatch) spark.lastDiagnosis = '精力耗竭 ' + dashMatch[1] + '%';
+                if (tagMatch) spark.personalityTag = tagMatch[1].substring(0, 30);
+
+                spark.boxesOpened++;
+                spark.days++;
+                saveSpark(spark);
+                syncQuizUI();
+
+                if (qRestartBtn) qRestartBtn.classList.remove('hidden');
+            } catch(e) {
+                removeQuizTyping();
+                addQuizBubble(e.message + '\n\n(Click "Start New Session" to retry.)', 'ai');
+                if (qRestartBtn) qRestartBtn.classList.remove('hidden');
+            }
+        }
+
+        function handleTypedInput(text) {
+            if (!activeUniverse) return;
+            if (currentQuestionIdx >= activeUniverse.questions.length) return;
+            const qData = activeUniverse.questions[currentQuestionIdx];
+            
+            const match = text.toUpperCase().trim().match(/^[A-C]/);
+            if (match) {
+                const key = match[0];
+                const opt = qData.options.find(o => o.key === key);
+                if (opt) {
+                    handleOptionSelection(opt);
+                    return;
+                }
+            }
+            handleOptionSelection({ key: "Typed", text: text });
+        }
+
+        async function startQuizSession() {
+            activeUniverse = QUIZ_UNIVERSES[Math.floor(Math.random() * QUIZ_UNIVERSES.length)];
+            currentQuestionIdx = 0;
+            selectedAnswers = [];
+            if (qMessages) qMessages.innerHTML = '';
+            if (qBadge) qBadge.innerText = '🎲 ' + activeUniverse.title;
+            if (qStartBtn) qStartBtn.classList.add('hidden');
+            if (qRestartBtn) qRestartBtn.classList.add('hidden');
+            showNextQuestion();
+        }
+
+        if (qStartBtn) qStartBtn.addEventListener('click', startQuizSession);
+        if (qRestartBtn) qRestartBtn.addEventListener('click', startQuizSession);
+        if (qSendBtn) qSendBtn.addEventListener('click', () => {
+            const text = qInput ? qInput.value.trim() : '';
+            if (text) {
+                if (qInput) qInput.value = '';
+                handleTypedInput(text);
+            }
+        });
+        if (qInput) qInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const text = qInput.value.trim();
+                if (text) {
+                    qInput.value = '';
+                    handleTypedInput(text);
+                }
+            }
+        });
+    })();
+
+    // =========================================================================
+    // SPARK SHOP — Gemini-powered conversational shop + visual catalog
+    // =========================================================================
+    (function SparkShopEngine() {
+        const SPARK_KEY = 'kawanku_spark';
+        function loadSpark() {
+            try { const d = JSON.parse(localStorage.getItem(SPARK_KEY)); if (d) return d; } catch(e) {}
+            return { days: 1, boxesOpened: 0, lastDiagnosis: '', personalityTag: '' };
+        }
+        function saveSpark(s) { localStorage.setItem(SPARK_KEY, JSON.stringify(s)); }
+
+        const SHOP_CATALOG = {
+            1: [
+                { icon: '👓', name: '智者金丝边框眼镜', cost: 3, prop: 'glasses', val: 'gold' },
+                { icon: '💇', name: '慵懒微卷空气感发型', cost: 5, prop: 'hairStyle', val: 'curly' },
+                { icon: '🎨', name: '限定皮肤：深夜食堂 · 温暖微光', cost: 15, prop: 'skinTone', val: '#FFD1A4' }
+            ],
+            2: [
+                { icon: '👓', name: '复古原色厚街黑框眼镜', cost: 3, prop: 'glasses', val: 'green' },
+                { icon: '💇', name: '少年感清爽利落碎发', cost: 5, prop: 'hairStyle', val: 'crop' },
+                { icon: '🎨', name: '限定皮肤：赛博朋克 · 暗夜霓虹', cost: 15, prop: 'skinTone', val: '#C8A2C8' }
+            ],
+            3: [
+                { icon: '👓', name: '蹦迪专用蹦碎极光墨镜', cost: 4, prop: 'glasses', val: 'gold' },
+                { icon: '💇', name: '触电般炸毛狂想发型', cost: 6, prop: 'hairStyle', val: 'bob' },
+                { icon: '🎨', name: '限定皮肤：深空流浪 · 孤独星云', cost: 18, prop: 'skinTone', val: '#87CEEB' }
+            ],
+            4: [
+                { icon: '👓', name: '智商爆表科学家圆框镜', cost: 4, prop: 'glasses', val: 'green' },
+                { icon: '💇', name: '高级感微翘狼尾发型', cost: 6, prop: 'hairStyle', val: 'long' },
+                { icon: '🎨', name: '限定皮肤：荒野求生 · 岛屿极光', cost: 18, prop: 'skinTone', val: '#98FB98' }
+            ]
+        };
+
+        const shopHistory = [];
+        let activeWeek = 1;
+
+        const sGrid = document.getElementById('shop-items-grid');
+        const sMessages = document.getElementById('shop-chat-messages');
+        const sInput = document.getElementById('shop-chat-input');
+        const sSendBtn = document.getElementById('shop-chat-send-btn');
+        const sBalance = document.getElementById('shop-spark-balance');
+
+        function renderShelf(week) {
+            if (!sGrid) return;
+            activeWeek = week;
+            sGrid.innerHTML = '';
+            const items = SHOP_CATALOG[week] || [];
+            items.forEach((item, idx) => {
+                const card = document.createElement('div');
+                card.className = 'shop-item-card';
+                card.innerHTML = '<span class="shop-item-icon">' + item.icon + '</span>' +
+                    '<div class="shop-item-info">' +
+                    '<span class="shop-item-name">' + item.name + '</span>' +
+                    '<span class="shop-item-cost">🔥 ' + item.cost + ' Day Sparks</span></div>' +
+                    '<button class="shop-item-buy-btn" data-week="' + week + '" data-idx="' + idx + '">Redeem</button>';
+                sGrid.appendChild(card);
+            });
+            sGrid.querySelectorAll('.shop-item-buy-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const w = parseInt(btn.getAttribute('data-week'));
+                    const i = parseInt(btn.getAttribute('data-idx'));
+                    handleBuy(SHOP_CATALOG[w][i]);
+                });
+            });
+            document.querySelectorAll('.shop-week-tab').forEach(t => {
+                t.classList.toggle('active', parseInt(t.getAttribute('data-week')) === week);
+            });
+        }
+
+        function handleBuy(item) {
+            let sp = loadSpark();
+            if (sp.days >= item.cost) {
+                sp.days -= item.cost;
+                saveSpark(sp);
+                syncShopBalance(sp);
+                unlockPremiumItem(item.prop, item.val);
+                if (typeof avatarState !== 'undefined' && avatarState.set) {
+                    avatarState.set(item.prop, item.val);
+                } else if (typeof state !== 'undefined') {
+                    state.avatar[item.prop] = item.val;
+                    renderAvatarVisuals();
+                }
+                showToast('兑换成功！' + item.name + ' 已装备到你的 Avatar！', 'success');
+                addShopBubble('🎉 兑换成功！「' + item.name + '」已放入你的主页衣柜。快去 Avatar Studio 看看吧！', 'ai');
+                if (typeof renderCustomizerUI === 'function') renderCustomizerUI();
+            } else {
+                const need = item.cost - sp.days;
+                showToast('火花不足，还需 ' + need + ' 天火花', 'warning');
+                addShopBubble('火花余额不足哟 🥲 再坚持自检 ' + need + ' 天就能带走「' + item.name + '」了！', 'ai');
+            }
+        }
+
+        function syncShopBalance(s) {
+            if (sBalance) sBalance.innerText = s.days;
+            const qCount = document.getElementById('quiz-spark-count');
+            if (qCount) qCount.innerText = s.days;
+        }
+
+        function addShopBubble(text, type) {
+            if (!sMessages) return;
+            const div = document.createElement('div');
+            div.className = type === 'ai' ? 'shop-ai-bubble' : 'shop-user-bubble';
+            div.innerText = text;
+            sMessages.appendChild(div);
+            sMessages.scrollTop = sMessages.scrollHeight;
+        }
+
+        async function sendShopMessage(userText) {
+            if (!getApiKey()) { addShopBubble('Error: No Gemini API key.', 'ai'); return; }
+            let sp = loadSpark();
+            shopHistory.push({ role: 'user', parts: [{ text: userText }] });
+            addShopBubble(userText, 'user');
+            if (sInput) sInput.value = '';
+            const shopPrompt = '你是 Kawanku AI 火花商店的潮流主理人。用户当前火花天数为 ' + sp.days + ' 天。当前显示第 ' + activeWeek + ' 周货架。请根据用户请求展示商品或处理兑换。保持极简留白风格。货架内容：' + JSON.stringify(SHOP_CATALOG[activeWeek]);
+            try {
+                const res = await fetchWithRetry(getGeminiEndpoint(), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        system_instruction: { parts: [{ text: shopPrompt }] },
+                        contents: shopHistory,
+                        generationConfig: { temperature: 0.8, maxOutputTokens: 1024 }
+                    })
+                });
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error(formatGeminiError(res.status, errText));
+                }
+                const data = await res.json();
+                const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || '(No response)';
+                shopHistory.push({ role: 'model', parts: [{ text: reply }] });
+                addShopBubble(reply, 'ai');
+            } catch(e) {
+                if (shopHistory.length > 0) shopHistory.pop();
+                addShopBubble('Error: ' + e.message, 'ai');
+            }
+        }
+
+        document.querySelectorAll('.shop-week-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                renderShelf(parseInt(tab.getAttribute('data-week')));
+            });
+        });
+
+        if (sSendBtn) sSendBtn.addEventListener('click', () => {
+            const text = sInput ? sInput.value.trim() : '';
+            if (text) sendShopMessage(text);
+        });
+        if (sInput) sInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const text = sInput.value.trim();
+                if (text) sendShopMessage(text);
+            }
+        });
+
+        // Initial render — auto-detect current week
+        const autoWeek = Math.min(4, Math.ceil(new Date().getDate() / 7));
+        renderShelf(autoWeek);
+        syncShopBalance(loadSpark());
+    })();
+
+    // Sync API Key input field in sidebar
+    const sidebarApiKeyInput = document.getElementById('sidebar-api-key');
+    if (sidebarApiKeyInput) {
+        sidebarApiKeyInput.value = localStorage.getItem('gemini_api_key') || '';
+        sidebarApiKeyInput.addEventListener('input', (e) => {
+            localStorage.setItem('gemini_api_key', e.target.value.trim());
+        });
+    }
 
     // Run launcher
     init();
