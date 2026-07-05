@@ -85,7 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
         webcam: {
             stream: null,
             isActive: false,
-            animationFrame: null
+            animationFrame: null,
+            lastScanTime: 0
         },
 
         // Quiz State
@@ -357,7 +358,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------------------------------------------------
     // TOAST NOTIFICATIONS
     // ----------------------------------------------------------------------
+    const USER_TOASTS_ENABLED = false;
+
     function showToast(message, type = 'info') {
+        if (!USER_TOASTS_ENABLED) {
+            console.info(`[toast:${type}] ${message}`);
+            return;
+        }
+
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
         
@@ -653,45 +661,129 @@ document.addEventListener('DOMContentLoaded', () => {
     // -----------------------------------------------------------------------
     // GEMINI AI ANALYSIS ENGINE
     // -----------------------------------------------------------------------
-    function getApiKey() {
-        return localStorage.getItem('gemini_api_key') || window.GEMINI_API_KEY || '';
-    }
-    function getGeminiEndpoint() {
-        return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${getApiKey()}`;
+    // IMPORTANT: Replace the value below with your own Gemini API key.
+    // Get one free at: https://aistudio.google.com/app/apikey
+    const GEMINI_API_KEY = (window.GEMINI_API_KEY || '').trim();
+    const GEMINI_QUOTA_COOLDOWN_MS = 60 * 1000;
+    const GEMINI_AUDIO_COOLDOWN_MS = 60 * 1000;
+    const GEMINI_NON_CHAT_COOLDOWN_MS = 90 * 1000;
+    const GEMINI_FACE_COOLDOWN_MS = 5 * 60 * 1000;
+    const GEMINI_QUIZ_COOLDOWN_MS = 5 * 60 * 1000;
+    const STUDENT_ANALYSIS_SYNC_COOLDOWN_MS = 20 * 1000;
+    let geminiDisabledUntil = 0;
+    let lastGeminiFailure = null;
+    let lastGeminiAudioAt = 0;
+    let lastGeminiNonChatAt = 0;
+    let lastGeminiFaceAt = 0;
+    let lastGeminiQuizAt = 0;
+    const lastStudentAnalysisSyncAt = {
+        text: 0,
+        voice: 0,
+        facial_emotion: 0
+    };
+
+    function canAttemptGemini() {
+        return Date.now() >= geminiDisabledUntil && (Boolean(GEMINI_API_KEY) || window.location.protocol !== 'file:');
     }
 
-    async function fetchWithRetry(url, options, maxRetries = 2, delayMs = 1000) {
-        for (let i = 0; i <= maxRetries; i++) {
-            try {
-                const res = await fetch(url, options);
-                if (res.ok) return res;
-                if ((res.status >= 500 || res.status === 429) && i < maxRetries) {
-                    await new Promise(resolve => setTimeout(resolve, delayMs));
-                    delayMs *= 2;
-                    continue;
-                }
-                return res;
-            } catch(e) {
-                if (i === maxRetries) throw e;
-                await new Promise(resolve => setTimeout(resolve, delayMs));
-                delayMs *= 2;
-            }
-        }
+    function canAttemptNonChatGemini(lastFeatureAt, featureCooldownMs) {
+        const now = Date.now();
+        if (!canAttemptGemini()) return false;
+        if (now - lastGeminiNonChatAt < GEMINI_NON_CHAT_COOLDOWN_MS) return false;
+        if (now - lastFeatureAt < featureCooldownMs) return false;
+        lastGeminiNonChatAt = now;
+        return true;
     }
-    function formatGeminiError(status, errText) {
-        if (status === 429) {
-            return `⚠️ Google API Rate Limit (429 - Quota Exceeded)\n\nYour Gemini API key is on the Free Tier, which has a strict limit of 5 requests per minute.\n\n⏳ Please wait 15–20 seconds for the quota to reset, then send your answer again to continue!`;
+
+    async function callGemini(model, requestBody) {
+        if (!canAttemptGemini()) return null;
+        lastGeminiFailure = null;
+
+        let response = null;
+        const canUseBackendProxy = window.location.protocol !== 'file:';
+
+        if (canUseBackendProxy) {
+            response = await fetch('/api/ai/gemini', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ model, payload: requestBody })
+            });
         }
-        if (status === 503) {
-            return `☁️ Google API Temporary Overload (503 - Service Unavailable)\n\nThe Gemini servers are temporarily busy. Please wait a few seconds and send your answer again to retry!`;
+
+        // Prefer the backend proxy. Browser-direct calls can expose the key and
+        // surface raw network errors, so only use them for file:// demos.
+        if (response && response.status === 503) {
+            const data = await response.json().catch(() => null);
+            lastGeminiFailure = {
+                code: data?.code || 'missing_api_key',
+                status: 503,
+                detail: data?.error || 'The backend could not find a Gemini API key.'
+            };
+            return null;
         }
-        try {
-            const parsed = JSON.parse(errText);
-            if (parsed?.error?.message) {
-                return `Error: ${parsed.error.message}`;
-            }
-        } catch(e) {}
-        return `API Error ${status}: ${errText}`;
+
+        if ((!response || response.status === 503) && GEMINI_API_KEY) {
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+            response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+        }
+
+        if (!response) return null;
+
+        if (response.status === 503) {
+            lastGeminiFailure = {
+                code: 'missing_api_key',
+                status: 503,
+                detail: 'The backend could not find a Gemini API key.'
+            };
+            return null;
+        }
+
+        if (response.status === 429) {
+            geminiDisabledUntil = Date.now() + GEMINI_QUOTA_COOLDOWN_MS;
+            lastGeminiFailure = {
+                code: 'http_429',
+                status: 429,
+                detail: 'Gemini returned HTTP 429 directly.'
+            };
+            return null;
+        }
+
+        if (!response.ok) {
+            throw new Error(`Gemini API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data?.quota_exceeded) {
+            geminiDisabledUntil = Date.now() + GEMINI_QUOTA_COOLDOWN_MS;
+            lastGeminiFailure = {
+                code: data.code || 'quota_exceeded',
+                status: data.status || 429,
+                detail: data.error || 'Gemini reported quota exceeded.'
+            };
+            return null;
+        }
+
+        if (data?.code === 'gemini_error' || data?.code === 'gemini_request_failed') {
+            lastGeminiFailure = {
+                code: data.code,
+                status: data.status || 'unknown',
+                detail: data.error || 'The Gemini proxy returned an error.'
+            };
+            console.warn(`Gemini proxy returned fallbackable error: ${data.status || data.code}`);
+            return null;
+        }
+
+        return data;
+    }
+
+    function formatGeminiDiagnostic() {
+        if (!lastGeminiFailure) return '';
+        const detail = String(lastGeminiFailure.detail || '').replace(/\s+/g, ' ').trim();
+        return `AI API diagnostic: the app tried the chatbot Gemini request, but it did not return a usable reply. Code: ${lastGeminiFailure.code}; status: ${lastGeminiFailure.status}. Detail: ${detail}`;
     }
 
     // Track conversation history for context-aware responses
@@ -699,7 +791,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function analyzeWithGemini(studentText) {
         // Add the student message to history
-        conversationHistory.push({ role: 'user', parts: [{ text: studentText }] });
+        conversationHistory.push({ parts: [{ text: studentText }] });
 
         const systemPrompt = `# Role
 你现在是 Kawanku AI 心理健康平台的“极简主义全能系统架构师”。你完美掌管着【情绪盲盒测验（Quiz）】、【心理自检诊断】、【安全熔断机制】以及带有周更月回归闭环的【火花商店（Kawan Shop）】。你的任务是给大学生提供一个毫无视觉压力、高级留白、好玩上头且兼具心理学深度的游戏化陪伴体验。
@@ -804,18 +896,8 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            const response = await fetchWithRetry(getGeminiEndpoint(), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody)
-            });
-
-            if (!response.ok) {
-                const errText = await response.text();
-                throw new Error(formatGeminiError(response.status, errText));
-            }
-
-            const data = await response.json();
+            const data = await callGemini('gemini-2.5-flash', requestBody);
+            if (!data) return null;
             const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
             // Check for Dashboard format from the new prompt
@@ -839,11 +921,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Add Gemini's response to conversation history
-            conversationHistory.push({ role: 'model', parts: [{ text: replyText }] });
+            conversationHistory.push({ parts: [{ text: replyText }] });
 
             return { reply: replyText, analytics };
         } catch (err) {
-            console.error('Gemini API call failed:', err);
+            console.warn('Gemini API call failed; using local fallback:', err);
             return null; // falls back to local analysis
         }
     }
@@ -866,7 +948,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let reply = '';
         let companionExpression = 'friendly';
 
-        if (getApiKey()) {
+        if (canAttemptGemini()) {
             const geminiResult = await analyzeWithGemini(text);
             if (geminiResult) {
                 reply = geminiResult.reply;
@@ -900,7 +982,53 @@ document.addEventListener('DOMContentLoaded', () => {
         state.avatar.expression = companionExpression;
         renderAvatarVisuals();
         appendChatMessage('Buddy', reply);
+        const geminiDiagnostic = formatGeminiDiagnostic();
+        if (geminiDiagnostic) appendChatMessage('Buddy', geminiDiagnostic);
         speakResponse(reply);
+        syncStudentAnalysisToBackend(text, reply, 'text');
+    }
+
+    async function syncStudentAnalysisToBackend(message, reply, modality = 'text', metadata = {}) {
+        const stored = localStorage.getItem('kawanku_student_session');
+        if (!stored) return;
+
+        const now = Date.now();
+        const lastSync = lastStudentAnalysisSyncAt[modality] || 0;
+        if (modality !== 'text' && now - lastSync < STUDENT_ANALYSIS_SYNC_COOLDOWN_MS) return;
+        lastStudentAnalysisSyncAt[modality] = now;
+
+        let session = null;
+        try {
+            session = JSON.parse(stored);
+        } catch (error) {
+            console.warn('Student session could not be parsed for analysis sync:', error);
+            return;
+        }
+
+        if (!session?.token) return;
+
+        try {
+            const response = await fetch('/api/student/analysis', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.token}`
+                },
+                body: JSON.stringify({
+                    message,
+                    reply,
+                    diagnostics: state.diagnostics,
+                    modality,
+                    metadata
+                })
+            });
+
+            if (!response.ok) {
+                console.warn(`Student analysis sync failed: ${response.status}`);
+            }
+        } catch (error) {
+            console.warn('Student analysis sync failed:', error);
+        }
     }
 
     function generateLocalReply() {
@@ -1415,12 +1543,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const pauseAssessment = state.rant.pauseCount > 4 ? "your speech had several hesitations and pauses, reflecting high stress or heavy thoughts" : "your voice flowed smoothly with confidence";
         const wpmVal = parseInt(DOM.rantMetricSpeed.innerText) || 120;
         const speedAssessment = wpmVal > 150 ? "rapid, fast-paced talking, which is often a sign of anxious excitement or built-up pressure" : "a measured, grounding vocal speed";
+        const tremorRate = Math.min(100, Math.round((state.rant.tremorAccumulator || 0) / ((state.rant.frameCount || 1) * 0.1))) || 8;
 
-        const summaryResponse = `I processed your rant. I hear that you're going through a lot. Specifically, ${pauseAssessment}, and you spoke at ${speedAssessment}. Getting those words out is an excellent step to unpack stress. I'm right here with you. What would you like to focus on next?`;
-        
         appendChatMessage('Buddy', `🎤 **Vocal Rant Report:** You vented for ${state.diagnostics.lastRantDuration}. Here's my response to your speech:`);
-        appendChatMessage('Buddy', summaryResponse);
-        speakResponse(summaryResponse);
+        const typingId = showTypingIndicator();
+
+        analyzeAudioRantWithGemini(transcriptText, wpmVal, state.rant.pauseCount, tremorRate).then(summaryResponse => {
+            removeTypingIndicator(typingId);
+            if (!summaryResponse) {
+                summaryResponse = `I processed your rant. I hear that you're going through a lot. Specifically, ${pauseAssessment}, and you spoke at ${speedAssessment}. Getting those words out is an excellent step to unpack stress. I'm right here with you. What would you like to focus on next?`;
+            }
+            appendChatMessage('Buddy', summaryResponse);
+            speakResponse(summaryResponse);
+            syncStudentAnalysisToBackend(transcriptText, summaryResponse, 'voice', {
+                speechRateWpm: wpmVal,
+                pauseCount: state.rant.pauseCount,
+                tremorRate,
+                duration: state.diagnostics.lastRantDuration
+            });
+        });
 
         // Adjust overall diagnostics
         state.diagnostics.burnout = Math.min(100, Math.max(10, state.diagnostics.burnout - 10)); // catharsis relief reduction
@@ -1428,20 +1569,50 @@ document.addEventListener('DOMContentLoaded', () => {
         evaluateTextDiagnostics(transcriptText);
     }
 
+    async function analyzeAudioRantWithGemini(transcriptText, wpmVal, pauseCount, tremorRate) {
+        if (!canAttemptNonChatGemini(lastGeminiAudioAt, GEMINI_AUDIO_COOLDOWN_MS)) return null;
+        lastGeminiAudioAt = Date.now();
+
+        const prompt = `The student has finished a voice/rant session.
+Transcript: ${transcriptText}
+
+Non-content voice metadata:
+- Speaking rate: ${wpmVal} words per minute
+- Hesitations/pauses: ${pauseCount}
+- Vocal tremor/jitter index: ${tremorRate}%
+
+Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect the vocal metadata without sounding clinical, and ask one supportive follow-up question.`;
+
+        try {
+            const data = await callGemini('gemini-2.5-flash', {
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    temperature: 0.75,
+                    maxOutputTokens: 220
+                }
+            });
+            return data?.candidates?.[0]?.content?.parts?.[0]?.text || null;
+        } catch (err) {
+            console.warn('Rant Gemini analysis failed, using local fallback:', err);
+            return null;
+        }
+    }
+
     // ----------------------------------------------------------------------
     // FACE SCANNER (CAM ANALYSIS HUD OVERLAY)
     // ----------------------------------------------------------------------
     function startWebcamAnalyzer() {
-        if (state.webcam.isActive) return;
+        if (state.webcam.isActive || !DOM.webcamOverlay.classList.contains('hidden')) return;
 
         // Show overlay immediately so user sees we're attempting to connect
         DOM.webcamOverlay.classList.remove('hidden');
+        DOM.webcamOverlay.style.display = 'flex';
         DOM.camToggleBtn.classList.add('active');
+        state.webcam.isActive = true;
 
         navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } })
             .then(stream => {
                 state.webcam.stream = stream;
-                state.webcam.isActive = true;
                 DOM.webcamElement.srcObject = stream;
 
                 // Start visual overlay tracking loop
@@ -1452,7 +1623,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Camera access failed", err);
                 // Overlay is already visible — user can still close it with × button
                 // Mark inactive so stop() doesn't skip
-                state.webcam.isActive = true; // trick: lets stopWebcamAnalyzer clean up
+                state.webcam.isActive = false;
                 showToast("Camera access was denied. Click × to close.", "error");
             });
     }
@@ -1537,24 +1708,115 @@ document.addEventListener('DOMContentLoaded', () => {
             DOM.camMetricMood.className = "val text-purple";
         }
         DOM.camMetricMood.innerText = expressionGuess;
+
+        // Periodically store local face metadata, with a rare Gemini frame check.
+        const now = Date.now();
+        if (now - state.webcam.lastScanTime > 60000) {
+            state.webcam.lastScanTime = now;
+            captureAndAnalyzeFaceFrame();
+        }
+    }
+
+    async function captureAndAnalyzeFaceFrame() {
+        if (!state.webcam.isActive || !DOM.webcamElement.videoWidth) return;
+        try {
+            const tensionScore = Math.round(
+                20 + Math.sin(Date.now() * 0.003) * 6 + (state.diagnostics.stressLevel === 'High' ? 40 : 0)
+            );
+            const expression = state.diagnostics.sentiment === 'Negative'
+                ? 'stressed'
+                : (state.diagnostics.sentiment === 'Positive' ? 'calm' : 'neutral');
+            const description = expression === 'stressed'
+                ? 'Local webcam metadata suggests visible tension indicators.'
+                : 'Local webcam metadata suggests calm or neutral expression indicators.';
+
+            DOM.camMetricMood.innerText = `${expression} (${description})`;
+            DOM.camMetricMood.className = expression === 'calm' ? 'val text-mint' : (expression === 'neutral' ? 'val text-purple' : 'val text-rose');
+            DOM.camMetricTension.style.width = `${Math.max(0, Math.min(100, tensionScore))}%`;
+
+            if (canAttemptNonChatGemini(lastGeminiFaceAt, GEMINI_FACE_COOLDOWN_MS)) {
+                lastGeminiFaceAt = Date.now();
+                const canvas = document.createElement('canvas');
+                canvas.width = 160;
+                canvas.height = 120;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(DOM.webcamElement, 0, 0, canvas.width, canvas.height);
+                const base64Data = canvas.toDataURL('image/jpeg', 0.55).split(',')[1];
+                const data = await callGemini('gemini-2.5-flash', {
+                    contents: [{
+                        parts: [
+                            {
+                                text: "Analyze this single webcam frame for broad expression metadata only. Return only JSON: {\"expression\":\"calm|neutral|stressed|sad|happy|anxious\",\"tensionScore\":0-100,\"description\":\"one short privacy-safe sentence\"}"
+                            },
+                            {
+                                inlineData: {
+                                    mimeType: "image/jpeg",
+                                    data: base64Data
+                                }
+                            }
+                        ]
+                    }],
+                    generationConfig: {
+                        temperature: 0.2,
+                        maxOutputTokens: 120
+                    }
+                });
+                const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    const result = JSON.parse(jsonMatch[0]);
+                    if (result.expression) {
+                        DOM.camMetricMood.innerText = `${result.expression} (${result.description || description})`;
+                        DOM.camMetricMood.className = result.expression === 'happy' || result.expression === 'calm' ? 'val text-mint' : (result.expression === 'neutral' ? 'val text-purple' : 'val text-rose');
+                        if (result.tensionScore !== undefined) {
+                            DOM.camMetricTension.style.width = `${Math.max(0, Math.min(100, Number(result.tensionScore)))}%`;
+                        }
+                    }
+                }
+            }
+
+            syncStudentAnalysisToBackend(
+                `Facial expression scan: ${expression}`,
+                description,
+                'facial_emotion',
+                {
+                    expression,
+                    tensionScore,
+                    description,
+                    source: 'local_webcam_metadata'
+                }
+            );
+        } catch (err) {
+            console.warn('Facial scan analysis failed:', err);
+        }
     }
 
     function stopWebcamAnalyzer() {
+        const wasVisible = !DOM.webcamOverlay.classList.contains('hidden') && DOM.webcamOverlay.style.display !== 'none';
+
         // Always hide the overlay, regardless of whether the stream started
         DOM.webcamOverlay.classList.add('hidden');
+        DOM.webcamOverlay.style.display = 'none';
         DOM.camToggleBtn.classList.remove('active');
 
-        if (!state.webcam.isActive) return;
-
         state.webcam.isActive = false;
-        cancelAnimationFrame(state.webcam.animationFrame);
+        if (state.webcam.animationFrame) {
+            cancelAnimationFrame(state.webcam.animationFrame);
+            state.webcam.animationFrame = null;
+        }
         
         if (state.webcam.stream) {
             state.webcam.stream.getTracks().forEach(track => track.stop());
             state.webcam.stream = null;
         }
 
-        showToast("Webcam face metrics stopped.", "info");
+        if (DOM.webcamElement) {
+            DOM.webcamElement.srcObject = null;
+        }
+
+        if (wasVisible) {
+            showToast("Webcam face metrics stopped.", "info");
+        }
     }
 
     // ----------------------------------------------------------------------
@@ -1984,15 +2246,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function startQuizSession() {
+    async function startQuizSession() {
+        DOM.quizIntroState.classList.add('hidden');
+        DOM.quizResultsState.classList.add('hidden');
+        DOM.quizActiveState.classList.remove('hidden');
+
+        // Student-side quiz uses local content. Counselor dashboard owns AI quiz generation.
+        DOM.quizQCounter.innerText = "Starting...";
+        DOM.quizProgressFill.style.width = "0%";
+        DOM.quizQuestionTitle.innerText = "Preparing your check-in questions...";
+        DOM.quizOptionsContainer.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:100px;"><span class="typing-dots"><span>.</span><span>.</span><span>.</span></span></div>';
+
         state.quiz.currentQuestionIdx = 0;
         state.quiz.answers = [];
-
-        if (DOM.quizIntroState) DOM.quizIntroState.classList.add('hidden');
-        if (DOM.quizResultsState) DOM.quizResultsState.classList.add('hidden');
-        if (DOM.quizActiveState) DOM.quizActiveState.classList.remove('hidden');
-
         renderQuizQuestion();
+    }
+
+    async function generateCustomQuizWithGemini() {
+        // Gemini quiz generation is intentionally counselor-triggered only.
+        return null;
     }
 
     function renderQuizQuestion() {

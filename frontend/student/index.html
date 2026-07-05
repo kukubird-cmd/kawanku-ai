@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KawanKu AI - Student Portal</title>
+    <script>
+        window.location.replace('http://127.0.0.1:5000/');
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #48bb78;
+            --danger: #f56565;
+            --bg-light: #f7fafc;
+            --bg-white: #ffffff;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-white);
+            box-shadow: var(--shadow-lg);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            border-right: 2px solid var(--border);
+        }
+
+        .logo {
+            margin-bottom: 2rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .logo p {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .nav {
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-light);
+            border-left-color: var(--primary);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+
+        .user-info {
+            border-top: 2px solid var(--border);
+            padding-top: 1rem;
+        }
+
+        .user-info p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .btn-logout {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background: #e53e3e;
+            transform: translateY(-2px);
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-light);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-white);
+            padding: 1.5rem 2rem;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .header h2 {
+            font-size: 1.5rem;
+            color: var(--text-dark);
+        }
+
+        .wellness-quick-view {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .metric {
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        /* Chat area */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 1.5rem;
+            border: 2px solid var(--border);
+            border-radius: 1rem;
+            background: var(--bg-white);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            display: flex;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.student {
+            justify-content: flex-end;
+        }
+
+        .message.ai {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 60%;
+            padding: 1rem 1.25rem;
+            border-radius: 1rem;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        .message.student .message-content {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .message.ai .message-content {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 0.25rem;
+        }
+
+        /* Input area */
+        .input-area {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        #messageInput:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-send {
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-send:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-send:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Wellness Dashboard */
+        .dashboard {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .wellness-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--bg-white);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .card h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: var(--bg-light);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .message-content {
+                max-width: 75%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 1rem;
+                flex-direction: row;
+                border-right: none;
+                border-bottom: 2px solid var(--border);
+            }
+
+            .nav {
+                display: flex;
+                gap: 1rem;
+                flex: 1;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <h1>💙 KawanKu</h1>
+                <p>AI Companion</p>
+            </div>
+
+            <div class="nav">
+                <div class="nav-item active" onclick="switchTab('chat')">
+                    <span>💬 Chat</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('wellness')">
+                    <span>📊 Wellness</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('settings')">
+                    <span>⚙️ Settings</span>
+                </div>
+            </div>
+
+            <div class="user-info">
+                <p><strong id="studentName">Student</strong></p>
+                <p id="studentId" style="font-size: 0.8rem; color: #a0aec0;"></p>
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <h2>Chat with KawanKu</h2>
+                <div class="wellness-quick-view">
+                    <div class="metric">
+                        <div class="metric-value" id="stressLevel">50</div>
+                        <div class="metric-label">Stress</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="moodValue">Neutral</div>
+                        <div class="metric-label">Mood</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Tab -->
+            <div class="chat-area" id="chatTab">
+                <div class="messages" id="messagesContainer">
+                    <div class="message ai">
+                        <div class="message-content">
+                            Hey! 👋 I'm KawanKu, your supportive AI companion. How are you doing today?
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-area">
+                    <input
+                        type="text"
+                        id="messageInput"
+                        placeholder="Tell me what's on your mind..."
+                        autocomplete="off"
+                    >
+                    <button class="btn-send" id="sendBtn" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+
+            <!-- Wellness Tab -->
+            <div class="dashboard" id="wellnessTab">
+                <h2 style="margin-bottom: 2rem;">Your Wellness Overview</h2>
+
+                <div class="wellness-cards">
+                    <div class="card">
+                        <h3>😊 Mood State</h3>
+                        <p id="moodState" style="font-size: 1.1rem; color: var(--primary); font-weight: 600;">Neutral</p>
+                        <p id="moodDescription" style="color: var(--text-light); margin-top: 0.5rem;"></p>
+                    </div>
+
+                    <div class="card">
+                        <h3>😰 Stress Levels</h3>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Overall</span>
+                                <span id="stressValue">Low</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="stressBar" style="width: 25%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>💪 Engagement</h3>
+                        <p id="engagementLevel" style="font-size: 1.1rem; color: var(--success); font-weight: 600;">High</p>
+                        <p style="color: var(--text-light); margin-top: 0.5rem;">Keep sharing - I'm here to listen!</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>🎯 Session Summary</h3>
+                        <p>Total Sessions: <strong id="totalSessions">0</strong></p>
+                        <p style="margin-top: 0.5rem;">Last Updated: <strong id="lastUpdated">-</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div class="dashboard" id="settingsTab">
+                <h2 style="margin-bottom: 2rem;">Settings</h2>
+                <div class="card">
+                    <h3>Account Information</h3>
+                    <p><strong>Student ID:</strong> <span id="settingsStudentId">-</span></p>
+                    <p><strong>Email:</strong> <span id="settingsEmail">-</span></p>
+                    <p style="margin-top: 1rem; color: var(--text-light); font-size: 0.9rem;">
+                        Your privacy is our top priority. All conversations are encrypted and isolated from others.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="http://127.0.0.1:5000/config.js"></script>
+    <script>
+        const API_BASE = window.API_BASE || 'http://localhost:5000/api';
+        const GEMINI_API_KEY = (window.GEMINI_API_KEY || '').trim();
+        const BACKEND_FALLBACK_REPLY = "Thank you for sharing. I'm here to listen.";
+        let studentId, token;
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            const stored = localStorage.getItem('kawanku_student_session');
+            if (!stored) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const session = JSON.parse(stored);
+            studentId = session.student_id;
+            token = session.token;
+
+            document.getElementById('studentName').textContent = session.full_name;
+            document.getElementById('studentId').textContent = studentId;
+            document.getElementById('settingsStudentId').textContent = studentId;
+
+            // Setup keyboard shortcut
+            document.getElementById('messageInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            loadWellness();
+        });
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('[id$="Tab"]').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Remove active class from nav items
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Show selected tab
+            if (tabName === 'chat') {
+                document.getElementById('chatTab').classList.add('active');
+                document.getElementById('chatTab').style.display = 'flex';
+            } else {
+                document.getElementById(tabName + 'Tab').classList.add('active');
+            }
+
+            // Set active nav item
+            event.target.closest('.nav-item').classList.add('active');
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            // Add user message to UI
+            addMessageToChat(message, 'student');
+            input.value = '';
+            document.getElementById('sendBtn').disabled = true;
+
+            try {
+                // Send to backend
+                const response = await fetch(`${API_BASE}/student/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const directReply = data.ai_response === BACKEND_FALLBACK_REPLY
+                        ? await generateGeminiReply(message)
+                        : null;
+                    addMessageToChat(directReply || data.ai_response, 'ai');
+                    loadWellness();  // Refresh wellness data
+                } else {
+                    addMessageToChat('Sorry, I encountered an error. Please try again.', 'ai');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                addMessageToChat('Connection error. Please check your internet.', 'ai');
+            } finally {
+                document.getElementById('sendBtn').disabled = false;
+                input.focus();
+            }
+        }
+
+        async function generateGeminiReply(message) {
+            if (!GEMINI_API_KEY) return null;
+
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+            const payload = {
+                system_instruction: {
+                    parts: [{
+                        text: "You are KawanKu, a warm, supportive AI companion for students. Reply in 2-4 friendly sentences. Do not include JSON."
+                    }]
+                },
+                contents: [{
+                    parts: [{ text: message }]
+                }],
+                generationConfig: {
+                    temperature: 0.85,
+                    maxOutputTokens: 250
+                }
+            };
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    console.warn(`Gemini direct fallback failed: ${response.status}`);
+                    return null;
+                }
+
+                const data = await response.json();
+                return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+            } catch (error) {
+                console.warn('Gemini direct fallback failed:', error);
+                return null;
+            }
+        }
+
+        function addMessageToChat(content, sender) {
+            const messagesContainer = document.getElementById('messagesContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = content;
+
+            messageDiv.appendChild(contentDiv);
+            messagesContainer.appendChild(messageDiv);
+
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        async function loadWellness() {
+            try {
+                const response = await fetch(`${API_BASE}/student/wellness`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const wellness = await response.json();
+                    updateWellnessUI(wellness);
+                }
+            } catch (error) {
+                console.error('Error loading wellness:', error);
+            }
+        }
+
+        function updateWellnessUI(wellness) {
+            document.getElementById('moodValue').textContent = wellness.mood_state;
+            document.getElementById('moodState').textContent = wellness.mood_state;
+            document.getElementById('stressValue').textContent = wellness.overall_stress;
+            document.getElementById('stressLevel').textContent = wellness.stress_breakdown?.academic_pressure || 50;
+
+            const stressPercent = (wellness.stress_breakdown?.academic_pressure || 0);
+            document.getElementById('stressBar').style.width = stressPercent + '%';
+        }
+
+        function logout() {
+            localStorage.removeItem('kawanku_student_session');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
