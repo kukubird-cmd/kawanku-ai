@@ -3035,25 +3035,19 @@ For the Report (after monster defeat), respond with:
   "wardrobe_tip": "<FOMO-inducing wardrobe unlock hint e.g. '2 more days to unlock the 🦸 Exam-Immunity Golden Cape!'>"
 }`;
 
-        async function callGemini(userMsg) {
-            const apiKey = getApiKey();
-            if (!apiKey) {
-                // Return a fallback if no API key
+        async function callGeminiLocal(userMsg) {
+            if (!canAttemptGemini()) {
+                // Return a fallback if no API key/proxy
                 return null;
             }
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
             const body = {
                 system_instruction: { parts: [{ text: MENTAL_STREAK_SYSTEM }] },
                 contents: [{ role: 'user', parts: [{ text: userMsg }] }],
                 generationConfig: { temperature: 0.85, maxOutputTokens: 1024 }
             };
             try {
-                const res = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
-                });
-                const data = await res.json();
+                const data = await callGemini('gemini-2.5-flash', body);
+                if (!data) return null;
                 const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
                 // Strip potential markdown fences
                 const cleaned = text.replace(/^```json\s*/i,'').replace(/```\s*$/,'').trim();
@@ -3198,7 +3192,7 @@ For the Report (after monster defeat), respond with:
             const answerSummary = answers.map((a,i) => `Q${i+1} answer (${a.type}): "${a.text}"`).join('\n');
             const prompt = `The student has answered ${answers.length} question(s) so far:\n${answerSummary}\n\nNow generate Step ${currentQuestion} of the quiz.`;
 
-            let data = await callGemini(prompt);
+            let data = await callGeminiLocal(prompt);
             if (!data) data = FALLBACKS[currentQuestion - 1];
             if (data.crisis) { showPhase('crisis'); stopAllBGM(); return; }
 
@@ -3330,7 +3324,7 @@ For the Report (after monster defeat), respond with:
             const answerSummary = answers.map((a,i) => `Q${i+1} answer (${a.type}): "${a.text}"`).join('\n');
             const prompt = `The student finished all 3 questions. Their answers:\n${answerSummary}\n\nNow generate the final Report (step: "report").`;
 
-            let data = await callGemini(prompt);
+            let data = await callGeminiLocal(prompt);
             if (!data || data.crisis) data = getFallbackReport(answers);
 
             // Update state
@@ -3482,7 +3476,7 @@ For the Report (after monster defeat), respond with:
 
             const prompt = `Today's theme hint: "${todayTheme}". Student streak day: ${state.streakDay}. Heart rate: ${simulatedHR} bpm. Generate Step 1 of the quiz.`;
 
-            let data = await callGemini(prompt);
+            let data = await callGeminiLocal(prompt);
             if (!data) data = FALLBACKS[0];
             if (data.crisis) { showPhase('crisis'); stopAllBGM(); return; }
 
@@ -3826,8 +3820,8 @@ For the Report (after monster defeat), respond with:
         }
 
         async function generateFinalReport() {
-            if (!getApiKey()) {
-                addQuizBubble('Error: No Gemini API key configured.', 'ai');
+            if (!canAttemptGemini()) {
+                addQuizBubble('Error: AI is currently unavailable. Please configure API key or ensure backend is running.', 'ai');
                 if (qRestartBtn) qRestartBtn.classList.remove('hidden');
                 return;
             }
@@ -3862,21 +3856,15 @@ For the Report (after monster defeat), respond with:
 -----`;
 
             try {
-                const res = await fetchWithRetry(getGeminiEndpoint(), {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        system_instruction: { parts: [{ text: EVALUATION_SYSTEM_PROMPT }] },
-                        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-                        generationConfig: { temperature: 0.85, maxOutputTokens: 2048 }
-                    })
+                const data = await callGemini('gemini-2.5-flash', {
+                    system_instruction: { parts: [{ text: EVALUATION_SYSTEM_PROMPT }] },
+                    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                    generationConfig: { temperature: 0.85, maxOutputTokens: 2048 }
                 });
                 removeQuizTyping();
-                if (!res.ok) {
-                    const errText = await res.text();
-                    throw new Error(formatGeminiError(res.status, errText));
+                if (!data) {
+                    throw new Error('No response from Gemini API proxy.');
                 }
-                const data = await res.json();
                 const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || '(No response)';
                 addQuizBubble(reply, 'ai');
 
@@ -4057,27 +4045,21 @@ For the Report (after monster defeat), respond with:
         }
 
         async function sendShopMessage(userText) {
-            if (!getApiKey()) { addShopBubble('Error: No Gemini API key.', 'ai'); return; }
+            if (!canAttemptGemini()) { addShopBubble('Error: AI is currently unavailable. Please configure API key or ensure backend is running.', 'ai'); return; }
             let sp = loadSpark();
             shopHistory.push({ role: 'user', parts: [{ text: userText }] });
             addShopBubble(userText, 'user');
             if (sInput) sInput.value = '';
             const shopPrompt = '你是 Kawanku AI 火花商店的潮流主理人。用户当前火花天数为 ' + sp.days + ' 天。当前显示第 ' + activeWeek + ' 周货架。请根据用户请求展示商品或处理兑换。保持极简留白风格。货架内容：' + JSON.stringify(SHOP_CATALOG[activeWeek]);
             try {
-                const res = await fetchWithRetry(getGeminiEndpoint(), {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        system_instruction: { parts: [{ text: shopPrompt }] },
-                        contents: shopHistory,
-                        generationConfig: { temperature: 0.8, maxOutputTokens: 1024 }
-                    })
+                const data = await callGemini('gemini-2.5-flash', {
+                    system_instruction: { parts: [{ text: shopPrompt }] },
+                    contents: shopHistory,
+                    generationConfig: { temperature: 0.8, maxOutputTokens: 1024 }
                 });
-                if (!res.ok) {
-                    const errText = await res.text();
-                    throw new Error(formatGeminiError(res.status, errText));
+                if (!data) {
+                    throw new Error('No response from Gemini API proxy.');
                 }
-                const data = await res.json();
                 const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || '(No response)';
                 shopHistory.push({ role: 'model', parts: [{ text: reply }] });
                 addShopBubble(reply, 'ai');
@@ -4110,15 +4092,6 @@ For the Report (after monster defeat), respond with:
         renderShelf(autoWeek);
         syncShopBalance(loadSpark());
     })();
-
-    // Sync API Key input field in sidebar
-    const sidebarApiKeyInput = document.getElementById('sidebar-api-key');
-    if (sidebarApiKeyInput) {
-        sidebarApiKeyInput.value = localStorage.getItem('gemini_api_key') || '';
-        sidebarApiKeyInput.addEventListener('input', (e) => {
-            localStorage.setItem('gemini_api_key', e.target.value.trim());
-        });
-    }
 
     // Run launcher
     init();
