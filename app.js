@@ -703,16 +703,38 @@ document.addEventListener('DOMContentLoaded', () => {
         const canUseBackendProxy = window.location.protocol !== 'file:';
 
         if (canUseBackendProxy) {
-            response = await fetch('/api/ai/gemini', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ model, payload: requestBody })
-            });
+            try {
+                response = await fetch('/api/ai/gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model, payload: requestBody })
+                });
+            } catch (e) {
+                console.warn('Backend proxy fetch failed:', e);
+            }
         }
+
+        // If backend proxy failed (either threw an exception, returned a non-ok status, or returned 503),
+        // we fall back to direct fetch using the local GEMINI_API_KEY if available.
+        const needsFallback = !response || !response.ok || response.status === 503;
+        if (needsFallback && GEMINI_API_KEY) {
+            try {
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+                response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+            } catch (e) {
+                console.error('Fallback direct Gemini fetch failed:', e);
+            }
+        }
+
+        if (!response) return null;
 
         // Prefer the backend proxy. Browser-direct calls can expose the key and
         // surface raw network errors, so only use them for file:// demos.
-        if (response && response.status === 503) {
+        if (response.status === 503) {
             const data = await response.json().catch(() => null);
             lastGeminiFailure = {
                 code: data?.code || 'missing_api_key',
@@ -720,27 +742,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 detail: data?.error || 'The backend could not find a Gemini API key.'
             };
             return null;
-        }
-
-        if ((!response || response.status === 503) && GEMINI_API_KEY) {
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
-            response = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody)
-            });
-        }
-
-        if (!response) return null;
-
-        if (response.status === 503) {
-            lastGeminiFailure = {
-                code: 'missing_api_key',
-                status: 503,
-                detail: 'The backend could not find a Gemini API key.'
-            };
-            return null;
-        }
 
         if (response.status === 429) {
             geminiDisabledUntil = Date.now() + GEMINI_QUOTA_COOLDOWN_MS;
