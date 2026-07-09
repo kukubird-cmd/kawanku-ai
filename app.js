@@ -3811,24 +3811,48 @@ For the Report (after monster defeat), respond with:
             }
         }
 
+        // Returns a short, student-friendly sentence for a given score (0% = best, 100% = worst)
+        function getScoreLabel(pct, category) {
+            if (category === 'academic') {
+                if (pct <= 20)  return "Great job! Your academic stress is very well managed today.";
+                if (pct <= 40)  return "Your study load is manageable — keep maintaining balance.";
+                if (pct <= 60)  return "You're feeling some academic pressure. Try to pace yourself.";
+                if (pct <= 80)  return "High academic stress detected. Consider lightening your load.";
+                return "Severe academic burnout. Please take a break and seek support.";
+            } else if (category === 'selfEsteem') {
+                if (pct <= 20)  return "Your self-confidence is in great shape — keep believing in yourself!";
+                if (pct <= 40)  return "Mostly positive self-image. Small doubts are normal.";
+                if (pct <= 60)  return "Some self-doubt present. Remind yourself of your strengths.";
+                if (pct <= 80)  return "Low self-esteem detected. You deserve more kindness towards yourself.";
+                return "Severe self-esteem concerns. Consider speaking with a counsellor.";
+            } else {
+                if (pct <= 20)  return "You're feeling calm and grounded today. Keep it up!";
+                if (pct <= 40)  return "Mild anxiety — manageable with small daily calming habits.";
+                if (pct <= 60)  return "Moderate anxiety level. Breathing exercises can really help.";
+                if (pct <= 80)  return "High anxiety detected. Prioritise rest and grounding techniques.";
+                return "Severe anxiety level. Please reach out to a trusted person or counsellor.";
+            }
+        }
+
         function generateLocalReport(academicPct, selfEsteemPct, anxietyPct, streakDays) {
+            // Pick solutions based on the HIGHEST (worst) score
             const categories = [
                 { name: 'academic', score: academicPct },
                 { name: 'selfEsteem', score: selfEsteemPct },
                 { name: 'anxiety', score: anxietyPct }
             ];
-            categories.sort((a, b) => a.score - b.score);
-            const lowest = categories[0].name;
+            categories.sort((a, b) => b.score - a.score);
+            const worst = categories[0].name;
 
             let solutions = [];
-            if (lowest === 'academic') {
+            if (worst === 'academic') {
                 solutions = [
                     "Time Blocking: Allocate focused study blocks of 25 minutes (Pomodoro technique) followed by 5-minute breaks to prevent cognitive fatigue.",
                     "Task Decomposition: Break down overwhelming assignments into smaller, manageable sub-tasks to reduce start-up friction.",
                     "Sleep Hygiene: Maintain a consistent sleep schedule and limit blue light exposure 1 hour before bed.",
                     "Boundary Setting: Dedicate specific hours to study and strictly disconnect from academic work afterwards."
                 ];
-            } else if (lowest === 'selfEsteem') {
+            } else if (worst === 'selfEsteem') {
                 solutions = [
                     "Gratitude Journaling: Write down 3 small personal achievements or positive traits about yourself daily to build self-appreciation.",
                     "Positive Affirmations: Practice self-compassion by replacing self-critical thoughts with supportive statements.",
@@ -3844,14 +3868,11 @@ For the Report (after monster defeat), respond with:
                 ];
             }
 
-            const burnoutVal = 100 - academicPct;
-            const anxietyVal = 100 - anxietyPct;
-
             return `📋 **Clinical Mental Health Report**
 
-🧠 **学习压力 (Academic Pressure):** ${academicPct}%
-🏷️ **自卑程度 (Self-Esteem):** ${selfEsteemPct}%
-⚡ **焦虑程度 (Anxiety Level):** ${anxietyPct}%
+🧠 **学习压力 (Academic Pressure):** ${academicPct}% — ${getScoreLabel(academicPct, 'academic')}
+🏷️ **自卑程度 (Self-Esteem):** ${selfEsteemPct}% — ${getScoreLabel(selfEsteemPct, 'selfEsteem')}
+⚡ **焦虑程度 (Anxiety Level):** ${anxietyPct}% — ${getScoreLabel(anxietyPct, 'anxiety')}
 
 🛠️ **解决办法 (Solutions):**
 1. ${solutions[0]}
@@ -3861,16 +3882,16 @@ For the Report (after monster defeat), respond with:
 
 -----
 #### 📊 [CAMPUS_DASHBOARD_ANONYMOUS_DATA]
-主题: Clinical Assessment | 精力耗竭: ${burnoutVal}% | 社交疲劳: ${anxietyVal}% | 火花天数: ${streakDays}
+主题: Clinical Assessment | 精力耗竭: ${academicPct}% | 社交疲劳: ${anxietyPct}% | 火花天数: ${streakDays}
 -----`;
         }
 
         function applyReportDiagnostics(academicPct, selfEsteemPct, anxietyPct, totalScore) {
-            const burnoutPct = 100 - academicPct;
-            spark.lastDiagnosis = 'Burnout ' + burnoutPct + '%';
-            state.diagnostics.burnout = burnoutPct;
-            state.diagnostics.academicPressure = burnoutPct;
-            state.diagnostics.socialAnxiety = 100 - anxietyPct;
+            // 100% = worst, so academicPct directly = burnout level for the dashboard
+            spark.lastDiagnosis = 'Burnout ' + academicPct + '%';
+            state.diagnostics.burnout = academicPct;
+            state.diagnostics.academicPressure = academicPct;
+            state.diagnostics.socialAnxiety = anxietyPct;
             state.diagnostics.stressLevel = totalScore > 20 ? 'High' : (totalScore > 10 ? 'Medium' : 'Low');
             updateHeaderStatusBars();
         }
@@ -3895,13 +3916,14 @@ For the Report (after monster defeat), respond with:
                 }
             });
 
-            const academicPct = Math.round(100 * (1 - scoreAcademic / 12));
-            const anxietyPct = Math.round(100 * (1 - scoreAnxiety / 15));
-            const selfEsteemPct = Math.round(100 * (1 - scoreSelfEsteem / 3));
+            // 100% = worst condition, 0% = best condition
+            const academicPct = Math.round(100 * scoreAcademic / 12);
+            const anxietyPct = Math.round(100 * scoreAnxiety / 15);
+            const selfEsteemPct = Math.round(100 * scoreSelfEsteem / 3);
 
             const prompt = `You are MindBuddy's Clinical Psychometric Analyst.
 The student has completed a 10-question adaptive mental health screening questionnaire.
-Here are their calculated health percentages (where 100% = perfect health, 0% = critical health):
+Here are their stress severity percentages (where 0% = perfectly healthy, 100% = very severe):
 - 学习压力 (Academic Pressure): ${academicPct}%
 - 自卑程度 (Self-Esteem): ${selfEsteemPct}%
 - 焦虑程度 (Anxiety Level): ${anxietyPct}%
@@ -3911,19 +3933,19 @@ Strictly adhere to the following layout and do NOT add any extra introductory te
 
 📋 **Clinical Mental Health Report**
 
-🧠 **学习压力 (Academic Pressure):** ${academicPct}%
-🏷️ **自卑程度 (Self-Esteem):** ${selfEsteemPct}%
-⚡ **焦虑程度 (Anxiety Level):** ${anxietyPct}%
+🧠 **学习压力 (Academic Pressure):** ${academicPct}% — [one short sentence describing what this score means for the student, e.g. if 0% say they are doing great, if 100% say it's severe]
+🏷️ **自卑程度 (Self-Esteem):** ${selfEsteemPct}% — [one short sentence describing what this score means]
+⚡ **焦虑程度 (Anxiety Level):** ${anxietyPct}% — [one short sentence describing what this score means]
 
 🛠️ **解决办法 (Solutions):**
-1. [Solution 1: Concise and highly practical action item based on their lowest score]
-2. [Solution 2: Concise and highly practical action item based on their lowest score]
-3. [Solution 3: Concise and highly practical action item based on their lowest score]
-4. [Solution 4: Concise and highly practical action item based on their lowest score]
+1. [Solution 1: Concise and highly practical action item targeting the highest-scored (worst) category]
+2. [Solution 2: Concise and highly practical action item targeting the highest-scored (worst) category]
+3. [Solution 3: Concise and highly practical action item targeting the highest-scored (worst) category]
+4. [Solution 4: Concise and highly practical action item targeting the highest-scored (worst) category]
 
 -----
 #### 📊 [CAMPUS_DASHBOARD_ANONYMOUS_DATA]
-主题: Clinical Assessment | 精力耗竭: ${100 - academicPct}% | 社交疲劳: ${100 - anxietyPct}% | 火花天数: ${spark.days}
+主题: Clinical Assessment | 精力耗竭: ${academicPct}% | 社交疲劳: ${anxietyPct}% | 火花天数: ${spark.days}
 -----`;
 
             let reportGenerated = false;
@@ -3949,7 +3971,7 @@ Strictly adhere to the following layout and do NOT add any extra introductory te
                             
                             if (dashMatch) {
                                 const parsedBurnout = parseInt(dashMatch[1], 10);
-                                applyReportDiagnostics(100 - parsedBurnout, selfEsteemPct, anxietyPct, totalScore);
+                                applyReportDiagnostics(parsedBurnout, selfEsteemPct, anxietyPct, totalScore);
                             } else {
                                 applyReportDiagnostics(academicPct, selfEsteemPct, anxietyPct, totalScore);
                             }
