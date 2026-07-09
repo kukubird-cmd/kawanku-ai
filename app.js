@@ -3811,93 +3811,176 @@ For the Report (after monster defeat), respond with:
             }
         }
 
-        async function generateFinalReport() {
-            if (!canAttemptGemini()) {
-                addQuizBubble('Error: AI is currently unavailable. Please configure API key or ensure backend is running.', 'ai');
-                if (qRestartBtn) qRestartBtn.classList.remove('hidden');
-                return;
+        function generateLocalReport(academicPct, selfEsteemPct, anxietyPct, streakDays) {
+            const categories = [
+                { name: 'academic', score: academicPct },
+                { name: 'selfEsteem', score: selfEsteemPct },
+                { name: 'anxiety', score: anxietyPct }
+            ];
+            categories.sort((a, b) => a.score - b.score);
+            const lowest = categories[0].name;
+
+            let solutions = [];
+            if (lowest === 'academic') {
+                solutions = [
+                    "Time Blocking: Allocate focused study blocks of 25 minutes (Pomodoro technique) followed by 5-minute breaks to prevent cognitive fatigue.",
+                    "Task Decomposition: Break down overwhelming assignments into smaller, manageable sub-tasks to reduce start-up friction.",
+                    "Sleep Hygiene: Maintain a consistent sleep schedule and limit blue light exposure 1 hour before bed.",
+                    "Boundary Setting: Dedicate specific hours to study and strictly disconnect from academic work afterwards."
+                ];
+            } else if (lowest === 'selfEsteem') {
+                solutions = [
+                    "Gratitude Journaling: Write down 3 small personal achievements or positive traits about yourself daily to build self-appreciation.",
+                    "Positive Affirmations: Practice self-compassion by replacing self-critical thoughts with supportive statements.",
+                    "Strength Focus: Spend 15 minutes daily engaging in activities or hobbies where you feel capable and skilled.",
+                    "Avoid Comparisons: Limit social media browsing to reduce the comparison trap with classmates."
+                ];
+            } else {
+                solutions = [
+                    "Grounding Techniques: Practice the 5-4-3-2-1 sensory grounding exercise during moments of high anxiety or overthinking.",
+                    "Box Breathing: Inhale for 4 seconds, hold for 4 seconds, exhale for 4 seconds, and hold for 4 seconds to calm the nervous system.",
+                    "Mindful Walks: Spend 10-15 minutes outdoors, focusing entirely on nature and sensory details to quiet the mind.",
+                    "Emotional Expression: Journal your feelings unfiltered or confide in a trusted friend to release internal cognitive loops."
+                ];
             }
-            addQuizTyping();
 
-            const totalScore = selectedAnswers.reduce((sum, item) => sum + item.score, 0);
-            const answerSummary = selectedAnswers.map((item, idx) => 
-                `${idx + 1}. ${item.aspect} ("${item.statement}"): Score ${item.score} (${item.optionText})`
-            ).join('\n');
+            const burnoutVal = 100 - academicPct;
+            const anxietyVal = 100 - anxietyPct;
 
-            const simulatedHR = state.biometrics.heartRate || 75;
-            const simulatedSleep = state.biometrics.sleepDuration || 7.0;
+            return `📋 **Clinical Mental Health Report**
 
-            const prompt = `You are MindBuddy's Clinical Psychometric Analyst.
-The student has completed a 10-question adaptive mental health screening questionnaire (scored via a 4-point Likert scale: 0 = Never, 1 = Rarely, 2 = Often, 3 = Always).
+🧠 **学习压力 (Academic Pressure):** ${academicPct}%
+🏷️ **自卑程度 (Self-Esteem):** ${selfEsteemPct}%
+⚡ **焦虑程度 (Anxiety Level):** ${anxietyPct}%
 
-Here are the results:
-${answerSummary}
+🛠️ **解决办法 (Solutions):**
+1. ${solutions[0]}
+2. ${solutions[1]}
+3. ${solutions[2]}
+4. ${solutions[3]}
 
-Total Score: ${totalScore} / 30
-
-Current physiological indicators:
-- Heart Rate: ${simulatedHR} BPM
-- Sleep Duration: ${simulatedSleep} hrs
-
-Based on this data, construct a detailed psychological report in English.
-Keep paragraphs relatively concise and readability high.
-The output format MUST contain:
-
-1. A custom, inspiring persona tag wrapped in triple asterisks e.g. ***Resilient Anchor*** or ***Luminous Thinker***
-2. A score breakdown and clinical interpretation of the 10 aspects (Mood, Motivation, Overthinking, Physical response, Irritability, Fatigue, Trauma triggers, Sleep, Social life, Self-esteem).
-3. Practical advice/recommendations tailored to their profile.
-4. An anonymous data line at the very bottom formatted exactly like this:
 -----
 #### 📊 [CAMPUS_DASHBOARD_ANONYMOUS_DATA]
-主题: Clinical Assessment | 精力耗竭: [anxiety/depression percentage]% | 社交疲劳: [social percentage]% | 火花天数: ${spark.days}
+主题: Clinical Assessment | 精力耗竭: ${burnoutVal}% | 社交疲劳: ${anxietyVal}% | 火花天数: ${streakDays}
+-----`;
+        }
+
+        function applyReportDiagnostics(academicPct, selfEsteemPct, anxietyPct, totalScore) {
+            const burnoutPct = 100 - academicPct;
+            spark.lastDiagnosis = 'Burnout ' + burnoutPct + '%';
+            state.diagnostics.burnout = burnoutPct;
+            state.diagnostics.academicPressure = burnoutPct;
+            state.diagnostics.socialAnxiety = 100 - anxietyPct;
+            state.diagnostics.stressLevel = totalScore > 20 ? 'High' : (totalScore > 10 ? 'Medium' : 'Low');
+            updateHeaderStatusBars();
+        }
+
+        async function generateFinalReport() {
+            addQuizTyping();
+
+            // Calculate scores
+            let scoreAcademic = 0;
+            let scoreAnxiety = 0;
+            let scoreSelfEsteem = 0;
+            const totalScore = selectedAnswers.reduce((sum, item) => sum + item.score, 0);
+
+            selectedAnswers.forEach(ans => {
+                const name = ans.aspect;
+                if (name === "Anhedonia & Lack of Motivation" || name === "Stress Tolerance & Irritability" || name === "Mental Fatigue & Burnout" || name === "Biological Patterns & Sleep Quality") {
+                    scoreAcademic += ans.score;
+                } else if (name === "Mood & Dysphoria" || name === "Cognitive Anxiety & Overthinking" || name === "Physical & Somatic Anxiety Responses" || name === "Trauma Awareness & Emotional Triggers" || name === "Social Relationships & Self-Isolation") {
+                    scoreAnxiety += ans.score;
+                } else if (name === "Self-Esteem & Psychological Resilience") {
+                    scoreSelfEsteem += ans.score;
+                }
+            });
+
+            const academicPct = Math.round(100 * (1 - scoreAcademic / 12));
+            const anxietyPct = Math.round(100 * (1 - scoreAnxiety / 15));
+            const selfEsteemPct = Math.round(100 * (1 - scoreSelfEsteem / 3));
+
+            const prompt = `You are MindBuddy's Clinical Psychometric Analyst.
+The student has completed a 10-question adaptive mental health screening questionnaire.
+Here are their calculated health percentages (where 100% = perfect health, 0% = critical health):
+- 学习压力 (Academic Pressure): ${academicPct}%
+- 自卑程度 (Self-Esteem): ${selfEsteemPct}%
+- 焦虑程度 (Anxiety Level): ${anxietyPct}%
+
+Based on these scores, generate a simplified, concise mental health report in Chinese and English.
+Strictly adhere to the following layout and do NOT add any extra introductory text, comments, fluff, or conversational filler. Output ONLY the report:
+
+📋 **Clinical Mental Health Report**
+
+🧠 **学习压力 (Academic Pressure):** ${academicPct}%
+🏷️ **自卑程度 (Self-Esteem):** ${selfEsteemPct}%
+⚡ **焦虑程度 (Anxiety Level):** ${anxietyPct}%
+
+🛠️ **解决办法 (Solutions):**
+1. [Solution 1: Concise and highly practical action item based on their lowest score]
+2. [Solution 2: Concise and highly practical action item based on their lowest score]
+3. [Solution 3: Concise and highly practical action item based on their lowest score]
+4. [Solution 4: Concise and highly practical action item based on their lowest score]
+
 -----
+#### 📊 [CAMPUS_DASHBOARD_ANONYMOUS_DATA]
+主题: Clinical Assessment | 精力耗竭: ${100 - academicPct}% | 社交疲劳: ${100 - anxietyPct}% | 火花天数: ${spark.days}
+-----`;
 
-(Note: Ensure you include the exact CAMPUS_DASHBOARD_ANONYMOUS_DATA block format above with "精力耗竭: X%" and "社交疲劳: Y%" so the backend dashboard can parse the metrics).`;
+            let reportGenerated = false;
 
-            try {
-                const data = await callGemini('gemini-2.5-flash', {
-                    system_instruction: { parts: [{ text: "You are a clinical psychologist compiling a student mental wellness assessment report. Be professional, supportive, and clear." }] },
-                    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-                    generationConfig: { temperature: 0.8, maxOutputTokens: 2048 }
-                });
-                
-                removeQuizTyping();
-                if (!data) {
-                    throw new Error('No response from Gemini API proxy.');
+            if (canAttemptGemini()) {
+                try {
+                    const data = await callGemini('gemini-2.5-flash', {
+                        system_instruction: { parts: [{ text: "You are a clinical psychologist compiling a student mental wellness assessment report. Be professional, supportive, and clear." }] },
+                        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                        generationConfig: { temperature: 0.8, maxOutputTokens: 2048 }
+                    });
+                    
+                    removeQuizTyping();
+                    if (data) {
+                        const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                        if (reply && reply.includes('Clinical Mental Health Report')) {
+                            addQuizBubble(reply, 'ai');
+                            reportGenerated = true;
+
+                            // Parse and apply state
+                            const dashMatch = reply.match(/精力耗竭[：:]\s*(\d+)%/);
+                            const tagMatch = reply.match(/\*{3}(.+?)\*{3}/) || reply.match(/\*\*(.+?)\*\*/);
+                            
+                            if (dashMatch) {
+                                const parsedBurnout = parseInt(dashMatch[1], 10);
+                                applyReportDiagnostics(100 - parsedBurnout, selfEsteemPct, anxietyPct, totalScore);
+                            } else {
+                                applyReportDiagnostics(academicPct, selfEsteemPct, anxietyPct, totalScore);
+                            }
+
+                            if (tagMatch) {
+                                spark.personalityTag = tagMatch[1].substring(0, 30);
+                            } else {
+                                spark.personalityTag = totalScore > 20 ? 'Sensitive Soul' : (totalScore > 10 ? 'Balanced Mind' : 'Resilient Anchor');
+                            }
+                        }
+                    }
+                } catch(e) {
+                    console.warn("Gemini report generation failed, using local fallback:", e);
                 }
-                const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || '(No response)';
-                addQuizBubble(reply, 'ai');
-
-                const dashMatch = reply.match(/精力耗竭[：:]\s*(\d+)%/);
-                const tagMatch = reply.match(/\*{3}(.+?)\*{3}/) || reply.match(/\*\*(.+?)\*\*/);
-                
-                if (dashMatch) {
-                    const burnoutPct = parseInt(dashMatch[1], 10);
-                    spark.lastDiagnosis = 'Burnout ' + burnoutPct + '%';
-                    state.diagnostics.burnout = burnoutPct;
-                    state.diagnostics.academicPressure = burnoutPct;
-                    state.diagnostics.stressLevel = totalScore > 20 ? 'High' : (totalScore > 10 ? 'Medium' : 'Low');
-                    updateHeaderStatusBars();
-                }
-                
-                if (tagMatch) {
-                    spark.personalityTag = tagMatch[1].substring(0, 30);
-                } else {
-                    spark.personalityTag = totalScore > 20 ? 'Sensitive Soul' : (totalScore > 10 ? 'Balanced Mind' : 'Resilient Anchor');
-                }
-
-                spark.boxesOpened++;
-                spark.days++;
-                saveSpark(spark);
-                syncQuizUI();
-
-                if (qRestartBtn) qRestartBtn.classList.remove('hidden');
-            } catch(e) {
-                console.error("Quiz report generation failed:", e);
-                removeQuizTyping();
-                addQuizBubble(e.message + '\n\n(Click "Start New Session" to retry.)', 'ai');
-                if (qRestartBtn) qRestartBtn.classList.remove('hidden');
             }
+
+            // Local fallback if Gemini fails or is unavailable
+            if (!reportGenerated) {
+                removeQuizTyping();
+                const localReport = generateLocalReport(academicPct, selfEsteemPct, anxietyPct, spark.days);
+                addQuizBubble(localReport, 'ai');
+                applyReportDiagnostics(academicPct, selfEsteemPct, anxietyPct, totalScore);
+                spark.personalityTag = totalScore > 20 ? 'Sensitive Soul' : (totalScore > 10 ? 'Balanced Mind' : 'Resilient Anchor');
+            }
+
+            spark.boxesOpened++;
+            spark.days++;
+            saveSpark(spark);
+            syncQuizUI();
+
+            if (qRestartBtn) qRestartBtn.classList.remove('hidden');
         }
 
         function handleTypedInput(text) {
