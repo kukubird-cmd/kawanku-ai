@@ -872,6 +872,60 @@ Keep your conversational reply warm, human and concise. The student should feel 
             return;
         }
 
+        // 2.5. Smart Feature Intent Detection — check if user wants a specific feature
+        const featureIntents = [
+            {
+                keywords: ['quiz', '测试', '测验', '问卷', 'emotion quiz', '情绪盲盒', '做测试', '做quiz', '心理测试'],
+                panel: 'quiz-panel',
+                navBtnId: 'nav-quiz',
+                label: '🎲 Emotion Quiz',
+                labelCn: '🎲 情绪盲盒测验'
+            },
+            {
+                keywords: ['shop', '商店', '商城', 'spark shop', '火花商店', '兑换', '买东西', '逛商店'],
+                panel: 'shop-panel',
+                navBtnId: 'nav-shop',
+                label: '🛍️ Spark Shop',
+                labelCn: '🛍️ 火花商店'
+            },
+            {
+                keywords: ['avatar', '换装', '穿搭', '造型', 'studio', '设计', 'customize', '自定义', '换衣服', '发型'],
+                panel: 'studio-panel',
+                navBtnId: 'nav-studio',
+                label: '🎨 Avatar Studio',
+                labelCn: '🎨 虚拟形象工作室'
+            },
+            {
+                keywords: ['biometric', '生物', '心率', 'heart rate', '睡眠', 'sleep', '健康数据', 'smartwatch', '手表'],
+                panel: 'bio-panel',
+                navBtnId: 'nav-bio',
+                label: '📊 Biometric Link',
+                labelCn: '📊 生物监测'
+            },
+            {
+                keywords: ['calm', '冥想', '放松', 'meditation', 'relax', '音乐', 'music', '白噪音', 'soundscape', '疗愈'],
+                panel: 'calm-panel',
+                navBtnId: 'nav-calm',
+                label: '🎵 Calm Hub',
+                labelCn: '🎵 宁静空间'
+            }
+        ];
+
+        const lowerText = text.toLowerCase();
+        const matchedFeature = featureIntents.find(f => f.keywords.some(kw => lowerText.includes(kw)));
+
+        if (matchedFeature) {
+            // Detect language: use Chinese label if input contains Chinese characters
+            const isChinese = /[\u4e00-\u9fff]/.test(text);
+            const featureLabel = isChinese ? matchedFeature.labelCn : matchedFeature.label;
+            const promptMsg = isChinese
+                ? `看起来你想去 <strong>${featureLabel}</strong>！要现在过去吗？`
+                : `It looks like you want to visit <strong>${featureLabel}</strong>! Want to go there now?`;
+
+            appendChatNavigationPrompt(promptMsg, matchedFeature.panel, matchedFeature.navBtnId, isChinese);
+            return;
+        }
+
         // 3. Show typing indicator
         const typingId = showTypingIndicator();
 
@@ -917,6 +971,81 @@ Keep your conversational reply warm, human and concise. The student should feel 
         if (geminiDiagnostic) appendChatMessage('Buddy', geminiDiagnostic);
         speakResponse(reply);
         syncStudentAnalysisToBackend(text, reply, 'text');
+    }
+
+    // Smart navigation prompt with clickable Go / Stay buttons
+    function appendChatNavigationPrompt(promptHtml, panelId, navBtnId, isChinese) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'message buddy-msg';
+
+        const goLabel   = isChinese ? '✅ 带我去！' : '✅ Take me there!';
+        const stayLabel = isChinese ? '💬 不用，继续聊天' : '💬 No, let\'s keep chatting';
+
+        const formattedTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        msgDiv.innerHTML = `
+            <div class="msg-avatar-icon">MB</div>
+            <div class="msg-body">
+                <p>${promptHtml}</p>
+                <div class="chat-nav-actions" style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+                    <button class="chat-nav-go-btn" style="
+                        padding: 8px 18px;
+                        background: linear-gradient(135deg, #00d2ff, #7b2ff7);
+                        color: #fff;
+                        border: none;
+                        border-radius: 20px;
+                        cursor: pointer;
+                        font-weight: 600;
+                        font-size: 0.85rem;
+                        transition: transform 0.15s, box-shadow 0.15s;
+                    ">${goLabel}</button>
+                    <button class="chat-nav-stay-btn" style="
+                        padding: 8px 18px;
+                        background: rgba(255,255,255,0.08);
+                        color: #ccc;
+                        border: 1px solid rgba(255,255,255,0.15);
+                        border-radius: 20px;
+                        cursor: pointer;
+                        font-weight: 500;
+                        font-size: 0.85rem;
+                        transition: transform 0.15s, background 0.15s;
+                    ">${stayLabel}</button>
+                </div>
+                <span class="msg-time">${formattedTime}</span>
+            </div>
+        `;
+
+        // Wire up Go button: navigate to the target panel
+        const goBtn = msgDiv.querySelector('.chat-nav-go-btn');
+        goBtn.addEventListener('click', () => {
+            switchPanel(panelId);
+            // Update sidebar active state
+            DOM.navBtns.forEach(b => b.classList.remove('active'));
+            const targetNavBtn = document.getElementById(navBtnId);
+            if (targetNavBtn) targetNavBtn.classList.add('active');
+            // Disable buttons after click
+            goBtn.disabled = true;
+            goBtn.style.opacity = '0.5';
+            goBtn.style.cursor = 'default';
+            const stayBtn = msgDiv.querySelector('.chat-nav-stay-btn');
+            if (stayBtn) { stayBtn.disabled = true; stayBtn.style.opacity = '0.5'; stayBtn.style.cursor = 'default'; }
+        });
+        goBtn.addEventListener('mouseenter', () => { goBtn.style.transform = 'scale(1.05)'; goBtn.style.boxShadow = '0 0 12px rgba(0,210,255,0.4)'; });
+        goBtn.addEventListener('mouseleave', () => { goBtn.style.transform = 'scale(1)'; goBtn.style.boxShadow = 'none'; });
+
+        // Wire up Stay button: dismiss and continue chatting
+        const stayBtn = msgDiv.querySelector('.chat-nav-stay-btn');
+        stayBtn.addEventListener('click', () => {
+            const actionsDiv = msgDiv.querySelector('.chat-nav-actions');
+            if (actionsDiv) actionsDiv.remove();
+            const confirmMsg = isChinese ? '好的，我们继续聊天吧！有什么想说的尽管告诉我~ 😊' : 'Alright, let\'s keep chatting! Tell me what\'s on your mind 😊';
+            appendChatMessage('Buddy', confirmMsg);
+        });
+        stayBtn.addEventListener('mouseenter', () => { stayBtn.style.background = 'rgba(255,255,255,0.15)'; });
+        stayBtn.addEventListener('mouseleave', () => { stayBtn.style.background = 'rgba(255,255,255,0.08)'; });
+
+        DOM.chatMessages.appendChild(msgDiv);
+        DOM.chatMessages.scrollTop = DOM.chatMessages.scrollHeight;
     }
 
     async function syncStudentAnalysisToBackend(message, reply, modality = 'text', metadata = {}) {
