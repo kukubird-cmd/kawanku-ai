@@ -742,6 +742,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 detail: data?.error || 'The backend could not find a Gemini API key.'
             };
             return null;
+        }
 
         if (response.status === 429) {
             geminiDisabledUntil = Date.now() + GEMINI_QUOTA_COOLDOWN_MS;
