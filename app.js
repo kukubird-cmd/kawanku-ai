@@ -3594,7 +3594,7 @@ For the Report (after monster defeat), respond with:
     })(); // END MentalStreakEngine
 
     // =========================================================================
-    // EMOTION QUIZ — Gemini-powered conversational blind-box quiz
+    // EMOTION QUIZ — Gemini-powered clinical screening quiz
     // =========================================================================
     (function EmotionQuizEngine() {
         const SPARK_KEY = 'kawanku_spark';
@@ -3627,194 +3627,110 @@ For the Report (after monster defeat), respond with:
         }
         syncQuizUI();
 
-        const EVALUATION_SYSTEM_PROMPT = `你现在是 Kawanku AI 心理健康平台的极简主义全能系统架构师。用户刚刚完成了情绪盲盒测试。
-请根据他们选择的答案，严格按照以下结算报告规范输出像电子书签一样的心理结算报告。
-
-# 📐 UI/UX 极简视觉规范 (最高优先级)
-1. 【绝对留白】：字数极度精简，每段话绝不超过 2 行，多用换行，拒绝大段文字墙。
-2. 【极简氛围灯】：文首固定只允许使用 1-2 个与主题相关的质感符号作为顶部视觉锚点。
-
-# 📊 心理状态与人格报告规范
-请直接输出以下结算报告（严格保持留白排版，将用户的学业压力、社交疲劳真实状态翻译为该宇宙主题的隐喻语言）：
-
------
-### 🏷️ 专属人格标签
-*[ 根据表现生成一个高分享欲的当代大学生人格头衔 ]*
-
-### 🧠 心理状态诊断
-- *学业/精力状态：* [基于Q1选项评估，将真实的压力状态翻译为该宇宙主题隐喻语言]
-- *社交/人际状态：* [基于Q2选项评估，将真实的社交疲劳翻译为该宇宙主题隐喻语言]
-
-### ⚡ 精神残余电量
-[■■■□□□□□□□] 30%  (根据用户的答案评估电量百分比，用■和□展示)
-
-### 🔥 Kawanku 火花连击
-- *当前连击：* 🔥 火花已连续点亮 [天数] 天
-
------
-#### 📊 [CAMPUS_DASHBOARD_ANONYMOUS_DATA]
-主题: [主题名字] | 精力耗竭: [百分比]% | 社交疲劳: [百分比]% | 火花天数: [天数]
------`;
-
-        const QUIZ_UNIVERSES = [
+        const QUIZ_ASPECTS = [
             {
-                id: 1,
-                title: "赛博朋克：系统重装",
-                icon: "● SYSTEM ONLINE",
+                name: "Mood & Dysphoria",
                 questions: [
-                    {
-                        q: "🏮 [● SYSTEM ONLINE]\n\n最近你的 CPU 占用率达到 99%（学业过载），系统发出高温警报。你的第一反应是？",
-                        options: [
-                            { key: "A", text: "强行超频，继续运转（硬撑到底）" },
-                            { key: "B", text: "进入安全模式，挂机低功耗运行（选择躺平）" },
-                            { key: "C", text: "寻找散热模组，给主板降降温（寻找外界支持）" }
-                        ]
-                    },
-                    {
-                        q: "社交防火墙拦截到多条未读数据。面对这些密集的社交信号，你选择？",
-                        options: [
-                            { key: "A", text: "一键清理，开启防骚扰模式（完全自我隔离）" },
-                            { key: "B", text: "筛选核心白名单，仅接收重要数据（精准社交）" },
-                            { key: "C", text: "彻底开放端口，迎接所有外接设备（来者不拒）" }
-                        ]
-                    },
-                    {
-                        q: "主控系统检测到核心代码即将崩溃（情绪临界点）。你打算怎么修复？",
-                        options: [
-                            { key: "A", text: "格式化所有情感分区，重新装机（压抑屏蔽情感）" },
-                            { key: "B", text: "运行安全诊断，找出冲突的底层代码（积极面对剖析）" },
-                            { key: "C", text: "呼叫外部技术支持，寻求系统重装帮助（寻找专业倾诉）" }
-                        ]
-                    }
+                    "I feel extremely sad without any clear reason.",
+                    "The feeling of emptiness in my chest is difficult to get rid of.",
+                    "I find it difficult to smile sincerely at others.",
+                    "I feel helpless to change my mood for the better.",
+                    "I feel as if tomorrow holds no meaning at all."
                 ]
             },
             {
-                id: 2,
-                title: "魔法分校：药剂课",
-                icon: "✦ 🔮 ✦",
+                name: "Anhedonia & Lack of Motivation",
                 questions: [
-                    {
-                        q: "✦ 🔮 ✦\n\n你的灵魂药水即将沸腾溢出（学业压力过大），药剂师警告你。你会？",
-                        options: [
-                            { key: "A", text: "加入冰霜粉末，强行压制沸腾（硬撑）" },
-                            { key: "B", text: "熄灭炉火，让药水慢慢冷却（休息放空）" },
-                            { key: "C", text: "向身边的同学借用坩埚分流药水（寻求合作与帮助）" }
-                        ]
-                    },
-                    {
-                        q: "你穿上隐形斗篷隔离了周围的声音。面对热闹的魔法集市，你倾向于？",
-                        options: [
-                            { key: "A", text: "享受绝对的安静，独自在角落待着（独处充电）" },
-                            { key: "B", text: "只脱下兜帽，和熟悉的老友打个招呼（选择性社交）" },
-                            { key: "C", text: "掀开斗篷，融入狂欢的人群中（渴望融入）" }
-                        ]
-                    },
-                    {
-                        q: "坩埚突然出现裂纹，黑色烟雾正在弥漫（情绪崩溃边缘）。你会？",
-                        options: [
-                            { key: "A", text: "用封印咒强行掩盖裂痕，假装没事（隐忍压抑）" },
-                            { key: "B", text: "使用修复咒仔细填补裂缝，寻找原因（自我疗愈）" },
-                            { key: "C", text: "大声呼唤教授，寻求魔法救援（寻求支持）" }
-                        ]
-                    }
+                    "The hobbies I used to enjoy now feel boring.",
+                    "I feel no motivation to start daily tasks.",
+                    "I feel zero energy even after sleeping for a long time.",
+                    "I find it difficult to force myself to shower or clean myself.",
+                    "I feel like a robot moving without a purpose."
                 ]
             },
             {
-                id: 3,
-                title: "深空流浪：宇航猫",
-                icon: "── 🪐 ──",
+                name: "Cognitive Anxiety & Overthinking",
                 questions: [
-                    {
-                        q: "── 🪐 ──\n\n飞船重力系统突然失效，你和物品一起漂浮在空中（学业失控）。你会？",
-                        options: [
-                            { key: "A", text: "拼命抓住固定物，强行稳住身形（过度紧绷）" },
-                            { key: "B", text: "任由自己随波逐流，享受失重感（暂时放弃）" },
-                            { key: "C", text: "寻找喷气背包，主动控制移动方向（积极调整）" }
-                        ]
-                    },
-                    {
-                        q: "星际信号断联，你与母星失去联系。在这段孤独的漂流中，你的状态是？",
-                        options: [
-                            { key: "A", text: "享受无信号的绝对宁静（自我封闭）" },
-                            { key: "B", text: "定期发送求救电波，等待特定回应（被动等待）" },
-                            { key: "C", text: "调整天线方向，积极寻找附近的飞船（主动联系）" }
-                        ]
-                    },
-                    {
-                        q: "飞船氧气储量降至警戒线，警报声大作。你选择如何应对？",
-                        options: [
-                            { key: "A", text: "关闭非必要系统，进入深度休眠以省氧（逃避压抑）" },
-                            { key: "B", text: "排查氧气泄露点，进行紧急修补（积极面对）" },
-                            { key: "C", text: "向附近的星系发送紧急 SOS 广播（呼寻救援）" }
-                        ]
-                    }
+                    "My mind is constantly thinking about bad things that might not even happen.",
+                    "I find it difficult to stop my racing thoughts.",
+                    "I often imagine the worst-case scenario in every situation.",
+                    "I feel excessively worried about my future.",
+                    "It is hard to shut down my mind, even at bedtime."
                 ]
             },
             {
-                id: 4,
-                title: "深夜食堂：疗愈店",
-                icon: "🏮",
+                name: "Physical & Somatic Anxiety Responses",
                 questions: [
-                    {
-                        q: "🏮\n\n连续熬夜让你身心状态发生化学反应，食欲不振（精力耗竭）。此时走进食堂，你会点？",
-                        options: [
-                            { key: "A", text: "超浓缩黑咖啡，强行提神（硬撑）" },
-                            { key: "B", text: "一碗温热的清粥，慢慢恢复元气（自我疗愈）" },
-                            { key: "C", text: "点一份双人套餐，和老板聊聊天（寻求陪伴）" }
-                        ]
-                    },
-                    {
-                        q: "你发现今天食堂的菜品味道异常，似乎有人调换了配方（人际关系敏感）。你会？",
-                        options: [
-                            { key: "A", text: "默默吃完，以后再也不来这家店（回避冲突）" },
-                            { key: "B", text: "委婉地向老板提出建议（沟通解决）" },
-                            { key: "C", text: "大声抱怨，甚至和老板理论（激烈冲突）" }
-                        ]
-                    },
-                    {
-                        q: "食堂突然停电，四周陷入一片黑暗与寂静。此时的你？",
-                        options: [
-                            { key: "A", text: "紧闭双眼，缩在角落等灯亮起（恐惧无助）" },
-                            { key: "B", text: "拿出手机手电筒，照亮自己和周围（自我安抚）" },
-                            { key: "C", text: "询问周围的人是否还好，互相安慰（传递温暖）" }
-                        ]
-                    }
+                    "My heart suddenly beats rapidly without any physical cause.",
+                    "I feel tightness in my chest and find it difficult to take deep breaths.",
+                    "My palms often break into a cold sweat when I feel anxious.",
+                    "My stomach feels upset or nauseous when facing new situations.",
+                    "My neck and shoulder muscles always feel tense."
                 ]
             },
             {
-                id: 5,
-                title: "荒野求生：进化岛",
-                icon: "🌿",
+                name: "Stress Tolerance & Irritability",
                 questions: [
-                    {
-                        q: "🌿\n\n一只巨大的丛林怪兽在身后紧追不舍（deadline 步步逼近）。你的选择是？",
-                        options: [
-                            { key: "A", text: "咬紧牙关，疯狂向前奔跑（硬撑硬拼）" },
-                            { key: "B", text: "寻找安全树洞，躲进去喘口气（避开锋芒）" },
-                            { key: "C", text: "设下简易陷阱，试图减缓怪兽速度（讲究策略）" }
-                        ]
-                    },
-                    {
-                        q: "为了躲避潜在的危险，你选择将自己伪装成一颗石头。当有其他幸存者走过时，你会？",
-                        options: [
-                            { key: "A", text: "继续呼吸，绝不暴露位置（完全防备）" },
-                            { key: "B", text: "观察对方是否有敌意，再决定是否现身（试探交往）" },
-                            { key: "C", text: "主动解除伪装，请求组队前行（渴望合作）" }
-                        ]
-                    },
-                    {
-                        q: "岛上的火山即将喷发，岩浆开始漫延。面临最大的生存考验，你会？",
-                        options: [
-                            { key: "A", text: "闭上眼听天由命，等待奇迹发生（消极等待）" },
-                            { key: "B", text: "观察风向和地势，寻找求生通道（冷静自救）" },
-                            { key: "C", text: "发射唯一的信号弹，等待直升机救援（寻求救助）" }
-                        ]
-                    }
+                    "I become very easily angered over small matters.",
+                    "My patience has been very thin lately.",
+                    "I easily feel irritated by other people's voices or habits.",
+                    "I feel angry when my plans are disrupted, even slightly.",
+                    "I tend to vent my anger on innocent people."
+                ]
+            },
+            {
+                name: "Mental Fatigue & Burnout",
+                questions: [
+                    "I feel my brain is too overloaded to think anymore.",
+                    "I experience mental fatigue that does not go away even after a vacation.",
+                    "I have difficulty making simple decisions.",
+                    "I feel like a robot carrying out a routine without any soul.",
+                    "I feel my mental energy has been completely drained."
+                ]
+            },
+            {
+                name: "Trauma Awareness & Emotional Triggers",
+                questions: [
+                    "Painful past memories often pop into my mind suddenly.",
+                    "I am easily startled by loud noises or sudden movements.",
+                    "Certain places or situations can make me feel panicked for no reason.",
+                    "I feel my nervous system is always on high alert for danger.",
+                    "I feel past trauma has blocked my potential to move forward."
+                ]
+            },
+            {
+                name: "Biological Patterns & Sleep Quality",
+                questions: [
+                    "It takes me more than an hour to fall asleep.",
+                    "I frequently wake up in the middle of the night and struggle to fall back asleep.",
+                    "My appetite has completely disappeared lately.",
+                    "I do not feel refreshed at all, even after sleeping for more than 8 hours.",
+                    "I feel as if my body rejects all efforts to rest."
+                ]
+            },
+            {
+                name: "Social Relationships & Self-Isolation",
+                questions: [
+                    "I intentionally leave friends' messages unanswered for days.",
+                    "I prefer to spend my days off alone in a dark room.",
+                    "I feel like nobody truly understands what I am going through.",
+                    "I tend to make up excuses to avoid attending gatherings.",
+                    "I feel like an actor wearing a mask of cheerfulness in front of the public."
+                ]
+            },
+            {
+                name: "Self-Esteem & Psychological Resilience",
+                questions: [
+                    "I feel worthless and that I don't have any talent.",
+                    "I am constantly comparing my weaknesses with others' strengths.",
+                    "I often feel like I am a fraud.",
+                    "I find it difficult to bounce back after experiencing failure.",
+                    "I find it hard to love myself with all my flaws."
                 ]
             }
         ];
 
-        let activeUniverse = null;
+        let activeQuestions = [];
         let currentQuestionIdx = 0;
         let selectedAnswers = [];
 
@@ -3842,11 +3758,19 @@ For the Report (after monster defeat), respond with:
             if (el) el.remove();
         }
 
-        function renderOptions(qData) {
+        function renderOptions() {
             if (!qOptions) return;
             qOptions.innerHTML = '';
             qOptions.classList.remove('hidden');
-            qData.options.forEach(opt => {
+            
+            const LIKERT_OPTIONS = [
+                { key: "0", text: "Never", score: 0 },
+                { key: "1", text: "Rarely", score: 1 },
+                { key: "2", text: "Often", score: 2 },
+                { key: "3", text: "Always", score: 3 }
+            ];
+            
+            LIKERT_OPTIONS.forEach(opt => {
                 const btn = document.createElement('button');
                 btn.className = 'quiz-opt-btn';
                 btn.innerHTML = `<strong>${opt.key}.</strong> ${opt.text}`;
@@ -3856,8 +3780,16 @@ For the Report (after monster defeat), respond with:
         }
 
         function handleOptionSelection(opt) {
-            selectedAnswers.push(opt.key + '. ' + opt.text);
-            addQuizBubble(opt.key + '. ' + opt.text, 'user');
+            const statement = activeQuestions[currentQuestionIdx];
+            const aspectName = QUIZ_ASPECTS[currentQuestionIdx].name;
+            selectedAnswers.push({
+                aspect: aspectName,
+                statement: statement,
+                score: opt.score,
+                optionText: opt.text
+            });
+            
+            addQuizBubble(opt.text, 'user');
             
             if (qOptions) qOptions.classList.add('hidden');
             currentQuestionIdx++;
@@ -3865,15 +3797,15 @@ For the Report (after monster defeat), respond with:
         }
 
         function showNextQuestion() {
-            if (!activeUniverse) return;
-            if (currentQuestionIdx < activeUniverse.questions.length) {
-                const qData = activeUniverse.questions[currentQuestionIdx];
+            if (currentQuestionIdx < 10) {
+                const statement = activeQuestions[currentQuestionIdx];
+                const aspectName = QUIZ_ASPECTS[currentQuestionIdx].name;
                 addQuizTyping();
                 setTimeout(() => {
                     removeQuizTyping();
-                    addQuizBubble(qData.q, 'ai');
-                    renderOptions(qData);
-                }, 600);
+                    addQuizBubble(`Question ${currentQuestionIdx + 1}/10 (${aspectName}):\n\n"${statement}"`, 'ai');
+                    renderOptions();
+                }, 400);
             } else {
                 generateFinalReport();
             }
@@ -3887,40 +3819,48 @@ For the Report (after monster defeat), respond with:
             }
             addQuizTyping();
 
-            const prompt = `你现在是 Kawanku AI 心理健康平台的极简主义全能系统架构师。用户刚刚完成了情绪盲盒测试。
-测试主题为：【${activeUniverse.title}】
-用户选择的答案为：
-1. 学业压力相关题：${selectedAnswers[0]}
-2. 社交人际相关题：${selectedAnswers[1]}
-3. 临界状态相关题：${selectedAnswers[2]}
+            const totalScore = selectedAnswers.reduce((sum, item) => sum + item.score, 0);
+            const answerSummary = selectedAnswers.map((item, idx) => 
+                `${idx + 1}. ${item.aspect} ("${item.statement}"): Score ${item.score} (${item.optionText})`
+            ).join('\n');
 
-请根据这三个选项，严格按照以下“结算报告规范”输出像电子书签一样的结算报告。保持极简留白排版，每段话绝不超过2行，多用换行：
+            const simulatedHR = state.biometrics.heartRate || 75;
+            const simulatedSleep = state.biometrics.sleepDuration || 7.0;
 
------
-### 🏷️ 专属人格标签
-*[ 根据表现生成一个高分享欲的当代大学生人格头衔 ]*
+            const prompt = `You are MindBuddy's Clinical Psychometric Analyst.
+The student has completed a 10-question adaptive mental health screening questionnaire (scored via a 4-point Likert scale: 0 = Never, 1 = Rarely, 2 = Often, 3 = Always).
 
-### 🧠 心理状态诊断
-- 学业/精力状态：[将真实的压力状态翻译为该宇宙主题语言，例如CPU过载、药剂沸腾等]
-- 社交/人际状态：[将真实的社交疲劳翻译为该宇宙主题语言，例如防火墙隔离、隐形斗篷等]
+Here are the results:
+${answerSummary}
 
-### ⚡ 精神残余电量
-[■■■□□□□□□□] 30% (根据用户的答案评估电量百分比，用■和□展示)
+Total Score: ${totalScore} / 30
 
-### 🔥 Kawanku 火花连击
-- 当前连击：🔥 火花已连续点亮 ${spark.days} 天
+Current physiological indicators:
+- Heart Rate: ${simulatedHR} BPM
+- Sleep Duration: ${simulatedSleep} hrs
 
+Based on this data, construct a detailed psychological report in English.
+Keep paragraphs relatively concise and readability high.
+The output format MUST contain:
+
+1. A custom, inspiring persona tag wrapped in triple asterisks e.g. ***Resilient Anchor*** or ***Luminous Thinker***
+2. A score breakdown and clinical interpretation of the 10 aspects (Mood, Motivation, Overthinking, Physical response, Irritability, Fatigue, Trauma triggers, Sleep, Social life, Self-esteem).
+3. Practical advice/recommendations tailored to their profile.
+4. An anonymous data line at the very bottom formatted exactly like this:
 -----
 #### 📊 [CAMPUS_DASHBOARD_ANONYMOUS_DATA]
-主题: ${activeUniverse.title} | 精力耗竭: [评估的百分比]% | 社交疲劳: [评估的百分比]% | 火花天数: ${spark.days}
------`;
+主题: Clinical Assessment | 精力耗竭: [anxiety/depression percentage]% | 社交疲劳: [social percentage]% | 火花天数: ${spark.days}
+-----
+
+(Note: Ensure you include the exact CAMPUS_DASHBOARD_ANONYMOUS_DATA block format above with "精力耗竭: X%" and "社交疲劳: Y%" so the backend dashboard can parse the metrics).`;
 
             try {
                 const data = await callGemini('gemini-2.5-flash', {
-                    system_instruction: { parts: [{ text: EVALUATION_SYSTEM_PROMPT }] },
+                    system_instruction: { parts: [{ text: "You are a clinical psychologist compiling a student mental wellness assessment report. Be professional, supportive, and clear." }] },
                     contents: [{ role: 'user', parts: [{ text: prompt }] }],
-                    generationConfig: { temperature: 0.85, maxOutputTokens: 2048 }
+                    generationConfig: { temperature: 0.8, maxOutputTokens: 2048 }
                 });
+                
                 removeQuizTyping();
                 if (!data) {
                     throw new Error('No response from Gemini API proxy.');
@@ -3928,11 +3868,23 @@ For the Report (after monster defeat), respond with:
                 const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || '(No response)';
                 addQuizBubble(reply, 'ai');
 
-                // Parse metrics to save state
                 const dashMatch = reply.match(/精力耗竭[：:]\s*(\d+)%/);
-                const tagMatch = reply.match(/专属人格标签[\s\S]*?\*\[?\s*(.+?)\s*\]?\*/);
-                if (dashMatch) spark.lastDiagnosis = '精力耗竭 ' + dashMatch[1] + '%';
-                if (tagMatch) spark.personalityTag = tagMatch[1].substring(0, 30);
+                const tagMatch = reply.match(/\*{3}(.+?)\*{3}/) || reply.match(/\*\*(.+?)\*\*/);
+                
+                if (dashMatch) {
+                    const burnoutPct = parseInt(dashMatch[1], 10);
+                    spark.lastDiagnosis = 'Burnout ' + burnoutPct + '%';
+                    state.diagnostics.burnout = burnoutPct;
+                    state.diagnostics.academicPressure = burnoutPct;
+                    state.diagnostics.stressLevel = totalScore > 20 ? 'High' : (totalScore > 10 ? 'Medium' : 'Low');
+                    updateHeaderStatusBars();
+                }
+                
+                if (tagMatch) {
+                    spark.personalityTag = tagMatch[1].substring(0, 30);
+                } else {
+                    spark.personalityTag = totalScore > 20 ? 'Sensitive Soul' : (totalScore > 10 ? 'Balanced Mind' : 'Resilient Anchor');
+                }
 
                 spark.boxesOpened++;
                 spark.days++;
@@ -3941,6 +3893,7 @@ For the Report (after monster defeat), respond with:
 
                 if (qRestartBtn) qRestartBtn.classList.remove('hidden');
             } catch(e) {
+                console.error("Quiz report generation failed:", e);
                 removeQuizTyping();
                 addQuizBubble(e.message + '\n\n(Click "Start New Session" to retry.)', 'ai');
                 if (qRestartBtn) qRestartBtn.classList.remove('hidden');
@@ -3948,31 +3901,127 @@ For the Report (after monster defeat), respond with:
         }
 
         function handleTypedInput(text) {
-            if (!activeUniverse) return;
-            if (currentQuestionIdx >= activeUniverse.questions.length) return;
-            const qData = activeUniverse.questions[currentQuestionIdx];
+            if (currentQuestionIdx >= 10) return;
+            const normalized = text.toLowerCase().trim();
             
-            const match = text.toUpperCase().trim().match(/^[A-C]/);
-            if (match) {
-                const key = match[0];
-                const opt = qData.options.find(o => o.key === key);
-                if (opt) {
-                    handleOptionSelection(opt);
-                    return;
+            let score = -1;
+            if (normalized === '0' || normalized.startsWith('nev') || normalized === 'never') score = 0;
+            else if (normalized === '1' || normalized.startsWith('rar') || normalized === 'rarely') score = 1;
+            else if (normalized === '2' || normalized.startsWith('oft') || normalized === 'often') score = 2;
+            else if (normalized === '3' || normalized.startsWith('alw') || normalized === 'always') score = 3;
+            
+            if (score === -1) {
+                const match = normalized.match(/^[0-3]/);
+                if (match) {
+                    score = parseInt(match[0], 10);
+                } else {
+                    const letterMatch = normalized.match(/^[a-d]/);
+                    if (letterMatch) {
+                        const code = letterMatch[0].charCodeAt(0) - 97;
+                        score = code;
+                    }
                 }
             }
-            handleOptionSelection({ key: "Typed", text: text });
+            
+            if (score >= 0 && score <= 3) {
+                const LIKERT_OPTIONS = [
+                    { key: "0", text: "Never", score: 0 },
+                    { key: "1", text: "Rarely", score: 1 },
+                    { key: "2", text: "Often", score: 2 },
+                    { key: "3", text: "Always", score: 3 }
+                ];
+                handleOptionSelection(LIKERT_OPTIONS[score]);
+            } else {
+                addQuizBubble("Please enter a valid option: 0 (Never), 1 (Rarely), 2 (Often), or 3 (Always).", 'ai');
+            }
         }
 
         async function startQuizSession() {
-            activeUniverse = QUIZ_UNIVERSES[Math.floor(Math.random() * QUIZ_UNIVERSES.length)];
             currentQuestionIdx = 0;
             selectedAnswers = [];
+            activeQuestions = [];
+            
             if (qMessages) qMessages.innerHTML = '';
-            if (qBadge) qBadge.innerText = '🎲 ' + activeUniverse.title;
+            if (qBadge) qBadge.innerText = '🎲 Clinical Assessment Quiz';
             if (qStartBtn) qStartBtn.classList.add('hidden');
             if (qRestartBtn) qRestartBtn.classList.add('hidden');
-            showNextQuestion();
+            
+            addQuizBubble("Initialising AI clinical assessment construction... Analyzing student logs and biometrics...", 'ai');
+            addQuizTyping();
+            
+            const simulatedHR = state.biometrics.heartRate || 75;
+            const simulatedSleep = state.biometrics.sleepDuration || 7.0;
+            const burnout = state.diagnostics.burnout || 30;
+            const anxiety = state.diagnostics.socialAnxiety || 30;
+            const academic = state.diagnostics.academicPressure || 30;
+            const loneliness = state.diagnostics.loneliness || 30;
+            
+            const prompt = `Student Profile:
+- Heart Rate: ${simulatedHR} BPM
+- Sleep Duration: ${simulatedSleep} hrs
+- Burnout: ${burnout}%
+- Social Anxiety: ${anxiety}%
+- Academic Pressure: ${academic}%
+- Loneliness: ${loneliness}%
+
+You are an AI psychiatric test compiler.
+Based on the student's status, choose or customize exactly 1 screening statement for each of the following 10 aspects to construct a personalized 10-question mental health questionnaire.
+Choose from or base on the following pools:
+${QUIZ_ASPECTS.map((a, idx) => `Aspect ${idx + 1} (${a.name}):\n${a.questions.map(q => `- ${q}`).join('\n')}`).join('\n\n')}
+
+Return ONLY a JSON array of exactly 10 strings representing the questions, in order from Aspect 1 to Aspect 10. No extra formatting, markdown tags, or text.
+Example format:
+[
+  "statement 1",
+  "statement 2",
+  ...
+]`;
+
+            try {
+                let questions = null;
+                if (canAttemptGemini()) {
+                    const data = await callGemini('gemini-2.5-flash', {
+                        system_instruction: { parts: [{ text: "You are a specialized JSON generator. You output raw JSON arrays containing strings and nothing else." }] },
+                        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                        generationConfig: { temperature: 0.7, maxOutputTokens: 1000 }
+                    });
+                    
+                    if (data) {
+                        const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                        const arrMatch = rawText.match(/\[\s*[\s\S]*?\s*\]/);
+                        if (arrMatch) {
+                            try {
+                                questions = JSON.parse(arrMatch[0]);
+                            } catch(e) {
+                                console.warn("Failed parsing adaptive quiz questions JSON:", e);
+                            }
+                        }
+                    }
+                }
+                
+                removeQuizTyping();
+                
+                if (!questions || !Array.isArray(questions) || questions.length !== 10) {
+                    console.log("Using local fallback questions selection.");
+                    questions = QUIZ_ASPECTS.map(aspect => {
+                        const randIdx = Math.floor(Math.random() * aspect.questions.length);
+                        return aspect.questions[randIdx];
+                    });
+                }
+                
+                activeQuestions = questions;
+                addQuizBubble("AI questionnaire constructed! Starting the 10-question check-in. For each question, please select the frequency of your experience over the past two weeks.", 'ai');
+                showNextQuestion();
+            } catch(e) {
+                console.error("Adaptive quiz initialization failed:", e);
+                removeQuizTyping();
+                activeQuestions = QUIZ_ASPECTS.map(aspect => {
+                    const randIdx = Math.floor(Math.random() * aspect.questions.length);
+                    return aspect.questions[randIdx];
+                });
+                addQuizBubble("Starting check-in (local fallback)...", 'ai');
+                showNextQuestion();
+            }
         }
 
         if (qStartBtn) qStartBtn.addEventListener('click', startQuizSession);
