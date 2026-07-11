@@ -485,9 +485,24 @@ body {
    SVG AVATAR INTERACTIVE ANIMATIONS
    ========================================== */
 
-#mindbuddy-svg {
+.avatar-viewport {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
+    object-fit: contain;
+    pointer-events: none; /* Prevents user selection/dragging breaks */
 }
 
 .glow-pulse {

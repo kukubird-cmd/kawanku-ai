@@ -278,16 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // INITIALIZATION & TAB NAVIGATION
     // ----------------------------------------------------------------------
     function init() {
-        // Clone the main SVG into the studio preview container
-        const mainSVG = document.getElementById('mindbuddy-svg');
-        const studioContainer = document.getElementById('studio-avatar-container');
-        if (mainSVG && studioContainer) {
-            const clonedSVG = mainSVG.cloneNode(true);
-            clonedSVG.id = 'mindbuddy-studio-svg';
-            studioContainer.appendChild(clonedSVG);
-        }
-
-        // Init SVG layout components
+        // Setup initial avatar state rendering
         renderAvatarVisuals();
         
         // Hook up Sidebar Nav links
@@ -573,10 +564,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.documentElement.style.setProperty('--glow-color-2', conf.glowColor2);
 
         // Apply to both the main chat avatar and the studio preview
-        const mainSVG   = document.getElementById('mindbuddy-svg');
-        const studioSVG = document.getElementById('mindbuddy-studio-svg');
-        applyAvatarToSVG(mainSVG, conf);
-        applyAvatarToSVG(studioSVG, conf);
+        const mainContainer   = document.getElementById('avatar-container');
+        const studioContainer = document.getElementById('studio-avatar-container');
+        applyAvatarToSVG(mainContainer, conf);
+        applyAvatarToSVG(studioContainer, conf);
 
         // Update expression badge label
         if (DOM.avatarExpressionLabel) {
@@ -604,7 +595,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Expression class for CSS targeting
-        [mainSVG, studioSVG].forEach(svg => {
+        [mainContainer, studioContainer].forEach(svg => {
             if (!svg) return;
             svg.classList.remove('expression-friendly', 'expression-thoughtful', 'expression-attentive', 'expression-excited');
             svg.classList.add('expression-' + conf.expression);
@@ -614,14 +605,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Dynamic speaking controls — targets both SVGs by ID
     let mouthAnimationTimer = null;
     function triggerAvatarSpeechSpeak(durationMs) {
-        ['mindbuddy-svg', 'mindbuddy-studio-svg'].forEach(id => {
+        ['avatar-container', 'studio-avatar-container'].forEach(id => {
             const svg = document.getElementById(id);
             if (svg) svg.classList.add('speaking-now');
         });
 
         if (mouthAnimationTimer) clearTimeout(mouthAnimationTimer);
         mouthAnimationTimer = setTimeout(() => {
-            ['mindbuddy-svg', 'mindbuddy-studio-svg'].forEach(id => {
+            ['avatar-container', 'studio-avatar-container'].forEach(id => {
                 const svg = document.getElementById(id);
                 if (svg) svg.classList.remove('speaking-now');
             });
