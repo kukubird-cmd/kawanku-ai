@@ -3744,6 +3744,8 @@ For the Report (after monster defeat), respond with:
             div.innerText = text;
             qMessages.appendChild(div);
             qMessages.scrollTop = qMessages.scrollHeight;
+            // Auto-scroll the page so the new bubble is visible
+            div.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
         function addQuizTyping() {
@@ -3808,6 +3810,10 @@ For the Report (after monster defeat), respond with:
                     removeQuizTyping();
                     addQuizBubble(`Question ${currentQuestionIdx + 1}/10 (${aspectName}):\n\n"${statement}"`, 'ai');
                     renderOptions();
+                    // Smooth-scroll the options into view so users don't have to scroll manually
+                    if (qOptions) {
+                        setTimeout(() => qOptions.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+                    }
                 }, 400);
             } else {
                 generateFinalReport();
