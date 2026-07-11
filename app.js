@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    MINDBUDDY COMPANION CLIENT-SIDE LOGIC
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
@@ -4311,574 +4311,424 @@ Example format:
     })();
 
     // =========================================================================
-    // GAMES & RELAXATION PANEL ENGINE — STEMGINEERS Innovation Project
+    // 开心消消乐 HAPPY MATCH-3 ENGINE — STEMGINEERS Innovation Project
     // =========================================================================
     (function RelaxationGamesEngine() {
-        // AI-Driven Entry Gateway Elements
-        const gatewayRobot = document.getElementById('gateway-robot');
-        const gatewayMoodBadge = document.getElementById('gateway-mood-badge');
-        const gatewaySpeechBubble = document.getElementById('gateway-speech-bubble');
-        const statusToggleBtn = document.getElementById('status-toggle-btn');
-        const cardMatch3 = document.getElementById('card-match3');
-        const cardTrash = document.getElementById('card-trash');
-        const tagMatch3 = document.getElementById('tag-match3');
-        const tagTrash = document.getElementById('tag-trash');
-
-        // Match-3 Game Elements
+        // ── DOM refs ──────────────────────────────────────────────────────────
         const match3StartAction = document.getElementById('match3-start-action');
-        const match3GameArena = document.getElementById('match3-game-arena');
-        const match3Board = document.getElementById('match3-board');
-        const match3Progress = document.getElementById('match3-progress');
+        const match3GameArena   = document.getElementById('match3-game-arena');
+        const match3Board       = document.getElementById('match3-board');
+        const match3Progress    = document.getElementById('match3-progress');
         const match3ProgressVal = document.getElementById('match3-progress-val');
-        const btnStartMatch3 = document.getElementById('btn-start-match3');
-        const btnQuitMatch3 = document.getElementById('btn-quit-match3');
+        const btnStartMatch3    = document.getElementById('btn-start-match3');
+        const btnQuitMatch3     = document.getElementById('btn-quit-match3');
+        const surveyInline      = document.getElementById('survey-inline');
+        const surveyPrompt      = document.getElementById('survey-robot-prompt');
+        const hintText          = document.getElementById('match3-hint-text');
 
-        // Emotional Trash Can Elements
-        const trashStartAction = document.getElementById('trash-start-action');
-        const trashGameArena = document.getElementById('trash-game-arena');
-        const trashTextInput = document.getElementById('trash-text-input');
-        const btnStartTrash = document.getElementById('btn-start-trash');
-        const btnDestroyTrash = document.getElementById('btn-destroy-trash');
-        const btnQuitTrash = document.getElementById('btn-quit-trash');
-        const crushStage = document.getElementById('crush-stage');
-        const crushedPaper = document.getElementById('crushed-paper');
-        const crushFlash = document.getElementById('crush-flash');
-
-        // Post-Game Survey Elements
-        const surveyModal = document.getElementById('survey-modal');
-        const surveyRobotPrompt = document.getElementById('survey-robot-prompt');
-
-        // Global Game Variables
-        let currentMoodState = 'A'; // 'A' or 'B'
-        
-        // Match-3 State
-        const GRID_ROWS = 6;
-        const GRID_COLS = 6;
+        // ── Fruit SVG tiles (cute, colourful, recognisable) ───────────────────
         const TILE_TYPES = [
-            { id: 1, char: '🟪', name: 'mangosteen' }, // Mangosteen
-            { id: 2, char: '🟨', name: 'durian' },     // Durian
-            { id: 3, char: '🥤', name: 'milo' },       // Milo Dinosaur
-            { id: 4, char: '🟥', name: 'rambutan' },   // Rambutan
-            { id: 5, char: '🤖', name: 'robot' }       // RobotFace
-        ];
-        let boardState = []; // 2D array of tile objects
-        let selectedTile = null;
-        let isSwapping = false;
-        let match3Score = 0;
-        const WIN_MATCH_COUNT = 8; // 8 matches to fill relaxation bar
-
-        // Localized Supportive Phrases
-        const SUPPORTIVE_PHRASES = [
-            "Relax-lah, you are doing great! 😊",
-            "Tak apa, I fully support you! 🤍",
-            "Steady-lah Kawan, tomorrow is a new day! 🌟",
-            "Chill-lah, one step at a time. 🧘",
-            "Don't worry too much, you got this! 💪",
-            "Sabar-lah, everything will turn out fine! ✨"
-        ];
-
-        // ---------------------------------------------------------------------
-        // AI GATEWAY STATE CONTROLLER
-        // ---------------------------------------------------------------------
-        function setMoodState(stateStr) {
-            currentMoodState = stateStr;
-            
-            // Update switch active classes
-            statusToggleBtn.querySelectorAll('.switch-option').forEach(opt => {
-                if (opt.getAttribute('data-state') === stateStr) {
-                    opt.classList.add('active');
-                } else {
-                    opt.classList.remove('active');
-                }
-            });
-
-            // Reset mascot classes
-            gatewayRobot.classList.remove('state-anxious', 'state-frustrated');
-
-            if (stateStr === 'A') {
-                // State A: Anxious / Stress Detected
-                gatewayRobot.classList.add('state-anxious');
-                gatewayMoodBadge.innerText = 'State A: Anxiety / Stress';
-                gatewayMoodBadge.className = 'status-badge status-anxious';
-                gatewaySpeechBubble.innerHTML = "Hey Kawan, I sense you're feeling anxious or overwhelmed. Let's take a 2-minute break and clear your mind. I highly recommend playing our <strong>'Cognitive Shifting Match-3'</strong>!";
-                
-                // Highlight recommendation card
-                cardMatch3.classList.add('recommend-pulse');
-                cardTrash.classList.remove('recommend-pulse');
-                tagMatch3.classList.remove('hidden');
-                tagTrash.classList.add('hidden');
-            } else {
-                // State B: Anger / Frustration Detected
-                gatewayRobot.classList.add('state-frustrated');
-                gatewayMoodBadge.innerText = 'State B: Frustration / Anger';
-                gatewayMoodBadge.className = 'status-badge status-frustrated';
-                gatewaySpeechBubble.innerHTML = "Hey Kawan, did something upset you today? Don't bottle it up. Write it down in the <strong>'Emotional Trash Can'</strong> and let's destroy it together!";
-                
-                // Highlight recommendation card
-                cardTrash.classList.add('recommend-pulse');
-                cardMatch3.classList.remove('recommend-pulse');
-                tagTrash.classList.remove('hidden');
-                tagMatch3.classList.add('hidden');
+            {
+                id: 1, name: 'Mangosteen 山竹',
+                color: '#6d28d9',
+                svg: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- leaves -->
+                    <ellipse cx="18" cy="9" rx="5" ry="3" fill="#16a34a" transform="rotate(-20 18 9)"/>
+                    <ellipse cx="24" cy="7" rx="5" ry="3" fill="#22c55e" transform="rotate(0 24 7)"/>
+                    <ellipse cx="30" cy="9" rx="5" ry="3" fill="#16a34a" transform="rotate(20 30 9)"/>
+                    <!-- shell -->
+                    <circle cx="24" cy="28" r="17" fill="#4c1d95"/>
+                    <circle cx="24" cy="28" r="15" fill="#6d28d9"/>
+                    <!-- highlight -->
+                    <ellipse cx="19" cy="21" rx="5" ry="4" fill="#8b5cf6" opacity="0.5"/>
+                    <!-- crown at bottom -->
+                    <path d="M17 42 Q24 46 31 42" stroke="#4c1d95" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                    <circle cx="17" cy="42" r="1.8" fill="#a78bfa"/>
+                    <circle cx="24" cy="44.5" r="1.8" fill="#a78bfa"/>
+                    <circle cx="31" cy="42" r="1.8" fill="#a78bfa"/>
+                </svg>`
+            },
+            {
+                id: 2, name: 'Durian 榴莲',
+                color: '#d97706',
+                svg: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- stem & leaf -->
+                    <rect x="22" y="3" width="4" height="7" rx="2" fill="#92400e"/>
+                    <ellipse cx="28" cy="6" rx="5" ry="2.5" fill="#16a34a" transform="rotate(30 28 6)"/>
+                    <!-- body -->
+                    <ellipse cx="24" cy="30" rx="16" ry="14" fill="#f59e0b"/>
+                    <ellipse cx="24" cy="30" rx="13" ry="11" fill="#fbbf24"/>
+                    <!-- spikes -->
+                    <g stroke="#92400e" stroke-width="1.2" stroke-linecap="round">
+                        <line x1="24" y1="16" x2="22" y2="11"/>
+                        <line x1="30" y1="17" x2="30" y2="12"/>
+                        <line x1="36" y1="21" x2="39" y2="17"/>
+                        <line x1="38" y1="28" x2="43" y2="27"/>
+                        <line x1="36" y1="35" x2="40" y2="37"/>
+                        <line x1="12" y1="21" x2="9" y2="17"/>
+                        <line x1="10" y1="28" x2="5" y2="27"/>
+                        <line x1="12" y1="35" x2="8" y2="37"/>
+                        <line x1="18" y1="17" x2="16" y2="12"/>
+                    </g>
+                    <!-- segments -->
+                    <path d="M24 19 Q28 27 24 35 Q20 27 24 19Z" fill="#fde68a" opacity="0.7"/>
+                    <path d="M17 22 Q24 27 18 36" stroke="#fde68a" stroke-width="1" fill="none" opacity="0.5"/>
+                    <path d="M31 22 Q24 27 30 36" stroke="#fde68a" stroke-width="1" fill="none" opacity="0.5"/>
+                    <!-- highlight -->
+                    <ellipse cx="20" cy="23" rx="4" ry="3" fill="white" opacity="0.15"/>
+                </svg>`
+            },
+            {
+                id: 3, name: 'Rambutan 红毛丹',
+                color: '#dc2626',
+                svg: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- stem -->
+                    <rect x="22" y="3" width="4" height="6" rx="2" fill="#92400e"/>
+                    <!-- body -->
+                    <circle cx="24" cy="28" r="16" fill="#b91c1c"/>
+                    <circle cx="24" cy="28" r="13" fill="#dc2626"/>
+                    <!-- hairs / spines -->
+                    <g stroke="#ef4444" stroke-width="1.8" stroke-linecap="round">
+                        <line x1="24" y1="12" x2="24" y2="8"/>
+                        <line x1="31" y1="14" x2="34" y2="10"/>
+                        <line x1="37" y1="20" x2="41" y2="18"/>
+                        <line x1="39" y1="28" x2="44" y2="28"/>
+                        <line x1="37" y1="36" x2="41" y2="38"/>
+                        <line x1="31" y1="41" x2="34" y2="45"/>
+                        <line x1="24" y1="43" x2="24" y2="47"/>
+                        <line x1="17" y1="41" x2="14" y2="45"/>
+                        <line x1="11" y1="36" x2="7" y2="38"/>
+                        <line x1="9" y1="28" x2="4" y2="28"/>
+                        <line x1="11" y1="20" x2="7" y2="18"/>
+                        <line x1="17" y1="14" x2="14" y2="10"/>
+                    </g>
+                    <!-- white flesh peek -->
+                    <circle cx="24" cy="28" r="8" fill="#fde68a" opacity="0.2"/>
+                    <!-- highlight -->
+                    <ellipse cx="19" cy="22" rx="5" ry="3.5" fill="white" opacity="0.18"/>
+                </svg>`
+            },
+            {
+                id: 4, name: 'Banana 香蕉',
+                color: '#ca8a04',
+                svg: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- stem -->
+                    <path d="M28 6 Q30 8 28 11" stroke="#92400e" stroke-width="3" stroke-linecap="round" fill="none"/>
+                    <!-- banana curve -->
+                    <path d="M10 34 Q8 20 20 12 Q32 6 38 16 Q42 24 36 32 Q30 38 22 38 Q14 38 10 34Z" fill="#fbbf24"/>
+                    <path d="M13 32 Q11 20 21 14 Q31 9 36 18 Q39 24 34 30 Q28 36 21 36 Q15 36 13 32Z" fill="#fde68a"/>
+                    <!-- ridge lines -->
+                    <path d="M16 30 Q15 20 22 14" stroke="#f59e0b" stroke-width="1" fill="none" opacity="0.6"/>
+                    <path d="M20 34 Q18 22 24 13" stroke="#f59e0b" stroke-width="1" fill="none" opacity="0.6"/>
+                    <path d="M25 35 Q23 24 28 14" stroke="#f59e0b" stroke-width="1" fill="none" opacity="0.6"/>
+                    <!-- tip -->
+                    <path d="M36 32 Q38 35 36 37" stroke="#92400e" stroke-width="2" stroke-linecap="round" fill="none"/>
+                    <!-- highlight -->
+                    <ellipse cx="22" cy="20" rx="6" ry="3" fill="white" opacity="0.2" transform="rotate(-30 22 20)"/>
+                </svg>`
+            },
+            {
+                id: 5, name: 'Mango 芒果',
+                color: '#ea580c',
+                svg: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- stem & leaf -->
+                    <rect x="22" y="3" width="4" height="7" rx="2" fill="#92400e"/>
+                    <ellipse cx="30" cy="6" rx="6" ry="2.5" fill="#16a34a" transform="rotate(25 30 6)"/>
+                    <!-- body -->
+                    <path d="M24 43 C10 43 7 30 9 22 C11 14 17 9 24 9 C31 9 37 14 39 22 C41 30 38 43 24 43Z" fill="#f97316"/>
+                    <path d="M24 40 C12 40 10 29 12 22 C14 16 19 12 24 12 C29 12 34 16 36 22 C38 29 36 40 24 40Z" fill="#fb923c"/>
+                    <!-- blush -->
+                    <ellipse cx="30" cy="25" rx="6" ry="8" fill="#fbbf24" opacity="0.45"/>
+                    <!-- highlight -->
+                    <ellipse cx="18" cy="19" rx="5" ry="4" fill="white" opacity="0.2"/>
+                </svg>`
             }
+        ];
+
+        // ── Game state ────────────────────────────────────────────────────────
+        const ROWS = 6, COLS = 6;
+        const WIN_MATCHES = 10;
+        let board       = [];   // 2-D array of tile objects
+        let selected    = null;
+        let busy        = false;
+        let score       = 0;
+
+        // ── Utility ───────────────────────────────────────────────────────────
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        // ── Tile SVG helper ───────────────────────────────────────────────────
+        function makeTileHTML(type) {
+            return `<div class="tile-inner" style="--tc:${type.color}">
+                        <div class="tile-svg">${type.svg}</div>
+                        <div class="tile-name">${type.name.split(' ')[1] || type.name.split(' ')[0]}</div>
+                    </div>`;
         }
 
-        // Toggle state click handler
-        if (statusToggleBtn) {
-            statusToggleBtn.addEventListener('click', (e) => {
-                const opt = e.target.closest('.switch-option');
-                if (opt) {
-                    setMoodState(opt.getAttribute('data-state'));
-                }
-            });
-        }
-
-        // ---------------------------------------------------------------------
-        // MATCH-3 PUZZLE CORE LOGIC
-        // ---------------------------------------------------------------------
-        function startMatch3Game() {
-            match3StartAction.classList.add('hidden');
-            match3GameArena.classList.remove('hidden');
-            match3Score = 0;
-            updateMatch3ProgressBar();
-            buildBoard();
-        }
-
-        function quitMatch3Game() {
-            match3GameArena.classList.add('hidden');
-            match3StartAction.classList.remove('hidden');
-        }
-
-        function updateMatch3ProgressBar() {
-            const pct = Math.min(100, Math.round((match3Score / WIN_MATCH_COUNT) * 100));
-            match3Progress.style.width = pct + '%';
-            match3ProgressVal.innerText = pct + '%';
-        }
-
+        // ── Build board (no initial matches) ─────────────────────────────────
         function buildBoard() {
-            match3Board.innerHTML = '';
-            boardState = [];
-
-            // Loop rows & cols
-            for (let r = 0; r < GRID_ROWS; r++) {
-                boardState[r] = [];
-                for (let c = 0; c < GRID_COLS; c++) {
-                    let tile;
-                    // Generate random, ensuring no starting Match-3 matches
+            board = [];
+            for (let r = 0; r < ROWS; r++) {
+                board[r] = [];
+                for (let c = 0; c < COLS; c++) {
+                    let t;
+                    let tries = 0;
                     do {
-                        tile = getRandomTileType();
+                        t = rand(TILE_TYPES);
+                        tries++;
+                        if (tries > 50) break;          // safety escape
                     } while (
-                        (r >= 2 && boardState[r-1][c].id === tile.id && boardState[r-2][c].id === tile.id) ||
-                        (c >= 2 && boardState[r][c-1].id === tile.id && boardState[r][c-2].id === tile.id)
+                        (r >= 2 && board[r-1][c].id === t.id && board[r-2][c].id === t.id) ||
+                        (c >= 2 && board[r][c-1].id === t.id && board[r][c-2].id === t.id)
                     );
-                    
-                    const tileObj = {
-                        id: tile.id,
-                        char: tile.char,
-                        name: tile.name,
-                        row: r,
-                        col: c,
-                        element: null
-                    };
-                    boardState[r][c] = tileObj;
+                    board[r][c] = { ...t, row: r, col: c, el: null };
                 }
             }
-            renderBoardElements();
         }
 
-        function getRandomTileType() {
-            return TILE_TYPES[Math.floor(Math.random() * TILE_TYPES.length)];
-        }
-
-        function renderBoardElements() {
+        // ── Render all tiles into the DOM grid ────────────────────────────────
+        function renderBoard() {
             match3Board.innerHTML = '';
-            for (let r = 0; r < GRID_ROWS; r++) {
-                for (let c = 0; c < GRID_COLS; c++) {
-                    const tileObj = boardState[r][c];
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const t   = board[r][c];
                     const div = document.createElement('div');
-                    div.className = 'match3-tile tile-drop';
-                    div.style.gridRowStart = r + 1;
-                    div.style.gridColumnStart = c + 1;
-                    div.innerText = tileObj.char;
-                    div.setAttribute('data-row', r);
-                    div.setAttribute('data-col', c);
-                    
-                    div.addEventListener('click', () => handleTileClick(tileObj));
-                    
-                    tileObj.element = div;
+                    div.className = 'match3-tile';
+                    div.innerHTML = makeTileHTML(t);
+                    div.dataset.row = r;
+                    div.dataset.col = c;
+                    div.addEventListener('click', () => onTileClick(t));
+                    t.el = div;
                     match3Board.appendChild(div);
                 }
             }
         }
 
-        function handleTileClick(tileObj) {
-            if (isSwapping) return;
-
-            if (!selectedTile) {
-                // First tile selection
-                selectedTile = tileObj;
-                tileObj.element.classList.add('selected');
-            } else if (selectedTile === tileObj) {
-                // Deselect
-                selectedTile.element.classList.remove('selected');
-                selectedTile = null;
+        // ── Click handler ─────────────────────────────────────────────────────
+        function onTileClick(t) {
+            if (busy) return;
+            if (!selected) {
+                selected = t;
+                t.el.classList.add('selected');
+                if (hintText) hintText.textContent = 'Now click an adjacent fruit to swap!';
+                return;
+            }
+            if (selected === t) {
+                t.el.classList.remove('selected');
+                selected = null;
+                if (hintText) hintText.textContent = 'Click a fruit, then click an adjacent fruit to swap them!';
+                return;
+            }
+            const dr = Math.abs(selected.row - t.row);
+            const dc = Math.abs(selected.col - t.col);
+            if ((dr === 1 && dc === 0) || (dr === 0 && dc === 1)) {
+                selected.el.classList.remove('selected');
+                doSwap(selected, t);
+                selected = null;
+                if (hintText) hintText.textContent = 'Click a fruit, then click an adjacent fruit to swap them!';
             } else {
-                // Check if adjacent
-                const rDiff = Math.abs(selectedTile.row - tileObj.row);
-                const cDiff = Math.abs(selectedTile.col - tileObj.col);
-                const isAdjacent = (rDiff === 1 && cDiff === 0) || (rDiff === 0 && cDiff === 1);
-
-                if (isAdjacent) {
-                    selectedTile.element.classList.remove('selected');
-                    swapTilesAndProcess(selectedTile, tileObj);
-                    selectedTile = null;
-                } else {
-                    // Change selection to the newly clicked tile
-                    selectedTile.element.classList.remove('selected');
-                    selectedTile = tileObj;
-                    tileObj.element.classList.add('selected');
-                }
+                selected.el.classList.remove('selected');
+                selected = t;
+                t.el.classList.add('selected');
             }
         }
 
-        async function swapTilesAndProcess(t1, t2) {
-            isSwapping = true;
+        // ── Swap two tiles, check matches, revert if none ─────────────────────
+        async function doSwap(a, b) {
+            busy = true;
+            swapState(a, b);
+            refreshTileEl(a);
+            refreshTileEl(b);
+            await sleep(200);
 
-            // Swapping visual animation coordinates
-            const row1 = t1.row, col1 = t1.col;
-            const row2 = t2.row, col2 = t2.col;
-
-            // Swap in internal board state arrays
-            boardState[row1][col1] = t2;
-            boardState[row2][col2] = t1;
-            t1.row = row2; t1.col = col2;
-            t2.row = row1; t2.col = col1;
-
-            // Re-render coordinate assignments
-            t1.element.style.gridRowStart = row2 + 1;
-            t1.element.style.gridColumnStart = col2 + 1;
-            t2.element.style.gridRowStart = row1 + 1;
-            t2.element.style.gridColumnStart = col1 + 1;
-
-            // Wait brief transition delay
-            await sleep(250);
-
-            // Verify if matches exist
-            const matches = getBoardMatches();
-            if (matches.length > 0) {
+            const matches = findMatches();
+            if (matches.length) {
                 await processMatches(matches);
             } else {
-                // No matches, swap back!
-                boardState[row1][col1] = t1;
-                boardState[row2][col2] = t2;
-                t1.row = row1; t1.col = col1;
-                t2.row = row2; t2.col = col2;
-
-                t1.element.style.gridRowStart = row1 + 1;
-                t1.element.style.gridColumnStart = col1 + 1;
-                t2.element.style.gridRowStart = row2 + 1;
-                t2.element.style.gridColumnStart = col2 + 1;
-                await sleep(250);
+                swapState(a, b);         // revert
+                refreshTileEl(a);
+                refreshTileEl(b);
+                a.el.classList.add('shake');
+                b.el.classList.add('shake');
+                await sleep(400);
+                a.el.classList.remove('shake');
+                b.el.classList.remove('shake');
             }
-            isSwapping = false;
+            busy = false;
         }
 
-        function getBoardMatches() {
-            const matches = [];
-            
-            // Check horizontal matches
-            for (let r = 0; r < GRID_ROWS; r++) {
-                for (let c = 0; c < GRID_COLS - 2; c++) {
-                    const id1 = boardState[r][c].id;
-                    const id2 = boardState[r][c+1].id;
-                    const id3 = boardState[r][c+2].id;
-                    if (id1 === id2 && id2 === id3) {
-                        matches.push({ r, c });
-                        matches.push({ r, c: c+1 });
-                        matches.push({ r, c: c+2 });
-                    }
-                }
-            }
-
-            // Check vertical matches
-            for (let r = 0; r < GRID_ROWS - 2; r++) {
-                for (let c = 0; c < GRID_COLS; c++) {
-                    const id1 = boardState[r][c].id;
-                    const id2 = boardState[r+1][c].id;
-                    const id3 = boardState[r+2][c].id;
-                    if (id1 === id2 && id2 === id3) {
-                        matches.push({ r, c });
-                        matches.push({ r: r+1, c });
-                        matches.push({ r: r+2, c });
-                    }
-                }
-            }
-
-            // De-duplicate match array elements
-            const unique = [];
-            const keyMap = {};
-            matches.forEach(m => {
-                const k = `${m.r}-${m.c}`;
-                if (!keyMap[k]) {
-                    keyMap[k] = true;
-                    unique.push(boardState[m.r][m.c]);
-                }
-            });
-
-            return unique;
+        // swap the two tile objects in the board array + update their row/col
+        function swapState(a, b) {
+            board[a.row][a.col] = b;
+            board[b.row][b.col] = a;
+            const tr = a.row, tc = a.col;
+            a.row = b.row; a.col = b.col;
+            b.row = tr;    b.col = tc;
         }
 
-        async function processMatches(matchesList) {
-            match3Score++;
-            updateMatch3ProgressBar();
+        // update a tile's DOM element to reflect its current board position + content
+        function refreshTileEl(t) {
+            t.el.style.gridRowStart    = t.row + 1;
+            t.el.style.gridColumnStart = t.col + 1;
+            t.el.dataset.row = t.row;
+            t.el.dataset.col = t.col;
+        }
 
-            // Clear visuals with animation
-            matchesList.forEach(tile => {
-                tile.element.classList.add('pop-clear');
-            });
-            await sleep(300);
+        // ── Match detection ───────────────────────────────────────────────────
+        function findMatches() {
+            const seen = new Set();
+            const out  = [];
+            const key  = (r,c) => `${r},${c}`;
 
-            // Remove cleared element nodes
-            matchesList.forEach(tile => {
-                tile.element.remove();
-                boardState[tile.row][tile.col] = null;
-            });
-
-            // Pull items down
-            for (let c = 0; c < GRID_COLS; c++) {
-                let emptySpots = 0;
-                for (let r = GRID_ROWS - 1; r >= 0; r--) {
-                    if (boardState[r][c] === null) {
-                        emptySpots++;
-                    } else if (emptySpots > 0) {
-                        // Move down by empty spots
-                        const tile = boardState[r][c];
-                        const targetRow = r + emptySpots;
-                        boardState[targetRow][c] = tile;
-                        boardState[r][c] = null;
-                        tile.row = targetRow;
-                        
-                        // Shift coordinates
-                        tile.element.style.gridRowStart = targetRow + 1;
+            // horizontal
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS - 2; c++) {
+                    if (board[r][c].id === board[r][c+1].id && board[r][c].id === board[r][c+2].id) {
+                        [[r,c],[r,c+1],[r,c+2]].forEach(([rr,cc]) => {
+                            if (!seen.has(key(rr,cc))) { seen.add(key(rr,cc)); out.push(board[rr][cc]); }
+                        });
                     }
                 }
+            }
+            // vertical
+            for (let r = 0; r < ROWS - 2; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (board[r][c].id === board[r+1][c].id && board[r][c].id === board[r+2][c].id) {
+                        [[r,c],[r+1,c],[r+2,c]].forEach(([rr,cc]) => {
+                            if (!seen.has(key(rr,cc))) { seen.add(key(rr,cc)); out.push(board[rr][cc]); }
+                        });
+                    }
+                }
+            }
+            return out;
+        }
 
-                // Fill from top
-                for (let i = 0; i < emptySpots; i++) {
-                    const newTile = getRandomTileType();
-                    const targetRow = emptySpots - 1 - i;
-                    const tileObj = {
-                        id: newTile.id,
-                        char: newTile.char,
-                        name: newTile.name,
-                        row: targetRow,
-                        col: c,
-                        element: null
-                    };
+        // ── Clear matches + gravity + refill ──────────────────────────────────
+        async function processMatches(matches) {
+            score++;
+            updateProgress();
 
-                    const div = document.createElement('div');
+            // pop animation
+            matches.forEach(t => t.el.classList.add('pop-clear'));
+            await sleep(320);
+
+            // remove from DOM + board
+            matches.forEach(t => {
+                if (t.el) t.el.remove();
+                board[t.row][t.col] = null;
+            });
+
+            // gravity: pull tiles down column by column
+            for (let c = 0; c < COLS; c++) {
+                let empty = 0;
+                for (let r = ROWS - 1; r >= 0; r--) {
+                    if (!board[r][c]) { empty++; }
+                    else if (empty > 0) {
+                        const t = board[r][c];
+                        board[r+empty][c] = t;
+                        board[r][c]       = null;
+                        t.row             = r + empty;
+                        t.el.style.gridRowStart = t.row + 1;
+                    }
+                }
+                // fill empty from top
+                for (let i = 0; i < empty; i++) {
+                    const type = rand(TILE_TYPES);
+                    const newT = { ...type, row: i, col: c, el: null };
+                    const div  = document.createElement('div');
                     div.className = 'match3-tile tile-drop';
-                    div.style.gridRowStart = targetRow + 1;
+                    div.innerHTML = makeTileHTML(type);
+                    div.dataset.row = i;
+                    div.dataset.col = c;
+                    div.style.gridRowStart    = i + 1;
                     div.style.gridColumnStart = c + 1;
-                    div.innerText = tileObj.char;
-                    div.setAttribute('data-row', targetRow);
-                    div.setAttribute('data-col', c);
-                    
-                    div.addEventListener('click', () => handleTileClick(tileObj));
-                    
-                    tileObj.element = div;
-                    boardState[targetRow][c] = tileObj;
+                    div.addEventListener('click', () => onTileClick(newT));
+                    newT.el = div;
+                    board[i][c] = newT;
                     match3Board.appendChild(div);
                 }
             }
 
             await sleep(350);
 
-            // Re-check cascading chain matches!
-            const newMatches = getBoardMatches();
-            if (newMatches.length > 0) {
-                await processMatches(newMatches);
-            } else {
-                // Verify win condition
-                if (match3Score >= WIN_MATCH_COUNT) {
-                    await sleep(400);
-                    triggerPostGameSurvey("Awesome matching session! Your brain has successfully shifted states.");
-                }
+            // cascade check
+            const next = findMatches();
+            if (next.length) {
+                await processMatches(next);
+            } else if (score >= WIN_MATCHES) {
+                await sleep(300);
+                triggerWin();
             }
         }
 
-        // Helper sleep utility
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
+        // ── Progress bar ──────────────────────────────────────────────────────
+        function updateProgress() {
+            const pct = Math.min(100, Math.round(score / WIN_MATCHES * 100));
+            match3Progress.style.width    = pct + '%';
+            match3ProgressVal.textContent = pct + '%';
         }
 
-        // ---------------------------------------------------------------------
-        // EMOTIONAL TRASH CAN LOGIC
-        // ---------------------------------------------------------------------
-        function startTrashGame() {
-            trashStartAction.classList.add('hidden');
-            trashGameArena.classList.remove('hidden');
-            trashTextInput.value = '';
-            trashTextInput.focus();
+        // ── Win flow ──────────────────────────────────────────────────────────
+        function triggerWin() {
+            match3GameArena.classList.add('hidden');
+            match3StartAction.classList.add('hidden');
+            surveyInline.classList.remove('hidden');
+            surveyInline.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-        function quitTrashGame() {
-            trashGameArena.classList.add('hidden');
-            trashStartAction.classList.remove('hidden');
-        }
-
-        async function destroyWorries() {
-            const text = trashTextInput.value.trim();
-            if (!text) {
-                showToast("Please write something down to destroy it!", "warning");
-                return;
-            }
-
-            // Lock controls
-            btnDestroyTrash.disabled = true;
-            btnQuitTrash.disabled = true;
-
-            // Trigger crush stage overlay display
-            crushStage.classList.remove('hidden');
-            crushedPaper.innerText = text.substring(0, 8) + '...';
-            crushStage.classList.add('animating');
-
-            // Play smash anims (claw slides inside CSS)
-            await sleep(550);
-
-            // Trigger explosion sparkles and flash
-            crushFlash.classList.add('trigger');
-            spawnExplosionParticles();
-
-            // Clear inputs
-            trashTextInput.value = '';
-
-            await sleep(600);
-
-            // Cleanup animations
-            crushStage.classList.remove('animating');
-            crushStage.classList.add('hidden');
-            crushFlash.classList.remove('trigger');
-
-            // Unlock controls
-            btnDestroyTrash.disabled = false;
-            btnQuitTrash.disabled = false;
-
-            // Get random supportive comment
-            const supportComment = SUPPORTIVE_PHRASES[Math.floor(Math.random() * SUPPORTIVE_PHRASES.length)];
-            
-            // Show survey
-            triggerPostGameSurvey(supportComment);
-        }
-
-        function spawnExplosionParticles() {
-            const count = 35;
-            const containerRect = crushStage.getBoundingClientRect();
-            const centerX = containerRect.width / 2;
-            const centerY = containerRect.height / 2;
-
-            for (let i = 0; i < count; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle-star';
-                particle.innerText = ['⭐', '✨', '💥', '💖', '🎈'][Math.floor(Math.random() * 5)];
-                particle.style.fontSize = (Math.random() * 0.8 + 0.8) + 'rem';
-                particle.style.left = centerX + 'px';
-                particle.style.top = centerY + 'px';
-
-                // Random fly vector variables in polar coordinates
-                const angle = Math.random() * Math.PI * 2;
-                const distance = Math.random() * 150 + 50;
-                const xVal = Math.cos(angle) * distance;
-                const yVal = Math.sin(angle) * distance;
-
-                particle.style.setProperty('--x', xVal + 'px');
-                particle.style.setProperty('--y', yVal + 'px');
-
-                crushStage.appendChild(particle);
-
-                // Auto clean-up particle divs
-                setTimeout(() => {
-                    particle.remove();
-                }, 800);
-            }
-        }
-
-        // ---------------------------------------------------------------------
-        // POST-GAME SURVEY LOG
-        // ---------------------------------------------------------------------
-        function triggerPostGameSurvey(customPrompt) {
-            surveyRobotPrompt.innerText = customPrompt + "\n\nHey Kawan, after playing this, how are you feeling now?";
-            surveyModal.classList.remove('hidden');
-        }
-
-        function handleMoodSurveyChoice(moodVal) {
-            surveyModal.classList.add('hidden');
-            
-            // Reset game arenas back to gateway menu
-            quitMatch3Game();
-            quitTrashGame();
-
-            if (moodVal === '5') {
-                // Redirect back to main KawanKu chat module
-                const chatNavBtn = document.getElementById('nav-chat');
-                if (chatNavBtn) {
-                    chatNavBtn.click();
-                } else {
-                    // Fallback programmatic switch
-                    switchPanel('chat-panel');
-                    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-                    const navChat = document.getElementById('nav-chat');
-                    if (navChat) navChat.classList.add('active');
-                }
-                showToast("Welcome back! What's on your mind? Tell me more.", "info");
-            } else {
-                // Normal mood updates log
-                showToast("Mood log updated in your Personalized Wellness Report! You're doing amazing.", "success");
-            }
-        }
-
-        // ---------------------------------------------------------------------
-        // INITIALIZATION
-        // ---------------------------------------------------------------------
-        function initGamesPage() {
-            // Setup default gateway view state
-            setMoodState('A');
-
-            // Wire button click handlers
-            if (btnStartMatch3) btnStartMatch3.addEventListener('click', startMatch3Game);
-            if (btnQuitMatch3) btnQuitMatch3.addEventListener('click', quitMatch3Game);
-            if (btnStartTrash) btnStartTrash.addEventListener('click', startTrashGame);
-            if (btnQuitTrash) btnQuitTrash.addEventListener('click', quitTrashGame);
-            if (btnDestroyTrash) btnDestroyTrash.addEventListener('click', destroyWorries);
-
-            // Wire emoji button selection
-            surveyModal.querySelectorAll('.emoji-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    handleMoodSurveyChoice(btn.getAttribute('data-mood'));
-                });
+        // ── Fruit preview on start screen ────────────────────────────────────
+        function populateFruitPreview() {
+            const items = document.querySelectorAll('.fruit-preview-item');
+            TILE_TYPES.forEach((t, i) => {
+                if (items[i]) items[i].innerHTML = t.svg;
             });
+        }
 
-            // Setup Lucide icons locally inside this scope
-            if (typeof lucide !== 'undefined' && lucide.createIcons) {
-                try {
-                    lucide.createIcons({
-                        attrs: {
-                            class: 'lucide-icon'
-                        }
-                    });
-                } catch(e) {
-                    console.warn("Lucide icons load issue inside games scope", e);
-                }
+        // ── Start / Quit ──────────────────────────────────────────────────────
+        function startGame() {
+            score = 0;
+            selected = null;
+            busy = false;
+            updateProgress();
+            buildBoard();
+            renderBoard();
+            match3StartAction.classList.add('hidden');
+            surveyInline.classList.add('hidden');
+            match3GameArena.classList.remove('hidden');
+            if (hintText) hintText.textContent = 'Click a fruit, then click an adjacent fruit to swap them!';
+        }
+
+        function quitGame() {
+            match3GameArena.classList.add('hidden');
+            match3StartAction.classList.remove('hidden');
+            surveyInline.classList.add('hidden');
+        }
+
+        // ── Mood survey handler ───────────────────────────────────────────────
+        function handleMood(val) {
+            surveyInline.classList.add('hidden');
+            match3StartAction.classList.remove('hidden');
+            if (val === '5') {
+                const chatBtn = document.getElementById('nav-chat');
+                if (chatBtn) chatBtn.click();
+                showToast("Welcome back! KawanKu is here for you. 💙", "info");
+            } else {
+                showToast("Mood logged! You're doing amazing, Kawan. 🌟", "success");
             }
         }
 
-        // Setup binder loop
-        initGamesPage();
+        // ── Init ──────────────────────────────────────────────────────────────
+        function init() {
+            populateFruitPreview();
+            if (btnStartMatch3) btnStartMatch3.addEventListener('click', startGame);
+            if (btnQuitMatch3)  btnQuitMatch3.addEventListener('click', quitGame);
+            document.querySelectorAll('#survey-inline .emoji-btn').forEach(btn => {
+                btn.addEventListener('click', () => handleMood(btn.dataset.mood));
+            });
+        }
 
-        // Expose internally in window context just in case
-        window.RelaxationGamesEngine = {
-            init: initGamesPage,
-            setMood: setMoodState
-        };
+        init();
     })();
 
     // Run launcher
