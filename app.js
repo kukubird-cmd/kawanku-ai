@@ -2507,6 +2507,163 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
             });
         }
 
+        // ─── Video Sanctuary ─────────────────────────────────────────
+        (function initVideoSanctuary() {
+            const fileInput     = document.getElementById('calm-video-input');
+            const uploadZone    = document.getElementById('video-upload-zone');
+            const dropTarget    = document.getElementById('video-drop-target');
+            const browseBtn     = document.getElementById('video-browse-btn');
+            const playerWrapper = document.getElementById('video-player-wrapper');
+            const vid           = document.getElementById('calm-video-player');
+            const playPauseBtn  = document.getElementById('calm-vid-playpause');
+            const playIcon      = document.getElementById('calm-vid-play-icon');
+            const progressBar   = document.getElementById('calm-vid-progress');
+            const timeLabel     = document.getElementById('calm-vid-time');
+            const volSlider     = document.getElementById('calm-vid-volume');
+            const muteBtn       = document.getElementById('calm-vid-mute');
+            const volIcon       = document.getElementById('calm-vid-vol-icon');
+            const loopBtn       = document.getElementById('calm-vid-loop-btn');
+            const fullscreenBtn = document.getElementById('calm-vid-fullscreen');
+            const removeBtn     = document.getElementById('calm-vid-remove');
+
+            if (!fileInput || !vid) return; // elements not on this page
+
+            let blobUrl = null;
+
+            function formatTime(sec) {
+                if (!isFinite(sec)) return '0:00';
+                const m = Math.floor(sec / 60);
+                const s = Math.floor(sec % 60);
+                return `${m}:${s.toString().padStart(2, '0')}`;
+            }
+
+            function loadVideo(file) {
+                if (!file || !file.type.startsWith('video/')) return;
+                if (blobUrl) URL.revokeObjectURL(blobUrl);
+                blobUrl = URL.createObjectURL(file);
+                vid.src = blobUrl;
+                vid.volume = parseFloat(volSlider.value);
+                vid.loop = loopBtn.classList.contains('active');
+                // Swap UI
+                uploadZone.classList.add('hidden');
+                uploadZone.style.display = 'none';
+                playerWrapper.classList.remove('hidden');
+                playerWrapper.style.display = 'flex';
+                lucide.createIcons(); // refresh icons in new elements
+            }
+
+            function resetPlayer() {
+                vid.pause();
+                vid.src = '';
+                if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
+                uploadZone.style.display = '';
+                uploadZone.classList.remove('hidden');
+                playerWrapper.style.display = 'none';
+                playerWrapper.classList.add('hidden');
+                progressBar.value = 0;
+                timeLabel.textContent = '0:00 / 0:00';
+                fileInput.value = '';
+                // Reset play icon
+                if (playIcon) { playIcon.setAttribute('data-lucide', 'play'); lucide.createIcons({ nodes: [playIcon] }); }
+            }
+
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) loadVideo(e.target.files[0]);
+            });
+
+            // "Choose Video" button — forward click to the hidden input
+            if (browseBtn) {
+                browseBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    fileInput.click();
+                });
+            }
+
+            // Drag & Drop
+            if (uploadZone) {
+                uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+                uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+                uploadZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadZone.classList.remove('drag-over');
+                    const file = e.dataTransfer.files[0];
+                    if (file) loadVideo(file);
+                });
+            }
+
+            // Play / Pause
+            if (playPauseBtn) {
+                playPauseBtn.addEventListener('click', () => {
+                    if (vid.paused) { vid.play(); }
+                    else { vid.pause(); }
+                });
+            }
+
+            vid.addEventListener('play', () => {
+                if (playIcon) { playIcon.setAttribute('data-lucide', 'pause'); lucide.createIcons({ nodes: [playIcon] }); }
+            });
+            vid.addEventListener('pause', () => {
+                if (playIcon) { playIcon.setAttribute('data-lucide', 'play'); lucide.createIcons({ nodes: [playIcon] }); }
+            });
+
+            // Progress bar sync
+            vid.addEventListener('timeupdate', () => {
+                if (!vid.duration) return;
+                progressBar.value = (vid.currentTime / vid.duration) * 100;
+                timeLabel.textContent = `${formatTime(vid.currentTime)} / ${formatTime(vid.duration)}`;
+            });
+
+            if (progressBar) {
+                progressBar.addEventListener('input', (e) => {
+                    if (vid.duration) vid.currentTime = (parseFloat(e.target.value) / 100) * vid.duration;
+                });
+            }
+
+            // Volume slider
+            if (volSlider) {
+                volSlider.addEventListener('input', (e) => {
+                    vid.volume = parseFloat(e.target.value);
+                    vid.muted = false;
+                    muteBtn.classList.remove('active');
+                    if (volIcon) { volIcon.setAttribute('data-lucide', vid.volume < 0.01 ? 'volume-x' : vid.volume < 0.5 ? 'volume-1' : 'volume-2'); lucide.createIcons({ nodes: [volIcon] }); }
+                });
+            }
+
+            // Mute toggle
+            if (muteBtn) {
+                muteBtn.addEventListener('click', () => {
+                    vid.muted = !vid.muted;
+                    muteBtn.classList.toggle('active', vid.muted);
+                    if (volIcon) { volIcon.setAttribute('data-lucide', vid.muted ? 'volume-x' : vid.volume < 0.5 ? 'volume-1' : 'volume-2'); lucide.createIcons({ nodes: [volIcon] }); }
+                });
+            }
+
+            // Loop toggle
+            if (loopBtn) {
+                loopBtn.addEventListener('click', () => {
+                    vid.loop = !vid.loop;
+                    loopBtn.classList.toggle('active', vid.loop);
+                });
+                // Start with loop ON (calming experience)
+                vid.loop = true;
+                loopBtn.classList.add('active');
+            }
+
+            // Fullscreen
+            if (fullscreenBtn) {
+                fullscreenBtn.addEventListener('click', () => {
+                    if (vid.requestFullscreen) vid.requestFullscreen();
+                    else if (vid.webkitRequestFullscreen) vid.webkitRequestFullscreen();
+                });
+            }
+
+            // Remove video
+            if (removeBtn) {
+                removeBtn.addEventListener('click', resetPlayer);
+            }
+        })();
+
         // Calm Hub Quiz buttons
         if (DOM.quizStartBtn) DOM.quizStartBtn.addEventListener('click', startQuizSession);
         if (DOM.quizRestartBtn) {

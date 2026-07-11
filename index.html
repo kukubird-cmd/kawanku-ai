@@ -974,6 +974,56 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Video Sanctuary Card -->
+                        <div class="mixer-card video-sanctuary-card">
+                            <div class="mixer-header">
+                                <h3>🎬 Video Sanctuary</h3>
+                                <p>Upload your own calming video — nature walks, lo-fi visuals, or anything peaceful. Just for you. 🌿</p>
+                            </div>
+
+                            <!-- Upload Drop Zone (shown when no video) -->
+                            <div class="video-upload-zone" id="video-upload-zone">
+                                <input type="file" id="calm-video-input" accept="video/*" class="video-file-input" />
+                                <div class="video-upload-inner" id="video-drop-target">
+                                    <div class="video-upload-icon">🎥</div>
+                                    <p class="video-upload-title">Drop your video here</p>
+                                    <p class="video-upload-hint">or click to browse your files</p>
+                                    <p class="video-upload-formats">Supports MP4, WebM, MOV, AVI</p>
+                                    <button class="video-browse-btn" id="video-browse-btn">
+                                        <i data-lucide="upload"></i> Choose Video
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Video Player (shown after upload) -->
+                            <div class="video-player-wrapper hidden" id="video-player-wrapper">
+                                <video id="calm-video-player" class="calm-video-player" loop>
+                                    Your browser does not support the video tag.
+                                </video>
+                                <!-- Custom Controls -->
+                                <div class="video-custom-controls">
+                                    <button class="video-ctrl-btn" id="calm-vid-playpause" title="Play / Pause">
+                                        <i data-lucide="play" id="calm-vid-play-icon"></i>
+                                    </button>
+                                    <input type="range" class="volume-slider video-progress-bar" id="calm-vid-progress" min="0" max="100" step="0.1" value="0">
+                                    <span class="video-time-label" id="calm-vid-time">0:00 / 0:00</span>
+                                    <input type="range" class="volume-slider video-vol-slider" id="calm-vid-volume" min="0" max="1" step="0.05" value="0.7">
+                                    <button class="video-ctrl-btn" id="calm-vid-mute" title="Mute">
+                                        <i data-lucide="volume-2" id="calm-vid-vol-icon"></i>
+                                    </button>
+                                    <button class="video-ctrl-btn" id="calm-vid-loop-btn" title="Loop">
+                                        <i data-lucide="repeat"></i>
+                                    </button>
+                                    <button class="video-ctrl-btn" id="calm-vid-fullscreen" title="Fullscreen">
+                                        <i data-lucide="maximize"></i>
+                                    </button>
+                                    <button class="video-ctrl-btn video-remove-btn" id="calm-vid-remove" title="Remove video">
+                                        <i data-lucide="trash-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 

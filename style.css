@@ -1875,6 +1875,220 @@ body {
     background-color: rgba(255, 255, 255, 0.08);
 }
 
+/* ── Video Sanctuary ─────────────────────────────────────────── */
+.video-sanctuary-card {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* The upload drop zone */
+.video-upload-zone {
+    position: relative;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+.video-file-input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.video-upload-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 40px 24px;
+    border: 2px dashed rgba(167, 139, 250, 0.35);
+    border-radius: 14px;
+    background: rgba(139, 92, 246, 0.04);
+    text-align: center;
+    transition: border-color 0.25s ease, background 0.25s ease;
+    min-height: 200px;
+}
+
+.video-upload-zone:hover .video-upload-inner,
+.video-upload-zone.drag-over .video-upload-inner {
+    border-color: rgba(167, 139, 250, 0.7);
+    background: rgba(139, 92, 246, 0.09);
+}
+
+.video-upload-icon {
+    font-size: 2.5rem;
+    line-height: 1;
+    margin-bottom: 4px;
+    animation: gentle-float 3s ease-in-out infinite;
+}
+
+@keyframes gentle-float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-6px); }
+}
+
+.video-upload-title {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+}
+
+.video-upload-hint {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+.video-upload-formats {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.3);
+    margin: 0;
+}
+
+.video-browse-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 10px 22px;
+    border-radius: 10px;
+    border: 1px solid rgba(167, 139, 250, 0.5);
+    background: rgba(139, 92, 246, 0.15);
+    color: #c4b5fd;
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    z-index: 3;
+    transition: all 0.25s ease;
+}
+
+.video-browse-btn:hover {
+    background: rgba(139, 92, 246, 0.28);
+    border-color: #a78bfa;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.video-browse-btn i {
+    width: 16px;
+    height: 16px;
+}
+
+/* The video player wrapper */
+.video-player-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #000;
+    margin-top: 20px;
+    flex-grow: 1;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.video-player-wrapper.hidden {
+    display: none;
+}
+
+.calm-video-player {
+    width: 100%;
+    display: block;
+    flex-grow: 1;
+    max-height: 300px;
+    object-fit: contain;
+    background: #000;
+}
+
+/* Custom video controls bar */
+.video-custom-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: rgba(10, 10, 20, 0.85);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    flex-wrap: nowrap;
+}
+
+.video-ctrl-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.75);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.video-ctrl-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.video-ctrl-btn.active {
+    background: rgba(139, 92, 246, 0.2);
+    border-color: rgba(167, 139, 250, 0.4);
+    color: #c4b5fd;
+}
+
+.video-ctrl-btn i {
+    width: 15px;
+    height: 15px;
+}
+
+.video-remove-btn:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
+    border-color: rgba(239, 68, 68, 0.4) !important;
+    color: #fca5a5 !important;
+}
+
+.video-progress-bar {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.video-vol-slider {
+    width: 70px !important;
+    flex-shrink: 0;
+}
+
+.video-time-label {
+    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.5);
+    white-space: nowrap;
+    font-family: var(--font-heading);
+    flex-shrink: 0;
+    min-width: 72px;
+    text-align: center;
+}
+
+/* ── Video Sanctuary responsive ────────────────────────────── */
+@media (max-width: 900px) {
+    .calm-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Mindfulness Quizzes */
 .mindfulness-card {
     background-color: var(--bg-glass);
