@@ -4672,8 +4672,13 @@ Example format:
 
         // ── Hint Solver ──────────────────────────────────────────────────────
         function findPossibleMoves() {
-            function checkMatchAt(r, c, typeId) {
-                // Check horizontal match
+            // Check if position (r,c) is part of a 3+ match (reads current board state)
+            function hasMatchAt(r, c) {
+                const tile = board[r][c];
+                if (!tile) return false;
+                const typeId = tile.id;
+
+                // Horizontal count
                 let horiz = 1;
                 let col = c - 1;
                 while (col >= 0 && board[r][col] && board[r][col].id === typeId) { horiz++; col--; }
@@ -4681,7 +4686,7 @@ Example format:
                 while (col < COLS && board[r][col] && board[r][col].id === typeId) { horiz++; col++; }
                 if (horiz >= 3) return true;
 
-                // Check vertical match
+                // Vertical count
                 let vert = 1;
                 let row = r - 1;
                 while (row >= 0 && board[row][c] && board[row][c].id === typeId) { vert++; row--; }
@@ -4692,28 +4697,35 @@ Example format:
                 return false;
             }
 
+            // Simulate swap, check, then swap back
+            function trySwap(r1, c1, r2, c2) {
+                const a = board[r1][c1];
+                const b = board[r2][c2];
+                if (!a || !b || a.id === b.id) return false;
+
+                // Perform the swap in the board array
+                board[r1][c1] = b;
+                board[r2][c2] = a;
+
+                // Check if either swapped position now forms a match
+                const matched = hasMatchAt(r1, c1) || hasMatchAt(r2, c2);
+
+                // Swap back to restore original state
+                board[r1][c1] = a;
+                board[r2][c2] = b;
+
+                return matched;
+            }
+
             for (let r = 0; r < ROWS; r++) {
                 for (let c = 0; c < COLS; c++) {
-                    const current = board[r][c];
-                    if (!current) continue;
-
                     // Try right swap
-                    if (c + 1 < COLS) {
-                        const right = board[r][c+1];
-                        if (right && current.id !== right.id) {
-                            if (checkMatchAt(r, c+1, current.id) || checkMatchAt(r, c, right.id)) {
-                                return { t1: current, t2: right };
-                            }
-                        }
+                    if (c + 1 < COLS && trySwap(r, c, r, c + 1)) {
+                        return { t1: board[r][c], t2: board[r][c + 1] };
                     }
                     // Try down swap
-                    if (r + 1 < ROWS) {
-                        const down = board[r+1][c];
-                        if (down && current.id !== down.id) {
-                            if (checkMatchAt(r+1, c, current.id) || checkMatchAt(r, c, down.id)) {
-                                return { t1: current, t2: down };
-                            }
-                        }
+                    if (r + 1 < ROWS && trySwap(r, c, r + 1, c)) {
+                        return { t1: board[r][c], t2: board[r + 1][c] };
                     }
                 }
             }
