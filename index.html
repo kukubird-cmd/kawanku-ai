@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -859,7 +859,6 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </section>
 
@@ -867,41 +866,86 @@
                 <section class="panel" id="games-panel">
                     <div class="games-layout">
 
-                        <!-- å¼€å¿ƒæ¶ˆæ¶ˆä¹ Match-3 Game (full width) -->
+                        <!-- 开心消消乐 Match-3 Game (full width) -->
                         <div class="game-card game-card-full" id="card-match3">
                             <div class="game-card-header">
                                 <div class="game-icon-title">
-                                    <span class="game-title-emoji">ðŸ‰</span>
+                                    <span class="game-title-emoji">🍉</span>
                                     <div>
-                                        <h3>å¼€å¿ƒæ¶ˆæ¶ˆä¹ Happy Match-3</h3>
-                                        <p class="game-subtitle">Swap cute Malaysian fruits Â· No timer Â· No limits Â· Pure relaxation ðŸŒ´</p>
+                                        <h3>开心消消乐 Happy Match-3</h3>
+                                        <p class="game-subtitle">Swap cute Malaysian fruits · No timer · No limits · Pure relaxation 🌴</p>
                                     </div>
                                 </div>
-                                <span class="recommend-tag">KawanKu's Choice â­</span>
+                                <span class="recommend-tag">KawanKu's Choice ⭐</span>
                             </div>
 
-                            <!-- Start Screen -->
+                            <!-- Start Screen with Comforting Rules Guide -->
                             <div class="match3-start-screen" id="match3-start-action">
-                                <div class="fruit-preview-row">
-                                    <div class="fruit-preview-item" title="Mangosteen å±±ç«¹"></div>
-                                    <div class="fruit-preview-item" title="Durian æ¦´èŽ²"></div>
-                                    <div class="fruit-preview-item" title="Rambutan çº¢æ¯›ä¸¹"></div>
-                                    <div class="fruit-preview-item" title="Banana é¦™è•‰"></div>
-                                    <div class="fruit-preview-item" title="Mango èŠ’æžœ"></div>
+                                <!-- Mascot Guide Message -->
+                                <div class="rules-mascot-row">
+                                    <div class="kawanku-robot-mini">
+                                        <div class="robot-antenna"></div>
+                                        <div class="robot-head">
+                                            <div class="robot-ears"></div>
+                                            <div class="robot-eyes">
+                                                <div class="eye"></div>
+                                                <div class="eye"></div>
+                                            </div>
+                                        </div>
+                                        <div class="robot-body">
+                                            <div class="robot-heart pulse-heart"></div>
+                                        </div>
+                                    </div>
+                                    <div class="rules-speech-bubble">
+                                        <p>Hey Kawan! Feel free to play this cozy matching game at your own pace. There is no score, no time limit, and no wrong moves. Let's relax together! 🤍</p>
+                                    </div>
                                 </div>
-                                <p class="start-hint">Match 3 or more fruits in a row or column to clear them. Fill the Relaxation Bar to win! ðŸŽ‰</p>
-                                <button class="game-btn-primary" id="btn-start-match3">ðŸŽ® Start Playing!</button>
+
+                                <!-- Fruits Preview -->
+                                <div class="fruit-preview-row">
+                                    <div class="fruit-preview-item" title="Mangosteen 山竹"></div>
+                                    <div class="fruit-preview-item" title="Durian 榴莲"></div>
+                                    <div class="fruit-preview-item" title="Rambutan 红毛丹"></div>
+                                    <div class="fruit-preview-item" title="Banana 香蕉"></div>
+                                    <div class="fruit-preview-item" title="Mango 芒果"></div>
+                                </div>
+
+                                <!-- Visual Easy-to-Understand Rules -->
+                                <div class="simple-rules-card">
+                                    <h4 class="rules-title">🎮 How to Play (游戏规则)</h4>
+                                    <div class="rules-steps-grid">
+                                        <div class="step-item">
+                                            <span class="step-number">1</span>
+                                            <p class="step-text"><strong>选择水果 (Select)</strong><br>Click any cute fruit on the grid.</p>
+                                        </div>
+                                        <div class="step-item">
+                                            <span class="step-number">2</span>
+                                            <p class="step-text"><strong>交换对齐 (Swap)</strong><br>Click an adjacent neighbor fruit to swap.</p>
+                                        </div>
+                                        <div class="step-item">
+                                            <span class="step-number">3</span>
+                                            <p class="step-text"><strong>消除放松 (Match)</strong><br>Line up 3 same fruits to clear them!</p>
+                                        </div>
+                                    </div>
+                                    <div class="rules-features-list">
+                                        <span class="feature-tag">⏳ No Timer (无倒计时)</span>
+                                        <span class="feature-tag">💖 Infinite Turns (无限步数)</span>
+                                        <span class="feature-tag">🌴 100% Calming (纯粹放松)</span>
+                                    </div>
+                                </div>
+
+                                <button class="game-btn-primary" id="btn-start-match3">🎮 Start Playing!</button>
                             </div>
 
                             <!-- Active Match-3 Arena -->
                             <div class="match3-arena hidden" id="match3-game-arena">
                                 <div class="match3-header">
-                                    <div class="progress-lbl">ðŸ˜Œ Relaxation Progress</div>
+                                    <div class="progress-lbl">😌 Relaxation Progress</div>
                                     <div class="match3-progress-bar">
                                         <div class="progress-fill" id="match3-progress" style="width: 0%;"></div>
                                     </div>
                                     <span class="progress-value" id="match3-progress-val">0%</span>
-                                    <button class="game-btn-secondary" id="btn-quit-match3">âœ• Quit</button>
+                                    <button class="game-btn-secondary" id="btn-quit-match3">✕ Quit</button>
                                 </div>
                                 <div class="match3-grid" id="match3-board"></div>
                                 <p class="match3-hint" id="match3-hint-text">Click a fruit, then click an adjacent fruit to swap them!</p>
@@ -911,20 +955,25 @@
                         <!-- Post-Game Survey (inline, shown after win) -->
                         <div class="survey-inline hidden" id="survey-inline">
                             <div class="survey-inline-inner">
-                                <div class="survey-win-banner">ðŸŽŠ Relaxation Complete! ðŸŽŠ</div>
+                                <div class="survey-win-banner">🎊 Relaxation Complete! 🎊</div>
                                 <p class="survey-prompt" id="survey-robot-prompt">Hey Kawan, after playing this, how are you feeling now?</p>
                                 <div class="emoji-options-grid">
-                                    <button class="emoji-btn" data-mood="1"><span class="emoji">ðŸŒŸ</span><span class="emoji-label">Much Better</span></button>
-                                    <button class="emoji-btn" data-mood="2"><span class="emoji">ðŸ˜Š</span><span class="emoji-label">Calmer</span></button>
-                                    <button class="emoji-btn" data-mood="3"><span class="emoji">ðŸ˜</span><span class="emoji-label">Neutral</span></button>
-                                    <button class="emoji-btn" data-mood="4"><span class="emoji">ðŸ˜•</span><span class="emoji-label">Still Stressed</span></button>
-                                    <button class="emoji-btn" data-mood="5"><span class="emoji">ðŸ˜¢</span><span class="emoji-label">Chat with AI</span></button>
+                                    <button class="emoji-btn" data-mood="1"><span class="emoji">🌟</span><span class="emoji-label">Much Better</span></button>
+                                    <button class="emoji-btn" data-mood="2"><span class="emoji">😊</span><span class="emoji-label">Calmer</span></button>
+                                    <button class="emoji-btn" data-mood="3"><span class="emoji">😐</span><span class="emoji-label">Neutral</span></button>
+                                    <button class="emoji-btn" data-mood="4"><span class="emoji">😕</span><span class="emoji-label">Still Stressed</span></button>
+                                    <button class="emoji-btn" data-mood="5"><span class="emoji">😢</span><span class="emoji-label">Chat with AI</span></button>
                                 </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
             </div>
         </main>
     </div>
 
-    <!-- SOS Counselor Confirmation Modal Overlay (Globally accessibility) -->
+    <!-- SOS Counselor Confirmation Modal Overlay -->
     <div class="sos-modal-overlay hidden" id="sos-modal">
         <div class="sos-modal-card">
             <div class="sos-modal-header">
