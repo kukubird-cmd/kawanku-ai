@@ -1,8 +1,14 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    MINDBUDDY COMPANION CLIENT-SIDE LOGIC
    ========================================================================== */
-
 document.addEventListener('DOMContentLoaded', () => {
+    function loadAvatarState() {
+        try {
+            const saved = localStorage.getItem('kawanku_avatar_state');
+            if (saved) return JSON.parse(saved);
+        } catch(e) {}
+        return {
+
     // ----------------------------------------------------------------------
     // GLOBAL STATE MANAGEMENT
     // ----------------------------------------------------------------------
@@ -31,14 +37,19 @@ document.addEventListener('DOMContentLoaded', () => {
             accessories: 'none',
             hoodieGraphic: 'star',
             pantsStyle: 'shorts',
-            shoesStyle: 'sneakers',
+            shoes: 'sneakers',
             pet: 'none',
             scene: 'yellow',
             hairColor: '#1e293b',
             shirtColor: '#4f46e5',
             glowColor1: '#8b5cf6',
             glowColor2: '#ec4899'
-        },
+        };
+    }
+
+    const state = {
+        activePanel: 'chat-panel',
+        avatar: loadAvatarState(),
 
         // Backend Diagnostics Report (Updated every turn)
         diagnostics: {
@@ -87,7 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
         webcam: {
             stream: null,
             isActive: false,
-            animationFrame: null
+            animationFrame: null,
+            lastScanTime: 0
         },
 
 
@@ -226,13 +238,12 @@ document.addEventListener('DOMContentLoaded', () => {
         ],
         
         // Studio buttons / inputs
-        studioTabBtns: document.querySelectorAll('.opt-tab-btn'),
-        studioPanelGroups: document.querySelectorAll('.options-content .options-panel-group'),
         avatarRandomizeBtn: document.getElementById('avatar-randomize-btn'),
-        pickerHair: document.getElementById('picker-hair'),
-        pickerShirt: document.getElementById('picker-shirt'),
-        pickerGlow1: document.getElementById('picker-glow1'),
-        pickerGlow2: document.getElementById('picker-glow2'),
+        customizerSubnav: document.getElementById('customizer-subnav'),
+        customizerSubtabs: document.getElementById('customizer-subtabs'),
+        customizerItemGrid: document.getElementById('customizer-item-grid'),
+        customizerViewport: document.getElementById('customizer-viewport'),
+        studioPetContainer: document.getElementById('studio-pet-container'),
         
         // IoT biometric page
         bioLiveHR: document.getElementById('bio-live-hr'),
@@ -303,22 +314,32 @@ document.addEventListener('DOMContentLoaded', () => {
         renderDailyQuiz();
         
         // Hook up Sidebar Nav links
-        DOM.navBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const target = btn.getAttribute('data-target');
-                switchPanel(target);
-                
-                DOM.navBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
+        if (DOM.navBtns) {
+            DOM.navBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = btn.getAttribute('data-target');
+                    switchPanel(target);
+                    
+                    DOM.navBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                });
             });
-        });
+        }
 
         // Initialize lucide icons
-        lucide.createIcons();
+        if (typeof lucide !== 'undefined' && lucide.createIcons) {
+            try {
+                lucide.createIcons();
+            } catch(e) {
+                console.warn('Lucide icons creation failed', e);
+            }
+        }
 
         // Biometrics Graph render cycle
-        initBiometricsChart();
-        setInterval(updateBiometricsLiveCycle, 1000);
+        if (DOM.hrChartPath) {
+            initBiometricsChart();
+            setInterval(updateBiometricsLiveCycle, 1000);
+        }
 
         // Bind events
         bindUIEvents();
@@ -350,13 +371,33 @@ document.addEventListener('DOMContentLoaded', () => {
             DOM.headerTitle.innerText = "Student Psychological State & Mood Calendar";
             DOM.headerSubtitle.innerText = "A 7x4 vertical monthly mood calendar mapping student emotional logs.";
             renderMoodCalendar();
+        } else if (panelId === 'calm-panel') {
+            DOM.headerTitle.innerText = "Calm Sanctuary & Healing Soundscapes";
+            DOM.headerSubtitle.innerText = "Access synthesizers and mindfulness check-in quizzes.";
+            updateQuizRecommendation();
+        } else if (panelId === 'quiz-panel') {
+            if (DOM.headerTitle) DOM.headerTitle.innerText = "Emotion Blind Box Quiz";
+            if (DOM.headerSubtitle) DOM.headerSubtitle.innerText = "AI-powered daily mental health check-in with gamified universe themes.";
+        } else if (panelId === 'shop-panel') {
+            if (DOM.headerTitle) DOM.headerTitle.innerText = "Kawan Spark Shop";
+            if (DOM.headerSubtitle) DOM.headerSubtitle.innerText = "Redeem your daily streak sparks for exclusive avatar items.";
+        } else if (panelId === 'games-panel') {
+            if (DOM.headerTitle) DOM.headerTitle.innerText = "Play & Relax";
+            if (DOM.headerSubtitle) DOM.headerSubtitle.innerText = "Take a quick mental break with our relaxing mini-games guided by KawanKu Robot.";
         }
     }
 
     // ----------------------------------------------------------------------
     // TOAST NOTIFICATIONS
     // ----------------------------------------------------------------------
+    const USER_TOASTS_ENABLED = false;
+
     function showToast(message, type = 'info') {
+        if (!USER_TOASTS_ENABLED) {
+            console.info(`[toast:${type}] ${message}`);
+            return;
+        }
+
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
         
@@ -366,8 +407,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (type === 'warning') iconName = 'alert-triangle';
 
         toast.innerHTML = `<i data-lucide="${iconName}"></i> <span>${message}</span>`;
-        DOM.toastContainer.appendChild(toast);
-        lucide.createIcons({attrs: {class: 'toast-icon-svg'}});
+        if (DOM.toastContainer) {
+            DOM.toastContainer.appendChild(toast);
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                try { lucide.createIcons({attrs: {class: 'toast-icon-svg'}}); } catch(e) {}
+            }
+        }
 
         setTimeout(() => {
             toast.style.animation = 'fadeOut 0.3s ease forwards';
@@ -469,6 +514,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (rips) rips.setAttribute('opacity', conf.pantsStyle === 'ripped' ? '1' : '0');
 
+        // ---- Shoes ----
+        const shoesGroup = svg.querySelector('#avatar-shoes');
+        if (shoesGroup && conf.shoes) {
+            const leftShoeMain = shoesGroup.querySelector('ellipse[cx="122"]');
+            const rightShoeMain = shoesGroup.querySelector('ellipse[cx="178"]');
+            const leftShoeBody = shoesGroup.querySelector('rect[x="100"][y="422"]');
+            const rightShoeBody = shoesGroup.querySelector('rect[x="156"][y="422"]');
+            const leftShoeSole = shoesGroup.querySelector('rect[x="99"][y="430"]');
+            const rightShoeSole = shoesGroup.querySelector('rect[x="155"][y="430"]');
+            const laces = shoesGroup.querySelectorAll('line');
+            const socks = svg.querySelector('#avatar-socks');
+            
+            if (conf.shoes === 'sneakers') {
+                if (leftShoeMain) leftShoeMain.setAttribute('fill', 'url(#shoe-grad-l)');
+                if (rightShoeMain) rightShoeMain.setAttribute('fill', 'url(#shoe-grad-r)');
+                if (leftShoeBody) leftShoeBody.setAttribute('fill', 'url(#shoe-grad-l)');
+                if (rightShoeBody) rightShoeBody.setAttribute('fill', 'url(#shoe-grad-r)');
+                if (leftShoeSole) leftShoeSole.setAttribute('fill', '#64748b');
+                if (rightShoeSole) rightShoeSole.setAttribute('fill', '#64748b');
+                if (socks) socks.setAttribute('opacity', '1');
+                laces.forEach(l => l.setAttribute('opacity', '1'));
+            } else if (conf.shoes === 'boots') {
+                if (leftShoeMain) leftShoeMain.setAttribute('fill', '#78350f');
+                if (rightShoeMain) rightShoeMain.setAttribute('fill', '#78350f');
+                if (leftShoeBody) leftShoeBody.setAttribute('fill', '#78350f');
+                if (rightShoeBody) rightShoeBody.setAttribute('fill', '#78350f');
+                if (leftShoeSole) leftShoeSole.setAttribute('fill', '#451a03');
+                if (rightShoeSole) rightShoeSole.setAttribute('fill', '#451a03');
+                if (socks) socks.setAttribute('opacity', '0.2');
+                laces.forEach(l => l.setAttribute('opacity', '0.5'));
+            } else if (conf.shoes === 'sandals') {
+                if (leftShoeMain) leftShoeMain.setAttribute('fill', conf.skinTone);
+                if (rightShoeMain) rightShoeMain.setAttribute('fill', conf.skinTone);
+                if (leftShoeBody) leftShoeBody.setAttribute('fill', '#1d4ed8');
+                if (rightShoeBody) rightShoeBody.setAttribute('fill', '#1d4ed8');
+                if (leftShoeSole) leftShoeSole.setAttribute('fill', '#1e3a8a');
+                if (rightShoeSole) rightShoeSole.setAttribute('fill', '#1e3a8a');
+                if (socks) socks.setAttribute('opacity', '0');
+                laces.forEach(l => l.setAttribute('opacity', '0'));
+            }
+        }
+
         // ---- Glasses ----
         const glasses = q('avatar-glasses');
         if (glasses) {
@@ -559,10 +646,37 @@ document.addEventListener('DOMContentLoaded', () => {
         applyAvatarToViewport(chatViewport,   conf);
         applyAvatarToViewport(studioViewport, conf);
 
-        // Update expression badge label in sidebar
+        // Update expression badge label
         if (DOM.avatarExpressionLabel) {
             DOM.avatarExpressionLabel.innerText = conf.expression.charAt(0).toUpperCase() + conf.expression.slice(1);
         }
+
+        // Update Customizer Viewport scene background
+        const customizerViewport = DOM.customizerViewport;
+        if (customizerViewport && conf.scene) {
+            customizerViewport.className = 'customizer-viewport scene-' + conf.scene;
+        }
+
+        // Toggle Pet active layers
+        const petCat = document.getElementById('pet-cat');
+        const petDog = document.getElementById('pet-dog');
+        const petBird = document.getElementById('pet-bird');
+        if (petCat && petDog && petBird) {
+            petCat.classList.remove('active');
+            petDog.classList.remove('active');
+            petBird.classList.remove('active');
+            
+            if (conf.pet === 'cat') petCat.classList.add('active');
+            if (conf.pet === 'dog') petDog.classList.add('active');
+            if (conf.pet === 'bird') petBird.classList.add('active');
+        }
+
+        // Expression class for CSS targeting
+        [mainSVG, studioSVG].forEach(svg => {
+            if (!svg) return;
+            svg.classList.remove('expression-friendly', 'expression-thoughtful', 'expression-attentive', 'expression-excited');
+            svg.classList.add('expression-' + conf.expression);
+        });
     }
 
     // Dynamic speaking controls — targets both viewports
@@ -620,8 +734,130 @@ document.addEventListener('DOMContentLoaded', () => {
     // -----------------------------------------------------------------------
     // IMPORTANT: Replace the value below with your own Gemini API key.
     // Get one free at: https://aistudio.google.com/app/apikey
-    const GEMINI_API_KEY = window.GEMINI_API_KEY || '';
-    const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    const GEMINI_API_KEY = (window.GEMINI_API_KEY || '').trim();
+    const GEMINI_QUOTA_COOLDOWN_MS = 60 * 1000;
+    const GEMINI_AUDIO_COOLDOWN_MS = 60 * 1000;
+    const GEMINI_NON_CHAT_COOLDOWN_MS = 90 * 1000;
+    const GEMINI_FACE_COOLDOWN_MS = 5 * 60 * 1000;
+    const GEMINI_QUIZ_COOLDOWN_MS = 5 * 60 * 1000;
+    const STUDENT_ANALYSIS_SYNC_COOLDOWN_MS = 20 * 1000;
+    let geminiDisabledUntil = 0;
+    let lastGeminiFailure = null;
+    let lastGeminiAudioAt = 0;
+    let lastGeminiNonChatAt = 0;
+    let lastGeminiFaceAt = 0;
+    let lastGeminiQuizAt = 0;
+    const lastStudentAnalysisSyncAt = {
+        text: 0,
+        voice: 0,
+        facial_emotion: 0
+    };
+
+    function canAttemptGemini() {
+        return Date.now() >= geminiDisabledUntil && (Boolean(GEMINI_API_KEY) || window.location.protocol !== 'file:');
+    }
+
+    function canAttemptNonChatGemini(lastFeatureAt, featureCooldownMs) {
+        const now = Date.now();
+        if (!canAttemptGemini()) return false;
+        if (now - lastGeminiNonChatAt < GEMINI_NON_CHAT_COOLDOWN_MS) return false;
+        if (now - lastFeatureAt < featureCooldownMs) return false;
+        lastGeminiNonChatAt = now;
+        return true;
+    }
+
+    async function callGemini(model, requestBody) {
+        if (!canAttemptGemini()) return null;
+        lastGeminiFailure = null;
+
+        let response = null;
+        const canUseBackendProxy = window.location.protocol !== 'file:';
+
+        if (canUseBackendProxy) {
+            try {
+                response = await fetch('/api/ai/gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model, payload: requestBody })
+                });
+            } catch (e) {
+                console.warn('Backend proxy fetch failed:', e);
+            }
+        }
+
+        // If backend proxy failed (either threw an exception, returned a non-ok status, or returned 503),
+        // we fall back to direct fetch using the local GEMINI_API_KEY if available.
+        const needsFallback = !response || !response.ok || response.status === 503;
+        if (needsFallback && GEMINI_API_KEY) {
+            try {
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+                response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+            } catch (e) {
+                console.error('Fallback direct Gemini fetch failed:', e);
+            }
+        }
+
+        if (!response) return null;
+
+        // Prefer the backend proxy. Browser-direct calls can expose the key and
+        // surface raw network errors, so only use them for file:// demos.
+        if (response.status === 503) {
+            const data = await response.json().catch(() => null);
+            lastGeminiFailure = {
+                code: data?.code || 'missing_api_key',
+                status: 503,
+                detail: data?.error || 'The backend could not find a Gemini API key.'
+            };
+            return null;
+        }
+
+        if (response.status === 429) {
+            geminiDisabledUntil = Date.now() + GEMINI_QUOTA_COOLDOWN_MS;
+            lastGeminiFailure = {
+                code: 'http_429',
+                status: 429,
+                detail: 'Gemini returned HTTP 429 directly.'
+            };
+            return null;
+        }
+
+        if (!response.ok) {
+            throw new Error(`Gemini API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data?.quota_exceeded) {
+            geminiDisabledUntil = Date.now() + GEMINI_QUOTA_COOLDOWN_MS;
+            lastGeminiFailure = {
+                code: data.code || 'quota_exceeded',
+                status: data.status || 429,
+                detail: data.error || 'Gemini reported quota exceeded.'
+            };
+            return null;
+        }
+
+        if (data?.code === 'gemini_error' || data?.code === 'gemini_request_failed') {
+            lastGeminiFailure = {
+                code: data.code,
+                status: data.status || 'unknown',
+                detail: data.error || 'The Gemini proxy returned an error.'
+            };
+            console.warn(`Gemini proxy returned fallbackable error: ${data.status || data.code}`);
+            return null;
+        }
+
+        return data;
+    }
+
+    function formatGeminiDiagnostic() {
+        if (!lastGeminiFailure) return '';
+        const detail = String(lastGeminiFailure.detail || '').replace(/\s+/g, ' ').trim();
+        return `AI API diagnostic: the app tried the chatbot Gemini request, but it did not return a usable reply. Code: ${lastGeminiFailure.code}; status: ${lastGeminiFailure.status}. Detail: ${detail}`;
+    }
 
     // Track conversation history for context-aware responses
     const conversationHistory = [];
@@ -635,7 +871,7 @@ Your personality: supportive, non-judgmental, casual and friendly — never clin
 Your responses should feel like talking to a caring, understanding friend who happens to be very emotionally intelligent.
 
 When responding, you must:
-1. Respond conversationally and warmly to the student's message (2-4 sentences max for chat)
+1. Respond conversationally and warmly to the student's message (2-4 sentences max for chat) in the same language they used (e.g. Chinese or English).
 2. At the END of your response, append a JSON block (wrapped in triple backticks) with this exact format:
 \`\`\`json
 {
@@ -657,29 +893,33 @@ Keep your conversational reply warm, human and concise. The student should feel 
             contents: conversationHistory,
             generationConfig: {
                 temperature: 0.85,
-                maxOutputTokens: 400
+                maxOutputTokens: 2048
             }
         };
 
         try {
-            const response = await fetch(GEMINI_ENDPOINT, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody)
-            });
-
-            if (!response.ok) throw new Error(`API error: ${response.status}`);
-
-            const data = await response.json();
+            const data = await callGemini('gemini-2.5-flash', requestBody);
+            if (!data) return null;
             const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-            // Parse out the JSON analytics block
-            const jsonMatch = rawText.match(/```json\s*([\s\S]*?)```/);
+            // Check for Dashboard format from the new prompt
+            const dashboardMatch = rawText.match(/精力耗竭:\s*(\d+)%?\s*\|\s*社交疲劳:\s*(\d+)%/);
             let analytics = null;
-            let replyText = rawText.replace(/```json[\s\S]*?```/, '').trim();
+            let replyText = rawText;
 
-            if (jsonMatch) {
-                try { analytics = JSON.parse(jsonMatch[1]); } catch (e) { console.warn('Analytics JSON parse failed', e); }
+            if (dashboardMatch) {
+                analytics = {
+                    burnout: parseInt(dashboardMatch[1], 10),
+                    socialAnxiety: parseInt(dashboardMatch[2], 10),
+                    academicPressure: parseInt(dashboardMatch[1], 10) // map to burnout
+                };
+            } else {
+                // Fallback for older JSON logic if needed
+                const jsonMatch = rawText.match(/```json\s*([\s\S]*?)```/);
+                if (jsonMatch) {
+                    try { analytics = JSON.parse(jsonMatch[1]); } catch (e) {}
+                    replyText = rawText.replace(/```json[\s\S]*?```/, '').trim();
+                }
             }
 
             // Add Gemini's response to conversation history
@@ -687,7 +927,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
 
             return { reply: replyText, analytics };
         } catch (err) {
-            console.error('Gemini API call failed:', err);
+            console.warn('Gemini API call failed; using local fallback:', err);
             return null; // falls back to local analysis
         }
     }
@@ -703,6 +943,60 @@ Keep your conversational reply warm, human and concise. The student should feel 
             return;
         }
 
+        // 2.5. Smart Feature Intent Detection — check if user wants a specific feature
+        const featureIntents = [
+            {
+                keywords: ['quiz', '测试', '测验', '问卷', 'emotion quiz', '情绪盲盒', '做测试', '做quiz', '心理测试'],
+                panel: 'quiz-panel',
+                navBtnId: 'nav-quiz',
+                label: '🎲 Emotion Quiz',
+                labelCn: '🎲 情绪盲盒测验'
+            },
+            {
+                keywords: ['shop', '商店', '商城', 'spark shop', '火花商店', '兑换', '买东西', '逛商店'],
+                panel: 'shop-panel',
+                navBtnId: 'nav-shop',
+                label: '🛍️ Spark Shop',
+                labelCn: '🛍️ 火花商店'
+            },
+            {
+                keywords: ['avatar', '换装', '穿搭', '造型', 'studio', '设计', 'customize', '自定义', '换衣服', '发型'],
+                panel: 'studio-panel',
+                navBtnId: 'nav-studio',
+                label: '🎨 Avatar Studio',
+                labelCn: '🎨 虚拟形象工作室'
+            },
+            {
+                keywords: ['biometric', '生物', '心率', 'heart rate', '睡眠', 'sleep', '健康数据', 'smartwatch', '手表'],
+                panel: 'bio-panel',
+                navBtnId: 'nav-bio',
+                label: '📊 Biometric Link',
+                labelCn: '📊 生物监测'
+            },
+            {
+                keywords: ['calm', '冥想', '放松', 'meditation', 'relax', '音乐', 'music', '白噪音', 'soundscape', '疗愈'],
+                panel: 'calm-panel',
+                navBtnId: 'nav-calm',
+                label: '🎵 Calm Hub',
+                labelCn: '🎵 宁静空间'
+            }
+        ];
+
+        const lowerText = text.toLowerCase();
+        const matchedFeature = featureIntents.find(f => f.keywords.some(kw => lowerText.includes(kw)));
+
+        if (matchedFeature) {
+            // Detect language: use Chinese label if input contains Chinese characters
+            const isChinese = /[\u4e00-\u9fff]/.test(text);
+            const featureLabel = isChinese ? matchedFeature.labelCn : matchedFeature.label;
+            const promptMsg = isChinese
+                ? `看起来你想去 <strong>${featureLabel}</strong>！要现在过去吗？`
+                : `It looks like you want to visit <strong>${featureLabel}</strong>! Want to go there now?`;
+
+            appendChatNavigationPrompt(promptMsg, matchedFeature.panel, matchedFeature.navBtnId, isChinese);
+            return;
+        }
+
         // 3. Show typing indicator
         const typingId = showTypingIndicator();
 
@@ -710,7 +1004,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
         let reply = '';
         let companionExpression = 'friendly';
 
-        if (GEMINI_API_KEY) {
+        if (canAttemptGemini()) {
             const geminiResult = await analyzeWithGemini(text);
             if (geminiResult) {
                 reply = geminiResult.reply;
@@ -744,7 +1038,128 @@ Keep your conversational reply warm, human and concise. The student should feel 
         state.avatar.expression = companionExpression;
         renderAvatarVisuals();
         appendChatMessage('Buddy', reply);
+        const geminiDiagnostic = formatGeminiDiagnostic();
+        if (geminiDiagnostic) appendChatMessage('Buddy', geminiDiagnostic);
         speakResponse(reply);
+        syncStudentAnalysisToBackend(text, reply, 'text');
+    }
+
+    // Smart navigation prompt with clickable Go / Stay buttons
+    function appendChatNavigationPrompt(promptHtml, panelId, navBtnId, isChinese) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'message buddy-msg';
+
+        const goLabel   = isChinese ? '✅ 带我去！' : '✅ Take me there!';
+        const stayLabel = isChinese ? '💬 不用，继续聊天' : '💬 No, let\'s keep chatting';
+
+        const formattedTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        msgDiv.innerHTML = `
+            <div class="msg-avatar-icon">MB</div>
+            <div class="msg-body">
+                <p>${promptHtml}</p>
+                <div class="chat-nav-actions" style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+                    <button class="chat-nav-go-btn" style="
+                        padding: 8px 18px;
+                        background: linear-gradient(135deg, #00d2ff, #7b2ff7);
+                        color: #fff;
+                        border: none;
+                        border-radius: 20px;
+                        cursor: pointer;
+                        font-weight: 600;
+                        font-size: 0.85rem;
+                        transition: transform 0.15s, box-shadow 0.15s;
+                    ">${goLabel}</button>
+                    <button class="chat-nav-stay-btn" style="
+                        padding: 8px 18px;
+                        background: rgba(255,255,255,0.08);
+                        color: #ccc;
+                        border: 1px solid rgba(255,255,255,0.15);
+                        border-radius: 20px;
+                        cursor: pointer;
+                        font-weight: 500;
+                        font-size: 0.85rem;
+                        transition: transform 0.15s, background 0.15s;
+                    ">${stayLabel}</button>
+                </div>
+                <span class="msg-time">${formattedTime}</span>
+            </div>
+        `;
+
+        // Wire up Go button: navigate to the target panel
+        const goBtn = msgDiv.querySelector('.chat-nav-go-btn');
+        goBtn.addEventListener('click', () => {
+            switchPanel(panelId);
+            // Update sidebar active state
+            DOM.navBtns.forEach(b => b.classList.remove('active'));
+            const targetNavBtn = document.getElementById(navBtnId);
+            if (targetNavBtn) targetNavBtn.classList.add('active');
+            // Disable buttons after click
+            goBtn.disabled = true;
+            goBtn.style.opacity = '0.5';
+            goBtn.style.cursor = 'default';
+            const stayBtn = msgDiv.querySelector('.chat-nav-stay-btn');
+            if (stayBtn) { stayBtn.disabled = true; stayBtn.style.opacity = '0.5'; stayBtn.style.cursor = 'default'; }
+        });
+        goBtn.addEventListener('mouseenter', () => { goBtn.style.transform = 'scale(1.05)'; goBtn.style.boxShadow = '0 0 12px rgba(0,210,255,0.4)'; });
+        goBtn.addEventListener('mouseleave', () => { goBtn.style.transform = 'scale(1)'; goBtn.style.boxShadow = 'none'; });
+
+        // Wire up Stay button: dismiss and continue chatting
+        const stayBtn = msgDiv.querySelector('.chat-nav-stay-btn');
+        stayBtn.addEventListener('click', () => {
+            const actionsDiv = msgDiv.querySelector('.chat-nav-actions');
+            if (actionsDiv) actionsDiv.remove();
+            const confirmMsg = isChinese ? '好的，我们继续聊天吧！有什么想说的尽管告诉我~ 😊' : 'Alright, let\'s keep chatting! Tell me what\'s on your mind 😊';
+            appendChatMessage('Buddy', confirmMsg);
+        });
+        stayBtn.addEventListener('mouseenter', () => { stayBtn.style.background = 'rgba(255,255,255,0.15)'; });
+        stayBtn.addEventListener('mouseleave', () => { stayBtn.style.background = 'rgba(255,255,255,0.08)'; });
+
+        DOM.chatMessages.appendChild(msgDiv);
+        DOM.chatMessages.scrollTop = DOM.chatMessages.scrollHeight;
+    }
+
+    async function syncStudentAnalysisToBackend(message, reply, modality = 'text', metadata = {}) {
+        const stored = localStorage.getItem('kawanku_student_session');
+        if (!stored) return;
+
+        const now = Date.now();
+        const lastSync = lastStudentAnalysisSyncAt[modality] || 0;
+        if (modality !== 'text' && now - lastSync < STUDENT_ANALYSIS_SYNC_COOLDOWN_MS) return;
+        lastStudentAnalysisSyncAt[modality] = now;
+
+        let session = null;
+        try {
+            session = JSON.parse(stored);
+        } catch (error) {
+            console.warn('Student session could not be parsed for analysis sync:', error);
+            return;
+        }
+
+        if (!session?.token) return;
+
+        try {
+            const response = await fetch('/api/student/analysis', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.token}`
+                },
+                body: JSON.stringify({
+                    message,
+                    reply,
+                    diagnostics: state.diagnostics,
+                    modality,
+                    metadata
+                })
+            });
+
+            if (!response.ok) {
+                console.warn(`Student analysis sync failed: ${response.status}`);
+            }
+        } catch (error) {
+            console.warn('Student analysis sync failed:', error);
+        }
     }
 
     function generateLocalReply() {
@@ -837,29 +1252,35 @@ Keep your conversational reply warm, human and concise. The student should feel 
 
     function updateHeaderStatusBars() {
         // Sentiment Badge
-        const sentVal = DOM.statusSentiment.querySelector('.metric-value');
-        sentVal.className = `metric-value ${state.diagnostics.sentiment.toLowerCase()}`;
-        
-        let icon = 'smile';
-        if (state.diagnostics.sentiment === 'Negative') icon = 'frown';
-        if (state.diagnostics.sentiment === 'Neutral') icon = 'meh';
-
-        sentVal.innerHTML = `<i data-lucide="${icon}"></i> ${state.diagnostics.sentiment}`;
-
-        // Stress Level Badge
-        const stressVal = DOM.statusStress.querySelector('.metric-value');
-        stressVal.className = `metric-value ${state.diagnostics.stressLevel.toLowerCase()}`;
-        stressVal.innerText = state.diagnostics.stressLevel;
-
-        // Mini trends
-        DOM.miniMoodTrend.innerText = state.diagnostics.stressLevel === 'High' ? 'Elevated' : 'Stable';
-        if (state.diagnostics.stressLevel === 'High') {
-            DOM.miniMoodTrend.className = 'mini-val text-rose';
-        } else {
-            DOM.miniMoodTrend.className = 'mini-val text-mint';
+        const sentVal = DOM.statusSentiment ? DOM.statusSentiment.querySelector('.metric-value') : null;
+        if (sentVal) {
+            sentVal.className = `metric-value ${state.diagnostics.sentiment.toLowerCase()}`;
+            let icon = 'smile';
+            if (state.diagnostics.sentiment === 'Negative') icon = 'frown';
+            if (state.diagnostics.sentiment === 'Neutral') icon = 'meh';
+            sentVal.innerHTML = `<i data-lucide="${icon}"></i> ${state.diagnostics.sentiment}`;
         }
 
-        lucide.createIcons();
+        // Stress Level Badge
+        const stressVal = DOM.statusStress ? DOM.statusStress.querySelector('.metric-value') : null;
+        if (stressVal) {
+            stressVal.className = `metric-value ${state.diagnostics.stressLevel.toLowerCase()}`;
+            stressVal.innerText = state.diagnostics.stressLevel;
+        }
+
+        // Mini trends
+        if (DOM.miniMoodTrend) {
+            DOM.miniMoodTrend.innerText = state.diagnostics.stressLevel === 'High' ? 'Elevated' : 'Stable';
+            if (state.diagnostics.stressLevel === 'High') {
+                DOM.miniMoodTrend.className = 'mini-val text-rose';
+            } else {
+                DOM.miniMoodTrend.className = 'mini-val text-mint';
+            }
+        }
+
+        if (typeof lucide !== 'undefined' && lucide.createIcons) {
+            try { lucide.createIcons(); } catch(e) {}
+        }
     }
 
     function appendChatMessage(sender, text) {
@@ -1253,12 +1674,25 @@ Keep your conversational reply warm, human and concise. The student should feel 
         const pauseAssessment = state.rant.pauseCount > 4 ? "your speech had several hesitations and pauses, reflecting high stress or heavy thoughts" : "your voice flowed smoothly with confidence";
         const wpmVal = parseInt(DOM.rantMetricSpeed.innerText) || 120;
         const speedAssessment = wpmVal > 150 ? "rapid, fast-paced talking, which is often a sign of anxious excitement or built-up pressure" : "a measured, grounding vocal speed";
+        const tremorRate = Math.min(100, Math.round((state.rant.tremorAccumulator || 0) / ((state.rant.frameCount || 1) * 0.1))) || 8;
 
-        const summaryResponse = `I processed your rant. I hear that you're going through a lot. Specifically, ${pauseAssessment}, and you spoke at ${speedAssessment}. Getting those words out is an excellent step to unpack stress. I'm right here with you. What would you like to focus on next?`;
-        
         appendChatMessage('Buddy', `🎤 **Vocal Rant Report:** You vented for ${state.diagnostics.lastRantDuration}. Here's my response to your speech:`);
-        appendChatMessage('Buddy', summaryResponse);
-        speakResponse(summaryResponse);
+        const typingId = showTypingIndicator();
+
+        analyzeAudioRantWithGemini(transcriptText, wpmVal, state.rant.pauseCount, tremorRate).then(summaryResponse => {
+            removeTypingIndicator(typingId);
+            if (!summaryResponse) {
+                summaryResponse = `I processed your rant. I hear that you're going through a lot. Specifically, ${pauseAssessment}, and you spoke at ${speedAssessment}. Getting those words out is an excellent step to unpack stress. I'm right here with you. What would you like to focus on next?`;
+            }
+            appendChatMessage('Buddy', summaryResponse);
+            speakResponse(summaryResponse);
+            syncStudentAnalysisToBackend(transcriptText, summaryResponse, 'voice', {
+                speechRateWpm: wpmVal,
+                pauseCount: state.rant.pauseCount,
+                tremorRate,
+                duration: state.diagnostics.lastRantDuration
+            });
+        });
 
         // Adjust overall diagnostics
         state.diagnostics.burnout = Math.min(100, Math.max(10, state.diagnostics.burnout - 10)); // catharsis relief reduction
@@ -1266,20 +1700,50 @@ Keep your conversational reply warm, human and concise. The student should feel 
         evaluateTextDiagnostics(transcriptText);
     }
 
+    async function analyzeAudioRantWithGemini(transcriptText, wpmVal, pauseCount, tremorRate) {
+        if (!canAttemptNonChatGemini(lastGeminiAudioAt, GEMINI_AUDIO_COOLDOWN_MS)) return null;
+        lastGeminiAudioAt = Date.now();
+
+        const prompt = `The student has finished a voice/rant session.
+Transcript: ${transcriptText}
+
+Non-content voice metadata:
+- Speaking rate: ${wpmVal} words per minute
+- Hesitations/pauses: ${pauseCount}
+- Vocal tremor/jitter index: ${tremorRate}%
+
+Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect the vocal metadata without sounding clinical, and ask one supportive follow-up question.`;
+
+        try {
+            const data = await callGemini('gemini-2.5-flash', {
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    temperature: 0.75,
+                    maxOutputTokens: 220
+                }
+            });
+            return data?.candidates?.[0]?.content?.parts?.[0]?.text || null;
+        } catch (err) {
+            console.warn('Rant Gemini analysis failed, using local fallback:', err);
+            return null;
+        }
+    }
+
     // ----------------------------------------------------------------------
     // FACE SCANNER (CAM ANALYSIS HUD OVERLAY)
     // ----------------------------------------------------------------------
     function startWebcamAnalyzer() {
-        if (state.webcam.isActive) return;
+        if (state.webcam.isActive || !DOM.webcamOverlay.classList.contains('hidden')) return;
 
         // Show overlay immediately so user sees we're attempting to connect
         DOM.webcamOverlay.classList.remove('hidden');
+        DOM.webcamOverlay.style.display = 'flex';
         DOM.camToggleBtn.classList.add('active');
+        state.webcam.isActive = true;
 
         navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } })
             .then(stream => {
                 state.webcam.stream = stream;
-                state.webcam.isActive = true;
                 DOM.webcamElement.srcObject = stream;
 
                 // Start visual overlay tracking loop
@@ -1290,7 +1754,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
                 console.error("Camera access failed", err);
                 // Overlay is already visible — user can still close it with × button
                 // Mark inactive so stop() doesn't skip
-                state.webcam.isActive = true; // trick: lets stopWebcamAnalyzer clean up
+                state.webcam.isActive = false;
                 showToast("Camera access was denied. Click × to close.", "error");
             });
     }
@@ -1375,24 +1839,115 @@ Keep your conversational reply warm, human and concise. The student should feel 
             DOM.camMetricMood.className = "val text-purple";
         }
         DOM.camMetricMood.innerText = expressionGuess;
+
+        // Periodically store local face metadata, with a rare Gemini frame check.
+        const now = Date.now();
+        if (now - state.webcam.lastScanTime > 60000) {
+            state.webcam.lastScanTime = now;
+            captureAndAnalyzeFaceFrame();
+        }
+    }
+
+    async function captureAndAnalyzeFaceFrame() {
+        if (!state.webcam.isActive || !DOM.webcamElement.videoWidth) return;
+        try {
+            const tensionScore = Math.round(
+                20 + Math.sin(Date.now() * 0.003) * 6 + (state.diagnostics.stressLevel === 'High' ? 40 : 0)
+            );
+            const expression = state.diagnostics.sentiment === 'Negative'
+                ? 'stressed'
+                : (state.diagnostics.sentiment === 'Positive' ? 'calm' : 'neutral');
+            const description = expression === 'stressed'
+                ? 'Local webcam metadata suggests visible tension indicators.'
+                : 'Local webcam metadata suggests calm or neutral expression indicators.';
+
+            DOM.camMetricMood.innerText = `${expression} (${description})`;
+            DOM.camMetricMood.className = expression === 'calm' ? 'val text-mint' : (expression === 'neutral' ? 'val text-purple' : 'val text-rose');
+            DOM.camMetricTension.style.width = `${Math.max(0, Math.min(100, tensionScore))}%`;
+
+            if (canAttemptNonChatGemini(lastGeminiFaceAt, GEMINI_FACE_COOLDOWN_MS)) {
+                lastGeminiFaceAt = Date.now();
+                const canvas = document.createElement('canvas');
+                canvas.width = 160;
+                canvas.height = 120;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(DOM.webcamElement, 0, 0, canvas.width, canvas.height);
+                const base64Data = canvas.toDataURL('image/jpeg', 0.55).split(',')[1];
+                const data = await callGemini('gemini-2.5-flash', {
+                    contents: [{
+                        parts: [
+                            {
+                                text: "Analyze this single webcam frame for broad expression metadata only. Return only JSON: {\"expression\":\"calm|neutral|stressed|sad|happy|anxious\",\"tensionScore\":0-100,\"description\":\"one short privacy-safe sentence\"}"
+                            },
+                            {
+                                inlineData: {
+                                    mimeType: "image/jpeg",
+                                    data: base64Data
+                                }
+                            }
+                        ]
+                    }],
+                    generationConfig: {
+                        temperature: 0.2,
+                        maxOutputTokens: 120
+                    }
+                });
+                const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    const result = JSON.parse(jsonMatch[0]);
+                    if (result.expression) {
+                        DOM.camMetricMood.innerText = `${result.expression} (${result.description || description})`;
+                        DOM.camMetricMood.className = result.expression === 'happy' || result.expression === 'calm' ? 'val text-mint' : (result.expression === 'neutral' ? 'val text-purple' : 'val text-rose');
+                        if (result.tensionScore !== undefined) {
+                            DOM.camMetricTension.style.width = `${Math.max(0, Math.min(100, Number(result.tensionScore)))}%`;
+                        }
+                    }
+                }
+            }
+
+            syncStudentAnalysisToBackend(
+                `Facial expression scan: ${expression}`,
+                description,
+                'facial_emotion',
+                {
+                    expression,
+                    tensionScore,
+                    description,
+                    source: 'local_webcam_metadata'
+                }
+            );
+        } catch (err) {
+            console.warn('Facial scan analysis failed:', err);
+        }
     }
 
     function stopWebcamAnalyzer() {
+        const wasVisible = !DOM.webcamOverlay.classList.contains('hidden') && DOM.webcamOverlay.style.display !== 'none';
+
         // Always hide the overlay, regardless of whether the stream started
         DOM.webcamOverlay.classList.add('hidden');
+        DOM.webcamOverlay.style.display = 'none';
         DOM.camToggleBtn.classList.remove('active');
 
-        if (!state.webcam.isActive) return;
-
         state.webcam.isActive = false;
-        cancelAnimationFrame(state.webcam.animationFrame);
+        if (state.webcam.animationFrame) {
+            cancelAnimationFrame(state.webcam.animationFrame);
+            state.webcam.animationFrame = null;
+        }
         
         if (state.webcam.stream) {
             state.webcam.stream.getTracks().forEach(track => track.stop());
             state.webcam.stream = null;
         }
 
-        showToast("Webcam face metrics stopped.", "info");
+        if (DOM.webcamElement) {
+            DOM.webcamElement.srcObject = null;
+        }
+
+        if (wasVisible) {
+            showToast("Webcam face metrics stopped.", "info");
+        }
     }
 
     // ----------------------------------------------------------------------
@@ -1419,7 +1974,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
         const offset = Math.floor(Math.random() * 5) - 2;
         let activeHR = Math.max(50, Math.min(150, pulseTarget + offset));
 
-        DOM.bioLiveHR.innerText = `${activeHR} bpm`;
+        if (DOM.bioLiveHR) DOM.bioLiveHR.innerText = `${activeHR} bpm`;
 
         // Shift ring buffer
         state.biometrics.chartData.shift();
@@ -1441,7 +1996,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
             }
         });
 
-        DOM.hrChartPath.setAttribute('d', pathD);
+        if (DOM.hrChartPath) DOM.hrChartPath.setAttribute('d', pathD);
 
         // Perform diagnostics update if IoT values flag high stress
         evaluateIoTBiometricState();
@@ -1459,9 +2014,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
             hasAnomaly = true;
             warningTitle = "High Stress Alert: Insomnia & Autonomic Panic";
             warningDesc = "Combined metrics of acute sleep deprivation (under 5 hrs) and tachycardia (resting heart rate above 100 BPM) reflect extreme autonomic flight activation.";
-            DOM.iotSyncStatus.innerText = "Panic Linked";
-            DOM.iotSyncStatus.className = "sync-badge status-anomalous";
-            
+            if (DOM.iotSyncStatus) { DOM.iotSyncStatus.innerText = "Panic Linked"; DOM.iotSyncStatus.className = "sync-badge status-anomalous"; }
             // Adjust stress levels behind the scenes
             state.diagnostics.burnout = Math.max(75, state.diagnostics.burnout);
             state.diagnostics.stressLevel = "High";
@@ -1469,180 +2022,814 @@ Keep your conversational reply warm, human and concise. The student should feel 
             hasAnomaly = true;
             warningTitle = "Autonomic Tension: Elevated Pulse";
             warningDesc = "A resting pulse rate above 100 BPM indicates sudden panic, physiological flight response, or cognitive anxiety spikes.";
-            DOM.iotSyncStatus.innerText = "Tension Linked";
-            DOM.iotSyncStatus.className = "sync-badge status-anomalous";
-            
+            if (DOM.iotSyncStatus) { DOM.iotSyncStatus.innerText = "Tension Linked"; DOM.iotSyncStatus.className = "sync-badge status-anomalous"; }
             state.diagnostics.socialAnxiety = Math.max(65, state.diagnostics.socialAnxiety);
         } else if (sleep < 5.5) {
             hasAnomaly = true;
             warningTitle = "Cognitive Deficit: Sleep Deprivation";
             warningDesc = "Fewer than 5.5 hours of rest drastically reduces resilience to emotional triggers, triggering immediate fatigue warnings.";
-            DOM.iotSyncStatus.innerText = "Fatigue Linked";
-            DOM.iotSyncStatus.className = "sync-badge status-anomalous";
-            
+            if (DOM.iotSyncStatus) { DOM.iotSyncStatus.innerText = "Fatigue Linked"; DOM.iotSyncStatus.className = "sync-badge status-anomalous"; }
             state.diagnostics.burnout = Math.max(70, state.diagnostics.burnout);
         } else {
-            DOM.iotSyncStatus.innerHTML = '<i data-lucide="check-circle"></i> Linked';
-            DOM.iotSyncStatus.className = "sync-badge status-connected";
-            lucide.createIcons();
+            if (DOM.iotSyncStatus) {
+                DOM.iotSyncStatus.innerHTML = '<i data-lucide="check-circle"></i> Linked';
+                DOM.iotSyncStatus.className = "sync-badge status-connected";
+            }
+            if (typeof lucide !== 'undefined' && lucide.createIcons) { try { lucide.createIcons(); } catch(e) {} }
         }
 
         // Apply visual classes to alert banner
         if (hasAnomaly) {
-            DOM.anomalyBanner.className = "biometric-alert-banner alert-warning";
-            DOM.anomalyIcon.setAttribute('data-lucide', 'alert-triangle');
-            
+            if (DOM.anomalyBanner) DOM.anomalyBanner.className = "biometric-alert-banner alert-warning";
+            if (DOM.anomalyIcon) DOM.anomalyIcon.setAttribute('data-lucide', 'alert-triangle');
             // Proactively prompt conversation change if high stress
             if (state.diagnostics.stressLevel === 'High') {
                 state.avatar.expression = 'attentive';
                 renderAvatarVisuals();
             }
         } else {
-            DOM.anomalyBanner.className = "biometric-alert-banner alert-normal";
-            DOM.anomalyIcon.setAttribute('data-lucide', 'info');
+            if (DOM.anomalyBanner) DOM.anomalyBanner.className = "biometric-alert-banner alert-normal";
+            if (DOM.anomalyIcon) DOM.anomalyIcon.setAttribute('data-lucide', 'info');
         }
 
-        DOM.anomalyTitle.innerText = warningTitle;
-        DOM.anomalyDesc.innerText = warningDesc;
-        lucide.createIcons();
+        if (DOM.anomalyTitle) DOM.anomalyTitle.innerText = warningTitle;
+        if (DOM.anomalyDesc) DOM.anomalyDesc.innerText = warningDesc;
+        if (typeof lucide !== 'undefined' && lucide.createIcons) { try { lucide.createIcons(); } catch(e) {} }
         
         // Sync stats to header
         updateHeaderStatusBars();
     }
 
 
+    // Binaural Beats Synthesizer (432Hz Alpha Waves)
+    function toggleBinauralBeats(play) {
+        initSynthContext();
+        const b = state.synth.binaural;
+        const ctx = state.synth.audioCtx;
+
+        if (play && !b.isPlaying) {
+            b.leftOsc = ctx.createOscillator();
+            b.rightOsc = ctx.createOscillator();
+            b.gain = ctx.createGain();
+
+            // Set detuned frequencies to create a 6Hz Binaural Beat
+            b.leftOsc.frequency.setValueAtTime(200, ctx.currentTime);  // 200 Hz
+            b.rightOsc.frequency.setValueAtTime(206, ctx.currentTime); // 206 Hz (6Hz Theta diff)
+            
+            b.leftOsc.type = 'sine';
+            b.rightOsc.type = 'sine';
+
+            // Channels merger to target left and right ears individually
+            const merger = ctx.createChannelMerger(2);
+            
+            // Connect nodes
+            b.leftOsc.connect(merger, 0, 0);
+            b.rightOsc.connect(merger, 0, 1);
+            
+            const vol = parseFloat(DOM.volBinaural.value);
+            b.gain.gain.setValueAtTime(vol * 0.4, ctx.currentTime); // keep beat gentle
+
+            merger.connect(b.gain);
+            b.gain.connect(state.synth.mainGain);
+
+            b.leftOsc.start();
+            b.rightOsc.start();
+            b.isPlaying = true;
+
+            DOM.btnBinaural.innerText = "Stop";
+            DOM.btnBinaural.classList.add('playing');
+            showToast("Binaural beats activated. Wear headphones for full effect.", "success");
+        } else if (!play && b.isPlaying) {
+            b.leftOsc.stop();
+            b.rightOsc.stop();
+            b.leftOsc.disconnect();
+            b.rightOsc.disconnect();
+            b.isPlaying = false;
+            DOM.btnBinaural.innerText = "Play";
+            DOM.btnBinaural.classList.remove('playing');
+        }
+    }
+
+    // Pink Noise Rain Filter Synthesizer
+    function togglePinkRain(play) {
+        initSynthContext();
+        const r = state.synth.rain;
+        const ctx = state.synth.audioCtx;
+
+        if (play && !r.isPlaying) {
+            const bufferSize = 2 * ctx.sampleRate;
+            const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+
+            // Pink Noise Generation Algorithm (Paul Kellet's method)
+            let b0, b1, b2, b3, b4, b5, b6;
+            b0 = b1 = b2 = b3 = b4 = b5 = b6 = 0.0;
+
+            for (let i = 0; i < bufferSize; i++) {
+                let white = Math.random() * 2 - 1;
+                b0 = 0.99886 * b0 + white * 0.0555179;
+                b1 = 0.99332 * b1 + white * 0.0750759;
+                b2 = 0.96900 * b2 + white * 0.1538520;
+                b3 = 0.86650 * b3 + white * 0.3104856;
+                b4 = 0.55000 * b4 + white * 0.5329522;
+                b5 = -0.7616 * b5 - white * 0.0168980;
+                output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+                output[i] *= 0.11; // normal scaling
+                b6 = white * 0.115926;
+            }
+
+            r.source = ctx.createBufferSource();
+            r.source.buffer = noiseBuffer;
+            r.source.loop = true;
+
+            // Lowpass filter to simulate rain muffling
+            const lowpass = ctx.createBiquadFilter();
+            lowpass.type = 'lowpass';
+            lowpass.frequency.setValueAtTime(600, ctx.currentTime);
+
+            r.gain = ctx.createGain();
+            const vol = parseFloat(DOM.volRain.value);
+            r.gain.gain.setValueAtTime(vol * 0.6, ctx.currentTime);
+
+            r.source.connect(lowpass);
+            lowpass.connect(r.gain);
+            r.gain.connect(state.synth.mainGain);
+
+            r.source.start();
+            r.isPlaying = true;
+
+            DOM.btnRain.innerText = "Stop";
+            DOM.btnRain.classList.add('playing');
+            showToast("Rain soundscape initialized.", "success");
+        } else if (!play && r.isPlaying) {
+            r.source.stop();
+            r.source.disconnect();
+            r.isPlaying = false;
+            DOM.btnRain.innerText = "Play";
+            DOM.btnRain.classList.remove('playing');
+        }
+    }
+
+    // Zen Drone Chord Synthesizer (Harmonized Triad + Slow LFO Volume Modulator)
+    function toggleZenDrone(play) {
+        initSynthContext();
+        const d = state.synth.drone;
+        const ctx = state.synth.audioCtx;
+
+        if (play && !d.isPlaying) {
+            d.osc1 = ctx.createOscillator();
+            d.osc2 = ctx.createOscillator();
+            d.osc3 = ctx.createOscillator();
+            d.gain = ctx.createGain();
+            d.filter = ctx.createBiquadFilter();
+
+            // Set triad chords C3 (130Hz) - G3 (196Hz) - C4 (261Hz)
+            d.osc1.frequency.setValueAtTime(130.81, ctx.currentTime);
+            d.osc2.frequency.setValueAtTime(196.00, ctx.currentTime);
+            d.osc3.frequency.setValueAtTime(261.63, ctx.currentTime);
+
+            d.osc1.type = 'triangle';
+            d.osc2.type = 'sine';
+            d.osc3.type = 'triangle';
+
+            d.filter.type = 'lowpass';
+            d.filter.frequency.setValueAtTime(450, ctx.currentTime);
+
+            // Connect voices to filter
+            d.osc1.connect(d.filter);
+            d.osc2.connect(d.filter);
+            d.osc3.connect(d.filter);
+
+            // Set main volume gain
+            const vol = parseFloat(DOM.volDrone.value);
+            d.gain.gain.setValueAtTime(vol * 0.35, ctx.currentTime);
+
+            // Create LFO to oscillate amplitude (simulating breathing)
+            d.lfo = ctx.createOscillator();
+            d.lfoGain = ctx.createGain();
+            d.lfo.frequency.setValueAtTime(0.12, ctx.currentTime); // ~8 second breathe cycles
+            d.lfoGain.gain.setValueAtTime(0.12, ctx.currentTime); // fluctuate up/down
+
+            d.lfo.connect(d.lfoGain);
+            d.lfoGain.connect(d.gain.gain); // Connect LFO to volume parameter
+
+            d.filter.connect(d.gain);
+            d.gain.connect(state.synth.mainGain);
+
+            d.osc1.start();
+            d.osc2.start();
+            d.osc3.start();
+            d.lfo.start();
+            d.isPlaying = true;
+
+            DOM.btnDrone.innerText = "Stop";
+            DOM.btnDrone.classList.add('playing');
+            showToast("Zen Meditation Drone activated.", "success");
+        } else if (!play && d.isPlaying) {
+            d.osc1.stop();
+            d.osc2.stop();
+            d.osc3.stop();
+            d.lfo.stop();
+            d.osc1.disconnect();
+            d.osc2.disconnect();
+            d.osc3.disconnect();
+            d.lfo.disconnect();
+            d.isPlaying = false;
+            DOM.btnDrone.innerText = "Play";
+            DOM.btnDrone.classList.remove('playing');
+        }
+    }
+
+    // ----------------------------------------------------------------------
+    // MINDFULNESS WELLNESS QUIZZES
+    // ----------------------------------------------------------------------
+    const QUIZ_LIBRARY = {
+        academic: {
+            title: "Study Alignment Check",
+            badge: "Recommended: Academic Burnout",
+            desc: "Use this quiz to reset expectations, analyze homework weight, and clear cognitive overload.",
+            questions: [
+                {
+                    q: "When you look at your upcoming homework deadline list, your first impulse is:",
+                    options: [
+                        { text: "Tackle it immediately to get it over with", score: "Attentive" },
+                        { text: "Feel paralyzed by the bulk and delay opening it", score: "Thoughtful" },
+                        { text: "Log off entirely and ignore it out of pure exhaustion", score: "Attentive" }
+                    ]
+                },
+                {
+                    q: "How does your body feel physically when sitting at your desk?",
+                    options: [
+                        { text: "Relatively relaxed, minor posture discomfort", score: "Friendly" },
+                        { text: "Tight shoulders, shallow breathing, clenched jaw", score: "Thoughtful" },
+                        { text: "Completely drained, head feels heavy, hard to focus", score: "Attentive" }
+                    ]
+                },
+                {
+                    q: "Which thought feels closest to your current academic goals?",
+                    options: [
+                        { text: "I just need to pass this week; perfection doesn't matter", score: "Friendly" },
+                        { text: "If I don't score highly, I am failing my expectations", score: "Thoughtful" },
+                        { text: "I want to learn, but my mental tank is completely empty", score: "Attentive" }
+                    ]
+                }
+            ]
+        },
+        burnout: {
+            title: "Energy & Rest Sanctuary Check",
+            badge: "Recommended: Chronic Burnout",
+            desc: "A small evaluation to see if your battery is in the red zone and suggest physical resets.",
+            questions: [
+                {
+                    q: "Over the past 48 hours, has sleeping felt recuperative?",
+                    options: [
+                        { text: "Yes, I feel relatively refreshed upon waking", score: "Friendly" },
+                        { text: "I wake up tired no matter how long I lay in bed", score: "Thoughtful" },
+                        { text: "My mind races when the lights go off, keeping me awake", score: "Attentive" }
+                    ]
+                },
+                {
+                    q: "When was the last time you spent 30 minutes doing absolutely nothing productive, guilt-free?",
+                    options: [
+                        { text: "Today! I schedule relaxation breaks", score: "Friendly" },
+                        { text: "A few days ago, but I felt anxious not working", score: "Thoughtful" },
+                        { text: "I cannot remember; I feel lazy if I am not busy", score: "Attentive" }
+                    ]
+                },
+                {
+                    q: "How does your emotional bandwidth feel when talking to others?",
+                    options: [
+                        { text: "Normal, I enjoy engaging with close friends", score: "Friendly" },
+                        { text: "Irritable, tiny inconveniences feel major", score: "Thoughtful" },
+                        { text: "Completely withdrawn, social messages look like chores", score: "Attentive" }
+                    ]
+                }
+            ]
+        },
+        general: {
+            title: "Mindfulness Grounding Check",
+            badge: "General Grounding Checkup",
+            desc: "Designed to anchor your awareness in the present moment and slow fast-moving anxious thoughts.",
+            questions: [
+                {
+                    q: "Take a slow deep breath. Where do you feel the tension focus in your body?",
+                    options: [
+                        { text: "Mainly in my chest or throat area", score: "Thoughtful" },
+                        { text: "Tightness around my forehead or eyes", score: "Attentive" },
+                        { text: "No significant tightness; feels open", score: "Friendly" }
+                    ]
+                },
+                {
+                    q: "Choose a calming sensory action that sounds nice right now:",
+                    options: [
+                        { text: "Splashing cool water on my face", score: "Friendly" },
+                        { text: "Listening to low binaural drone tones", score: "Attentive" },
+                        { text: "Stretching my neck and arms for 2 minutes", score: "Thoughtful" }
+                    ]
+                },
+                {
+                    q: "If your current mood was described as a weather condition, it would be:",
+                    options: [
+                        { text: "Bright sunshine, few clouds", score: "Friendly" },
+                        { text: "Heavy fog, difficult to navigate", score: "Thoughtful" },
+                        { text: "Stormy downpour, lightning spikes", score: "Attentive" }
+                    ]
+                }
+            ]
+        }
+    };
+
+    function updateQuizRecommendation() {
+        const diagnostics = state.diagnostics;
+        let selectedCategory = 'general';
+
+        if (diagnostics.burnout > 50) {
+            selectedCategory = 'burnout';
+        } else if (diagnostics.academicPressure > 50) {
+            selectedCategory = 'academic';
+        }
+
+        const data = QUIZ_LIBRARY[selectedCategory];
+        if (!data) return;
+        state.quiz.activeCategory = selectedCategory;
+        state.quiz.questions = data.questions;
+
+        if (DOM.quizRecBadge) DOM.quizRecBadge.innerText = data.badge;
+        if (DOM.quizRecTitle) DOM.quizRecTitle.innerText = data.title;
+        if (DOM.quizIntroState) {
+            const p = DOM.quizIntroState.querySelector('p');
+            if (p) p.innerText = data.desc;
+        }
+    }
+
+    async function startQuizSession() {
+        DOM.quizIntroState.classList.add('hidden');
+        DOM.quizResultsState.classList.add('hidden');
+        DOM.quizActiveState.classList.remove('hidden');
+
+        // Student-side quiz uses local content. Counselor dashboard owns AI quiz generation.
+        DOM.quizQCounter.innerText = "Starting...";
+        DOM.quizProgressFill.style.width = "0%";
+        DOM.quizQuestionTitle.innerText = "Preparing your check-in questions...";
+        DOM.quizOptionsContainer.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:100px;"><span class="typing-dots"><span>.</span><span>.</span><span>.</span></span></div>';
+
+        state.quiz.currentQuestionIdx = 0;
+        state.quiz.answers = [];
+        renderQuizQuestion();
+    }
+
+    async function generateCustomQuizWithGemini() {
+        // Gemini quiz generation is intentionally counselor-triggered only.
+        return null;
+    }
+
+    function renderQuizQuestion() {
+        const idx = state.quiz.currentQuestionIdx;
+        const qList = state.quiz.questions;
+        if (!qList || !qList[idx]) return;
+        const qData = qList[idx];
+
+        if (DOM.quizQCounter) DOM.quizQCounter.innerText = `Question ${idx + 1} of ${qList.length}`;
+        if (DOM.quizProgressFill) DOM.quizProgressFill.style.width = `${((idx + 1) / qList.length) * 100}%`;
+        if (DOM.quizQuestionTitle) DOM.quizQuestionTitle.innerText = qData.q;
+
+        if (DOM.quizOptionsContainer) {
+            DOM.quizOptionsContainer.innerHTML = '';
+            qData.options.forEach((opt, oIdx) => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-opt-btn';
+                btn.innerText = opt.text;
+                btn.addEventListener('click', () => handleQuizAnswer(opt.score));
+                DOM.quizOptionsContainer.appendChild(btn);
+            });
+        }
+    }
+
+    function handleQuizAnswer(score) {
+        state.quiz.answers.push(score);
+        state.quiz.currentQuestionIdx++;
+
+        if (state.quiz.currentQuestionIdx < (state.quiz.questions || []).length) {
+            renderQuizQuestion();
+        } else {
+            showQuizResults();
+        }
+    }
+
+    function showQuizResults() {
+        if (DOM.quizActiveState) DOM.quizActiveState.classList.add('hidden');
+        if (DOM.quizResultsState) DOM.quizResultsState.classList.remove('hidden');
+
+        // Tabulate results and choose avatar response modifier
+        let counts = { Friendly: 0, Thoughtful: 0, Attentive: 0 };
+        state.quiz.answers.forEach(val => {
+            if (counts[val] !== undefined) counts[val]++;
+        });
+
+        let dominantExpression = 'friendly';
+        let feedbackMessage = "Excellent work checking in with your mind. Taking a moment to trace how your body and thoughts are behaving is a core mindfulness skill. I've adjusted my active presence to match your state.";
+
+        if (counts.Attentive > counts.Friendly && counts.Attentive > counts.Thoughtful) {
+            dominantExpression = 'attentive';
+            feedbackMessage = "Your alignment check suggests you are carrying notable tension. Let's focus on calming down. Try toggling on the Pink Rain or Binaural Beats mixers below to ground your focus.";
+        } else if (counts.Thoughtful > counts.Friendly) {
+            dominantExpression = 'thoughtful';
+            feedbackMessage = "Your answers reflect deep analytical thoughts, likely reflecting school or task pressure. Allow yourself permission to step back from goals for just one hour tonight. I'm right here with you.";
+        }
+
+        // Apply updated expression
+        state.avatar.expression = dominantExpression;
+        renderAvatarVisuals();
+        
+        if (DOM.quizResultFeedback) DOM.quizResultFeedback.innerText = feedbackMessage;
+        showToast("Wellness Check-in Complete.", "success");
+    }
 
     // ----------------------------------------------------------------------
     // UI EVENT BINDINGS
     // ----------------------------------------------------------------------
     function bindUIEvents() {
         // Chat Actions
-        DOM.chatSendBtn.addEventListener('click', handleChatTextSubmit);
-        DOM.chatTextInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleChatTextSubmit();
-            }
-        });
+        if (DOM.chatSendBtn) DOM.chatSendBtn.addEventListener('click', handleChatTextSubmit);
+        if (DOM.chatTextInput) {
+            DOM.chatTextInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleChatTextSubmit();
+                }
+            });
+        }
 
         // Rant microphone button toggles
-        DOM.rantStartBtn.addEventListener('click', startRantSession);
-        DOM.rantStopBtn.addEventListener('click', stopRantSession);
+        if (DOM.rantStartBtn) DOM.rantStartBtn.addEventListener('click', startRantSession);
+        if (DOM.rantStopBtn) DOM.rantStopBtn.addEventListener('click', stopRantSession);
 
         // Webcam toggles
-        DOM.camToggleBtn.addEventListener('click', () => {
-            if (state.webcam.isActive) {
-                stopWebcamAnalyzer();
-            } else {
-                startWebcamAnalyzer();
-            }
-        });
-        DOM.closeCamBtn.addEventListener('click', stopWebcamAnalyzer);
-
-        // Studio Designer events
-        const selectBtns = document.querySelectorAll('.selection-grid .select-btn');
-        selectBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const prop = btn.getAttribute('data-avatar-prop');
-                const val = btn.getAttribute('data-val');
-
-                state.avatar[prop] = val;
-                
-                // Toggle active state in sibling button group
-                const row = btn.closest('.selection-grid');
-                row.querySelectorAll('.select-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
-                renderAvatarVisuals();
+        if (DOM.camToggleBtn) {
+            DOM.camToggleBtn.addEventListener('click', () => {
+                if (state.webcam.isActive) {
+                    stopWebcamAnalyzer();
+                } else {
+                    startWebcamAnalyzer();
+                }
             });
-        });
+        }
+        if (DOM.closeCamBtn) DOM.closeCamBtn.addEventListener('click', stopWebcamAnalyzer);
 
-        // Studio Designer Color Pickers
-        DOM.pickerHair.addEventListener('input', (e) => {
-            state.avatar.hairColor = e.target.value;
-            renderAvatarVisuals();
-        });
-        DOM.pickerShirt.addEventListener('input', (e) => {
-            state.avatar.shirtColor = e.target.value;
-            renderAvatarVisuals();
-        });
-        DOM.pickerGlow1.addEventListener('input', (e) => {
-            state.avatar.glowColor1 = e.target.value;
-            renderAvatarVisuals();
-        });
-        DOM.pickerGlow2.addEventListener('input', (e) => {
-            state.avatar.glowColor2 = e.target.value;
-            renderAvatarVisuals();
-        });
-
-        // Studio Swapping subtabs
-        DOM.studioTabBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                DOM.studioTabBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
-                const target = btn.getAttribute('data-opt-group');
-                DOM.studioPanelGroups.forEach(g => {
-                    g.classList.remove('active');
-                    if (g.id === `opt-${target}`) {
-                        g.classList.add('active');
-                    }
+        // Studio Customizer Category Switcher
+        if (DOM.customizerSubnav) {
+            DOM.customizerSubnav.querySelectorAll('.subnav-item').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    DOM.customizerSubnav.querySelectorAll('.subnav-item').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    activeCategory = btn.getAttribute('data-category');
+                    activeSubcategory = AVATAR_CATALOG[activeCategory].subcategories[0];
+                    renderCustomizerUI();
                 });
             });
-        });
+        }
+
+        // Initial customizer render
+        renderCustomizerUI();
 
         // Avatar Randomizer Dice
-        DOM.avatarRandomizeBtn.addEventListener('click', randomizeAvatarConfig);
+        if (DOM.avatarRandomizeBtn) DOM.avatarRandomizeBtn.addEventListener('click', randomizeAvatarConfig);
 
         // IoT Biometrics controls
-        DOM.sliderHR.addEventListener('input', (e) => {
-            const hr = parseInt(e.target.value);
-            state.biometrics.heartRate = hr;
-            DOM.bubbleHR.innerText = `${hr} BPM`;
-            evaluateIoTBiometricState();
-        });
+        if (DOM.sliderHR) {
+            DOM.sliderHR.addEventListener('input', (e) => {
+                const hr = parseInt(e.target.value);
+                state.biometrics.heartRate = hr;
+                if (DOM.bubbleHR) DOM.bubbleHR.innerText = `${hr} BPM`;
+                evaluateIoTBiometricState();
+            });
+        }
 
-        DOM.sliderSleep.addEventListener('input', (e) => {
-            const hrs = parseFloat(e.target.value);
-            state.biometrics.sleepDuration = hrs;
-            DOM.bubbleSleep.innerText = `${hrs} Hrs`;
-            
-            // Recompute values
-            DOM.bioSleepDuration.innerText = `${hrs} hrs`;
-            // estimate Deep sleep as 25% of total
-            const deep = (hrs * 0.26).toFixed(1);
-            DOM.bioSleepDeep.innerText = `${deep} hrs`;
-            
-            // Efficiency formula (lower sleep, lower efficiency)
-            const eff = Math.min(100, Math.round(75 + (hrs / 8) * 20));
-            DOM.bioSleepEfficiency.innerText = `${eff}%`;
+        if (DOM.sliderSleep) {
+            DOM.sliderSleep.addEventListener('input', (e) => {
+                const hrs = parseFloat(e.target.value);
+                state.biometrics.sleepDuration = hrs;
+                if (DOM.bubbleSleep) DOM.bubbleSleep.innerText = `${hrs} Hrs`;
+                
+                // Recompute values
+                if (DOM.bioSleepDuration) DOM.bioSleepDuration.innerText = `${hrs} hrs`;
+                // estimate Deep sleep as 25% of total
+                const deep = (hrs * 0.26).toFixed(1);
+                if (DOM.bioSleepDeep) DOM.bioSleepDeep.innerText = `${deep} hrs`;
+                
+                // Efficiency formula (lower sleep, lower efficiency)
+                const eff = Math.min(100, Math.round(75 + (hrs / 8) * 20));
+                if (DOM.bioSleepEfficiency) DOM.bioSleepEfficiency.innerText = `${eff}%`;
 
-            evaluateIoTBiometricState();
-        });
+                evaluateIoTBiometricState();
+            });
+        }
 
+        // Calm Hub Mixer Synth controls
+        if (DOM.btnBinaural) {
+            DOM.btnBinaural.addEventListener('click', () => {
+                toggleBinauralBeats(!state.synth.binaural.isPlaying);
+            });
+        }
+        if (DOM.btnRain) {
+            DOM.btnRain.addEventListener('click', () => {
+                togglePinkRain(!state.synth.rain.isPlaying);
+            });
+        }
+        if (DOM.btnDrone) {
+            DOM.btnDrone.addEventListener('click', () => {
+                toggleZenDrone(!state.synth.drone.isPlaying);
+            });
+        }
 
+        // Synth Volume adjusters
+        if (DOM.volBinaural) {
+            DOM.volBinaural.addEventListener('input', (e) => {
+                const vol = parseFloat(e.target.value);
+                if (state.synth.binaural.gain) {
+                    state.synth.binaural.gain.gain.setValueAtTime(vol * 0.4, state.synth.audioCtx.currentTime);
+                }
+            });
+        }
+        if (DOM.volRain) {
+            DOM.volRain.addEventListener('input', (e) => {
+                const vol = parseFloat(e.target.value);
+                if (state.synth.rain.gain) {
+                    state.synth.rain.gain.gain.setValueAtTime(vol * 0.6, state.synth.audioCtx.currentTime);
+                }
+            });
+        }
+        if (DOM.volDrone) {
+            DOM.volDrone.addEventListener('input', (e) => {
+                const vol = parseFloat(e.target.value);
+                if (state.synth.drone.gain) {
+                    state.synth.drone.gain.gain.setValueAtTime(vol * 0.35, state.synth.audioCtx.currentTime);
+                }
+            });
+        }
+
+        // Calm Hub Quiz buttons
+        if (DOM.quizStartBtn) DOM.quizStartBtn.addEventListener('click', startQuizSession);
+        if (DOM.quizRestartBtn) {
+            DOM.quizRestartBtn.addEventListener('click', () => {
+                updateQuizRecommendation();
+                if (DOM.quizResultsState) DOM.quizResultsState.classList.add('hidden');
+                if (DOM.quizIntroState) DOM.quizIntroState.classList.remove('hidden');
+            });
+        }
 
         // SOS modal triggers
-        DOM.sosOpenBtn.addEventListener('click', () => {
-            syncSOSReportPreview();
-            DOM.sosModal.classList.remove('hidden');
-        });
-        DOM.sosCloseBtn.addEventListener('click', () => DOM.sosModal.classList.add('hidden'));
-        DOM.sosCancelBtn.addEventListener('click', () => DOM.sosModal.classList.add('hidden'));
+        if (DOM.sosOpenBtn) {
+            DOM.sosOpenBtn.addEventListener('click', () => {
+                syncSOSReportPreview();
+                if (DOM.sosModal) DOM.sosModal.classList.remove('hidden');
+            });
+        }
+        if (DOM.sosCloseBtn) DOM.sosCloseBtn.addEventListener('click', () => { if (DOM.sosModal) DOM.sosModal.classList.add('hidden'); });
+        if (DOM.sosCancelBtn) DOM.sosCancelBtn.addEventListener('click', () => { if (DOM.sosModal) DOM.sosModal.classList.add('hidden'); });
         
-        DOM.sosConfirmBtn.addEventListener('click', () => {
-            DOM.sosModal.classList.add('hidden');
-            showToast("Anonymized diagnostics successfully dispatched to counselor.", "success");
-            appendChatMessage('Buddy', "📬 **Notification:** I've packaged and forwarded your current physiological indicators and stress indices to the counselor department. A school advisor will receive it shortly. Hang in there!");
-        });
+        if (DOM.sosConfirmBtn) {
+            DOM.sosConfirmBtn.addEventListener('click', () => {
+                if (DOM.sosModal) DOM.sosModal.classList.add('hidden');
+                showToast("Anonymized diagnostics successfully dispatched to counselor.", "success");
+                appendChatMessage('Buddy', "📬 **Notification:** I've packaged and forwarded your current physiological indicators and stress indices to the counselor department. A school advisor will receive it shortly. Hang in there!");
+            });
+        }
     }
 
     function handleChatTextSubmit() {
+        if (!DOM.chatTextInput) return;
         const text = DOM.chatTextInput.value.trim();
         if (!text) return;
 
         DOM.chatTextInput.value = "";
         processStudentMessage(text);
+    }
+
+    // ----------------------------------------------------------------------
+    // AVATAR CUSTOMIZER SYSTEM (BITMOJI SYSTEM DEFINITIONS)
+    // ----------------------------------------------------------------------
+    let activeCategory = 'Fashion';
+    let activeSubcategory = 'Tops';
+
+    function unlockPremiumItem(prop, val) {
+        let unlocked = [];
+        try {
+            unlocked = JSON.parse(localStorage.getItem('kawanku_unlocked_items')) || [];
+        } catch(e) {}
+        if (!unlocked.includes(prop + ':' + val)) {
+            unlocked.push(prop + ':' + val);
+            localStorage.setItem('kawanku_unlocked_items', JSON.stringify(unlocked));
+        }
+    }
+    function isItemUnlocked(item) {
+        if (!item.locked) return true;
+        let unlocked = [];
+        try {
+            unlocked = JSON.parse(localStorage.getItem('kawanku_unlocked_items')) || [];
+        } catch(e) {}
+        return unlocked.includes(item.prop + ':' + item.id);
+    }
+
+    const AVATAR_CATALOG = {
+        Fashion: {
+            subcategories: ['Tops', 'Bottoms', 'Shoes'],
+            items: {
+                Tops: [
+                    { id: 'hoodie', label: 'Classic Hoodie', prop: 'shirtStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="40" width="40" height="40" rx="8" fill="#4f46e5"/><path d="M40,40 L50,30 L60,40 Z" fill="#3730a3"/></svg>' },
+                    { id: 'tshirt', label: 'Sporty T-Shirt', prop: 'shirtStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="40" width="36" height="40" rx="4" fill="#0d9488"/><rect x="24" y="40" width="52" height="12" rx="4" fill="#0d9488"/></svg>' },
+                    { id: 'sweater', label: 'Cozy Sweater', prop: 'shirtStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="28" y="38" width="44" height="44" rx="10" fill="#ea580c"/></svg>' }
+                ],
+                Bottoms: [
+                    { id: 'shorts', label: 'Casual Shorts', prop: 'pantsStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="45" width="16" height="24" rx="2" fill="#1e293b"/><rect x="52" y="45" width="16" height="24" rx="2" fill="#1e293b"/></svg>' },
+                    { id: 'cargo', label: 'Cargo Trousers', prop: 'pantsStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="40" width="16" height="45" rx="4" fill="#78716c"/><rect x="52" y="40" width="16" height="45" rx="4" fill="#78716c"/></svg>' },
+                    { id: 'jogger', label: 'Jogger Pants', prop: 'pantsStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="40" width="16" height="42" rx="4" fill="#374151"/><rect x="52" y="40" width="16" height="42" rx="4" fill="#374151"/></svg>' }
+                ],
+                Shoes: [
+                    { id: 'sneakers', label: 'Grey Sneakers', prop: 'shoes', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="48" width="40" height="18" rx="6" fill="#94a3b8"/><rect x="30" y="60" width="40" height="6" fill="#ffffff"/></svg>' },
+                    { id: 'boots', label: 'Outdoor Boots', prop: 'shoes', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="38" width="40" height="28" rx="8" fill="#78350f"/><rect x="30" y="60" width="40" height="6" fill="#451a03"/></svg>' },
+                    { id: 'sandals', label: 'Comfy Slides', prop: 'shoes', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="50" width="40" height="12" rx="4" fill="#1e3a8a"/><rect x="35" y="44" width="30" height="8" fill="#1d4ed8"/></svg>' }
+                ]
+            }
+        },
+        Selfie: {
+            subcategories: ['Expression'],
+            items: {
+                Expression: [
+                    { id: 'friendly', label: 'Friendly Smile', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="white" stroke-width="4"/><circle cx="40" cy="45" r="3.5" fill="white"/><circle cx="60" cy="45" r="3.5" fill="white"/><path d="M40,60 Q50,70 60,60" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>' },
+                    { id: 'thoughtful', label: 'Thinking Pose', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="white" stroke-width="4"/><circle cx="40" cy="45" r="3.5" fill="white"/><circle cx="60" cy="45" r="3.5" fill="white"/><line x1="42" y1="62" x2="58" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>' },
+                    { id: 'attentive', label: 'Focused Look', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="white" stroke-width="4"/><circle cx="40" cy="45" r="3" fill="white"/><circle cx="60" cy="45" r="3" fill="white"/><path d="M44,60 Q50,64 56,60" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>' },
+                    { id: 'excited', label: 'Excited Grin', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="white" stroke-width="4"/><circle cx="40" cy="45" r="3.5" fill="white"/><circle cx="60" cy="45" r="3.5" fill="white"/><path d="M38,58 Q50,72 62,58 Z" fill="white" stroke="white" stroke-width="1"/></svg>' }
+                ]
+            }
+        },
+        Pet: {
+            subcategories: ['Pets'],
+            items: {
+                Pets: [
+                    { id: 'none', label: 'No Pet', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="#64748b" stroke-width="4" stroke-dasharray="4,4"/><line x1="35" y1="35" x2="65" y2="65" stroke="#64748b" stroke-width="4"/></svg>' },
+                    { id: 'cat', label: 'Kitty Cat', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="22" fill="#f59e0b"/><polygon points="34,36 30,16 44,28" fill="#d97706"/><polygon points="66,36 70,16 56,28" fill="#d97706"/><circle cx="42" cy="48" r="2" fill="#1e293b"/><circle cx="58" cy="48" r="2" fill="#1e293b"/><polygon points="50,54 48,52 52,52" fill="#1e293b"/></svg>' },
+                    { id: 'dog', label: 'Loyal Pup', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="22" fill="#78350f"/><path d="M30,42 Q18,48 24,65" fill="none" stroke="#78350f" stroke-width="6"/><path d="M70,42 Q82,48 76,65" fill="none" stroke="#78350f" stroke-width="6"/><circle cx="42" cy="48" r="2" fill="#f8fafc"/><circle cx="58" cy="48" r="2" fill="#f8fafc"/><ellipse cx="50" cy="54" rx="3" ry="1.5" fill="#0f172a"/></svg>' },
+                    { id: 'bird', label: 'Blue Bird', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="20" fill="#3b82f6"/><polygon points="66,46 72,50 66,54" fill="#f59e0b"/><circle cx="56" cy="46" r="2" fill="#0f172a"/><path d="M38,48 Q44,42 50,56" fill="none" stroke="#2563eb" stroke-width="5" stroke-linecap="round"/></svg>' }
+                ]
+            }
+        },
+        Scene: {
+            subcategories: ['Backgrounds'],
+            items: {
+                Backgrounds: [
+                    { id: 'yellow', label: 'Sunny Yellow', prop: 'scene', color: '#ffd02c' },
+                    { id: 'purple', label: 'Dreamy Purple', prop: 'scene', color: 'linear-gradient(135deg, #a78bfa, #c084fc)' },
+                    { id: 'blue', label: 'Sky Blue', prop: 'scene', color: 'linear-gradient(135deg, #38bdf8, #0ea5e9)' },
+                    { id: 'green', label: 'Forest Green', prop: 'scene', color: 'linear-gradient(135deg, #34d399, #059669)' },
+                    { id: 'sunset', label: 'Sunset Orange', prop: 'scene', color: 'linear-gradient(135deg, #fb923c, #db2777)' }
+                ]
+            }
+        },
+        Avatar: {
+            subcategories: ['Hairstyles', 'Skin Tones', 'Glasses', 'Hair Color', 'Shirt Color'],
+            items: {
+                Hairstyles: [
+                    { id: 'crop', label: 'Sleek Crop', prop: 'hairStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M25,60 C25,20 75,20 75,60 C65,40 55,30 50,30 C45,30 35,40 25,60 Z" fill="#1e293b"/></svg>' },
+                    { id: 'curly', label: 'Curly Afro', prop: 'hairStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="26" fill="#1e293b" stroke="#334155" stroke-width="3" stroke-dasharray="6,4"/></svg>' },
+                    { id: 'bob', label: 'Bob Cut', prop: 'hairStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M25,60 C25,25 75,25 75,60 L75,70 C65,75 55,78 50,78 C45,78 35,75 25,70 Z" fill="#1e293b"/></svg>' },
+                    { id: 'long', label: 'Long Wave', prop: 'hairStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M25,60 C25,20 75,20 75,60 M20,55 L20,80 C20,90 35,90 35,80 Z M80,55 L80,80 C80,90 65,90 65,80 Z" fill="#1e293b"/></svg>' },
+                    { id: 'bald', label: 'Shaved', prop: 'hairStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="55" r="24" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="4,4"/></svg>' }
+                ],
+                'Skin Tones': [
+                    { id: '#ffdbac', label: 'Fair', prop: 'skinTone', color: '#ffdbac' },
+                    { id: '#f1c27d', label: 'Peach', prop: 'skinTone', color: '#f1c27d' },
+                    { id: '#e0ac69', label: 'Honey', prop: 'skinTone', color: '#e0ac69' },
+                    { id: '#c68642', label: 'Bronze', prop: 'skinTone', color: '#c68642' },
+                    { id: '#8d5524', label: 'Deep', prop: 'skinTone', color: '#8d5524' },
+                    { id: '#FFD1A4', label: '深夜食堂', prop: 'skinTone', color: '#FFD1A4', locked: true },
+                    { id: '#C8A2C8', label: '赛博朋克', prop: 'skinTone', color: '#C8A2C8', locked: true },
+                    { id: '#87CEEB', label: '深空流浪', prop: 'skinTone', color: '#87CEEB', locked: true },
+                    { id: '#98FB98', label: '荒野求生', prop: 'skinTone', color: '#98FB98', locked: true }
+                ],
+                Glasses: [
+                    { id: 'none', label: 'No Glasses', prop: 'glasses', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="#64748b" stroke-width="4" stroke-dasharray="4,4"/><line x1="35" y1="35" x2="65" y2="65" stroke="#64748b" stroke-width="4"/></svg>' },
+                    { id: 'gold', label: '智者金丝', prop: 'glasses', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="26" y="45" width="20" height="12" rx="4" fill="none" stroke="#f59e0b" stroke-width="4"/><rect x="54" y="45" width="20" height="12" rx="4" fill="none" stroke="#f59e0b" stroke-width="4"/><line x1="46" y1="51" x2="54" y2="51" stroke="#f59e0b" stroke-width="4"/></svg>', locked: true },
+                    { id: 'green', label: '复古黑框', prop: 'glasses', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="26" y="45" width="20" height="12" rx="4" fill="none" stroke="#10b981" stroke-width="4"/><rect x="54" y="45" width="20" height="12" rx="4" fill="none" stroke="#10b981" stroke-width="4"/><line x1="46" y1="51" x2="54" y2="51" stroke="#10b981" stroke-width="4"/></svg>', locked: true }
+                ],
+                'Hair Color': [
+                    { id: '#1e293b', label: 'Dark Slate', prop: 'hairColor', color: '#1e293b' },
+                    { id: '#e2e8f0', label: 'Silver White', prop: 'hairColor', color: '#e2e8f0' },
+                    { id: '#b45309', label: 'Golden Brown', prop: 'hairColor', color: '#b45309' },
+                    { id: '#4f46e5', label: 'Bright Indigo', prop: 'hairColor', color: '#4f46e5' },
+                    { id: '#e11d48', label: 'Rose Red', prop: 'hairColor', color: '#e11d48' }
+                ],
+                'Shirt Color': [
+                    { id: '#4f46e5', label: 'Royal Blue', prop: 'shirtColor', color: '#4f46e5' },
+                    { id: '#0d9488', label: 'Teal Green', prop: 'shirtColor', color: '#0d9488' },
+                    { id: '#ea580c', label: 'Warm Orange', prop: 'shirtColor', color: '#ea580c' },
+                    { id: '#db2777', label: 'Hot Pink', prop: 'shirtColor', color: '#db2777' },
+                    { id: '#1e293b', label: 'Charcoal Black', prop: 'shirtColor', color: '#1e293b' }
+                ]
+            }
+        }
+    };
+
+    // Customizer State Management Hook Abstraction
+    const avatarState = {
+        subscribe(callback) {
+            this.listeners.push(callback);
+        },
+        listeners: [],
+        set(prop, val) {
+            state.avatar[prop] = val;
+            if (prop === 'shirtStyle') state.avatar.top = val;
+            if (prop === 'pantsStyle') state.avatar.bottom = val;
+            if (prop === 'shoes') state.avatar.shoes = val;
+            if (prop === 'hairStyle') state.avatar.hairStyle = val;
+            if (prop === 'expression') state.avatar.expression = val;
+
+            renderAvatarVisuals();
+            try {
+                localStorage.setItem('kawanku_avatar_state', JSON.stringify(state.avatar));
+            } catch(e) {}
+            this.listeners.forEach(callback => callback(state.avatar));
+        },
+        get(prop) {
+            return state.avatar[prop];
+        }
+    };
+
+    function renderCustomizerUI() {
+        const subtabsContainer = DOM.customizerSubtabs;
+        const gridContainer = DOM.customizerItemGrid;
+        if (!subtabsContainer || !gridContainer) return;
+
+        // 1. Render Subtabs
+        subtabsContainer.innerHTML = '';
+        const categoryData = AVATAR_CATALOG[activeCategory];
+
+        if (categoryData.subcategories.length > 1) {
+            subtabsContainer.style.display = 'flex';
+            categoryData.subcategories.forEach(sub => {
+                const btn = document.createElement('button');
+                btn.className = `subtab-btn ${sub === activeSubcategory ? 'active' : ''}`;
+                btn.innerText = sub;
+                btn.addEventListener('click', () => {
+                    activeSubcategory = sub;
+                    renderCustomizerUI();
+                });
+                subtabsContainer.appendChild(btn);
+            });
+        } else {
+            subtabsContainer.style.display = 'none';
+        }
+
+        // 2. Render Grid Items
+        gridContainer.innerHTML = '';
+        const items = categoryData.items[activeSubcategory];
+        if (!items) return;
+
+        items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'catalog-card';
+
+            const unlocked = isItemUnlocked(item);
+            if (!unlocked) {
+                card.classList.add('locked-item');
+            }
+
+            const currentVal = state.avatar[item.prop];
+            if (currentVal === item.id) {
+                card.classList.add('active');
+            }
+
+            const previewDiv = document.createElement('div');
+            previewDiv.className = 'catalog-card-preview';
+
+            if (item.svg) {
+                previewDiv.innerHTML = item.svg;
+            } else if (item.color) {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch-circle';
+                swatch.style.background = item.color;
+                previewDiv.appendChild(swatch);
+            }
+
+            card.appendChild(previewDiv);
+
+            const label = document.createElement('div');
+            label.className = 'catalog-card-label';
+            label.innerText = item.label + (unlocked ? '' : ' 🔒');
+            card.appendChild(label);
+
+            card.addEventListener('click', () => {
+                if (!unlocked) {
+                    showToast('这是火花商店限定单品，请先兑换解锁！', 'warning');
+                    return;
+                }
+                avatarState.set(item.prop, item.id);
+                renderCustomizerUI();
+            });
+
+            gridContainer.appendChild(card);
+        });
     }
 
     function randomizeAvatarConfig() {
@@ -1654,6 +2841,9 @@ Keep your conversational reply warm, human and concise. The student should feel 
         const accOptions         = ['none', 'headphones'];
         const graphicOptions     = ['none', 'pumpkin', 'heart', 'wave', 'star'];
         const pantsOptions       = ['shorts', 'cargo', 'jogger'];
+        const shoeOptions        = ['sneakers', 'boots', 'sandals'];
+        const petOptions         = ['none', 'cat', 'dog', 'bird'];
+        const sceneOptions       = ['yellow', 'purple', 'blue', 'green', 'sunset'];
 
         state.avatar.hairStyle    = getRandomElement(hairOptions);
         state.avatar.shirtStyle   = getRandomElement(shirtOptions);
@@ -1663,36 +2853,26 @@ Keep your conversational reply warm, human and concise. The student should feel 
         state.avatar.accessories  = getRandomElement(accOptions);
         state.avatar.hoodieGraphic = getRandomElement(graphicOptions);
         state.avatar.pantsStyle   = getRandomElement(pantsOptions);
+        state.avatar.shoes        = getRandomElement(shoeOptions);
+        state.avatar.pet          = getRandomElement(petOptions);
+        state.avatar.scene        = getRandomElement(sceneOptions);
 
         state.avatar.hairColor   = getRandomHexColor();
         state.avatar.shirtColor  = getRandomHexColor();
         state.avatar.glowColor1  = getRandomHexColor();
         state.avatar.glowColor2  = getRandomHexColor();
 
-        DOM.pickerHair.value   = state.avatar.hairColor;
-        DOM.pickerShirt.value  = state.avatar.shirtColor;
-        DOM.pickerGlow1.value  = state.avatar.glowColor1;
-        DOM.pickerGlow2.value  = state.avatar.glowColor2;
+        // Populate dynamic schema fields
+        state.avatar.top = state.avatar.shirtStyle;
+        state.avatar.bottom = state.avatar.pantsStyle;
 
-        // Sync active class selections on designer studio grids
-        syncSelectorActiveStates();
-        
         renderAvatarVisuals();
+        
+        if (typeof renderCustomizerUI === 'function') {
+            renderCustomizerUI();
+        }
+        
         showToast("MindBuddy randomized!", "success");
-    }
-
-    function syncSelectorActiveStates() {
-        const selectBtns = document.querySelectorAll('.selection-grid .select-btn');
-        selectBtns.forEach(btn => {
-            const prop = btn.getAttribute('data-avatar-prop');
-            const val = btn.getAttribute('data-val');
-            
-            if (state.avatar[prop] === val) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
     }
 
     // ----------------------------------------------------------------------
@@ -2312,6 +3492,1899 @@ Keep your conversational reply warm, human and concise. The student should feel 
 
         container.appendChild(optionsGrid);
     }
+
+    // =========================================================================
+    // MENTAL STREAK ENGINE — Gamified Mental Health Quiz System
+    // =========================================================================
+    (function MentalStreakEngine() {
+
+        // ── State persisted in localStorage ──────────────────────────────────
+        const STORE_KEY = 'kawanku_streak';
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORE_KEY);
+                if (raw) return JSON.parse(raw);
+            } catch (e) {}
+            return {
+                streakDay: 1,
+                coins: 0,
+                passesUsed: 0,          // resets each Mon
+                passesWeekReset: null,  // ISO date string of last Mon reset
+                journal: []
+            };
+        }
+        function saveState(s) {
+            localStorage.setItem(STORE_KEY, JSON.stringify(s));
+        }
+        function getWeekStart() {
+            const d = new Date();
+            const day = d.getDay(); // 0=Sun
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            const mon = new Date(d.setDate(diff));
+            return mon.toISOString().split('T')[0];
+        }
+        function resetPassesIfNewWeek(s) {
+            const thisWeek = getWeekStart();
+            if (s.passesWeekReset !== thisWeek) {
+                s.passesUsed = 0;
+                s.passesWeekReset = thisWeek;
+            }
+        }
+
+        const MAX_PASSES = 2;
+
+        // ── Per-session quiz variables ────────────────────────────────────────
+        let state = loadState();
+        resetPassesIfNewWeek(state);
+
+        let currentQuestion = 0;   // 1-3
+        let answers = [];          // user's chosen option texts
+        let monsterData = {};      // { emoji, name }
+        let monsterHP = 100;
+        let monsterMaxHP = 100;
+        let comboCount = 0;
+        let bgmMuted = false;
+        let bgmNodes = {};         // Web Audio nodes
+        let currentPhase = 'intro';
+        let simulatedHR = Math.floor(Math.random() * 30 + 72); // 72-101 bpm
+
+        // ── DOM references ────────────────────────────────────────────────────
+        const $ = id => document.getElementById(id);
+        const phases = {
+            intro:   $('streak-phase-intro'),
+            question:$('streak-phase-question'),
+            loading: $('streak-phase-loading'),
+            monster: $('streak-phase-monster'),
+            report:  $('streak-phase-report'),
+            crisis:  $('streak-phase-crisis')
+        };
+
+        function showPhase(name) {
+            currentPhase = name;
+            Object.entries(phases).forEach(([k, el]) => {
+                if (!el) return;
+                if (k === name) el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
+        }
+
+        // ── Intro population ─────────────────────────────────────────────────
+        function populateIntro() {
+            const passLeft = MAX_PASSES - state.passesUsed;
+            const passStr = `${passLeft}/${MAX_PASSES}`;
+            const hrLabel = simulatedHR > 90 ? '😤 Looking a bit stressed!' : '😌 Cool as a cucumber!';
+            if ($('streak-day-display'))   $('streak-day-display').textContent   = `Day ${state.streakDay}`;
+            if ($('streak-pass-display'))  $('streak-pass-display').textContent  = passStr;
+            if ($('streak-coins-display')) $('streak-coins-display').textContent = state.coins;
+            if ($('streak-hr-display'))    $('streak-hr-display').textContent    = `${simulatedHR} bpm ${hrLabel}`;
+            if ($('streak-bgm-label'))     $('streak-bgm-label').textContent     = '🌿 Rainforest Lo-Fi Chill — Active';
+        }
+
+        // ── Web Audio BGM ─────────────────────────────────────────────────────
+        let audioCtx = null;
+        function getAudioCtx() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            return audioCtx;
+        }
+
+        function stopAllBGM() {
+            Object.values(bgmNodes).forEach(n => { try { n.stop(); } catch(e){} });
+            bgmNodes = {};
+        }
+
+        function playCalmBGM() {
+            if (bgmMuted) return;
+            stopAllBGM();
+            try {
+                const ctx = getAudioCtx();
+                // Soft sine pad at 174Hz (healing frequency)
+                [174, 220, 261].forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0, ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.04 - i * 0.01, ctx.currentTime + 2);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    bgmNodes[`calm_${i}`] = osc;
+                });
+                if ($('streak-bgm-label')) $('streak-bgm-label').textContent = '🌿 Lo-Fi Healing Pads — Playing';
+            } catch(e) {}
+        }
+
+        function playBattleBGM() {
+            if (bgmMuted) return;
+            stopAllBGM();
+            try {
+                const ctx = getAudioCtx();
+                // Punchy percussive rhythm
+                function beatTick() {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.value = 80 + Math.random() * 40;
+                    gain.gain.setValueAtTime(0.18, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.2);
+                }
+                const interval = setInterval(beatTick, 280);
+                bgmNodes['battle_interval'] = { stop: () => clearInterval(interval) };
+                if ($('streak-bgm-label')) $('streak-bgm-label').textContent = '🔥 Hype Battle Theme — Active!';
+            } catch(e) {}
+        }
+
+        function playHealingBGM() {
+            if (bgmMuted) return;
+            stopAllBGM();
+            try {
+                const ctx = getAudioCtx();
+                // Tibetan-style sustained tones
+                [396, 528].forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0, ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.035 - i * 0.01, ctx.currentTime + 3);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    bgmNodes[`heal_${i}`] = osc;
+                });
+                if ($('streak-bgm-label')) $('streak-bgm-label').textContent = '🍃 Tibetan Singing Bowls — Playing';
+            } catch(e) {}
+        }
+
+        function playSmashSFX() {
+            if (bgmMuted) return;
+            try {
+                const ctx = getAudioCtx();
+                const buf = ctx.createBuffer(1, ctx.sampleRate * 0.12, ctx.sampleRate);
+                const data = buf.getChannelData(0);
+                for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+                const src = ctx.createBufferSource();
+                const gain = ctx.createGain();
+                src.buffer = buf;
+                gain.gain.value = 0.3;
+                src.connect(gain);
+                gain.connect(ctx.destination);
+                src.start();
+            } catch(e) {}
+        }
+
+        // ── Crisis detection ─────────────────────────────────────────────────
+        const CRISIS_WORDS = [
+            'suicide','kill myself','end my life','want to die','self harm',
+            'cut myself','hurt myself','no point living','can\'t go on',
+            'don\'t want to be here','disappear forever','everyone better without me'
+        ];
+        function detectCrisis(text) {
+            const lower = text.toLowerCase();
+            return CRISIS_WORDS.some(w => lower.includes(w));
+        }
+
+        // ── Gemini API call ──────────────────────────────────────────────────
+        const MENTAL_STREAK_SYSTEM = `You are the Mental Streak Engine inside KawanKu AI — a mental health companion for Malaysian secondary school students.
+Your job is to run a 3-question gamified "blind box" mental check-in quiz, one step at a time.
+Always respond in JSON only. No markdown fences around the JSON.
+
+Tone: Gen-Z savvy, witty, warm, Malaysian-relatable. Use Manglish/Malaysian school references naturally.
+Language mix: Mostly English, sprinkle BM words (e.g. "haiyah", "confirm", "siaaa", "jangan", "eh", "lah").
+
+IMPORTANT SAFETY RULE: If ANY user input contains signs of crisis (suicidal thoughts, self-harm), respond with:
+{ "crisis": true }
+
+For Step 1 (first question), respond with:
+{
+  "step": 1,
+  "story": "<2-3 sentence scene-setting story relevant to today's school stressor. Witty and fast-paced.>",
+  "question": "<The actual question text>",
+  "options": [
+    { "type": "positive", "emoji": "📖", "text": "<Positive coping option>" },
+    { "type": "neutral",  "emoji": "😰", "text": "<Realistic middle-ground option>" },
+    { "type": "layflat",  "emoji": "🦥", "text": "<Funny defeated/rebellious 'lay flat' option>" }
+  ],
+  "theme": "<A short 2-4 word theme name for today e.g. 'The Pop Quiz Panic'>"
+}
+
+For Step 2 (second question), respond with:
+{
+  "step": 2,
+  "reaction": "<Witty 1-2 sentence banter responding to the user's previous answer. Validate their feeling.>",
+  "story": "<Advance the plot. 2-3 sentences. Build tension.>",
+  "question": "<Second question text>",
+  "options": [
+    { "type": "positive", "emoji": "🧠", "text": "<Positive option>" },
+    { "type": "neutral",  "emoji": "🧐", "text": "<Neutral option>" },
+    { "type": "layflat",  "emoji": "🦥", "text": "<Lay flat option>" }
+  ]
+}
+
+For Step 3 (third question), respond with:
+{
+  "step": 3,
+  "reaction": "<1-2 sentence banter on Q2 answer.>",
+  "story": "<Climax! The stress monster is about to emerge. 2-3 dramatic sentences.>",
+  "question": "<Final question text>",
+  "options": [
+    { "type": "positive", "emoji": "💪", "text": "<Positive option>" },
+    { "type": "neutral",  "emoji": "😤", "text": "<Neutral option>" },
+    { "type": "layflat",  "emoji": "🦥", "text": "<Lay flat option>" }
+  ],
+  "monster": {
+    "emoji": "<Single monster emoji e.g. 👾 🐙 😈 👻 🦖 🤡>",
+    "name": "<Creative goofy monster name e.g. 'The Balding Final Exam Beast' or 'The Exam Panic Goblin'>"
+  }
+}
+
+For the Report (after monster defeat), respond with:
+{
+  "step": "report",
+  "persona": "<Funny humorous title e.g. 'The Calm-on-Outside Screaming-Inside Academic Ninja'>",
+  "defense_pct": <integer 40-100 based on positivity of answers>,
+  "treehouse": "<2-3 sentence empathetic paragraph unpacking the psychology of their choices + 1 super easy micro-action tip>",
+  "coins_earned": 10,
+  "streak_day": <current streak day + 1>,
+  "wardrobe_tip": "<FOMO-inducing wardrobe unlock hint e.g. '2 more days to unlock the 🦸 Exam-Immunity Golden Cape!'>"
+}`;
+
+        async function callGeminiLocal(userMsg) {
+            if (!canAttemptGemini()) {
+                // Return a fallback if no API key/proxy
+                return null;
+            }
+            const body = {
+                system_instruction: { parts: [{ text: MENTAL_STREAK_SYSTEM }] },
+                contents: [{ role: 'user', parts: [{ text: userMsg }] }],
+                generationConfig: { temperature: 0.85, maxOutputTokens: 1024 }
+            };
+            try {
+                const data = await callGemini('gemini-2.5-flash', body);
+                if (!data) return null;
+                const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                // Strip potential markdown fences
+                const cleaned = text.replace(/^```json\s*/i,'').replace(/```\s*$/,'').trim();
+                return JSON.parse(cleaned);
+            } catch(e) {
+                console.warn('[StreakEngine] Gemini parse error:', e);
+                return null;
+            }
+        }
+
+        // ── Fallback content (when no API key) ───────────────────────────────
+        const FALLBACKS = [
+            {
+                step: 1,
+                theme: "The Monday Morning Mayhem",
+                story: "You walk into school Monday morning and Cikgu drops the bomb — pop quiz in 10 minutes! ⚡ Your brain is still buffering from the weekend. The student next to you pulls out a 10-page cheat sheet. Classic.",
+                question: "How does your brain respond to the surprise pop quiz?",
+                options: [
+                    { type: 'positive', emoji: '📖', text: "Let's goooo! I actually studied (a little). Time to shine!" },
+                    { type: 'neutral',  emoji: '😰', text: "Okay okay okay... stay calm. Write SOMETHING. Partial marks exist, right?" },
+                    { type: 'layflat',  emoji: '🦥', text: "Close eyes. If I can't see the paper, the quiz can't hurt me. Nap time." }
+                ]
+            },
+            {
+                step: 2,
+                reaction: "Okay okay, we see you! Whether you're crushing it or surviving it, KawanKu's got your back. 💪",
+                story: "Halfway through the quiz — your pen runs out of ink. The horror. You borrow from your friend but now you owe them bubble tea. As if life wasn't already stressful enough.",
+                question: "Your pen just died. What's your next move?",
+                options: [
+                    { type: 'positive', emoji: '🧠', text: "No biggie, I always carry a backup. Prepared is my middle name." },
+                    { type: 'neutral',  emoji: '🧐', text: "Borrow from bae, negotiate the bubble tea debt later. Problems for future me." },
+                    { type: 'layflat',  emoji: '🦥', text: "Sign the quiz with blood. Metaphorically. I'm done with this universe." }
+                ]
+            },
+            {
+                step: 3,
+                reaction: "Valid reaction tbh. The universe clearly had it out for you today. 😤",
+                story: "The quiz is FINALLY over but then... your teacher announces the results will count for 30% of your grade. The stress has reached MAXIMUM OVERDRIVE. A dark energy is forming... a monster shaped from all your academic anxiety is materializing! 🚨",
+                question: "The grade reveal is tomorrow. How do you handle tonight?",
+                options: [
+                    { type: 'positive', emoji: '💪', text: "Review my answers, accept whatever comes, and sleep by 11pm. Growth mindset!" },
+                    { type: 'neutral',  emoji: '😤', text: "Doomscroll TikTok until 2am, then panic-text my study group. Classic me." },
+                    { type: 'layflat',  emoji: '🦥', text: "Enter emotional shutdown mode. The grades are not real. Nothing is real. Goodnight." }
+                ],
+                monster: { emoji: '👾', name: 'The Balding Final Exam Beast' }
+            }
+        ];
+
+        function getFallbackReport(answers) {
+            const posCount = answers.filter(a => a.type === 'positive').length;
+            const pct = 40 + posCount * 20;
+            return {
+                step: 'report',
+                persona: posCount >= 2 ? 'The "Calm Under Fire" Academic Warrior 🏹' : posCount === 1 ? 'The "Surviving But Make It Aesthetic" Realist 🌙' : 'The "Full Send on Lay Flat Mode" Chaos Champion 🦥',
+                defense_pct: pct,
+                treehouse: `You tackled today's stress with ${posCount >= 2 ? 'real resilience' : 'honest realness'} — and that actually takes courage. ${posCount < 2 ? 'Choosing to laugh at the chaos is a valid coping strategy too. Humour is a superpower.' : 'Staying grounded when things spiral is a real skill.'} Micro-action for tonight: spend exactly 2 minutes writing down one thing that went okay today, no matter how small. ✏️`,
+                coins_earned: 10,
+                streak_day: state.streakDay + 1,
+                wardrobe_tip: `Maintain your streak for ${3 - (state.streakDay % 3)} more days to unlock the legendary 🦸 【Exam-Immunity Golden Cape】 skin!`
+            };
+        }
+
+        // ── Render a question phase ───────────────────────────────────────────
+        function renderQuestion(data) {
+            showPhase('question');
+            const q = currentQuestion;
+
+            // Update step dots
+            [1,2,3].forEach(i => {
+                const dot = $(`sdot-${i}`);
+                if (!dot) return;
+                dot.classList.remove('active','done');
+                if (i < q) dot.classList.add('done');
+                else if (i === q) dot.classList.add('active');
+            });
+
+            // Pass count
+            const passLeft = MAX_PASSES - state.passesUsed;
+            if ($('sq-pass-remaining')) $('sq-pass-remaining').textContent = passLeft;
+
+            // Story box
+            let storyText = '';
+            if (data.reaction) storyText += data.reaction + '\n\n';
+            storyText += data.story || '';
+            if ($('streak-story-box')) $('streak-story-box').textContent = storyText;
+
+            // Options
+            const grid = $('streak-options-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            data.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = `streak-option-btn opt-${opt.type}`;
+                btn.textContent = `${opt.emoji}  ${opt.text}`;
+                if (opt.type === 'layflat' && passLeft <= 0) {
+                    btn.classList.add('disabled');
+                }
+                btn.addEventListener('click', () => handleOptionClick(opt, data));
+                grid.appendChild(btn);
+            });
+
+            // Hide pass warning
+            const warn = $('streak-pass-warning');
+            if (warn) warn.classList.add('hidden');
+        }
+
+        async function handleOptionClick(opt, stepData) {
+            // Crisis check on option text
+            if (detectCrisis(opt.text)) { showPhase('crisis'); stopAllBGM(); return; }
+
+            // Lay flat pass logic
+            if (opt.type === 'layflat') {
+                const passLeft = MAX_PASSES - state.passesUsed;
+                if (passLeft <= 0) {
+                    const warn = $('streak-pass-warning');
+                    if (warn) warn.classList.remove('hidden');
+                    return;
+                }
+                state.passesUsed++;
+                saveState(state);
+                const pl = MAX_PASSES - state.passesUsed;
+                if ($('sq-pass-remaining')) $('sq-pass-remaining').textContent = pl;
+                if ($('streak-pass-display')) $('streak-pass-display').textContent = `${pl}/${MAX_PASSES}`;
+            }
+
+            answers.push({ type: opt.type, text: opt.text });
+
+            if (currentQuestion < 3) {
+                currentQuestion++;
+                await loadNextQuestion(stepData);
+            } else {
+                // All 3 done → show monster
+                await loadMonsterPhase(stepData);
+            }
+        }
+
+        async function loadNextQuestion(prevStepData) {
+            showPhase('loading');
+            if ($('streak-loading-text')) $('streak-loading-text').textContent = `KawanKu is building Question ${currentQuestion}...`;
+
+            // Build prompt context
+            const answerSummary = answers.map((a,i) => `Q${i+1} answer (${a.type}): "${a.text}"`).join('\n');
+            const prompt = `The student has answered ${answers.length} question(s) so far:\n${answerSummary}\n\nNow generate Step ${currentQuestion} of the quiz.`;
+
+            let data = await callGeminiLocal(prompt);
+            if (!data) data = FALLBACKS[currentQuestion - 1];
+            if (data.crisis) { showPhase('crisis'); stopAllBGM(); return; }
+
+            renderQuestion(data);
+        }
+
+        async function loadMonsterPhase(lastStepData) {
+            // Extract monster from last step data or fallback
+            let monster = lastStepData?.monster || { emoji: '👾', name: 'The Exam Panic Goblin' };
+            monsterData = monster;
+            monsterHP = 100;
+            monsterMaxHP = 100;
+            comboCount = 0;
+
+            if ($('monster-emoji')) $('monster-emoji').textContent = monster.emoji;
+            if ($('monster-name'))  $('monster-name').textContent  = monster.name;
+            updateMonsterHP(100);
+
+            showPhase('monster');
+            stopAllBGM();
+            playBattleBGM();
+        }
+
+        // ── Monster HP ────────────────────────────────────────────────────────
+        function updateMonsterHP(pct) {
+            const bar  = $('monster-hp-bar');
+            const text = $('monster-hp-text');
+            if (bar)  bar.style.width = `${Math.max(0, pct)}%`;
+            const hp = Math.round(pct);
+            if (text) text.textContent = `HP: ${hp} / 100`;
+        }
+
+        function smashMonster() {
+            if (monsterHP <= 0) return;
+            playSmashSFX();
+            comboCount++;
+
+            // Damage: 20-35 per hit
+            const dmg = 20 + Math.floor(Math.random() * 16);
+            monsterHP = Math.max(0, monsterHP - dmg);
+            updateMonsterHP(monsterHP);
+
+            // Hit animation
+            const body = $('monster-body');
+            if (body) {
+                body.classList.remove('hit');
+                void body.offsetWidth; // reflow
+                body.classList.add('hit');
+                setTimeout(() => body.classList.remove('hit'), 280);
+            }
+
+            // Shake arena
+            const arena = document.querySelector('.monster-arena');
+            if (arena) {
+                arena.classList.remove('shaking');
+                void arena.offsetWidth;
+                arena.classList.add('shaking');
+                setTimeout(() => arena.classList.remove('shaking'), 370);
+            }
+
+            // Add crack
+            addCrack();
+
+            // Combo display
+            const comboEl = $('monster-combo');
+            const comboText = $('monster-combo-text');
+            if (comboEl && comboText) {
+                comboText.textContent = comboCount === 1 ? '💥 SMASH!' : comboCount === 2 ? '🔥 DOUBLE SMASH!' : comboCount >= 3 ? `⚡ COMBO x${comboCount}!!!` : `💥 HIT!`;
+                comboEl.classList.remove('hidden');
+                comboEl.style.animation = 'none';
+                void comboEl.offsetWidth;
+                comboEl.style.animation = 'combo-pop 0.4s ease';
+                clearTimeout(comboEl._hideTimer);
+                comboEl._hideTimer = setTimeout(() => comboEl.classList.add('hidden'), 1400);
+            }
+
+            // Death?
+            if (monsterHP <= 0) {
+                setTimeout(triggerMonsterDeath, 400);
+            }
+        }
+
+        function addCrack() {
+            const cracksDiv = $('monster-cracks');
+            if (!cracksDiv || cracksDiv.children.length >= 5) return;
+            const crack = document.createElement('div');
+            crack.className = 'crack';
+            crack.style.cssText = `
+                left: ${20 + Math.random() * 60}%;
+                top: ${20 + Math.random() * 60}%;
+                width: ${15 + Math.random() * 30}px;
+                transform: rotate(${Math.random() * 180}deg);
+            `;
+            cracksDiv.appendChild(crack);
+        }
+
+        async function triggerMonsterDeath() {
+            stopAllBGM();
+            const body = $('monster-body');
+            if (body) {
+                body.classList.add('dead');
+            }
+            // Coin burst visual
+            const arena = document.querySelector('.monster-arena');
+            if (arena) {
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        const coin = document.createElement('span');
+                        coin.className = 'coin-burst';
+                        coin.textContent = '🪙';
+                        coin.style.left = `${Math.random() * 80 + 10}%`;
+                        arena.style.position = 'relative';
+                        arena.appendChild(coin);
+                        setTimeout(() => coin.remove(), 900);
+                    }, i * 120);
+                }
+            }
+
+            // Wait then show report
+            setTimeout(async () => {
+                await loadReport();
+            }, 1000);
+        }
+
+        async function loadReport() {
+            showPhase('loading');
+            if ($('streak-loading-text')) $('streak-loading-text').textContent = 'Generating your 60-Second Mental Audit Report...';
+
+            const answerSummary = answers.map((a,i) => `Q${i+1} answer (${a.type}): "${a.text}"`).join('\n');
+            const prompt = `The student finished all 3 questions. Their answers:\n${answerSummary}\n\nNow generate the final Report (step: "report").`;
+
+            let data = await callGeminiLocal(prompt);
+            if (!data || data.crisis) data = getFallbackReport(answers);
+
+            // Update state
+            state.streakDay = data.streak_day || state.streakDay + 1;
+            state.coins += (data.coins_earned || 10);
+            saveState(state);
+
+            renderReport(data);
+            playHealingBGM();
+        }
+
+        function renderReport(data) {
+            showPhase('report');
+            const pct = data.defense_pct || 70;
+            const progressBlocks = Math.round(pct / 20);
+            const bar = '■'.repeat(progressBlocks) + '□'.repeat(5 - progressBlocks);
+
+            const html = `<div class="report-section">
+  <div class="report-section-title">🏆 Today's Soul Persona</div>
+  <strong>${data.persona}</strong>
+</div>
+<div class="report-section">
+  <div class="report-section-title">📊 Mental Defense Rating</div>
+  <code style="color:#a78bfa;font-size:1.1rem;">[${bar}] ${pct}%</code>
+  <div class="report-progress-bar-wrap"><div class="report-progress-fill" id="report-prog-fill" style="width:0%"></div></div>
+</div>
+<div class="report-section">
+  <div class="report-section-title">💌 Hidden Soul Treehouse</div>
+  <p style="font-size:0.87rem;line-height:1.7;color:var(--color-text-primary)">${data.treehouse}</p>
+</div>
+<div class="report-section">
+  <div class="report-section-title">🎁 Streak &amp; Loot Summary</div>
+  <div class="report-loot-row">💥 Monster Defeated! <span class="report-coins-badge">+${data.coins_earned || 10} 🪙 Kawan Coins</span></div>
+  <div class="report-loot-row">💰 Wallet: <span class="report-coins-badge">${state.coins} 🪙</span></div>
+  <div class="report-loot-row">⚡ Streak: <strong>Day ${state.streakDay}!</strong> KawanKu sends a finger heart 🫶</div>
+  <div class="report-loot-row" style="margin-top:8px;font-size:0.82rem;color:#fbbf24;">👕 ${data.wardrobe_tip}</div>
+</div>`;
+
+            const content = $('report-content');
+            if (content) content.innerHTML = html;
+
+            // Animate progress bar
+            setTimeout(() => {
+                const fill = $('report-prog-fill');
+                if (fill) fill.style.width = `${pct}%`;
+            }, 300);
+
+            // Update intro counters for next time
+            if ($('streak-coins-display')) $('streak-coins-display').textContent = state.coins;
+        }
+
+        // ── Sticky note ───────────────────────────────────────────────────────
+        function initStickyNote() {
+            const input  = $('sticky-note-input');
+            const chars  = $('sticky-chars');
+            const btn    = $('sticky-save-btn');
+            const saved  = $('sticky-saved-msg');
+            if (!input) return;
+            input.addEventListener('input', () => {
+                if (chars) chars.textContent = input.value.length;
+            });
+            if (btn) btn.addEventListener('click', () => {
+                const note = input.value.trim();
+                if (!note) return;
+                state.journal.push({ date: new Date().toISOString(), note });
+                saveState(state);
+                if (saved) saved.classList.remove('hidden');
+                btn.disabled = true;
+                btn.textContent = '✅ Saved!';
+            });
+        }
+
+        // ── BGM mute toggle ──────────────────────────────────────────────────
+        function initMuteBtn() {
+            const btn = $('bgm-mute-btn');
+            if (!btn) return;
+            btn.addEventListener('click', () => {
+                bgmMuted = !bgmMuted;
+                if (bgmMuted) {
+                    stopAllBGM();
+                    btn.classList.add('muted');
+                    btn.textContent = '🔔 Sound On';
+                } else {
+                    btn.classList.remove('muted');
+                    btn.textContent = '🔇 Silent Mode';
+                    if (currentPhase === 'question' || currentPhase === 'intro') playCalmBGM();
+                    else if (currentPhase === 'monster') playBattleBGM();
+                    else if (currentPhase === 'report') playHealingBGM();
+                }
+            });
+        }
+
+        // ── Monster bash events ───────────────────────────────────────────────
+        function initMonsterBash() {
+            // Tap on monster body
+            const monsterAvatar = $('monster-avatar');
+            if (monsterAvatar) {
+                monsterAvatar.addEventListener('click', (e) => {
+                    if (monsterHP > 0) smashMonster();
+                });
+                monsterAvatar.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    if (monsterHP > 0) smashMonster();
+                }, { passive: false });
+            }
+
+            // Type input smash
+            const typeInput = $('monster-type-input');
+            const smashBtn  = $('monster-smash-btn');
+            const SMASH_WORDS = ['smash','punch','hit','destroy','dieeee','die','die!!!','bonk','bash','yeet','kill','obliterate'];
+
+            function doTypeSmash() {
+                const val = (typeInput?.value || '').trim().toLowerCase();
+                if (detectCrisis(val)) { showPhase('crisis'); stopAllBGM(); return; }
+                if (val && (SMASH_WORDS.some(w => val.includes(w)) || val.length > 0)) {
+                    smashMonster();
+                    if (typeInput) typeInput.value = '';
+                }
+            }
+
+            if (typeInput) {
+                typeInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') doTypeSmash();
+                });
+            }
+            if (smashBtn) smashBtn.addEventListener('click', doTypeSmash);
+        }
+
+        // ── Start quiz flow ───────────────────────────────────────────────────
+        async function startQuiz() {
+            currentQuestion = 1;
+            answers = [];
+            monsterHP = 100;
+            comboCount = 0;
+
+            // Clear cracks
+            const cracksDiv = $('monster-cracks');
+            if (cracksDiv) cracksDiv.innerHTML = '';
+            const monsterBody = $('monster-body');
+            if (monsterBody) monsterBody.classList.remove('dead');
+
+            showPhase('loading');
+            if ($('streak-loading-text')) $('streak-loading-text').textContent = 'Opening your Mental Blind Box...';
+            playCalmBGM();
+
+            const today = new Date();
+            const themes = ['pop quiz panic','canteen food running out','group project member ghosting','presentation slides corrupted','homework deadline tonight','comparison trap with classmates'];
+            const todayTheme = themes[today.getDay() % themes.length];
+
+            const prompt = `Today's theme hint: "${todayTheme}". Student streak day: ${state.streakDay}. Heart rate: ${simulatedHR} bpm. Generate Step 1 of the quiz.`;
+
+            let data = await callGeminiLocal(prompt);
+            if (!data) data = FALLBACKS[0];
+            if (data.crisis) { showPhase('crisis'); stopAllBGM(); return; }
+
+            renderQuestion(data);
+        }
+
+        // ── Restart ───────────────────────────────────────────────────────────
+        function resetToIntro() {
+            stopAllBGM();
+            simulatedHR = Math.floor(Math.random() * 30 + 72);
+            populateIntro();
+            showPhase('intro');
+            // Reset sticky note
+            const input = $('sticky-note-input');
+            const saved = $('sticky-saved-msg');
+            const btn   = $('sticky-save-btn');
+            if (input) { input.value = ''; }
+            if (saved) saved.classList.add('hidden');
+            if (btn)   { btn.disabled = false; btn.textContent = '💾 Save to Journal'; }
+            const chars = $('sticky-chars');
+            if (chars) chars.textContent = '0';
+        }
+
+        // ── Crisis back ───────────────────────────────────────────────────────
+        function initCrisisBack() {
+            const backBtn = $('crisis-back-btn');
+            if (backBtn) backBtn.addEventListener('click', resetToIntro);
+        }
+
+        // ── Boot ──────────────────────────────────────────────────────────────
+        function boot() {
+            // Only init if the quiz card is present in DOM
+            if (!$('streak-engine-card')) return;
+
+            populateIntro();
+            showPhase('intro');
+            initMuteBtn();
+            initMonsterBash();
+            initStickyNote();
+            initCrisisBack();
+
+            const startBtn   = $('streak-start-btn');
+            const restartBtn = $('streak-restart-btn');
+            if (startBtn)   startBtn.addEventListener('click', startQuiz);
+            if (restartBtn) restartBtn.addEventListener('click', resetToIntro);
+        }
+
+        // Wait for DOM then boot
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', boot);
+        } else {
+            boot();
+        }
+
+    })(); // END MentalStreakEngine
+
+    // =========================================================================
+    // EMOTION QUIZ — Gemini-powered clinical screening quiz
+    // =========================================================================
+    (function EmotionQuizEngine() {
+        const SPARK_KEY = 'kawanku_spark';
+        function loadSpark() {
+            try { const d = JSON.parse(localStorage.getItem(SPARK_KEY)); if (d) return d; } catch(e) {}
+            return { days: 1, boxesOpened: 0, lastDiagnosis: '', personalityTag: '' };
+        }
+        function saveSpark(s) { localStorage.setItem(SPARK_KEY, JSON.stringify(s)); }
+        let spark = loadSpark();
+
+        const qSparkCount = document.getElementById('quiz-spark-count');
+        const qBoxesOpened = document.getElementById('quiz-boxes-opened');
+        const qLastDiag = document.getElementById('quiz-last-diagnosis');
+        const qPersonality = document.getElementById('quiz-personality-tag');
+        const qStartBtn = document.getElementById('quiz-ai-start-btn');
+        const qRestartBtn = document.getElementById('quiz-ai-restart-btn');
+        const qMessages = document.getElementById('quiz-chat-messages');
+        const qInput = document.getElementById('quiz-chat-input');
+        const qSendBtn = document.getElementById('quiz-chat-send-btn');
+        const qBadge = document.getElementById('quiz-universe-badge');
+        const qOptions = document.getElementById('quiz-chat-options');
+
+        function syncQuizUI() {
+            if (qSparkCount) qSparkCount.innerText = spark.days;
+            if (qBoxesOpened) qBoxesOpened.innerText = spark.boxesOpened;
+            if (qLastDiag) qLastDiag.innerText = spark.lastDiagnosis || '—';
+            if (qPersonality) qPersonality.innerText = spark.personalityTag || '—';
+            const shopBal = document.getElementById('shop-spark-balance');
+            if (shopBal) shopBal.innerText = spark.days;
+        }
+        syncQuizUI();
+
+        const QUIZ_ASPECTS = [
+            {
+                name: "Mood & Dysphoria",
+                questions: [
+                    "I feel extremely sad without any clear reason.",
+                    "The feeling of emptiness in my chest is difficult to get rid of.",
+                    "I find it difficult to smile sincerely at others.",
+                    "I feel helpless to change my mood for the better.",
+                    "I feel as if tomorrow holds no meaning at all."
+                ]
+            },
+            {
+                name: "Anhedonia & Lack of Motivation",
+                questions: [
+                    "The hobbies I used to enjoy now feel boring.",
+                    "I feel no motivation to start daily tasks.",
+                    "I feel zero energy even after sleeping for a long time.",
+                    "I find it difficult to force myself to shower or clean myself.",
+                    "I feel like a robot moving without a purpose."
+                ]
+            },
+            {
+                name: "Cognitive Anxiety & Overthinking",
+                questions: [
+                    "My mind is constantly thinking about bad things that might not even happen.",
+                    "I find it difficult to stop my racing thoughts.",
+                    "I often imagine the worst-case scenario in every situation.",
+                    "I feel excessively worried about my future.",
+                    "It is hard to shut down my mind, even at bedtime."
+                ]
+            },
+            {
+                name: "Physical & Somatic Anxiety Responses",
+                questions: [
+                    "My heart suddenly beats rapidly without any physical cause.",
+                    "I feel tightness in my chest and find it difficult to take deep breaths.",
+                    "My palms often break into a cold sweat when I feel anxious.",
+                    "My stomach feels upset or nauseous when facing new situations.",
+                    "My neck and shoulder muscles always feel tense."
+                ]
+            },
+            {
+                name: "Stress Tolerance & Irritability",
+                questions: [
+                    "I become very easily angered over small matters.",
+                    "My patience has been very thin lately.",
+                    "I easily feel irritated by other people's voices or habits.",
+                    "I feel angry when my plans are disrupted, even slightly.",
+                    "I tend to vent my anger on innocent people."
+                ]
+            },
+            {
+                name: "Mental Fatigue & Burnout",
+                questions: [
+                    "I feel my brain is too overloaded to think anymore.",
+                    "I experience mental fatigue that does not go away even after a vacation.",
+                    "I have difficulty making simple decisions.",
+                    "I feel like a robot carrying out a routine without any soul.",
+                    "I feel my mental energy has been completely drained."
+                ]
+            },
+            {
+                name: "Trauma Awareness & Emotional Triggers",
+                questions: [
+                    "Painful past memories often pop into my mind suddenly.",
+                    "I am easily startled by loud noises or sudden movements.",
+                    "Certain places or situations can make me feel panicked for no reason.",
+                    "I feel my nervous system is always on high alert for danger.",
+                    "I feel past trauma has blocked my potential to move forward."
+                ]
+            },
+            {
+                name: "Biological Patterns & Sleep Quality",
+                questions: [
+                    "It takes me more than an hour to fall asleep.",
+                    "I frequently wake up in the middle of the night and struggle to fall back asleep.",
+                    "My appetite has completely disappeared lately.",
+                    "I do not feel refreshed at all, even after sleeping for more than 8 hours.",
+                    "I feel as if my body rejects all efforts to rest."
+                ]
+            },
+            {
+                name: "Social Relationships & Self-Isolation",
+                questions: [
+                    "I intentionally leave friends' messages unanswered for days.",
+                    "I prefer to spend my days off alone in a dark room.",
+                    "I feel like nobody truly understands what I am going through.",
+                    "I tend to make up excuses to avoid attending gatherings.",
+                    "I feel like an actor wearing a mask of cheerfulness in front of the public."
+                ]
+            },
+            {
+                name: "Self-Esteem & Psychological Resilience",
+                questions: [
+                    "I feel worthless and that I don't have any talent.",
+                    "I am constantly comparing my weaknesses with others' strengths.",
+                    "I often feel like I am a fraud.",
+                    "I find it difficult to bounce back after experiencing failure.",
+                    "I find it hard to love myself with all my flaws."
+                ]
+            }
+        ];
+
+        let activeQuestions = [];
+        let currentQuestionIdx = 0;
+        let selectedAnswers = [];
+
+        function addQuizBubble(text, type) {
+            if (!qMessages) return;
+            const div = document.createElement('div');
+            div.className = type === 'ai' ? 'quiz-ai-bubble' : 'quiz-user-bubble';
+            div.innerText = text;
+            qMessages.appendChild(div);
+            qMessages.scrollTop = qMessages.scrollHeight;
+        }
+
+        function addQuizTyping() {
+            if (!qMessages) return;
+            const div = document.createElement('div');
+            div.className = 'quiz-ai-bubble quiz-typing';
+            div.id = 'quiz-typing-indicator';
+            div.innerHTML = '<span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>';
+            qMessages.appendChild(div);
+            qMessages.scrollTop = qMessages.scrollHeight;
+        }
+
+        function removeQuizTyping() {
+            const el = document.getElementById('quiz-typing-indicator');
+            if (el) el.remove();
+        }
+
+        function renderOptions() {
+            if (!qOptions) return;
+            qOptions.innerHTML = '';
+            qOptions.classList.remove('hidden');
+            
+            const LIKERT_OPTIONS = [
+                { key: "0", text: "Never", score: 0 },
+                { key: "1", text: "Rarely", score: 1 },
+                { key: "2", text: "Often", score: 2 },
+                { key: "3", text: "Always", score: 3 }
+            ];
+            
+            LIKERT_OPTIONS.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-opt-btn';
+                btn.innerHTML = `<strong>${opt.key}.</strong> ${opt.text}`;
+                btn.addEventListener('click', () => handleOptionSelection(opt));
+                qOptions.appendChild(btn);
+            });
+        }
+
+        function handleOptionSelection(opt) {
+            const statement = activeQuestions[currentQuestionIdx];
+            const aspectName = QUIZ_ASPECTS[currentQuestionIdx].name;
+            selectedAnswers.push({
+                aspect: aspectName,
+                statement: statement,
+                score: opt.score,
+                optionText: opt.text
+            });
+            
+            addQuizBubble(opt.text, 'user');
+            
+            if (qOptions) qOptions.classList.add('hidden');
+            currentQuestionIdx++;
+            showNextQuestion();
+        }
+
+        function showNextQuestion() {
+            if (currentQuestionIdx < 10) {
+                const statement = activeQuestions[currentQuestionIdx];
+                const aspectName = QUIZ_ASPECTS[currentQuestionIdx].name;
+                addQuizTyping();
+                setTimeout(() => {
+                    removeQuizTyping();
+                    addQuizBubble(`Question ${currentQuestionIdx + 1}/10 (${aspectName}):\n\n"${statement}"`, 'ai');
+                    renderOptions();
+                }, 400);
+            } else {
+                generateFinalReport();
+            }
+        }
+
+        // Returns a short, student-friendly sentence for a given score (0% = best, 100% = worst)
+        function getScoreLabel(pct, category) {
+            if (category === 'academic') {
+                if (pct <= 20)  return "Great job! Your academic stress is very well managed today.";
+                if (pct <= 40)  return "Your study load is manageable — keep maintaining balance.";
+                if (pct <= 60)  return "You're feeling some academic pressure. Try to pace yourself.";
+                if (pct <= 80)  return "High academic stress detected. Consider lightening your load.";
+                return "Severe academic burnout. Please take a break and seek support.";
+            } else if (category === 'selfEsteem') {
+                if (pct <= 20)  return "Your self-confidence is in great shape — keep believing in yourself!";
+                if (pct <= 40)  return "Mostly positive self-image. Small doubts are normal.";
+                if (pct <= 60)  return "Some self-doubt present. Remind yourself of your strengths.";
+                if (pct <= 80)  return "Low self-esteem detected. You deserve more kindness towards yourself.";
+                return "Severe self-esteem concerns. Consider speaking with a counsellor.";
+            } else {
+                if (pct <= 20)  return "You're feeling calm and grounded today. Keep it up!";
+                if (pct <= 40)  return "Mild anxiety — manageable with small daily calming habits.";
+                if (pct <= 60)  return "Moderate anxiety level. Breathing exercises can really help.";
+                if (pct <= 80)  return "High anxiety detected. Prioritise rest and grounding techniques.";
+                return "Severe anxiety level. Please reach out to a trusted person or counsellor.";
+            }
+        }
+
+        function generateLocalReport(academicPct, selfEsteemPct, anxietyPct, streakDays) {
+            // Pick solutions based on the HIGHEST (worst) score
+            const categories = [
+                { name: 'academic', score: academicPct },
+                { name: 'selfEsteem', score: selfEsteemPct },
+                { name: 'anxiety', score: anxietyPct }
+            ];
+            categories.sort((a, b) => b.score - a.score);
+            const worst = categories[0].name;
+
+            let solutions = [];
+            if (worst === 'academic') {
+                solutions = [
+                    "Time Blocking: Allocate focused study blocks of 25 minutes (Pomodoro technique) followed by 5-minute breaks to prevent cognitive fatigue.",
+                    "Task Decomposition: Break down overwhelming assignments into smaller, manageable sub-tasks to reduce start-up friction.",
+                    "Sleep Hygiene: Maintain a consistent sleep schedule and limit blue light exposure 1 hour before bed.",
+                    "Boundary Setting: Dedicate specific hours to study and strictly disconnect from academic work afterwards."
+                ];
+            } else if (worst === 'selfEsteem') {
+                solutions = [
+                    "Gratitude Journaling: Write down 3 small personal achievements or positive traits about yourself daily to build self-appreciation.",
+                    "Positive Affirmations: Practice self-compassion by replacing self-critical thoughts with supportive statements.",
+                    "Strength Focus: Spend 15 minutes daily engaging in activities or hobbies where you feel capable and skilled.",
+                    "Avoid Comparisons: Limit social media browsing to reduce the comparison trap with classmates."
+                ];
+            } else {
+                solutions = [
+                    "Grounding Techniques: Practice the 5-4-3-2-1 sensory grounding exercise during moments of high anxiety or overthinking.",
+                    "Box Breathing: Inhale for 4 seconds, hold for 4 seconds, exhale for 4 seconds, and hold for 4 seconds to calm the nervous system.",
+                    "Mindful Walks: Spend 10-15 minutes outdoors, focusing entirely on nature and sensory details to quiet the mind.",
+                    "Emotional Expression: Journal your feelings unfiltered or confide in a trusted friend to release internal cognitive loops."
+                ];
+            }
+
+            return `📋 **Clinical Mental Health Report**
+
+🧠 **学习压力 (Academic Pressure):** ${academicPct}% — ${getScoreLabel(academicPct, 'academic')}
+🏷️ **自卑程度 (Self-Esteem):** ${selfEsteemPct}% — ${getScoreLabel(selfEsteemPct, 'selfEsteem')}
+⚡ **焦虑程度 (Anxiety Level):** ${anxietyPct}% — ${getScoreLabel(anxietyPct, 'anxiety')}
+
+🛠️ **解决办法 (Solutions):**
+1. ${solutions[0]}
+2. ${solutions[1]}
+3. ${solutions[2]}
+4. ${solutions[3]}
+
+-----
+#### 📊 [CAMPUS_DASHBOARD_ANONYMOUS_DATA]
+主题: Clinical Assessment | 精力耗竭: ${academicPct}% | 社交疲劳: ${anxietyPct}% | 火花天数: ${streakDays}
+-----`;
+        }
+
+        function applyReportDiagnostics(academicPct, selfEsteemPct, anxietyPct, totalScore) {
+            // 100% = worst, so academicPct directly = burnout level for the dashboard
+            spark.lastDiagnosis = 'Burnout ' + academicPct + '%';
+            state.diagnostics.burnout = academicPct;
+            state.diagnostics.academicPressure = academicPct;
+            state.diagnostics.socialAnxiety = anxietyPct;
+            state.diagnostics.stressLevel = totalScore > 20 ? 'High' : (totalScore > 10 ? 'Medium' : 'Low');
+            updateHeaderStatusBars();
+        }
+
+        async function generateFinalReport() {
+            addQuizTyping();
+
+            // Calculate scores
+            let scoreAcademic = 0;
+            let scoreAnxiety = 0;
+            let scoreSelfEsteem = 0;
+            const totalScore = selectedAnswers.reduce((sum, item) => sum + item.score, 0);
+
+            selectedAnswers.forEach(ans => {
+                const name = ans.aspect;
+                if (name === "Anhedonia & Lack of Motivation" || name === "Stress Tolerance & Irritability" || name === "Mental Fatigue & Burnout" || name === "Biological Patterns & Sleep Quality") {
+                    scoreAcademic += ans.score;
+                } else if (name === "Mood & Dysphoria" || name === "Cognitive Anxiety & Overthinking" || name === "Physical & Somatic Anxiety Responses" || name === "Trauma Awareness & Emotional Triggers" || name === "Social Relationships & Self-Isolation") {
+                    scoreAnxiety += ans.score;
+                } else if (name === "Self-Esteem & Psychological Resilience") {
+                    scoreSelfEsteem += ans.score;
+                }
+            });
+
+            // 100% = worst condition, 0% = best condition
+            const academicPct = Math.round(100 * scoreAcademic / 12);
+            const anxietyPct = Math.round(100 * scoreAnxiety / 15);
+            const selfEsteemPct = Math.round(100 * scoreSelfEsteem / 3);
+
+            const prompt = `You are MindBuddy's Clinical Psychometric Analyst.
+The student has completed a 10-question adaptive mental health screening questionnaire.
+Here are their stress severity percentages (where 0% = perfectly healthy, 100% = very severe):
+- 学习压力 (Academic Pressure): ${academicPct}%
+- 自卑程度 (Self-Esteem): ${selfEsteemPct}%
+- 焦虑程度 (Anxiety Level): ${anxietyPct}%
+
+Based on these scores, generate a simplified, concise mental health report in Chinese and English.
+Strictly adhere to the following layout and do NOT add any extra introductory text, comments, fluff, or conversational filler. Output ONLY the report:
+
+📋 **Clinical Mental Health Report**
+
+🧠 **学习压力 (Academic Pressure):** ${academicPct}% — [one short sentence describing what this score means for the student, e.g. if 0% say they are doing great, if 100% say it's severe]
+🏷️ **自卑程度 (Self-Esteem):** ${selfEsteemPct}% — [one short sentence describing what this score means]
+⚡ **焦虑程度 (Anxiety Level):** ${anxietyPct}% — [one short sentence describing what this score means]
+
+🛠️ **解决办法 (Solutions):**
+1. [Solution 1: Concise and highly practical action item targeting the highest-scored (worst) category]
+2. [Solution 2: Concise and highly practical action item targeting the highest-scored (worst) category]
+3. [Solution 3: Concise and highly practical action item targeting the highest-scored (worst) category]
+4. [Solution 4: Concise and highly practical action item targeting the highest-scored (worst) category]
+
+-----
+#### 📊 [CAMPUS_DASHBOARD_ANONYMOUS_DATA]
+主题: Clinical Assessment | 精力耗竭: ${academicPct}% | 社交疲劳: ${anxietyPct}% | 火花天数: ${spark.days}
+-----`;
+
+            let reportGenerated = false;
+
+            if (canAttemptGemini()) {
+                try {
+                    const data = await callGemini('gemini-2.5-flash', {
+                        system_instruction: { parts: [{ text: "You are a clinical psychologist compiling a student mental wellness assessment report. Be professional, supportive, and clear." }] },
+                        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                        generationConfig: { temperature: 0.8, maxOutputTokens: 2048 }
+                    });
+                    
+                    removeQuizTyping();
+                    if (data) {
+                        const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                        if (reply && reply.includes('Clinical Mental Health Report')) {
+                            addQuizBubble(reply, 'ai');
+                            reportGenerated = true;
+
+                            // Parse and apply state
+                            const dashMatch = reply.match(/精力耗竭[：:]\s*(\d+)%/);
+                            const tagMatch = reply.match(/\*{3}(.+?)\*{3}/) || reply.match(/\*\*(.+?)\*\*/);
+                            
+                            if (dashMatch) {
+                                const parsedBurnout = parseInt(dashMatch[1], 10);
+                                applyReportDiagnostics(parsedBurnout, selfEsteemPct, anxietyPct, totalScore);
+                            } else {
+                                applyReportDiagnostics(academicPct, selfEsteemPct, anxietyPct, totalScore);
+                            }
+
+                            if (tagMatch) {
+                                spark.personalityTag = tagMatch[1].substring(0, 30);
+                            } else {
+                                spark.personalityTag = totalScore > 20 ? 'Sensitive Soul' : (totalScore > 10 ? 'Balanced Mind' : 'Resilient Anchor');
+                            }
+                        }
+                    }
+                } catch(e) {
+                    console.warn("Gemini report generation failed, using local fallback:", e);
+                }
+            }
+
+            // Local fallback if Gemini fails or is unavailable
+            if (!reportGenerated) {
+                removeQuizTyping();
+                const localReport = generateLocalReport(academicPct, selfEsteemPct, anxietyPct, spark.days);
+                addQuizBubble(localReport, 'ai');
+                applyReportDiagnostics(academicPct, selfEsteemPct, anxietyPct, totalScore);
+                spark.personalityTag = totalScore > 20 ? 'Sensitive Soul' : (totalScore > 10 ? 'Balanced Mind' : 'Resilient Anchor');
+            }
+
+            spark.boxesOpened++;
+            spark.days++;
+            saveSpark(spark);
+            syncQuizUI();
+
+            if (qRestartBtn) qRestartBtn.classList.remove('hidden');
+        }
+
+        function handleTypedInput(text) {
+            if (currentQuestionIdx >= 10) return;
+            const normalized = text.toLowerCase().trim();
+            
+            let score = -1;
+            if (normalized === '0' || normalized.startsWith('nev') || normalized === 'never') score = 0;
+            else if (normalized === '1' || normalized.startsWith('rar') || normalized === 'rarely') score = 1;
+            else if (normalized === '2' || normalized.startsWith('oft') || normalized === 'often') score = 2;
+            else if (normalized === '3' || normalized.startsWith('alw') || normalized === 'always') score = 3;
+            
+            if (score === -1) {
+                const match = normalized.match(/^[0-3]/);
+                if (match) {
+                    score = parseInt(match[0], 10);
+                } else {
+                    const letterMatch = normalized.match(/^[a-d]/);
+                    if (letterMatch) {
+                        const code = letterMatch[0].charCodeAt(0) - 97;
+                        score = code;
+                    }
+                }
+            }
+            
+            if (score >= 0 && score <= 3) {
+                const LIKERT_OPTIONS = [
+                    { key: "0", text: "Never", score: 0 },
+                    { key: "1", text: "Rarely", score: 1 },
+                    { key: "2", text: "Often", score: 2 },
+                    { key: "3", text: "Always", score: 3 }
+                ];
+                handleOptionSelection(LIKERT_OPTIONS[score]);
+            } else {
+                addQuizBubble("Please enter a valid option: 0 (Never), 1 (Rarely), 2 (Often), or 3 (Always).", 'ai');
+            }
+        }
+
+        async function startQuizSession() {
+            currentQuestionIdx = 0;
+            selectedAnswers = [];
+            activeQuestions = [];
+            
+            if (qMessages) qMessages.innerHTML = '';
+            if (qBadge) qBadge.innerText = '🎲 Clinical Assessment Quiz';
+            if (qStartBtn) qStartBtn.classList.add('hidden');
+            if (qRestartBtn) qRestartBtn.classList.add('hidden');
+            
+            addQuizBubble("Initialising AI clinical assessment construction... Analyzing student logs and biometrics...", 'ai');
+            addQuizTyping();
+            
+            const simulatedHR = state.biometrics.heartRate || 75;
+            const simulatedSleep = state.biometrics.sleepDuration || 7.0;
+            const burnout = state.diagnostics.burnout || 30;
+            const anxiety = state.diagnostics.socialAnxiety || 30;
+            const academic = state.diagnostics.academicPressure || 30;
+            const loneliness = state.diagnostics.loneliness || 30;
+            
+            const prompt = `Student Profile:
+- Heart Rate: ${simulatedHR} BPM
+- Sleep Duration: ${simulatedSleep} hrs
+- Burnout: ${burnout}%
+- Social Anxiety: ${anxiety}%
+- Academic Pressure: ${academic}%
+- Loneliness: ${loneliness}%
+
+You are an AI psychiatric test compiler.
+Based on the student's status, choose or customize exactly 1 screening statement for each of the following 10 aspects to construct a personalized 10-question mental health questionnaire.
+Choose from or base on the following pools:
+${QUIZ_ASPECTS.map((a, idx) => `Aspect ${idx + 1} (${a.name}):\n${a.questions.map(q => `- ${q}`).join('\n')}`).join('\n\n')}
+
+Return ONLY a JSON array of exactly 10 strings representing the questions, in order from Aspect 1 to Aspect 10. No extra formatting, markdown tags, or text.
+Example format:
+[
+  "statement 1",
+  "statement 2",
+  ...
+]`;
+
+            try {
+                let questions = null;
+                if (canAttemptGemini()) {
+                    const data = await callGemini('gemini-2.5-flash', {
+                        system_instruction: { parts: [{ text: "You are a specialized JSON generator. You output raw JSON arrays containing strings and nothing else." }] },
+                        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                        generationConfig: { temperature: 0.7, maxOutputTokens: 1000 }
+                    });
+                    
+                    if (data) {
+                        const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                        const arrMatch = rawText.match(/\[\s*[\s\S]*?\s*\]/);
+                        if (arrMatch) {
+                            try {
+                                questions = JSON.parse(arrMatch[0]);
+                            } catch(e) {
+                                console.warn("Failed parsing adaptive quiz questions JSON:", e);
+                            }
+                        }
+                    }
+                }
+                
+                removeQuizTyping();
+                
+                if (!questions || !Array.isArray(questions) || questions.length !== 10) {
+                    console.log("Using local fallback questions selection.");
+                    questions = QUIZ_ASPECTS.map(aspect => {
+                        const randIdx = Math.floor(Math.random() * aspect.questions.length);
+                        return aspect.questions[randIdx];
+                    });
+                }
+                
+                activeQuestions = questions;
+                addQuizBubble("AI questionnaire constructed! Starting the 10-question check-in. For each question, please select the frequency of your experience over the past two weeks.", 'ai');
+                showNextQuestion();
+            } catch(e) {
+                console.error("Adaptive quiz initialization failed:", e);
+                removeQuizTyping();
+                activeQuestions = QUIZ_ASPECTS.map(aspect => {
+                    const randIdx = Math.floor(Math.random() * aspect.questions.length);
+                    return aspect.questions[randIdx];
+                });
+                addQuizBubble("Starting check-in (local fallback)...", 'ai');
+                showNextQuestion();
+            }
+        }
+
+        if (qStartBtn) qStartBtn.addEventListener('click', startQuizSession);
+        if (qRestartBtn) qRestartBtn.addEventListener('click', startQuizSession);
+        if (qSendBtn) qSendBtn.addEventListener('click', () => {
+            const text = qInput ? qInput.value.trim() : '';
+            if (text) {
+                if (qInput) qInput.value = '';
+                handleTypedInput(text);
+            }
+        });
+        if (qInput) qInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const text = qInput.value.trim();
+                if (text) {
+                    qInput.value = '';
+                    handleTypedInput(text);
+                }
+            }
+        });
+    })();
+
+    // =========================================================================
+    // SPARK SHOP — Gemini-powered conversational shop + visual catalog
+    // =========================================================================
+    (function SparkShopEngine() {
+        const SPARK_KEY = 'kawanku_spark';
+        function loadSpark() {
+            try { const d = JSON.parse(localStorage.getItem(SPARK_KEY)); if (d) return d; } catch(e) {}
+            return { days: 1, boxesOpened: 0, lastDiagnosis: '', personalityTag: '' };
+        }
+        function saveSpark(s) { localStorage.setItem(SPARK_KEY, JSON.stringify(s)); }
+
+        const SHOP_CATALOG = {
+            1: [
+                { icon: '👓', name: '智者金丝边框眼镜', cost: 3, prop: 'glasses', val: 'gold' },
+                { icon: '💇', name: '慵懒微卷空气感发型', cost: 5, prop: 'hairStyle', val: 'curly' },
+                { icon: '🎨', name: '限定皮肤：深夜食堂 · 温暖微光', cost: 15, prop: 'skinTone', val: '#FFD1A4' }
+            ],
+            2: [
+                { icon: '👓', name: '复古原色厚街黑框眼镜', cost: 3, prop: 'glasses', val: 'green' },
+                { icon: '💇', name: '少年感清爽利落碎发', cost: 5, prop: 'hairStyle', val: 'crop' },
+                { icon: '🎨', name: '限定皮肤：赛博朋克 · 暗夜霓虹', cost: 15, prop: 'skinTone', val: '#C8A2C8' }
+            ],
+            3: [
+                { icon: '👓', name: '蹦迪专用蹦碎极光墨镜', cost: 4, prop: 'glasses', val: 'gold' },
+                { icon: '💇', name: '触电般炸毛狂想发型', cost: 6, prop: 'hairStyle', val: 'bob' },
+                { icon: '🎨', name: '限定皮肤：深空流浪 · 孤独星云', cost: 18, prop: 'skinTone', val: '#87CEEB' }
+            ],
+            4: [
+                { icon: '👓', name: '智商爆表科学家圆框镜', cost: 4, prop: 'glasses', val: 'green' },
+                { icon: '💇', name: '高级感微翘狼尾发型', cost: 6, prop: 'hairStyle', val: 'long' },
+                { icon: '🎨', name: '限定皮肤：荒野求生 · 岛屿极光', cost: 18, prop: 'skinTone', val: '#98FB98' }
+            ]
+        };
+
+        const shopHistory = [];
+        let activeWeek = 1;
+
+        const sGrid = document.getElementById('shop-items-grid');
+        const sMessages = document.getElementById('shop-chat-messages');
+        const sInput = document.getElementById('shop-chat-input');
+        const sSendBtn = document.getElementById('shop-chat-send-btn');
+        const sBalance = document.getElementById('shop-spark-balance');
+
+        function renderShelf(week) {
+            if (!sGrid) return;
+            activeWeek = week;
+            sGrid.innerHTML = '';
+            const items = SHOP_CATALOG[week] || [];
+            items.forEach((item, idx) => {
+                const card = document.createElement('div');
+                card.className = 'shop-item-card';
+                card.innerHTML = '<span class="shop-item-icon">' + item.icon + '</span>' +
+                    '<div class="shop-item-info">' +
+                    '<span class="shop-item-name">' + item.name + '</span>' +
+                    '<span class="shop-item-cost">🔥 ' + item.cost + ' Day Sparks</span></div>' +
+                    '<button class="shop-item-buy-btn" data-week="' + week + '" data-idx="' + idx + '">Redeem</button>';
+                sGrid.appendChild(card);
+            });
+            sGrid.querySelectorAll('.shop-item-buy-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const w = parseInt(btn.getAttribute('data-week'));
+                    const i = parseInt(btn.getAttribute('data-idx'));
+                    handleBuy(SHOP_CATALOG[w][i]);
+                });
+            });
+            document.querySelectorAll('.shop-week-tab').forEach(t => {
+                t.classList.toggle('active', parseInt(t.getAttribute('data-week')) === week);
+            });
+        }
+
+        function handleBuy(item) {
+            let sp = loadSpark();
+            if (sp.days >= item.cost) {
+                sp.days -= item.cost;
+                saveSpark(sp);
+                syncShopBalance(sp);
+                unlockPremiumItem(item.prop, item.val);
+                if (typeof avatarState !== 'undefined' && avatarState.set) {
+                    avatarState.set(item.prop, item.val);
+                } else if (typeof state !== 'undefined') {
+                    state.avatar[item.prop] = item.val;
+                    renderAvatarVisuals();
+                }
+                showToast('兑换成功！' + item.name + ' 已装备到你的 Avatar！', 'success');
+                addShopBubble('🎉 兑换成功！「' + item.name + '」已放入你的主页衣柜。快去 Avatar Studio 看看吧！', 'ai');
+                if (typeof renderCustomizerUI === 'function') renderCustomizerUI();
+            } else {
+                const need = item.cost - sp.days;
+                showToast('火花不足，还需 ' + need + ' 天火花', 'warning');
+                addShopBubble('火花余额不足哟 🥲 再坚持自检 ' + need + ' 天就能带走「' + item.name + '」了！', 'ai');
+            }
+        }
+
+        function syncShopBalance(s) {
+            if (sBalance) sBalance.innerText = s.days;
+            const qCount = document.getElementById('quiz-spark-count');
+            if (qCount) qCount.innerText = s.days;
+        }
+
+        function addShopBubble(text, type) {
+            if (!sMessages) return;
+            const div = document.createElement('div');
+            div.className = type === 'ai' ? 'shop-ai-bubble' : 'shop-user-bubble';
+            div.innerText = text;
+            sMessages.appendChild(div);
+            sMessages.scrollTop = sMessages.scrollHeight;
+        }
+
+        async function sendShopMessage(userText) {
+            if (!canAttemptGemini()) { addShopBubble('Error: AI is currently unavailable. Please configure API key or ensure backend is running.', 'ai'); return; }
+            let sp = loadSpark();
+            shopHistory.push({ role: 'user', parts: [{ text: userText }] });
+            addShopBubble(userText, 'user');
+            if (sInput) sInput.value = '';
+            const shopPrompt = '你是 Kawanku AI 火花商店的潮流主理人。用户当前火花天数为 ' + sp.days + ' 天。当前显示第 ' + activeWeek + ' 周货架。请根据用户请求展示商品或处理兑换。保持极简留白风格。货架内容：' + JSON.stringify(SHOP_CATALOG[activeWeek]);
+            try {
+                const data = await callGemini('gemini-2.5-flash', {
+                    system_instruction: { parts: [{ text: shopPrompt }] },
+                    contents: shopHistory,
+                    generationConfig: { temperature: 0.8, maxOutputTokens: 1024 }
+                });
+                if (!data) {
+                    throw new Error('No response from Gemini API proxy.');
+                }
+                const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || '(No response)';
+                shopHistory.push({ role: 'model', parts: [{ text: reply }] });
+                addShopBubble(reply, 'ai');
+            } catch(e) {
+                if (shopHistory.length > 0) shopHistory.pop();
+                addShopBubble('Error: ' + e.message, 'ai');
+            }
+        }
+
+        document.querySelectorAll('.shop-week-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                renderShelf(parseInt(tab.getAttribute('data-week')));
+            });
+        });
+
+        if (sSendBtn) sSendBtn.addEventListener('click', () => {
+            const text = sInput ? sInput.value.trim() : '';
+            if (text) sendShopMessage(text);
+        });
+        if (sInput) sInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const text = sInput.value.trim();
+                if (text) sendShopMessage(text);
+            }
+        });
+
+        // Initial render — auto-detect current week
+        const autoWeek = Math.min(4, Math.ceil(new Date().getDate() / 7));
+        renderShelf(autoWeek);
+        syncShopBalance(loadSpark());
+    })();
+
+    // =========================================================================
+    // 开心消消乐 HAPPY MATCH-3 ENGINE — STEMGINEERS Innovation Project
+    // =========================================================================
+    (function RelaxationGamesEngine() {
+        // ── DOM refs ──────────────────────────────────────────────────────────
+        const match3StartAction = document.getElementById('match3-start-action');
+        const match3GameArena   = document.getElementById('match3-game-arena');
+        const match3Board       = document.getElementById('match3-board');
+        const match3Progress    = document.getElementById('match3-progress');
+        const match3ProgressVal = document.getElementById('match3-progress-val');
+        const btnStartMatch3    = document.getElementById('btn-start-match3');
+        const btnQuitMatch3     = document.getElementById('btn-quit-match3');
+        const surveyInline      = document.getElementById('survey-inline');
+        const surveyPrompt      = document.getElementById('survey-robot-prompt');
+        const hintText          = document.getElementById('match3-hint-text');
+
+        // ── Fruit SVG tiles (cute, colourful, recognisable) ───────────────────
+        const TILE_TYPES = [
+            {
+                id: 1, name: 'Mangosteen 山竹',
+                color: '#6d28d9',
+                svg: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- leaves -->
+                    <ellipse cx="18" cy="9" rx="5" ry="3" fill="#16a34a" transform="rotate(-20 18 9)"/>
+                    <ellipse cx="24" cy="7" rx="5" ry="3" fill="#22c55e" transform="rotate(0 24 7)"/>
+                    <ellipse cx="30" cy="9" rx="5" ry="3" fill="#16a34a" transform="rotate(20 30 9)"/>
+                    <!-- shell -->
+                    <circle cx="24" cy="28" r="17" fill="#4c1d95"/>
+                    <circle cx="24" cy="28" r="15" fill="#6d28d9"/>
+                    <!-- highlight -->
+                    <ellipse cx="19" cy="21" rx="5" ry="4" fill="#8b5cf6" opacity="0.5"/>
+                    <!-- crown at bottom -->
+                    <path d="M17 42 Q24 46 31 42" stroke="#4c1d95" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                    <circle cx="17" cy="42" r="1.8" fill="#a78bfa"/>
+                    <circle cx="24" cy="44.5" r="1.8" fill="#a78bfa"/>
+                    <circle cx="31" cy="42" r="1.8" fill="#a78bfa"/>
+                </svg>`
+            },
+            {
+                id: 2, name: 'Durian 榴莲',
+                color: '#d97706',
+                svg: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- stem & leaf -->
+                    <rect x="22" y="3" width="4" height="7" rx="2" fill="#92400e"/>
+                    <ellipse cx="28" cy="6" rx="5" ry="2.5" fill="#16a34a" transform="rotate(30 28 6)"/>
+                    <!-- body -->
+                    <ellipse cx="24" cy="30" rx="16" ry="14" fill="#f59e0b"/>
+                    <ellipse cx="24" cy="30" rx="13" ry="11" fill="#fbbf24"/>
+                    <!-- spikes -->
+                    <g stroke="#92400e" stroke-width="1.2" stroke-linecap="round">
+                        <line x1="24" y1="16" x2="22" y2="11"/>
+                        <line x1="30" y1="17" x2="30" y2="12"/>
+                        <line x1="36" y1="21" x2="39" y2="17"/>
+                        <line x1="38" y1="28" x2="43" y2="27"/>
+                        <line x1="36" y1="35" x2="40" y2="37"/>
+                        <line x1="12" y1="21" x2="9" y2="17"/>
+                        <line x1="10" y1="28" x2="5" y2="27"/>
+                        <line x1="12" y1="35" x2="8" y2="37"/>
+                        <line x1="18" y1="17" x2="16" y2="12"/>
+                    </g>
+                    <!-- segments -->
+                    <path d="M24 19 Q28 27 24 35 Q20 27 24 19Z" fill="#fde68a" opacity="0.7"/>
+                    <path d="M17 22 Q24 27 18 36" stroke="#fde68a" stroke-width="1" fill="none" opacity="0.5"/>
+                    <path d="M31 22 Q24 27 30 36" stroke="#fde68a" stroke-width="1" fill="none" opacity="0.5"/>
+                    <!-- highlight -->
+                    <ellipse cx="20" cy="23" rx="4" ry="3" fill="white" opacity="0.15"/>
+                </svg>`
+            },
+            {
+                id: 3, name: 'Rambutan 红毛丹',
+                color: '#dc2626',
+                svg: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- stem -->
+                    <rect x="22" y="3" width="4" height="6" rx="2" fill="#92400e"/>
+                    <!-- body -->
+                    <circle cx="24" cy="28" r="16" fill="#b91c1c"/>
+                    <circle cx="24" cy="28" r="13" fill="#dc2626"/>
+                    <!-- hairs / spines -->
+                    <g stroke="#ef4444" stroke-width="1.8" stroke-linecap="round">
+                        <line x1="24" y1="12" x2="24" y2="8"/>
+                        <line x1="31" y1="14" x2="34" y2="10"/>
+                        <line x1="37" y1="20" x2="41" y2="18"/>
+                        <line x1="39" y1="28" x2="44" y2="28"/>
+                        <line x1="37" y1="36" x2="41" y2="38"/>
+                        <line x1="31" y1="41" x2="34" y2="45"/>
+                        <line x1="24" y1="43" x2="24" y2="47"/>
+                        <line x1="17" y1="41" x2="14" y2="45"/>
+                        <line x1="11" y1="36" x2="7" y2="38"/>
+                        <line x1="9" y1="28" x2="4" y2="28"/>
+                        <line x1="11" y1="20" x2="7" y2="18"/>
+                        <line x1="17" y1="14" x2="14" y2="10"/>
+                    </g>
+                    <!-- white flesh peek -->
+                    <circle cx="24" cy="28" r="8" fill="#fde68a" opacity="0.2"/>
+                    <!-- highlight -->
+                    <ellipse cx="19" cy="22" rx="5" ry="3.5" fill="white" opacity="0.18"/>
+                </svg>`
+            },
+            {
+                id: 4, name: 'Banana 香蕉',
+                color: '#ca8a04',
+                svg: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- stem -->
+                    <path d="M28 6 Q30 8 28 11" stroke="#92400e" stroke-width="3" stroke-linecap="round" fill="none"/>
+                    <!-- banana curve -->
+                    <path d="M10 34 Q8 20 20 12 Q32 6 38 16 Q42 24 36 32 Q30 38 22 38 Q14 38 10 34Z" fill="#fbbf24"/>
+                    <path d="M13 32 Q11 20 21 14 Q31 9 36 18 Q39 24 34 30 Q28 36 21 36 Q15 36 13 32Z" fill="#fde68a"/>
+                    <!-- ridge lines -->
+                    <path d="M16 30 Q15 20 22 14" stroke="#f59e0b" stroke-width="1" fill="none" opacity="0.6"/>
+                    <path d="M20 34 Q18 22 24 13" stroke="#f59e0b" stroke-width="1" fill="none" opacity="0.6"/>
+                    <path d="M25 35 Q23 24 28 14" stroke="#f59e0b" stroke-width="1" fill="none" opacity="0.6"/>
+                    <!-- tip -->
+                    <path d="M36 32 Q38 35 36 37" stroke="#92400e" stroke-width="2" stroke-linecap="round" fill="none"/>
+                    <!-- highlight -->
+                    <ellipse cx="22" cy="20" rx="6" ry="3" fill="white" opacity="0.2" transform="rotate(-30 22 20)"/>
+                </svg>`
+            },
+            {
+                id: 5, name: 'Mango 芒果',
+                color: '#ea580c',
+                svg: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- stem & leaf -->
+                    <rect x="22" y="3" width="4" height="7" rx="2" fill="#92400e"/>
+                    <ellipse cx="30" cy="6" rx="6" ry="2.5" fill="#16a34a" transform="rotate(25 30 6)"/>
+                    <!-- body -->
+                    <path d="M24 43 C10 43 7 30 9 22 C11 14 17 9 24 9 C31 9 37 14 39 22 C41 30 38 43 24 43Z" fill="#f97316"/>
+                    <path d="M24 40 C12 40 10 29 12 22 C14 16 19 12 24 12 C29 12 34 16 36 22 C38 29 36 40 24 40Z" fill="#fb923c"/>
+                    <!-- blush -->
+                    <ellipse cx="30" cy="25" rx="6" ry="8" fill="#fbbf24" opacity="0.45"/>
+                    <!-- highlight -->
+                    <ellipse cx="18" cy="19" rx="5" ry="4" fill="white" opacity="0.2"/>
+                </svg>`
+            }
+        ];
+
+        // ── Game state ────────────────────────────────────────────────────────
+        const ROWS = 6, COLS = 6;
+        const WIN_MATCHES = 10;
+        let board       = [];   // 2-D array of tile objects
+        let selected    = null;
+        let busy        = false;
+        let score       = 0;
+
+        // ── Utility ───────────────────────────────────────────────────────────
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        // ── Tile SVG helper ───────────────────────────────────────────────────
+        function makeTileHTML(type) {
+            return `<div class="tile-inner" style="--tc:${type.color}">
+                        <div class="tile-svg">${type.svg}</div>
+                        <div class="tile-name">${type.name.split(' ')[1] || type.name.split(' ')[0]}</div>
+                    </div>`;
+        }
+
+        // ── Build board (no initial matches) ─────────────────────────────────
+        function buildBoard() {
+            board = [];
+            for (let r = 0; r < ROWS; r++) {
+                board[r] = [];
+                for (let c = 0; c < COLS; c++) {
+                    let t;
+                    let tries = 0;
+                    do {
+                        t = rand(TILE_TYPES);
+                        tries++;
+                        if (tries > 50) break;          // safety escape
+                    } while (
+                        (r >= 2 && board[r-1][c].id === t.id && board[r-2][c].id === t.id) ||
+                        (c >= 2 && board[r][c-1].id === t.id && board[r][c-2].id === t.id)
+                    );
+                    board[r][c] = { ...t, row: r, col: c, el: null };
+                }
+            }
+        }
+
+        // ── Render all tiles into the DOM grid ────────────────────────────────
+        function renderBoard() {
+            match3Board.innerHTML = '';
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const t   = board[r][c];
+                    const div = document.createElement('div');
+                    div.className = 'match3-tile';
+                    div.innerHTML = makeTileHTML(t);
+                    div.dataset.row = r;
+                    div.dataset.col = c;
+                    div.addEventListener('click', () => onTileClick(t));
+                    t.el = div;
+                    match3Board.appendChild(div);
+                }
+            }
+        }
+
+        // ── Click handler ─────────────────────────────────────────────────────
+        function onTileClick(t) {
+            if (busy) return;
+            if (!selected) {
+                selected = t;
+                t.el.classList.add('selected');
+                if (hintText) hintText.textContent = 'Now click an adjacent fruit to swap!';
+                return;
+            }
+            if (selected === t) {
+                t.el.classList.remove('selected');
+                selected = null;
+                if (hintText) hintText.textContent = 'Click a fruit, then click an adjacent fruit to swap them!';
+                return;
+            }
+            const dr = Math.abs(selected.row - t.row);
+            const dc = Math.abs(selected.col - t.col);
+            if ((dr === 1 && dc === 0) || (dr === 0 && dc === 1)) {
+                selected.el.classList.remove('selected');
+                doSwap(selected, t);
+                selected = null;
+                if (hintText) hintText.textContent = 'Click a fruit, then click an adjacent fruit to swap them!';
+            } else {
+                selected.el.classList.remove('selected');
+                selected = t;
+                t.el.classList.add('selected');
+            }
+        }
+
+        // ── Swap two tiles, check matches, revert if none ─────────────────────
+        async function doSwap(a, b) {
+            busy = true;
+            swapState(a, b);
+            refreshTileEl(a);
+            refreshTileEl(b);
+            await sleep(200);
+
+            const matches = findMatches();
+            if (matches.length) {
+                await processMatches(matches);
+            } else {
+                swapState(a, b);         // revert
+                refreshTileEl(a);
+                refreshTileEl(b);
+                a.el.classList.add('shake');
+                b.el.classList.add('shake');
+                await sleep(400);
+                a.el.classList.remove('shake');
+                b.el.classList.remove('shake');
+            }
+            busy = false;
+        }
+
+        // swap the two tile objects in the board array + update their row/col
+        function swapState(a, b) {
+            board[a.row][a.col] = b;
+            board[b.row][b.col] = a;
+            const tr = a.row, tc = a.col;
+            a.row = b.row; a.col = b.col;
+            b.row = tr;    b.col = tc;
+        }
+
+        // update a tile's DOM element to reflect its current board position + content
+        function refreshTileEl(t) {
+            t.el.style.gridRowStart    = t.row + 1;
+            t.el.style.gridColumnStart = t.col + 1;
+            t.el.dataset.row = t.row;
+            t.el.dataset.col = t.col;
+        }
+
+        // ── Match detection ───────────────────────────────────────────────────
+        function findMatches() {
+            const seen = new Set();
+            const out  = [];
+            const key  = (r,c) => `${r},${c}`;
+
+            // horizontal
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS - 2; c++) {
+                    if (board[r][c].id === board[r][c+1].id && board[r][c].id === board[r][c+2].id) {
+                        [[r,c],[r,c+1],[r,c+2]].forEach(([rr,cc]) => {
+                            if (!seen.has(key(rr,cc))) { seen.add(key(rr,cc)); out.push(board[rr][cc]); }
+                        });
+                    }
+                }
+            }
+            // vertical
+            for (let r = 0; r < ROWS - 2; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (board[r][c].id === board[r+1][c].id && board[r][c].id === board[r+2][c].id) {
+                        [[r,c],[r+1,c],[r+2,c]].forEach(([rr,cc]) => {
+                            if (!seen.has(key(rr,cc))) { seen.add(key(rr,cc)); out.push(board[rr][cc]); }
+                        });
+                    }
+                }
+            }
+            return out;
+        }
+
+        // ── Clear matches + gravity + refill ──────────────────────────────────
+        async function processMatches(matches) {
+            score++;
+            updateProgress();
+
+            // pop animation
+            matches.forEach(t => t.el.classList.add('pop-clear'));
+            await sleep(320);
+
+            // remove from DOM + board
+            matches.forEach(t => {
+                if (t.el) t.el.remove();
+                board[t.row][t.col] = null;
+            });
+
+            // gravity: pull tiles down column by column
+            for (let c = 0; c < COLS; c++) {
+                let empty = 0;
+                for (let r = ROWS - 1; r >= 0; r--) {
+                    if (!board[r][c]) { empty++; }
+                    else if (empty > 0) {
+                        const t = board[r][c];
+                        board[r+empty][c] = t;
+                        board[r][c]       = null;
+                        t.row             = r + empty;
+                        t.el.style.gridRowStart = t.row + 1;
+                    }
+                }
+                // fill empty from top
+                for (let i = 0; i < empty; i++) {
+                    const type = rand(TILE_TYPES);
+                    const newT = { ...type, row: i, col: c, el: null };
+                    const div  = document.createElement('div');
+                    div.className = 'match3-tile tile-drop';
+                    div.innerHTML = makeTileHTML(type);
+                    div.dataset.row = i;
+                    div.dataset.col = c;
+                    div.style.gridRowStart    = i + 1;
+                    div.style.gridColumnStart = c + 1;
+                    div.addEventListener('click', () => onTileClick(newT));
+                    newT.el = div;
+                    board[i][c] = newT;
+                    match3Board.appendChild(div);
+                }
+            }
+
+            await sleep(350);
+
+            // cascade check
+            const next = findMatches();
+            if (next.length) {
+                await processMatches(next);
+            } else if (score >= WIN_MATCHES) {
+                await sleep(300);
+                triggerWin();
+            }
+        }
+
+        // ── Progress bar ──────────────────────────────────────────────────────
+        function updateProgress() {
+            const pct = Math.min(100, Math.round(score / WIN_MATCHES * 100));
+            match3Progress.style.width    = pct + '%';
+            match3ProgressVal.textContent = pct + '%';
+        }
+
+        // ── Win flow ──────────────────────────────────────────────────────────
+        function triggerWin() {
+            match3GameArena.classList.add('hidden');
+            match3StartAction.classList.add('hidden');
+            surveyInline.classList.remove('hidden');
+            surveyInline.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // ── Fruit preview on start screen ────────────────────────────────────
+        function populateFruitPreview() {
+            const items = document.querySelectorAll('.fruit-preview-item');
+            TILE_TYPES.forEach((t, i) => {
+                if (items[i]) items[i].innerHTML = t.svg;
+            });
+        }
+
+        // ── Start / Quit ──────────────────────────────────────────────────────
+        function startGame() {
+            score = 0;
+            selected = null;
+            busy = false;
+            updateProgress();
+            buildBoard();
+            renderBoard();
+            match3StartAction.classList.add('hidden');
+            surveyInline.classList.add('hidden');
+            match3GameArena.classList.remove('hidden');
+            if (hintText) hintText.textContent = 'Click a fruit, then click an adjacent fruit to swap them!';
+        }
+
+        function quitGame() {
+            match3GameArena.classList.add('hidden');
+            match3StartAction.classList.remove('hidden');
+            surveyInline.classList.add('hidden');
+        }
+
+        // ── Mood survey handler ───────────────────────────────────────────────
+        function handleMood(val) {
+            surveyInline.classList.add('hidden');
+            match3StartAction.classList.remove('hidden');
+            if (val === '5') {
+                const chatBtn = document.getElementById('nav-chat');
+                if (chatBtn) chatBtn.click();
+                showToast("Welcome back! KawanKu is here for you. 💙", "info");
+            } else {
+                showToast("Mood logged! You're doing amazing, Kawan. 🌟", "success");
+            }
+        }
+
+        // ── Init ──────────────────────────────────────────────────────────────
+        function init() {
+            populateFruitPreview();
+            if (btnStartMatch3) btnStartMatch3.addEventListener('click', startGame);
+            if (btnQuitMatch3)  btnQuitMatch3.addEventListener('click', quitGame);
+            document.querySelectorAll('#survey-inline .emoji-btn').forEach(btn => {
+                btn.addEventListener('click', () => handleMood(btn.dataset.mood));
+            });
+        }
+
+        init();
+    })();
 
     // Run launcher
     init();

@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KawanKu AI - Counselor Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --danger: #f56565;
+            --warning: #ed8936;
+            --success: #48bb78;
+            --bg-light: #f7fafc;
+            --bg-white: #ffffff;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .logo {
+            margin-bottom: 2rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .nav {
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.8;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            opacity: 1;
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            opacity: 1;
+            border-left-color: white;
+        }
+
+        .counselor-info {
+            border-top: 2px solid rgba(255,255,255,0.2);
+            padding-top: 1rem;
+        }
+
+        .counselor-info p {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .btn-logout {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background: white;
+            color: var(--primary);
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-white);
+            padding: 2rem;
+            border-bottom: 2px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .header h2 {
+            font-size: 1.75rem;
+            color: var(--text-dark);
+        }
+
+        /* Dashboard content */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-white);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-card.urgent {
+            border-left-color: var(--danger);
+        }
+
+        .stat-card.warning {
+            border-left-color: var(--warning);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .students-table {
+            background: var(--bg-white);
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            display: grid;
+            grid-template-columns: 150px 200px 150px 150px 1fr;
+            gap: 1rem;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .table-row {
+            padding: 1.5rem 2rem;
+            display: grid;
+            grid-template-columns: 150px 200px 150px 150px 1fr;
+            gap: 1rem;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .table-row:hover {
+            background: var(--bg-light);
+        }
+
+        .student-id {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .risk-badge.low {
+            background: rgba(72, 187, 120, 0.1);
+            color: var(--success);
+        }
+
+        .risk-badge.moderate {
+            background: rgba(237, 137, 54, 0.1);
+            color: var(--warning);
+        }
+
+        .risk-badge.high {
+            background: rgba(245, 101, 101, 0.1);
+            color: var(--danger);
+        }
+
+        .risk-badge.urgent {
+            background: var(--danger);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.4rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--border);
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background: var(--text-light);
+            color: white;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-white);
+            border-radius: 1rem;
+            max-width: 700px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .report-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .report-section h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .report-section p {
+            color: var(--text-light);
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .table-header,
+            .table-row {
+                grid-template-columns: 120px 150px 120px 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                justify-content: space-between;
+                padding: 1rem;
+            }
+
+            .nav {
+                display: flex;
+                gap: 1rem;
+                flex: 1;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .table-header,
+            .table-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <h1>🎯 KawanKu</h1>
+                <p>Counselor Portal</p>
+            </div>
+
+            <div class="nav">
+                <div class="nav-item active" onclick="switchTab('dashboard')">
+                    📊 Dashboard
+                </div>
+                <div class="nav-item" onclick="switchTab('students')">
+                    👥 Students
+                </div>
+                <div class="nav-item" onclick="switchTab('reports')">
+                    📋 Reports
+                </div>
+            </div>
+
+            <div class="counselor-info">
+                <p><strong id="counselorName">Counselor</strong></p>
+                <p id="counselorId" style="font-size: 0.8rem; opacity: 0.7;"></p>
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <h2 id="pageTitle">Dashboard Overview</h2>
+            </div>
+
+            <!-- Content -->
+            <div class="content">
+                <!-- Dashboard Tab -->
+                <div id="dashboardTab" class="tab-content active">
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalStudents">0</div>
+                            <div class="stat-label">Total Students</div>
+                        </div>
+                        <div class="stat-card warning">
+                            <div class="stat-value" id="needsAttention">0</div>
+                            <div class="stat-label">Needs Attention</div>
+                        </div>
+                        <div class="stat-card urgent">
+                            <div class="stat-value" id="urgentCases">0</div>
+                            <div class="stat-label">Urgent Cases</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Students Tab -->
+                <div id="studentsTab" class="tab-content" style="display: none;">
+                    <div class="students-table">
+                        <div class="table-header">
+                            <div>Student ID</div>
+                            <div>Name</div>
+                            <div>Risk Level</div>
+                            <div>Last Active</div>
+                            <div>Actions</div>
+                        </div>
+                        <div id="studentsTableBody"></div>
+                    </div>
+                </div>
+
+                <!-- Reports Tab -->
+                <div id="reportsTab" class="tab-content" style="display: none;">
+                    <p style="color: var(--text-light); margin-bottom: 1rem;">Select a student to view their privacy-preserved report.</p>
+                    <div id="reportsContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Student Report - <span id="reportStudentId"></span></h2>
+                <button class="close-btn" onclick="closeReportModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="reportContent">
+                <!-- Report content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.API_BASE || 'http://localhost:5000/api';
+        let counselorId, token;
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            const stored = localStorage.getItem('kawanku_counselor_session');
+            if (!stored) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const session = JSON.parse(stored);
+            counselorId = session.counselor_id;
+            token = session.token;
+
+            document.getElementById('counselorName').textContent = session.full_name;
+            document.getElementById('counselorId').textContent = counselorId;
+
+            loadDashboard();
+            loadStudents();
+            setInterval(() => {
+                loadDashboard();
+                loadStudents();
+            }, 15000);
+        });
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.style.display = 'none';
+            });
+
+            // Remove active class from nav items
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName + 'Tab').style.display = 'block';
+
+            // Set active nav item
+            event.target.classList.add('active');
+
+            // Update page title
+            const titles = {
+                'dashboard': 'Dashboard Overview',
+                'students': 'Student List',
+                'reports': 'Reports'
+            };
+            document.getElementById('pageTitle').textContent = titles[tabName];
+        }
+
+        async function loadDashboard() {
+            try {
+                const response = await fetch(`${API_BASE}/counselor/dashboard`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('totalStudents').textContent = data.total_students;
+                    document.getElementById('needsAttention').textContent = data.students_needing_attention;
+                    document.getElementById('urgentCases').textContent = data.urgent_cases;
+                }
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        async function loadStudents() {
+            try {
+                const response = await fetch(`${API_BASE}/counselor/students`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayStudents(data.students);
+                }
+            } catch (error) {
+                console.error('Error loading students:', error);
+            }
+        }
+
+        function displayStudents(students) {
+            const tbody = document.getElementById('studentsTableBody');
+            tbody.innerHTML = '';
+
+            students.forEach(student => {
+                const riskLevel = student.risk_assessment?.overall_risk_level || 'Low';
+                const riskClass = riskLevel.toLowerCase();
+                const lastLogin = student.last_login ? new Date(student.last_login).toLocaleDateString() : 'N/A';
+
+                const row = document.createElement('div');
+                row.className = 'table-row';
+                row.innerHTML = `
+                    <div class="student-id">${student.student_id}</div>
+                    <div>${student.full_name}</div>
+                    <div>
+                        <span class="risk-badge ${riskClass}">${riskLevel}</span>
+                    </div>
+                    <div>${lastLogin}</div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="viewReport('${student.student_id}')">Report</button>
+                        <button class="btn btn-secondary" onclick="contactStudent('${student.student_id}')">Contact</button>
+                    </div>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function viewReport(studentId) {
+            try {
+                const response = await fetch(`${API_BASE}/counselor/report/${studentId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const report = await response.json();
+                    displayReportModal(studentId, report);
+                }
+            } catch (error) {
+                console.error('Error loading report:', error);
+                alert('Failed to load report');
+            }
+        }
+
+        function displayReportModal(studentId, report) {
+            document.getElementById('reportStudentId').textContent = studentId;
+
+            const reportHtml = `
+                <div class="report-section">
+                    <h3>📋 Metadata</h3>
+                    <p><strong>Sessions:</strong> ${report.metadata.total_sessions}</p>
+                    <p><strong>Messages:</strong> ${report.metadata.total_messages}</p>
+                </div>
+
+                <div class="report-section">
+                    <h3>😊 Mood State</h3>
+                    <p><strong>Current:</strong> ${report.mood_state.current_state}</p>
+                    <p><strong>Trajectory:</strong> ${report.mood_state.trajectory}</p>
+                    <p>${report.mood_state.description}</p>
+                </div>
+
+                <div class="report-section">
+                    <h3>😰 Stress Assessment</h3>
+                    <p><strong>Overall Level:</strong> ${report.stress_assessment.overall_level}</p>
+                    <p><strong>Breakdown:</strong></p>
+                    <ul style="margin-left: 1rem; color: var(--text-light);">
+                        <li>Cognitive Burnout: ${report.stress_assessment.breakdown.cognitive_burnout}%</li>
+                        <li>Emotional Fatigue: ${report.stress_assessment.breakdown.emotional_fatigue}%</li>
+                        <li>Social Stress: ${report.stress_assessment.breakdown.social_stress}%</li>
+                        <li>Academic Pressure: ${report.stress_assessment.breakdown.academic_pressure}%</li>
+                    </ul>
+                </div>
+
+                <div class="report-section">
+                    <h3>🏥 Clinical Screening</h3>
+                    <p><strong>GAD-7 Score:</strong> ${report.clinical_screening.gad7.score} (${report.clinical_screening.gad7.risk_level})</p>
+                    <p><strong>PHQ-9 Score:</strong> ${report.clinical_screening.phq9.score} (${report.clinical_screening.phq9.risk_level})</p>
+                </div>
+
+                <div class="report-section">
+                    <h3>⚠️ Risk Assessment</h3>
+                    <p><strong>Overall Risk:</strong> ${report.risk_assessment.overall_risk_level}</p>
+                    <p><strong>Intervention Needed:</strong> ${report.risk_assessment.immediate_intervention_needed ? 'YES' : 'No'}</p>
+                    <p><strong>Follow-up Priority:</strong> ${report.risk_assessment.follow_up_priority}</p>
+                </div>
+
+                <div class="report-section" style="border: none;">
+                    <h3>💡 Recommendations</h3>
+                    <div id="recommendationsContainer"></div>
+                    <p style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.9rem; color: var(--text-light);">
+                        ⚕️ ${report.privacy_notice}
+                    </p>
+                </div>
+            `;
+
+            document.getElementById('reportContent').innerHTML = reportHtml;
+
+            // Add recommendations
+            const recsContainer = document.getElementById('recommendationsContainer');
+            report.clinical_recommendations.forEach(rec => {
+                const recDiv = document.createElement('div');
+                recDiv.style.marginBottom = '1rem';
+                recDiv.innerHTML = `
+                    <p><strong>${rec.action}</strong> <span class="risk-badge ${rec.urgency.toLowerCase()}">${rec.urgency}</span></p>
+                    <p style="color: var(--text-light); margin-top: 0.5rem;">${rec.description}</p>
+                `;
+                recsContainer.appendChild(recDiv);
+            });
+
+            document.getElementById('reportModal').classList.add('active');
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.remove('active');
+        }
+
+        function contactStudent(studentId) {
+            alert(`Contacting student ${studentId}...\n(This would open contact form)`);
+        }
+
+        function logout() {
+            localStorage.removeItem('kawanku_counselor_session');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

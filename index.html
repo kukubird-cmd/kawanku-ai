@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MindBuddy - Your Empathetic AI Companion</title>
     <meta name="description" content="MindBuddy is a customizable, supportive AI personal companion for students. Express your emotions, analyze speech rants, scan facial gestures, sync biometric trackers, and restore peace of mind.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%238b5cf6'/%3E%3Cpath d='M18 36c4 8 10 12 14 12s10-4 14-12c4-8-1-18-10-18-4 0-7 2-9 5-2-3-5-5-9-5-9 0-14 10-10 18z' fill='white'/%3E%3C/svg%3E">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="lucide.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -32,6 +33,14 @@
                     <i data-lucide="message-square"></i>
                     <span>Chat & Rant</span>
                 </button>
+                <button class="nav-btn" data-target="quiz-panel" id="nav-quiz">
+                    <i data-lucide="help-circle"></i>
+                    <span>Emotion Quiz</span>
+                </button>
+                <button class="nav-btn" data-target="shop-panel" id="nav-shop">
+                    <i data-lucide="shopping-bag"></i>
+                    <span>Spark Shop</span>
+                </button>
                 <button class="nav-btn" data-target="studio-panel" id="nav-studio">
                     <i data-lucide="palette"></i>
                     <span>Avatar Studio</span>
@@ -44,6 +53,10 @@
                 <button class="nav-btn" data-target="mood-panel" id="nav-mood">
                     <i data-lucide="calendar"></i>
                     <span>Mood Calendar</span>
+                </button>
+                <button class="nav-btn" data-target="games-panel" id="nav-games">
+                    <i data-lucide="gamepad-2"></i>
+                    <span>Play & Relax</span>
                 </button>
             </nav>
 
@@ -500,7 +513,7 @@
                 <!-- Avatar Studio Panel -->
                 <section class="panel" id="studio-panel">
                     <div class="studio-layout">
-                        <!-- Preview Column -->
+                        <!-- Left Panel: Preview Column -->
                         <div class="studio-preview-card">
                             <div class="preview-header">
                                 <h3>Studio Preview</h3>
@@ -509,19 +522,61 @@
                                 </button>
                             </div>
                             
-                            <!-- Secondary viewport linked to main state -->
-                            <div class="studio-viewport">
-                                <div class="avatar-svg-container" id="studio-avatar-container">
+                            <!-- Customizer Live Viewport -->
+                            <div class="customizer-viewport scene-yellow" id="customizer-viewport">
+                                <div id="studio-avatar-container">
                                     <!-- Rendered dynamically by script -->
                                 </div>
-                            </div>
-                            
-                            <div class="avatar-manifesto">
-                                <p>This is your MindBuddy's physical projection. Make them look how you feel, or style them to represent a calm, grounding presence.</p>
+                                <!-- Pet Layer System -->
+                                <div class="pet-overlay-container" id="studio-pet-container">
+                                    <!-- Cat SVG -->
+                                    <svg id="pet-cat" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                        <ellipse cx="50" cy="70" rx="20" ry="25" fill="#f59e0b"/>
+                                        <circle cx="50" cy="40" r="16" fill="#f59e0b"/>
+                                        <!-- Ears -->
+                                        <polygon points="36,36 34,20 46,30" fill="#d97706"/>
+                                        <polygon points="64,36 66,20 54,30" fill="#d97706"/>
+                                        <!-- Eyes -->
+                                        <circle cx="44" cy="38" r="2.5" fill="#1e293b"/>
+                                        <circle cx="56" cy="38" r="2.5" fill="#1e293b"/>
+                                        <!-- Nose/Mouth -->
+                                        <polygon points="50,44 48,42 52,42" fill="#1e293b"/>
+                                        <!-- Tail -->
+                                        <path d="M68,75 Q85,75 80,50" fill="none" stroke="#f59e0b" stroke-width="5" stroke-linecap="round"/>
+                                    </svg>
+                                    <!-- Dog SVG -->
+                                    <svg id="pet-dog" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                        <ellipse cx="50" cy="70" rx="22" ry="24" fill="#78350f"/>
+                                        <circle cx="50" cy="42" r="16" fill="#78350f"/>
+                                        <!-- Ears -->
+                                        <path d="M34,34 Q22,40 28,55" fill="none" stroke="#78350f" stroke-width="8" stroke-linecap="round"/>
+                                        <path d="M66,34 Q78,40 72,55" fill="none" stroke="#78350f" stroke-width="8" stroke-linecap="round"/>
+                                        <!-- Eyes -->
+                                        <circle cx="44" cy="40" r="2.5" fill="#f8fafc"/>
+                                        <circle cx="56" cy="40" r="2.5" fill="#f8fafc"/>
+                                        <!-- Nose -->
+                                        <ellipse cx="50" cy="46" rx="3.5" ry="2" fill="#0f172a"/>
+                                        <!-- Tail -->
+                                        <path d="M68,78 Q82,85 88,72" fill="none" stroke="#78350f" stroke-width="5" stroke-linecap="round"/>
+                                    </svg>
+                                    <!-- Bird SVG -->
+                                    <svg id="pet-bird" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                        <ellipse cx="50" cy="65" rx="18" ry="20" fill="#3b82f6"/>
+                                        <circle cx="58" cy="42" r="12" fill="#3b82f6"/>
+                                        <!-- Beak -->
+                                        <polygon points="70,40 76,44 70,48" fill="#f59e0b"/>
+                                        <!-- Eye -->
+                                        <circle cx="58" cy="38" r="2" fill="#0f172a"/>
+                                        <!-- Wing -->
+                                        <path d="M38,62 Q45,55 52,70" fill="none" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
+                                        <!-- Tail -->
+                                        <path d="M34,75 L20,85 L28,70" fill="#3b82f6"/>
+                                    </svg>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Design Board Column -->
+                        <!-- Right Panel: Design Board Column -->
                         <div class="studio-options-card">
                             <div class="options-header">
                                 <div class="header-flex" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
@@ -725,12 +780,151 @@
                             <div class="calendar-grid-container">
                                 <div class="calendar-weekdays">
                                     <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                <!-- ============================================
+                     EMOTION QUIZ PANEL (Gemini-Powered)
+                     ============================================ -->
+                <section class="panel" id="quiz-panel">
+                    <div class="quiz-page-layout">
+                        <!-- Left: Spark Status Card -->
+                        <div class="quiz-status-card">
+                            <div class="spark-hero">
+                                <span class="spark-fire-icon">ðŸ”¥</span>
+                                <div class="spark-count" id="quiz-spark-count">1</div>
+                                <span class="spark-label">Day Streak</span>
+                            </div>
+                            <div class="spark-stats-grid">
+                                <div class="spark-stat-item">
+                                    <span class="spark-stat-icon">ðŸ“¦</span>
+                                    <span class="spark-stat-label">Blind Boxes Opened</span>
+                                    <span class="spark-stat-val" id="quiz-boxes-opened">0</span>
+                                </div>
+                                <div class="spark-stat-item">
+                                    <span class="spark-stat-icon">ðŸ§ </span>
+                                    <span class="spark-stat-label">Last Diagnosis</span>
+                                    <span class="spark-stat-val" id="quiz-last-diagnosis">â€”</span>
+                                </div>
+                                <div class="spark-stat-item">
+                                    <span class="spark-stat-icon">ðŸ·ï¸</span>
+                                    <span class="spark-stat-label">Personality Tag</span>
+                                    <span class="spark-stat-val" id="quiz-personality-tag">â€”</span>
+                                </div>
+                            </div>
+                            <button class="quiz-start-btn" id="quiz-ai-start-btn">
+                                <i data-lucide="sparkles"></i>
+                                <span>Start AI Diagnostic Quiz ðŸ§ </span>
+                            </button>
+                            <button class="quiz-restart-btn hidden" id="quiz-ai-restart-btn">
+                                <i data-lucide="rotate-ccw"></i>
+                                <span>Start New Session</span>
+                            </button>
+                        </div>
+
+                        <!-- Right: Conversational Chat Stream -->
+                        <div class="quiz-chat-card">
+                            <div class="quiz-chat-header">
+                                <div class="quiz-chat-title">
+                                    <i data-lucide="bot" class="text-violet"></i>
+                                    <h3>Kawanku AI Â· Emotion Blind Box</h3>
+                                </div>
+                                <span class="quiz-chat-badge" id="quiz-universe-badge">Awaiting Launch...</span>
+                            </div>
+                            <div class="quiz-chat-messages" id="quiz-chat-messages">
+                                <div class="quiz-welcome-msg">
+                                    <p>Welcome to your AI-powered clinical mental health check-in. ðŸ‘‹</p>
+                                    <p>This adaptive quiz constructs 10 personalized questions (1 for each core psychological aspect) dynamically adjusted to your current stress markers, heart rate, and logs. It uses a standard 4-point Likert scale to calculate a detailed diagnostic evaluation.</p>
+                                </div>
+                            </div>
+                            <div class="quiz-chat-options hidden" id="quiz-chat-options"></div>
+                            <div class="quiz-chat-input-bar">
+                                <textarea class="quiz-chat-input" id="quiz-chat-input" placeholder="Type your answer or pick an option above..." rows="1"></textarea>
+                                <button class="quiz-chat-send-btn" id="quiz-chat-send-btn">
+                                    <i data-lucide="send"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ============================================
+                     SPARK SHOP PANEL (Gemini-Powered)
+                     ============================================ -->
+                <section class="panel" id="shop-panel">
+                    <div class="shop-page-layout">
+                        <!-- Left: Product Shelf -->
+                        <div class="shop-shelf-card">
+                            <div class="shop-shelf-header">
+                                <h3>ðŸ›’ Kawan Spark Shop</h3>
+                                <div class="shop-week-tabs">
+                                    <button class="shop-week-tab active" data-week="1">Week 1</button>
+                                    <button class="shop-week-tab" data-week="2">Week 2</button>
+                                    <button class="shop-week-tab" data-week="3">Week 3</button>
+                                    <button class="shop-week-tab" data-week="4">Week 4</button>
+                                </div>
+                            </div>
+                            <div class="shop-balance-bar">
+                                <span>Your Sparks: ðŸ”¥ <strong id="shop-spark-balance">1</strong> days</span>
+                            </div>
+                            <div class="shop-items-grid" id="shop-items-grid">
+                                <!-- Items rendered by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Right: Shop Chat Stream -->
+                        <div class="shop-chat-card">
+                            <div class="shop-chat-header">
+                                <div class="shop-chat-title">
+                                    <i data-lucide="shopping-bag" class="text-amber"></i>
+                                    <h3>Kawanku AI Â· Shop Host</h3>
+                                </div>
+                            </div>
+                            <div class="shop-chat-messages" id="shop-chat-messages">
+                                <div class="shop-welcome-msg">
+                                    <p>Welcome to the Kawan Spark Shop! ðŸ›ï¸</p>
+                                    <p>Browse the weekly shelves on the left, or just tell me what you'd like. I'll check your spark balance and help you redeem items for your avatar!</p>
+                                </div>
+                            </div>
+                            <div class="shop-chat-input-bar">
+                                <textarea class="shop-chat-input" id="shop-chat-input" placeholder="Tell the shop host what you want..." rows="1"></textarea>
+                                <button class="shop-chat-send-btn" id="shop-chat-send-btn">
+                                    <i data-lucide="send"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Calm Hub Panel -->
+                <section class="panel" id="calm-panel">
+                    <div class="calm-layout">
+                        <!-- Audio Synthesizer mixer panel -->
+                        <div class="mixer-card">
+                            <div class="mixer-header">
+                                <h3>Sound Sanctuary</h3>
+                                <p>Direct browser-synthesized audio tones using the Web Audio API. Perfect for grounding during stress episodes.</p>
+                            </div>
+
+                            <div class="sound-mixer-list">
+                                <!-- Sound 1: Binaural Beat -->
+                                <div class="mixer-row">
+                                    <div class="mixer-sound-info">
+                                        <i data-lucide="audio-waveform" class="text-purple"></i>
+                                        <div>
+                                            <span class="sound-title">Binaural Calm Beats (432Hz)</span>
+                                            <span class="sound-desc">Encourages theta brainwaves for anxiety relief.</span>
+                                        </div>
+                                    </div>
+                                    <div class="mixer-controls">
+                                        <input type="range" class="volume-slider" id="vol-binaural" min="0" max="1" step="0.05" value="0.5">
+                                        <button class="synth-toggle-btn" id="btn-play-binaural">Play</button>
+                                    </div>
                                 </div>
                                 <div class="calendar-days-grid" id="calendar-days-grid">
                                     <!-- Populated dynamically via JS -->
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </section>
 
                         <!-- Right Panel: Day Details Detail Card -->
                         <div class="calendar-detail-card">
@@ -766,15 +960,118 @@
                                         <blockquote class="detail-snippet" id="calendar-detail-snippet">"This is a sample journal entry."</blockquote>
                                     </div>
                                 </div>
+                <!-- Games & Relaxation Panel -->
+                <section class="panel" id="games-panel">
+                    <div class="games-layout">
+
+                        <!-- 开心消消乐 Match-3 Game (full width) -->
+                        <div class="game-card game-card-full" id="card-match3">
+                            <div class="game-card-header">
+                                <div class="game-icon-title">
+                                    <span class="game-title-emoji">🍉</span>
+                                    <div>
+                                        <h3>开心消消乐 Happy Match-3</h3>
+                                        <p class="game-subtitle">Swap cute Malaysian fruits · No timer · No limits · Pure relaxation 🌴</p>
+                                    </div>
+                                </div>
+                                <span class="recommend-tag">KawanKu's Choice ⭐</span>
+                            </div>
+
+                            <!-- Start Screen with Comforting Rules Guide -->
+                            <div class="match3-start-screen" id="match3-start-action">
+                                <!-- Mascot Guide Message -->
+                                <div class="rules-mascot-row">
+                                    <div class="kawanku-robot-mini">
+                                        <div class="robot-antenna"></div>
+                                        <div class="robot-head">
+                                            <div class="robot-ears"></div>
+                                            <div class="robot-eyes">
+                                                <div class="eye"></div>
+                                                <div class="eye"></div>
+                                            </div>
+                                        </div>
+                                        <div class="robot-body">
+                                            <div class="robot-heart pulse-heart"></div>
+                                        </div>
+                                    </div>
+                                    <div class="rules-speech-bubble">
+                                        <p>Hey Kawan! Feel free to play this cozy matching game at your own pace. There is no score, no time limit, and no wrong moves. Let's relax together! 🤍</p>
+                                    </div>
+                                </div>
+
+                                <!-- Fruits Preview -->
+                                <div class="fruit-preview-row">
+                                    <div class="fruit-preview-item" title="Mangosteen 山竹"></div>
+                                    <div class="fruit-preview-item" title="Durian 榴莲"></div>
+                                    <div class="fruit-preview-item" title="Rambutan 红毛丹"></div>
+                                    <div class="fruit-preview-item" title="Banana 香蕉"></div>
+                                    <div class="fruit-preview-item" title="Mango 芒果"></div>
+                                </div>
+
+                                <!-- Visual Easy-to-Understand Rules -->
+                                <div class="simple-rules-card">
+                                    <h4 class="rules-title">🎮 How to Play (游戏规则)</h4>
+                                    <div class="rules-steps-grid">
+                                        <div class="step-item">
+                                            <span class="step-number">1</span>
+                                            <p class="step-text"><strong>选择水果 (Select)</strong><br>Click any cute fruit on the grid.</p>
+                                        </div>
+                                        <div class="step-item">
+                                            <span class="step-number">2</span>
+                                            <p class="step-text"><strong>交换对齐 (Swap)</strong><br>Click an adjacent neighbor fruit to swap.</p>
+                                        </div>
+                                        <div class="step-item">
+                                            <span class="step-number">3</span>
+                                            <p class="step-text"><strong>消除放松 (Match)</strong><br>Line up 3 same fruits to clear them!</p>
+                                        </div>
+                                    </div>
+                                    <div class="rules-features-list">
+                                        <span class="feature-tag">⏳ No Timer (无倒计时)</span>
+                                        <span class="feature-tag">💖 Infinite Turns (无限步数)</span>
+                                        <span class="feature-tag">🌴 100% Calming (纯粹放松)</span>
+                                    </div>
+                                </div>
+
+                                <button class="game-btn-primary" id="btn-start-match3">🎮 Start Playing!</button>
+                            </div>
+
+                            <!-- Active Match-3 Arena -->
+                            <div class="match3-arena hidden" id="match3-game-arena">
+                                <div class="match3-header">
+                                    <div class="progress-lbl">😌 Relaxation Progress</div>
+                                    <div class="match3-progress-bar">
+                                        <div class="progress-fill" id="match3-progress" style="width: 0%;"></div>
+                                    </div>
+                                    <span class="progress-value" id="match3-progress-val">0%</span>
+                                    <button class="game-btn-secondary" id="btn-quit-match3">✕ Quit</button>
+                                </div>
+                                <div class="match3-grid" id="match3-board"></div>
+                                <p class="match3-hint" id="match3-hint-text">Click a fruit, then click an adjacent fruit to swap them!</p>
                             </div>
                         </div>
+
+                        <!-- Post-Game Survey (inline, shown after win) -->
+                        <div class="survey-inline hidden" id="survey-inline">
+                            <div class="survey-inline-inner">
+                                <div class="survey-win-banner">🎊 Relaxation Complete! 🎊</div>
+                                <p class="survey-prompt" id="survey-robot-prompt">Hey Kawan, after playing this, how are you feeling now?</p>
+                                <div class="emoji-options-grid">
+                                    <button class="emoji-btn" data-mood="1"><span class="emoji">🌟</span><span class="emoji-label">Much Better</span></button>
+                                    <button class="emoji-btn" data-mood="2"><span class="emoji">😊</span><span class="emoji-label">Calmer</span></button>
+                                    <button class="emoji-btn" data-mood="3"><span class="emoji">😐</span><span class="emoji-label">Neutral</span></button>
+                                    <button class="emoji-btn" data-mood="4"><span class="emoji">😕</span><span class="emoji-label">Still Stressed</span></button>
+                                    <button class="emoji-btn" data-mood="5"><span class="emoji">😢</span><span class="emoji-label">Chat with AI</span></button>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </section>
             </div>
         </main>
     </div>
 
-    <!-- SOS Counselor Confirmation Modal Overlay (Globally accessibility) -->
+    <!-- SOS Counselor Confirmation Modal Overlay -->
     <div class="sos-modal-overlay hidden" id="sos-modal">
         <div class="sos-modal-card">
             <div class="sos-modal-header">
