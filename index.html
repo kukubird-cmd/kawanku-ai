@@ -49,10 +49,9 @@
                     <i data-lucide="activity"></i>
                     <span>Biometric Link</span>
                 </button>
-
-                <button class="nav-btn" data-target="mood-panel" id="nav-mood">
-                    <i data-lucide="calendar"></i>
-                    <span>Mood Calendar</span>
+                <button class="nav-btn" data-target="calm-panel" id="nav-calm">
+                    <i data-lucide="music"></i>
+                    <span>Calm Hub</span>
                 </button>
                 <button class="nav-btn" data-target="games-panel" id="nav-games">
                     <i data-lucide="gamepad-2"></i>
@@ -112,245 +111,220 @@
                             
                             <div class="avatar-viewport-container">
                                 <!-- Customizable SVG Avatar Container -->
-                                    <div class="avatar-viewport" id="chat-avatar-viewport">
-                                        <!-- Level 1 (z-index: 10) -> Backgrounds / Purchased Scenes -->
-                                        <svg class="avatar-layer" style="z-index: 10;" id="layer-bg" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
-                                            <defs>
-                                                <radialGradient id="floor-shadow" cx="50%" cy="50%" r="50%">
-                                                    <stop offset="0%" stop-color="#000" stop-opacity="0.25"/>
-                                                    <stop offset="100%" stop-color="#000" stop-opacity="0"/>
-                                                </radialGradient>
-                                                <linearGradient id="avatar-glow" x1="0%" y1="0%" x2="100%" y2="100%">
-                                                    <stop offset="0%" stop-color="var(--glow-color-1,#8b5cf6)"/>
-                                                    <stop offset="100%" stop-color="var(--glow-color-2,#ec4899)"/>
-                                                </linearGradient>
-                                            </defs>
-                                            <!-- Solid background fill (defaults to yellow, can be overridden by scene color) -->
-                                            <rect width="100%" height="100%" id="avatar-scene-bg" fill="#facc15"/>
-                                            <ellipse cx="150" cy="510" rx="100" ry="12" fill="url(#floor-shadow)"/>
-                                            <circle cx="150" cy="200" r="120" fill="url(#avatar-glow)" opacity="0.15" class="glow-pulse"/>
-                                            <!-- Custom scenes -->
-                                            <g id="scene-elements-starry" opacity="0">
-                                                <circle cx="40" cy="60" r="1.5" fill="#ffffff" />
-                                                <circle cx="80" cy="110" r="2" fill="#ffffff" />
-                                                <circle cx="220" cy="80" r="1.5" fill="#ffffff" />
-                                                <circle cx="260" cy="140" r="2.5" fill="#ffffff" />
-                                                <circle cx="140" cy="40" r="1" fill="#ffffff" />
-                                                <polygon points="30,30 32,35 37,35 33,38 35,43 30,40 25,43 27,38 23,35 28,35" fill="#fef08a" opacity="0.8"/>
-                                                <polygon points="240,50 242,55 247,55 243,58 245,63 240,60 235,63 237,58 233,55 238,55" fill="#fef08a" opacity="0.6"/>
+                                <div class="avatar-svg-container" id="avatar-container">
+                                    <svg id="mindbuddy-svg" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
+                                        <defs>
+                                            <radialGradient id="floor-shadow" cx="50%" cy="50%" r="50%">
+                                                <stop offset="0%" stop-color="#000" stop-opacity="0.25"/>
+                                                <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+                                            </radialGradient>
+                                            <linearGradient id="avatar-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" stop-color="var(--glow-color-1,#8b5cf6)"/>
+                                                <stop offset="100%" stop-color="var(--glow-color-2,#ec4899)"/>
+                                            </linearGradient>
+                                            <linearGradient id="shoe-grad-l" x1="0%" y1="0%" x2="0%" y2="100%">
+                                                <stop offset="0%" stop-color="#e2e8f0"/>
+                                                <stop offset="100%" stop-color="#94a3b8"/>
+                                            </linearGradient>
+                                            <linearGradient id="shoe-grad-r" x1="0%" y1="0%" x2="0%" y2="100%">
+                                                <stop offset="0%" stop-color="#e2e8f0"/>
+                                                <stop offset="100%" stop-color="#94a3b8"/>
+                                            </linearGradient>
+                                        </defs>
+
+                                        <!-- Background ambient glow -->
+                                        <ellipse cx="150" cy="510" rx="100" ry="12" fill="url(#floor-shadow)"/>
+                                        <circle cx="150" cy="200" r="120" fill="url(#avatar-glow)" opacity="0.1" class="glow-pulse"/>
+
+                                        <!-- Full-body character group with float animation -->
+                                        <g class="character-group">
+
+                                            <!-- ===================== LEGS ===================== -->
+                                            <!-- Shorts / Cargo Pants -->
+                                            <g id="avatar-pants">
+                                                <!-- Default: Shorts -->
+                                                <rect id="pants-left" x="103" y="330" width="38" height="72" rx="6" fill="#1e293b"/>
+                                                <rect id="pants-right" x="159" y="330" width="38" height="72" rx="6" fill="#1e293b"/>
+                                                <!-- Shorts hem detail lines -->
+                                                <line x1="103" y1="400" x2="141" y2="400" stroke="#0f172a" stroke-width="2" id="hem-left"/>
+                                                <line x1="159" y1="400" x2="197" y2="400" stroke="#0f172a" stroke-width="2" id="hem-right"/>
                                             </g>
-                                            <g id="scene-elements-zen" opacity="0">
-                                                <path d="M20,520 L35,0" stroke="#047857" stroke-width="4.5" fill="none" opacity="0.3"/>
-                                                <path d="M25,180 L40,165" stroke="#047857" stroke-width="2" fill="none" opacity="0.3"/>
-                                                <path d="M28,330 L43,315" stroke="#047857" stroke-width="2" fill="none" opacity="0.3"/>
-                                                <path d="M280,520 L265,0" stroke="#047857" stroke-width="5" fill="none" opacity="0.3"/>
-                                                <path d="M272,230 L257,215" stroke="#047857" stroke-width="2" fill="none" opacity="0.3"/>
-                                                <circle cx="150" cy="510" r="70" stroke="#e2e8f0" stroke-width="1.5" fill="none" stroke-dasharray="3,5" opacity="0.25"/>
-                                                <circle cx="150" cy="510" r="95" stroke="#e2e8f0" stroke-width="1.5" fill="none" stroke-dasharray="3,5" opacity="0.25"/>
+
+                                            <!-- SOCKS -->
+                                            <g id="avatar-socks">
+                                                <rect x="106" y="398" width="32" height="28" rx="4" fill="#f8fafc"/>
+                                                <rect x="162" y="398" width="32" height="28" rx="4" fill="#f8fafc"/>
+                                                <!-- Sock stripe -->
+                                                <rect x="106" y="405" width="32" height="4" rx="1" fill="#6366f1" opacity="0.7"/>
+                                                <rect x="162" y="405" width="32" height="4" rx="1" fill="#6366f1" opacity="0.7"/>
                                             </g>
-                                        </svg>
-                                        
-                                        <!-- Level 2 (z-index: 20) -> Back Hair / Back Equipment -->
-                                        <svg class="avatar-layer" style="z-index: 20;" id="layer-hair-back" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
+
+                                            <!-- SNEAKERS -->
+                                            <g id="avatar-shoes">
+                                                <!-- Left shoe -->
+                                                <ellipse cx="122" cy="432" rx="22" ry="10" fill="url(#shoe-grad-l)"/>
+                                                <rect x="100" y="422" width="44" height="12" rx="6" fill="url(#shoe-grad-l)"/>
+                                                <rect x="100" y="420" width="44" height="6" rx="3" fill="#ffffff" opacity="0.6"/>
+                                                <!-- Shoe sole -->
+                                                <rect x="99" y="430" width="46" height="5" rx="2" fill="#64748b"/>
+                                                <!-- Laces -->
+                                                <line x1="110" y1="424" x2="110" y2="430" stroke="#64748b" stroke-width="1.5"/>
+                                                <line x1="118" y1="422" x2="118" y2="430" stroke="#64748b" stroke-width="1.5"/>
+                                                <line x1="126" y1="422" x2="126" y2="430" stroke="#64748b" stroke-width="1.5"/>
+                                                <line x1="134" y1="424" x2="134" y2="430" stroke="#64748b" stroke-width="1.5"/>
+                                                <!-- Right shoe -->
+                                                <ellipse cx="178" cy="432" rx="22" ry="10" fill="url(#shoe-grad-r)"/>
+                                                <rect x="156" y="422" width="44" height="12" rx="6" fill="url(#shoe-grad-r)"/>
+                                                <rect x="156" y="420" width="44" height="6" rx="3" fill="#ffffff" opacity="0.6"/>
+                                                <rect x="155" y="430" width="46" height="5" rx="2" fill="#64748b"/>
+                                                <line x1="166" y1="424" x2="166" y2="430" stroke="#64748b" stroke-width="1.5"/>
+                                                <line x1="174" y1="422" x2="174" y2="430" stroke="#64748b" stroke-width="1.5"/>
+                                                <line x1="182" y1="422" x2="182" y2="430" stroke="#64748b" stroke-width="1.5"/>
+                                                <line x1="190" y1="424" x2="190" y2="430" stroke="#64748b" stroke-width="1.5"/>
+                                            </g>
+
+                                            <!-- ===================== TORSO / HOODIE ===================== -->
+                                            <!-- Main hoodie body -->
+                                            <path id="avatar-clothes" d="M85,200 C72,215 68,240 70,280 L70,340 L230,340 L230,280 C232,240 228,215 215,200 L195,192 L150,192 L105,200 Z" fill="#4f46e5"/>
+                                            <!-- Hood collar -->
+                                            <path id="avatar-hood" d="M105,200 C110,185 130,178 150,178 C170,178 190,185 195,200 L188,195 L150,195 L112,195 Z" fill="#3730a3"/>
+                                            <!-- Hoodie pocket -->
+                                            <rect x="118" y="285" width="64" height="35" rx="8" fill="#3730a3" opacity="0.7"/>
+                                            <!-- Drawstring -->
+                                            <line x1="138" y1="205" x2="132" y2="240" stroke="#c7d2fe" stroke-width="2" stroke-linecap="round"/>
+                                            <line x1="162" y1="205" x2="168" y2="240" stroke="#c7d2fe" stroke-width="2" stroke-linecap="round"/>
+                                            <!-- Drawstring ends -->
+                                            <circle cx="132" cy="243" r="4" fill="#c7d2fe"/>
+                                            <circle cx="168" cy="243" r="4" fill="#c7d2fe"/>
+
+                                            <!-- Chest Graphic Layer (swappable) -->
+                                            <!-- Pumpkin graphic -->
+                                            <g id="graphic-pumpkin" opacity="0">
+                                                <ellipse cx="150" cy="263" rx="18" ry="16" fill="#f97316"/>
+                                                <path d="M137,258 Q150,248 163,258" fill="none" stroke="#ea580c" stroke-width="1.5"/>
+                                                <!-- Eyes -->
+                                                <polygon points="141,261 144,256 147,261" fill="#fef08a"/>
+                                                <polygon points="153,261 156,256 159,261" fill="#fef08a"/>
+                                                <!-- Mouth -->
+                                                <path d="M140,267 Q145,273 150,270 Q155,273 160,267" fill="#fef08a" stroke="none"/>
+                                                <!-- Stem -->
+                                                <rect x="148" y="247" width="4" height="8" rx="2" fill="#16a34a"/>
+                                            </g>
+                                            <!-- Heart graphic -->
+                                            <g id="graphic-heart" opacity="0">
+                                                <path d="M150,278 C150,278 130,264 130,253 C130,246 136,242 143,245 C146,246 148,248 150,251 C152,248 154,246 157,245 C164,242 170,246 170,253 C170,264 150,278 150,278 Z" fill="#f43f5e"/>
+                                            </g>
+                                            <!-- Wave graphic -->
+                                            <g id="graphic-wave" opacity="0">
+                                                <path d="M130,260 Q138,252 146,260 Q154,268 162,260 Q170,252 178,260" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+                                                <path d="M130,270 Q138,262 146,270 Q154,278 162,270 Q170,262 178,270" fill="none" stroke="#7dd3fc" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+                                            </g>
+                                            <!-- Star graphic -->
+                                            <g id="graphic-star" opacity="1">
+                                                <polygon points="150,248 153,258 163,258 155,264 158,274 150,268 142,274 145,264 137,258 147,258" fill="#fbbf24"/>
+                                            </g>
+
+                                            <!-- ===================== ARMS (Thinking Pose) ===================== -->
+                                            <!-- Left arm (folded across chest) -->
+                                            <g id="avatar-left-arm">
+                                                <!-- Upper left arm -->
+                                                <path d="M85,210 C68,220 62,245 68,265 L90,265 C88,248 90,228 105,215 Z" fill="#4f46e5"/>
+                                                <!-- Forearm going right across -->
+                                                <path d="M68,255 C68,248 72,244 80,244 L170,244 C178,244 180,250 178,256 L80,258 C72,260 68,262 68,255 Z" fill="#4f46e5"/>
+                                                <!-- Left hand (fist) -->
+                                                <ellipse cx="175" cy="251" rx="14" ry="10" fill="#ffdbac" id="avatar-hand-l"/>
+                                                <!-- Knuckle hints -->
+                                                <line x1="167" y1="244" x2="167" y2="258" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
+                                                <line x1="173" y1="243" x2="173" y2="259" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
+                                                <line x1="179" y1="244" x2="179" y2="258" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
+                                            </g>
+                                            <!-- Right arm (elbow up, hand touching chin) -->
+                                            <g id="avatar-right-arm">
+                                                <!-- Upper right arm -->
+                                                <path d="M215,210 C230,222 234,245 228,268 L208,265 C212,248 210,228 195,215 Z" fill="#4f46e5"/>
+                                                <!-- Forearm going up to chin -->
+                                                <path d="M218,262 C222,258 224,248 220,235 L210,220 C205,212 200,210 196,214 L200,226 C204,238 208,252 208,265 Z" fill="#4f46e5"/>
+                                                <!-- Right hand at chin -->
+                                                <ellipse cx="207" cy="185" rx="13" ry="10" fill="#ffdbac" id="avatar-hand-r"/>
+                                                <line x1="200" y1="179" x2="200" y2="191" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
+                                                <line x1="206" y1="178" x2="206" y2="192" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
+                                                <line x1="212" y1="179" x2="212" y2="191" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
+                                            </g>
+
+                                            <!-- ===================== NECK ===================== -->
+                                            <rect id="avatar-neck" x="138" y="152" width="24" height="28" rx="8" fill="#ffdbac"/>
+
+                                            <!-- ===================== HEAD ===================== -->
+                                            <!-- Head base (slightly oval) -->
+                                            <ellipse id="avatar-head" cx="150" cy="110" rx="58" ry="62" fill="#ffdbac"/>
+
+                                            <!-- Ear left -->
+                                            <ellipse cx="93" cy="112" rx="10" ry="13" fill="#ffdbac" id="ear-l"/>
+                                            <ellipse cx="93" cy="112" rx="5" ry="8" fill="#e0a96d" opacity="0.5"/>
+                                            <!-- Ear right -->
+                                            <ellipse cx="207" cy="112" rx="10" ry="13" fill="#ffdbac" id="ear-r"/>
+                                            <ellipse cx="207" cy="112" rx="5" ry="8" fill="#e0a96d" opacity="0.5"/>
+
+                                            <!-- Hair back layer -->
                                             <path id="avatar-hair-back" d="" fill="var(--hair-color, #1e293b)"/>
-                                        </svg>
-                                        
-                                        <!-- Level 3 (z-index: 30) -> Base Body (Torso, Arms, Legs) -->
-                                        <svg class="avatar-layer" style="z-index: 30;" id="layer-body" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
-                                            <defs>
-                                                <linearGradient id="shoe-grad-l" x1="0%" y1="0%" x2="0%" y2="100%">
-                                                    <stop offset="0%" stop-color="#e2e8f0"/>
-                                                    <stop offset="100%" stop-color="#94a3b8"/>
-                                                </linearGradient>
-                                                <linearGradient id="shoe-grad-r" x1="0%" y1="0%" x2="0%" y2="100%">
-                                                    <stop offset="0%" stop-color="#e2e8f0"/>
-                                                    <stop offset="100%" stop-color="#94a3b8"/>
-                                                </linearGradient>
-                                            </defs>
-                                            <g class="character-group">
-                                                <g id="avatar-socks">
-                                                    <rect x="106" y="398" width="32" height="28" rx="4" fill="#f8fafc"/>
-                                                    <rect x="162" y="398" width="32" height="28" rx="4" fill="#f8fafc"/>
-                                                    <rect x="106" y="405" width="32" height="4" rx="1" fill="#6366f1" opacity="0.7"/>
-                                                    <rect x="162" y="405" width="32" height="4" rx="1" fill="#6366f1" opacity="0.7"/>
+
+                                            <!-- ===================== FACE FEATURES ===================== -->
+                                            <g id="avatar-face-features">
+                                                <!-- Eyebrows -->
+                                                <path id="left-brow" d="M118,88 Q130,83 140,88" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+                                                <path id="right-brow" d="M160,88 Q170,83 182,88" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+
+                                                <!-- Eyes -->
+                                                <g id="left-eye-group">
+                                                    <ellipse cx="130" cy="103" rx="10" ry="11" fill="#1e293b" class="avatar-eye"/>
+                                                    <circle cx="127" cy="99" r="3.5" fill="#ffffff"/>
+                                                    <circle cx="132" cy="107" r="2" fill="#ffffff" opacity="0.3"/>
                                                 </g>
-                                                <rect id="avatar-neck" x="138" y="152" width="24" height="28" rx="8" fill="#ffdbac"/>
-                                                <g id="avatar-left-arm">
-                                                    <path d="M85,210 C68,220 62,245 68,265 L90,265 C88,248 90,228 105,215 Z" fill="#4f46e5"/>
-                                                    <path d="M68,255 C68,248 72,244 80,244 L170,244 C178,244 180,250 178,256 L80,258 C72,260 68,262 68,255 Z" fill="#4f46e5"/>
-                                                    <ellipse cx="175" cy="251" rx="14" ry="10" fill="#ffdbac" id="avatar-hand-l"/>
-                                                    <line x1="167" y1="244" x2="167" y2="258" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
-                                                    <line x1="173" y1="243" x2="173" y2="259" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
-                                                    <line x1="179" y1="244" x2="179" y2="258" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
+                                                <g id="right-eye-group">
+                                                    <ellipse cx="170" cy="103" rx="10" ry="11" fill="#1e293b" class="avatar-eye"/>
+                                                    <circle cx="167" cy="99" r="3.5" fill="#ffffff"/>
+                                                    <circle cx="172" cy="107" r="2" fill="#ffffff" opacity="0.3"/>
                                                 </g>
-                                                <g id="avatar-right-arm">
-                                                    <path d="M215,210 C230,222 234,245 228,268 L208,265 C212,248 210,228 195,215 Z" fill="#4f46e5"/>
-                                                    <path d="M218,262 C222,258 224,248 220,235 L210,220 C205,212 200,210 196,214 L200,226 C204,238 208,252 208,265 Z" fill="#4f46e5"/>
-                                                    <ellipse cx="207" cy="185" rx="13" ry="10" fill="#ffdbac" id="avatar-hand-r"/>
-                                                    <line x1="200" y1="179" x2="200" y2="191" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
-                                                    <line x1="206" y1="178" x2="206" y2="192" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
-                                                    <line x1="212" y1="179" x2="212" y2="191" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
-                                                </g>
+
+                                                <!-- Blush cheeks -->
+                                                <ellipse cx="112" cy="122" rx="10" ry="7" fill="#f43f5e" opacity="0.25"/>
+                                                <ellipse cx="188" cy="122" rx="10" ry="7" fill="#f43f5e" opacity="0.25"/>
+
+                                                <!-- Nose -->
+                                                <path id="avatar-nose" d="M150,108 C148,116 145,120 143,122 C146,124 154,124 157,122 C155,120 152,116 150,108 Z" fill="#e0a96d" opacity="0.7"/>
+
+                                                <!-- Mouth (base smile) -->
+                                                <path id="avatar-mouth" d="M138,133 Q150,143 162,133" stroke="#1e293b" stroke-width="3" stroke-linecap="round" fill="none"/>
+                                                <!-- Teeth hint (shows on open smile / excited) -->
+                                                <path id="avatar-teeth" d="M140,134 Q150,140 160,134 L160,138 Q150,144 140,138 Z" fill="white" opacity="0"/>
                                             </g>
-                                        </svg>
-                                        
-                                        <!-- Level 4 (z-index: 40) -> Head & Neck Profile -->
-                                        <svg class="avatar-layer" style="z-index: 40;" id="layer-head-face" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
-                                            <g class="character-group">
-                                                <ellipse id="avatar-head" cx="150" cy="110" rx="58" ry="62" fill="#ffdbac"/>
-                                                <ellipse cx="93" cy="112" rx="10" ry="13" fill="#ffdbac" id="ear-l"/>
-                                                <ellipse cx="93" cy="112" rx="5" ry="8" fill="#e0a96d" opacity="0.5"/>
-                                                <ellipse cx="207" cy="112" rx="10" ry="13" fill="#ffdbac" id="ear-r"/>
-                                                <ellipse cx="207" cy="112" rx="5" ry="8" fill="#e0a96d" opacity="0.5"/>
-                                                
-                                                <g id="avatar-face-features">
-                                                    <path id="left-brow" d="M118,88 Q130,83 140,88" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-                                                    <path id="right-brow" d="M160,88 Q170,83 182,88" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-                                                    <g id="left-eye-group">
-                                                        <ellipse cx="130" cy="103" rx="10" ry="11" fill="#1e293b" class="avatar-eye"/>
-                                                        <circle cx="127" cy="99" r="3.5" fill="#ffffff"/>
-                                                        <circle cx="132" cy="107" r="2" fill="#ffffff" opacity="0.3"/>
-                                                    </g>
-                                                    <g id="right-eye-group">
-                                                        <ellipse cx="170" cy="103" rx="10" ry="11" fill="#1e293b" class="avatar-eye"/>
-                                                        <circle cx="167" cy="99" r="3.5" fill="#ffffff"/>
-                                                        <circle cx="172" cy="107" r="2" fill="#ffffff" opacity="0.3"/>
-                                                    </g>
-                                                    <ellipse cx="112" cy="122" rx="10" ry="7" fill="#f43f5e" opacity="0.25"/>
-                                                    <ellipse cx="188" cy="122" rx="10" ry="7" fill="#f43f5e" opacity="0.25"/>
-                                                    <path id="avatar-nose" d="M150,108 C148,116 145,120 143,122 C146,124 154,124 157,122 C155,120 152,116 150,108 Z" fill="#e0a96d" opacity="0.7"/>
-                                                    <path id="avatar-mouth" d="M138,133 Q150,143 162,133" stroke="#1e293b" stroke-width="3" stroke-linecap="round" fill="none"/>
-                                                    <path id="avatar-teeth" d="M140,134 Q150,140 160,134 L160,138 Q150,144 140,138 Z" fill="white" opacity="0"/>
-                                                </g>
-                                            </g>
-                                        </svg>
-                                        
-                                        <!-- Level 5 (z-index: 50) -> Purchased Clothes (Tops, Bottoms, Shoes) -->
-                                        <svg class="avatar-layer" style="z-index: 50;" id="layer-clothes" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
-                                            <g class="character-group">
-                                                <g id="avatar-pants">
-                                                    <rect id="pants-left" x="103" y="330" width="38" height="72" rx="6" fill="#1e293b"/>
-                                                    <rect id="pants-right" x="159" y="330" width="38" height="72" rx="6" fill="#1e293b"/>
-                                                    <line x1="103" y1="400" x2="141" y2="400" stroke="#0f172a" stroke-width="2" id="hem-left"/>
-                                                    <line x1="159" y1="400" x2="197" y2="400" stroke="#0f172a" stroke-width="2" id="hem-right"/>
-                                                </g>
-                                                <!-- Ripped Jeans white tear highlights -->
-                                                <g id="pants-rips" opacity="0">
-                                                    <line x1="110" y1="355" x2="134" y2="355" stroke="#ffffff" stroke-width="2" opacity="0.7"/>
-                                                    <line x1="112" y1="375" x2="132" y2="375" stroke="#ffffff" stroke-width="2" opacity="0.7"/>
-                                                    <line x1="166" y1="355" x2="190" y2="355" stroke="#ffffff" stroke-width="2" opacity="0.7"/>
-                                                    <line x1="168" y1="375" x2="188" y2="375" stroke="#ffffff" stroke-width="2" opacity="0.7"/>
-                                                </g>
-                                                <g id="avatar-shoes">
-                                                    <ellipse cx="122" cy="432" rx="22" ry="10" fill="url(#shoe-grad-l)"/>
-                                                    <rect x="100" y="422" width="44" height="12" rx="6" fill="url(#shoe-grad-l)"/>
-                                                    <rect x="100" y="420" width="44" height="6" rx="3" fill="#ffffff" opacity="0.6"/>
-                                                    <rect x="99" y="430" width="46" height="5" rx="2" fill="#64748b"/>
-                                                    <line x1="110" y1="424" x2="110" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                                    <line x1="118" y1="422" x2="118" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                                    <line x1="126" y1="422" x2="126" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                                    <line x1="134" y1="424" x2="134" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                                    <ellipse cx="178" cy="432" rx="22" ry="10" fill="url(#shoe-grad-r)"/>
-                                                    <rect x="156" y="422" width="44" height="12" rx="6" fill="url(#shoe-grad-r)"/>
-                                                    <rect x="156" y="420" width="44" height="6" rx="3" fill="#ffffff" opacity="0.6"/>
-                                                    <rect x="155" y="430" width="46" height="5" rx="2" fill="#64748b"/>
-                                                    <line x1="166" y1="424" x2="166" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                                    <line x1="174" y1="422" x2="174" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                                    <line x1="182" y1="422" x2="182" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                                    <line x1="190" y1="424" x2="190" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                                </g>
-                                                <!-- Tops -->
-                                                <path id="avatar-clothes" d="M85,200 C72,215 68,240 70,280 L70,340 L230,340 L230,280 C232,240 228,215 215,200 L195,192 L150,192 L105,200 Z" fill="#4f46e5"/>
-                                                <path id="avatar-hood" d="M105,200 C110,185 130,178 150,178 C170,178 190,185 195,200 L188,195 L150,195 L112,195 Z" fill="#3730a3"/>
-                                                <!-- Varsity Details -->
-                                                <g id="varsity-details" opacity="0">
-                                                    <line x1="150" y1="200" x2="150" y2="340" stroke="#ffffff" stroke-width="3" stroke-dasharray="8,8"/>
-                                                    <rect x="98" y="200" width="10" height="140" fill="#ffffff" opacity="0.25"/>
-                                                    <rect x="192" y="200" width="10" height="140" fill="#ffffff" opacity="0.25"/>
-                                                </g>
-                                                <!-- Cyber Armor Core -->
-                                                <g id="cyber-details" opacity="0">
-                                                    <circle cx="150" cy="270" r="14" fill="#06b6d4" filter="drop-shadow(0 0 6px #06b6d4)"/>
-                                                    <path d="M110,230 L150,250 L190,230" stroke="#06b6d4" stroke-width="3.5" fill="none" opacity="0.8"/>
-                                                </g>
-                                                <rect id="avatar-pocket" x="118" y="285" width="64" height="35" rx="8" fill="#3730a3" opacity="0.7"/>
-                                                <g id="avatar-drawstrings">
-                                                    <line x1="138" y1="205" x2="132" y2="240" stroke="#c7d2fe" stroke-width="2" stroke-linecap="round"/>
-                                                    <line x1="162" y1="205" x2="168" y2="240" stroke="#c7d2fe" stroke-width="2" stroke-linecap="round"/>
-                                                    <circle cx="132" cy="243" r="4" fill="#c7d2fe"/>
-                                                    <circle cx="168" cy="243" r="4" fill="#c7d2fe"/>
-                                                </g>
-                                                <!-- Graphic layers -->
-                                                <g id="graphic-pumpkin" opacity="0">
-                                                    <ellipse cx="150" cy="263" rx="18" ry="16" fill="#f97316"/>
-                                                    <path d="M137,258 Q150,248 163,258" fill="none" stroke="#ea580c" stroke-width="1.5"/>
-                                                    <polygon points="141,261 144,256 147,261" fill="#fef08a"/>
-                                                    <polygon points="153,261 156,256 159,261" fill="#fef08a"/>
-                                                    <path d="M140,267 Q145,273 150,270 Q155,273 160,267" fill="#fef08a" stroke="none"/>
-                                                    <rect x="148" y="247" width="4" height="8" rx="2" fill="#16a34a"/>
-                                                </g>
-                                                <g id="graphic-heart" opacity="0">
-                                                    <path d="M150,278 C150,278 130,264 130,253 C130,246 136,242 143,245 C146,246 148,248 150,251 C152,248 154,246 157,245 C164,242 170,246 170,253 C170,264 150,278 150,278 Z" fill="#f43f5e"/>
-                                                </g>
-                                                <g id="graphic-wave" opacity="0">
-                                                    <path d="M130,260 Q138,252 146,260 Q154,268 162,260 Q170,252 178,260" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
-                                                    <path d="M130,270 Q138,262 146,270 Q154,278 162,270 Q170,262 178,270" fill="none" stroke="#7dd3fc" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
-                                                </g>
-                                                <g id="graphic-star" opacity="1">
-                                                    <polygon points="150,248 153,258 163,258 155,264 158,274 150,268 142,274 145,264 137,258 147,258" fill="#fbbf24"/>
-                                                </g>
-                                            </g>
-                                        </svg>
-                                        
-                                        <!-- Level 6 (z-index: 60) -> Front Hair / Bangs -->
-                                        <svg class="avatar-layer" style="z-index: 60;" id="layer-hair-front" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
+
+                                            <!-- Hair front layer -->
                                             <path id="avatar-hair-front" d="M93,108 C93,50 207,50 207,108 C195,72 175,60 150,60 C125,60 105,72 93,108 Z" fill="var(--hair-color, #1e293b)"/>
-                                        </svg>
-                                        
-                                        <!-- Level 7 (z-index: 70) -> Purchased Accessories (Glasses/Specs, Hats, Masks) -->
-                                        <svg class="avatar-layer" style="z-index: 70;" id="layer-accessories" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
-                                            <g class="character-group">
-                                                <g id="avatar-glasses" opacity="0">
-                                                    <rect x="112" y="95" width="28" height="20" rx="6" stroke="#10b981" stroke-width="2.5" fill="rgba(16,185,129,0.08)"/>
-                                                    <rect x="160" y="95" width="28" height="20" rx="6" stroke="#10b981" stroke-width="2.5" fill="rgba(16,185,129,0.08)"/>
-                                                    <line x1="140" y1="105" x2="160" y2="105" stroke="#10b981" stroke-width="2"/>
-                                                    <line x1="93" y1="105" x2="112" y2="105" stroke="#10b981" stroke-width="2"/>
-                                                    <line x1="188" y1="105" x2="207" y2="105" stroke="#10b981" stroke-width="2"/>
-                                                </g>
-                                                <g id="avatar-accessories" opacity="0">
-                                                    <path d="M93,110 A57,57 0 0,1 207,110" stroke="#f59e0b" stroke-width="7" fill="none" stroke-linecap="round"/>
-                                                    <rect x="80" y="102" width="16" height="28" rx="8" fill="#f59e0b"/>
-                                                    <rect x="204" y="102" width="16" height="28" rx="8" fill="#f59e0b"/>
-                                                    <ellipse cx="88" cy="116" rx="4" ry="6" fill="#d97706"/>
-                                                    <ellipse cx="212" cy="116" rx="4" ry="6" fill="#d97706"/>
-                                                </g>
-                                                <!-- Cat Ears -->
-                                                <g id="avatar-catears" opacity="0">
-                                                    <path d="M112,62 L128,34 L138,50 Z" fill="#1e293b" id="ear-cat-l"/>
-                                                    <path d="M116,58 L126,38 L133,50 Z" fill="#f43f5e" opacity="0.6"/>
-                                                    <path d="M188,62 L172,34 L162,50 Z" fill="#1e293b" id="ear-cat-r"/>
-                                                    <path d="M184,58 L174,38 L167,50 Z" fill="#f43f5e" opacity="0.6"/>
-                                                </g>
-                                                <!-- VR Goggles -->
-                                                <g id="avatar-vrgoggles" opacity="0">
-                                                    <rect x="106" y="90" width="88" height="26" rx="6" fill="#1e293b"/>
-                                                    <rect x="110" y="94" width="80" height="18" rx="4" fill="#06b6d4" opacity="0.8" filter="drop-shadow(0 0 4px #06b6d4)"/>
-                                                    <line x1="93" y1="102" x2="106" y2="102" stroke="#1e293b" stroke-width="4"/>
-                                                    <line x1="194" y1="102" x2="207" y2="102" stroke="#1e293b" stroke-width="4"/>
-                                                </g>
-                                                <!-- Pet Companion -->
-                                                <g id="avatar-pet" opacity="0">
-                                                    <circle cx="55" cy="300" r="18" fill="#e2e8f0" id="pet-body"/>
-                                                    <circle cx="55" cy="285" r="12" fill="#e2e8f0" id="pet-head"/>
-                                                    <polygon points="45,278 48,270 52,276" fill="#e2e8f0" id="pet-ear-l"/>
-                                                    <polygon points="65,278 62,270 58,276" fill="#e2e8f0" id="pet-ear-r"/>
-                                                    <circle cx="51" cy="283" r="1.5" fill="#1e293b"/>
-                                                    <circle cx="59" cy="283" r="1.5" fill="#1e293b"/>
-                                                    <path d="M37,305 Q30,295 32,285" stroke="#e2e8f0" stroke-width="3" fill="none" stroke-linecap="round"/>
-                                                </g>
+
+                                            <!-- Glasses overlay -->
+                                            <g id="avatar-glasses" opacity="0">
+                                                <rect x="112" y="95" width="28" height="20" rx="6" stroke="#10b981" stroke-width="2.5" fill="rgba(16,185,129,0.08)"/>
+                                                <rect x="160" y="95" width="28" height="20" rx="6" stroke="#10b981" stroke-width="2.5" fill="rgba(16,185,129,0.08)"/>
+                                                <line x1="140" y1="105" x2="160" y2="105" stroke="#10b981" stroke-width="2"/>
+                                                <!-- Side arms -->
+                                                <line x1="93" y1="105" x2="112" y2="105" stroke="#10b981" stroke-width="2"/>
+                                                <line x1="188" y1="105" x2="207" y2="105" stroke="#10b981" stroke-width="2"/>
                                             </g>
-                                        </svg>
-                                    </div>
+
+                                            <!-- Headphone accessories -->
+                                            <g id="avatar-accessories" opacity="0">
+                                                <path d="M93,110 A57,57 0 0,1 207,110" stroke="#f59e0b" stroke-width="7" fill="none" stroke-linecap="round"/>
+                                                <rect x="80" y="102" width="16" height="28" rx="8" fill="#f59e0b"/>
+                                                <rect x="204" y="102" width="16" height="28" rx="8" fill="#f59e0b"/>
+                                                <!-- Speaker mesh -->
+                                                <ellipse cx="88" cy="116" rx="4" ry="6" fill="#d97706"/>
+                                                <ellipse cx="212" cy="116" rx="4" ry="6" fill="#d97706"/>
+                                            </g>
+
+                                        </g>
+                                    </svg>
+                                </div>
 
                                 <!-- Speech bubble display -->
                                 <div class="avatar-bubble" id="avatar-speech-bubble">
@@ -578,83 +552,41 @@
 
                         <!-- Right Panel: Design Board Column -->
                         <div class="studio-options-card">
-                            <div class="options-header">
-                                <div class="header-flex" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                                    <div>
-                                        <h3>Avatar Studio</h3>
-                                        <p>Style your companion or complete quiz challenges to earn Sparks.</p>
-                                    </div>
-                                    <div class="sparks-display-badge" style="display:flex; align-items:center; gap:8px; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.3); padding:8px 16px; border-radius:12px; font-weight:600; color:#f59e0b;">
-                                        <i data-lucide="sparkles"></i>
-                                        <span><strong id="sparks-balance-display">100</strong> Sparks</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Sub-Navigation Menu (Horizontal bar with exact categories) -->
-                            <div class="studio-sub-nav" style="display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin:20px 0; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:12px;">
-                                <button class="sub-nav-btn active" data-subnav="fashion">
+                            <!-- Sub-Navigation Menu -->
+                            <div class="customizer-subnav" id="customizer-subnav">
+                                <button class="subnav-item active" data-category="Fashion">
                                     <i data-lucide="shirt"></i>
                                     <span>Fashion</span>
                                 </button>
-                                <button class="sub-nav-btn" data-subnav="avatar">
-                                    <i data-lucide="user"></i>
-                                    <span>Avatar</span>
+                                <button class="subnav-item" data-category="Selfie">
+                                    <i data-lucide="smile"></i>
+                                    <span>Selfie</span>
                                 </button>
-                                <button class="sub-nav-btn" data-subnav="pet">
+                                <button class="subnav-item" data-category="Pet">
                                     <i data-lucide="dog"></i>
                                     <span>Pet</span>
                                 </button>
-                                <button class="sub-nav-btn" data-subnav="scene">
+                                <button class="subnav-item" data-category="Scene">
                                     <i data-lucide="image"></i>
                                     <span>Scene</span>
                                 </button>
-                                <button class="sub-nav-btn" data-subnav="selfie">
-                                    <i data-lucide="camera"></i>
-                                    <span>Selfie</span>
+                                <button class="subnav-item" data-category="Avatar">
+                                    <i data-lucide="user"></i>
+                                    <span>Avatar</span>
                                 </button>
                             </div>
 
-                            <div class="options-content" style="flex-grow:1; display:flex; flex-direction:column; gap:16px;">
-                                <h4 class="sheet-title" id="options-sheet-title" style="font-family:var(--font-heading); font-size:1.05rem; margin-bottom:8px; color:var(--color-text-muted);">Try a new look</h4>
-
-                                <!-- Category Grid Panels -->
-                                <div class="catalog-panel active" id="catalog-fashion">
-                                    <!-- Rendered dynamically by script -->
-                                </div>
-
-                                <div class="catalog-panel" id="catalog-avatar" style="display:none;">
-                                    <!-- Rendered dynamically by script -->
-                                </div>
-
-                                <div class="catalog-panel" id="catalog-pet" style="display:none;">
-                                    <!-- Rendered dynamically by script -->
-                                </div>
-
-                                <div class="catalog-panel" id="catalog-scene" style="display:none;">
-                                    <!-- Rendered dynamically by script -->
-                                </div>
-
-                                <div class="catalog-panel" id="catalog-selfie" style="display:none; flex-direction:column; gap:20px;">
-                                    <!-- Quiz section + snapshot section -->
-                                    <div class="quiz-section-card" style="background:rgba(255,255,255,0.02); border:1px solid var(--border-glass); padding:20px; border-radius:16px;">
-                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                                            <h4 style="font-family:var(--font-heading); font-size:1.1rem; color:white;">Daily Sparks Quiz Challenge</h4>
-                                            <span class="quiz-status-badge" id="quiz-status-msg" style="font-size:0.75rem; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); color:#10b981; padding:2px 8px; border-radius:12px;">Available</span>
-                                        </div>
-                                        <p style="font-size:0.85rem; color:var(--color-text-muted); margin-bottom:16px;">Complete these psychological resilience questions to earn extra Sparks and customize your companion.</p>
-                                        
-                                        <div id="quiz-container">
-                                            <!-- Dynamic Quiz Question -->
-                                        </div>
+                            <!-- Customization Bottom Sheet -->
+                            <div class="customizer-bottom-sheet">
+                                <h4>Try a new look</h4>
+                                <div class="sheet-content">
+                                    <!-- Dynamic Secondary subtabs (e.g. Tops / Bottoms / Shoes) -->
+                                    <div class="sheet-subtabs" id="customizer-subtabs">
+                                        <!-- Rendered dynamically by script -->
                                     </div>
-                                    
-                                    <div class="selfie-section-card" style="background:rgba(255,255,255,0.02); border:1px solid var(--border-glass); padding:20px; border-radius:16px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px;">
-                                        <h4 style="font-family:var(--font-heading); font-size:1.1rem; color:white;">Diary Projection Capture</h4>
-                                        <p style="font-size:0.85rem; color:var(--color-text-muted);">Snap a high-resolution projection photo of your companion to log this customized styling state into your mental health diary.</p>
-                                        <button class="select-btn active" id="btn-take-selfie" style="display:flex; align-items:center; gap:8px; width:fit-content; background:linear-gradient(135deg, var(--color-violet), #4f46e5); color:white; border:none; box-shadow:0 4px 14px rgba(139,92,246,0.3);">
-                                            <i data-lucide="aperture"></i> Capture Companion Selfie
-                                        </button>
+                                    <!-- Dynamic Grid view of catalog options -->
+                                    <div class="item-grid" id="customizer-item-grid">
+                                        <!-- Rendered dynamically by script -->
                                     </div>
                                 </div>
                             </div>
@@ -757,29 +689,6 @@
                     </div>
                 </section>
 
-
-
-                <!-- Student Psychological State & Mood Calendar Panel -->
-                <section class="panel" id="mood-panel">
-                    <div class="calendar-layout">
-                        <!-- Left Panel: Calendar Grid Card -->
-                        <div class="calendar-grid-card">
-                            <div class="calendar-card-header">
-                                <div>
-                                    <h3>Monthly Mood Grid</h3>
-                                    <p>Visualizing student emotional metrics on an HSL color spectrum with buoyant/heavy physical weights.</p>
-                                </div>
-                                <div class="calendar-legend">
-                                    <span class="legend-item"><span class="legend-dot calm"></span> Calm/Peaceful</span>
-                                    <span class="legend-item"><span class="legend-dot transitional"></span> Transitional</span>
-                                    <span class="legend-item"><span class="legend-dot stressed"></span> Stressed/Burnout</span>
-                                    <span class="legend-item"><span class="legend-dot missing"></span> No Log</span>
-                                </div>
-                            </div>
-                            
-                            <div class="calendar-grid-container">
-                                <div class="calendar-weekdays">
-                                    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
                 <!-- ============================================
                      EMOTION QUIZ PANEL (Gemini-Powered)
                      ============================================ -->
@@ -918,48 +827,41 @@
                                         <button class="synth-toggle-btn" id="btn-play-binaural">Play</button>
                                     </div>
                                 </div>
-                                <div class="calendar-days-grid" id="calendar-days-grid">
-                                    <!-- Populated dynamically via JS -->
+
+                                <!-- Sound 2: Rain Sound -->
+                                <div class="mixer-row">
+                                    <div class="mixer-sound-info">
+                                        <i data-lucide="cloud-rain" class="text-indigo"></i>
+                                        <div>
+                                            <span class="sound-title">Synthesized Pink Rain</span>
+                                            <span class="sound-desc">Continuous soothing white noise spectrum filter.</span>
+                                        </div>
+                                    </div>
+                                    <div class="mixer-controls">
+                                        <input type="range" class="volume-slider" id="vol-rain" min="0" max="1" step="0.05" value="0.5">
+                                        <button class="synth-toggle-btn" id="btn-play-rain">Play</button>
+                                    </div>
+                                </div>
+
+                                <!-- Sound 3: Zen Drone -->
+                                <div class="mixer-row">
+                                    <div class="mixer-sound-info">
+                                        <i data-lucide="music-4" class="text-mint"></i>
+                                        <div>
+                                            <span class="sound-title">Zen Meditation Drone</span>
+                                            <span class="sound-desc">Deep harmonic chord oscillations for grounding.</span>
+                                        </div>
+                                    </div>
+                                    <div class="mixer-controls">
+                                        <input type="range" class="volume-slider" id="vol-drone" min="0" max="1" step="0.05" value="0.5">
+                                        <button class="synth-toggle-btn" id="btn-play-drone">Play</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                        <!-- Right Panel: Day Details Detail Card -->
-                        <div class="calendar-detail-card">
-                            <div class="detail-card-header">
-                                <h3>Evaluation Details</h3>
-                                <span class="detail-badge" id="calendar-detail-badge">Day Inspect</span>
-                            </div>
-                            <div class="calendar-detail-content" id="calendar-detail-content">
-                                <div class="empty-detail-placeholder" id="calendar-empty-placeholder">
-                                    <i data-lucide="info"></i>
-                                    <p>Select any calendar day to inspect the detailed AI psychological evaluation, emotional score, and student journal snippet.</p>
-                                </div>
-                                <div class="active-detail-view hidden" id="calendar-active-detail">
-                                    <div class="detail-row date-row">
-                                        <span class="detail-lbl">Log Date</span>
-                                        <span class="detail-val" id="calendar-detail-date">2026-06-01</span>
-                                    </div>
-                                    <div class="detail-row state-row">
-                                        <span class="detail-lbl">Psychological State</span>
-                                        <span class="detail-val state-highlight" id="calendar-detail-state">Focused</span>
-                                    </div>
-                                    <div class="detail-row score-row">
-                                        <span class="detail-lbl">Emotional Score</span>
-                                        <div class="detail-score-meter">
-                                            <span class="detail-val" id="calendar-detail-score">0.15</span>
-                                            <div class="meter-bar-container">
-                                                <div class="meter-fill" id="calendar-detail-meter-fill" style="width: 15%"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="detail-row snippet-row">
-                                        <span class="detail-lbl">Journal Snippet</span>
-                                        <blockquote class="detail-snippet" id="calendar-detail-snippet">"This is a sample journal entry."</blockquote>
-                                    </div>
-                                </div>
                 <!-- Games & Relaxation Panel -->
                 <section class="panel" id="games-panel">
                     <div class="games-layout">
