@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    MINDBUDDY COMPANION CLIENT-SIDE LOGIC
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
@@ -4322,9 +4322,15 @@ Example format:
         const match3ProgressVal = document.getElementById('match3-progress-val');
         const btnStartMatch3    = document.getElementById('btn-start-match3');
         const btnQuitMatch3     = document.getElementById('btn-quit-match3');
+        const btnMatch3Tip      = document.getElementById('btn-match3-tip');
+        const tipBoxText        = document.getElementById('match3-tip-box-text');
         const surveyInline      = document.getElementById('survey-inline');
         const surveyPrompt      = document.getElementById('survey-robot-prompt');
         const hintText          = document.getElementById('match3-hint-text');
+        const btnWinReplay      = document.getElementById('btn-win-replay');
+        const btnWinSurvey      = document.getElementById('btn-win-survey');
+        const surveyMoodSection = document.getElementById('survey-mood-section');
+        const winChoicesRow     = document.getElementById('win-choices-row');
 
         // ── Fruit SVG tiles (cute, colourful, recognisable) ───────────────────
         const TILE_TYPES = [
@@ -4447,7 +4453,7 @@ Example format:
 
         // ── Game state ────────────────────────────────────────────────────────
         const ROWS = 6, COLS = 6;
-        const WIN_MATCHES = 10;
+        const WIN_MATCHES = 15;
         let board       = [];   // 2-D array of tile objects
         let selected    = null;
         let busy        = false;
@@ -4498,6 +4504,8 @@ Example format:
                     div.innerHTML = makeTileHTML(t);
                     div.dataset.row = r;
                     div.dataset.col = c;
+                    div.style.gridRowStart = r + 1;
+                    div.style.gridColumnStart = c + 1;
                     div.addEventListener('click', () => onTileClick(t));
                     t.el = div;
                     match3Board.appendChild(div);
@@ -4629,7 +4637,7 @@ Example format:
                         board[r+empty][c] = t;
                         board[r][c]       = null;
                         t.row             = r + empty;
-                        t.el.style.gridRowStart = t.row + 1;
+                        refreshTileEl(t); // Updates position and dataset properly
                     }
                 }
                 // fill empty from top
@@ -4662,6 +4670,86 @@ Example format:
             }
         }
 
+        // ── Hint Solver ──────────────────────────────────────────────────────
+        function findPossibleMoves() {
+            function checkMatchAt(r, c, typeId) {
+                // Check horizontal match
+                let horiz = 1;
+                let col = c - 1;
+                while (col >= 0 && board[r][col] && board[r][col].id === typeId) { horiz++; col--; }
+                col = c + 1;
+                while (col < COLS && board[r][col] && board[r][col].id === typeId) { horiz++; col++; }
+                if (horiz >= 3) return true;
+
+                // Check vertical match
+                let vert = 1;
+                let row = r - 1;
+                while (row >= 0 && board[row][c] && board[row][c].id === typeId) { vert++; row--; }
+                row = r + 1;
+                while (row < ROWS && board[row][c] && board[row][c].id === typeId) { vert++; row++; }
+                if (vert >= 3) return true;
+
+                return false;
+            }
+
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const current = board[r][c];
+                    if (!current) continue;
+
+                    // Try right swap
+                    if (c + 1 < COLS) {
+                        const right = board[r][c+1];
+                        if (right && current.id !== right.id) {
+                            if (checkMatchAt(r, c+1, current.id) || checkMatchAt(r, c, right.id)) {
+                                return { t1: current, t2: right };
+                            }
+                        }
+                    }
+                    // Try down swap
+                    if (r + 1 < ROWS) {
+                        const down = board[r+1][c];
+                        if (down && current.id !== down.id) {
+                            if (checkMatchAt(r+1, c, current.id) || checkMatchAt(r, c, down.id)) {
+                                return { t1: current, t2: down };
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        let hintActive = false;
+        async function showHint() {
+            if (busy || hintActive) return;
+            hintActive = true;
+            
+            const move = findPossibleMoves();
+            if (move) {
+                move.t1.el.classList.add('hint-glow');
+                move.t2.el.classList.add('hint-glow');
+                
+                if (tipBoxText) {
+                    tipBoxText.innerHTML = `Swap the <strong>${move.t1.name.split(' ')[0]}</strong> and <strong>${move.t2.name.split(' ')[0]}</strong>! ✨`;
+                }
+                
+                await sleep(2000);
+                if (move.t1 && move.t1.el) move.t1.el.classList.remove('hint-glow');
+                if (move.t2 && move.t2.el) move.t2.el.classList.remove('hint-glow');
+            } else {
+                if (tipBoxText) tipBoxText.textContent = "No matches left! Reshuffling board...";
+                showToast("No moves possible! Reshuffling board...", "info");
+                let tries = 0;
+                do {
+                    buildBoard();
+                    tries++;
+                } while (!findPossibleMoves() && tries < 10);
+                renderBoard();
+            }
+            hintActive = false;
+        }
+
         // ── Progress bar ──────────────────────────────────────────────────────
         function updateProgress() {
             const pct = Math.min(100, Math.round(score / WIN_MATCHES * 100));
@@ -4674,6 +4762,8 @@ Example format:
             match3GameArena.classList.add('hidden');
             match3StartAction.classList.add('hidden');
             surveyInline.classList.remove('hidden');
+            if (winChoicesRow) winChoicesRow.classList.remove('hidden');
+            if (surveyMoodSection) surveyMoodSection.classList.add('hidden');
             surveyInline.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
@@ -4697,6 +4787,7 @@ Example format:
             surveyInline.classList.add('hidden');
             match3GameArena.classList.remove('hidden');
             if (hintText) hintText.textContent = 'Click a fruit, then click an adjacent fruit to swap them!';
+            if (tipBoxText) tipBoxText.textContent = 'Take deep breaths while matching. Let the stress melt away.';
         }
 
         function quitGame() {
@@ -4723,6 +4814,18 @@ Example format:
             populateFruitPreview();
             if (btnStartMatch3) btnStartMatch3.addEventListener('click', startGame);
             if (btnQuitMatch3)  btnQuitMatch3.addEventListener('click', quitGame);
+            if (btnMatch3Tip)   btnMatch3Tip.addEventListener('click', showHint);
+            
+            if (btnWinReplay) {
+                btnWinReplay.addEventListener('click', startGame);
+            }
+            if (btnWinSurvey) {
+                btnWinSurvey.addEventListener('click', () => {
+                    if (winChoicesRow) winChoicesRow.classList.add('hidden');
+                    if (surveyMoodSection) surveyMoodSection.classList.remove('hidden');
+                });
+            }
+
             document.querySelectorAll('#survey-inline .emoji-btn').forEach(btn => {
                 btn.addEventListener('click', () => handleMood(btn.dataset.mood));
             });

@@ -932,12 +932,11 @@
                                         <span class="feature-tag">💖 Infinite Turns (无限步数)</span>
                                         <span class="feature-tag">🌴 100% Calming (纯粹放松)</span>
                                     </div>
+
+                                    <button class="game-btn-primary" id="btn-start-match3">🎮 Start Playing!</button>
                                 </div>
 
-                                <button class="game-btn-primary" id="btn-start-match3">🎮 Start Playing!</button>
-                            </div>
-
-                            <!-- Active Match-3 Arena -->
+                                <!-- Active Match-3 Arena -->
                             <div class="match3-arena hidden" id="match3-game-arena">
                                 <div class="match3-header">
                                     <div class="progress-lbl">😌 Relaxation Progress</div>
@@ -947,7 +946,22 @@
                                     <span class="progress-value" id="match3-progress-val">0%</span>
                                     <button class="game-btn-secondary" id="btn-quit-match3">✕ Quit</button>
                                 </div>
-                                <div class="match3-grid" id="match3-board"></div>
+                                
+                                <div class="match3-game-layout">
+                                    <div class="match3-grid" id="match3-board"></div>
+                                    
+                                    <!-- Sidebar with Cute Tips Button -->
+                                    <div class="match3-sidebar">
+                                        <button class="match3-tip-btn" id="btn-match3-tip" title="Get a hint!">
+                                            <span class="tip-icon">💡</span>
+                                            <span class="tip-text">Kawan's Tip</span>
+                                        </button>
+                                        <div class="tip-box">
+                                            <p class="tip-box-title">💡 Relaxation Tip:</p>
+                                            <p class="tip-box-desc" id="match3-tip-box-text">Take deep breaths while matching. Let the stress melt away.</p>
+                                        </div>
+                                    </div>
+                                </div>
                                 <p class="match3-hint" id="match3-hint-text">Click a fruit, then click an adjacent fruit to swap them!</p>
                             </div>
                         </div>
@@ -956,13 +970,21 @@
                         <div class="survey-inline hidden" id="survey-inline">
                             <div class="survey-inline-inner">
                                 <div class="survey-win-banner">🎊 Relaxation Complete! 🎊</div>
-                                <p class="survey-prompt" id="survey-robot-prompt">Hey Kawan, after playing this, how are you feeling now?</p>
-                                <div class="emoji-options-grid">
-                                    <button class="emoji-btn" data-mood="1"><span class="emoji">🌟</span><span class="emoji-label">Much Better</span></button>
-                                    <button class="emoji-btn" data-mood="2"><span class="emoji">😊</span><span class="emoji-label">Calmer</span></button>
-                                    <button class="emoji-btn" data-mood="3"><span class="emoji">😐</span><span class="emoji-label">Neutral</span></button>
-                                    <button class="emoji-btn" data-mood="4"><span class="emoji">😕</span><span class="emoji-label">Still Stressed</span></button>
-                                    <button class="emoji-btn" data-mood="5"><span class="emoji">😢</span><span class="emoji-label">Chat with AI</span></button>
+                                <p class="survey-prompt" id="survey-win-prompt">You've successfully filled your relaxation bar! What would you like to do next?</p>
+                                <div class="win-choices-row" id="win-choices-row">
+                                    <button class="game-btn-primary" id="btn-win-replay">🎮 Play Again (继续玩)</button>
+                                    <button class="game-btn-secondary" id="btn-win-survey">📝 Log Mood & Exit (退出并记录心情)</button>
+                                </div>
+                                
+                                <div class="survey-mood-section hidden" id="survey-mood-section">
+                                    <p class="survey-prompt" id="survey-robot-prompt">Hey Kawan, after playing this, how are you feeling now?</p>
+                                    <div class="emoji-options-grid">
+                                        <button class="emoji-btn" data-mood="1"><span class="emoji">🌟</span><span class="emoji-label">Much Better</span></button>
+                                        <button class="emoji-btn" data-mood="2"><span class="emoji">😊</span><span class="emoji-label">Calmer</span></button>
+                                        <button class="emoji-btn" data-mood="3"><span class="emoji">😐</span><span class="emoji-label">Neutral</span></button>
+                                        <button class="emoji-btn" data-mood="4"><span class="emoji">😕</span><span class="emoji-label">Still Stressed</span></button>
+                                        <button class="emoji-btn" data-mood="5"><span class="emoji">😢</span><span class="emoji-label">Chat with AI</span></button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

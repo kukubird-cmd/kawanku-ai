@@ -3716,5 +3716,117 @@ body {
     border-radius: 8px;
 }
 
+/* --- Match-3 Side Column & Tips styling --- */
+.match3-game-layout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+}
+
+.match3-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 160px;
+    align-items: center;
+}
+
+.match3-tip-btn {
+    background: radial-gradient(circle at top left, #fbbf24, #d97706);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 16px;
+    width: 100%;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.match3-tip-btn:hover {
+    transform: scale(1.06) translateY(-2px);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45);
+}
+
+.match3-tip-btn:active {
+    transform: scale(0.96);
+}
+
+.match3-tip-btn .tip-icon {
+    font-size: 2rem;
+    animation: bulbGlow 1.5s infinite alternate;
+}
+
+@keyframes bulbGlow {
+    from { filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.8)); }
+    to { filter: drop-shadow(0 0 12px #fef08a); }
+}
+
+.match3-tip-btn .tip-text {
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tip-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: var(--color-text-muted);
+    width: 100%;
+    text-align: left;
+}
+
+.tip-box-title {
+    font-weight: 700;
+    color: #fbd38d;
+    margin: 0 0 6px 0;
+}
+
+.tip-box-desc {
+    margin: 0;
+}
+
+/* Glow animation for highlighted hint tiles */
+@keyframes hintPulse {
+    0%, 100% { border-color: rgba(251, 191, 36, 0.4); box-shadow: 0 0 8px rgba(251, 191, 36, 0.3); }
+    50% { border-color: #fbbf24; box-shadow: 0 0 20px #fbbf24, inset 0 0 10px rgba(251, 191, 36, 0.2); transform: scale(1.04); }
+}
+
+.match3-tile.hint-glow {
+    animation: hintPulse 1s infinite ease-in-out;
+    z-index: 5;
+}
+
+/* Win Choices screen styling */
+.win-choices-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    margin-top: 12px;
+}
+
+.win-choices-row button {
+    flex: 1;
+    max-width: 220px;
+}
+
+.survey-mood-section {
+    width: 100%;
+    animation: surveySlideUp 0.4s ease-out;
+}
+
 .hidden { display: none !important; pointer-events: none !important; }
 
