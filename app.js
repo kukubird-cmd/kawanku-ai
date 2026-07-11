@@ -9,6 +9,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const state = {
         activePanel: 'chat-panel',
         
+        // Sparks Economy
+        sparks: 100,
+        inventory: [
+            'hair-crop', 'hair-curly', 'hair-bob', 'hair-bald',
+            'top-hoodie', 'top-tshirt', 'top-sweater',
+            'bottom-shorts', 'bottom-cargo', 'bottom-jogger',
+            'shoes-sneakers',
+            'acc-glasses-emerald', 'acc-glasses-gold', 'acc-glasses-none',
+            'acc-headphones-none',
+            'scene-yellow', 'pet-none'
+        ],
+
         // Avatar Configuration
         avatar: {
             hairStyle: 'crop',
@@ -19,6 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
             accessories: 'none',
             hoodieGraphic: 'star',
             pantsStyle: 'shorts',
+            shoesStyle: 'sneakers',
+            pet: 'none',
+            scene: 'yellow',
             hairColor: '#1e293b',
             shirtColor: '#4f46e5',
             glowColor1: '#8b5cf6',
@@ -48,15 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
             chartData: Array(50).fill(72) // Ring buffer for HR graph
         },
 
-        // Web Audio Synthesizer Nodes
-        synth: {
-            audioCtx: null,
-            mainGain: null,
-            // Individual sound instances
-            binaural: { leftOsc: null, rightOsc: null, gain: null, isPlaying: false },
-            rain: { source: null, gain: null, isPlaying: false },
-            drone: { osc1: null, osc2: null, osc3: null, lfo: null, lfoGain: null, gain: null, filter: null, isPlaying: false }
-        },
+
 
         // Rant Audio Recording Session
         rant: {
@@ -83,12 +90,12 @@ document.addEventListener('DOMContentLoaded', () => {
             animationFrame: null
         },
 
-        // Quiz State
-        quiz: {
-            activeCategory: 'general',
-            currentQuestionIdx: 0,
-            answers: [],
-            questions: []
+
+
+        // Mood Calendar State
+        calendar: {
+            selectedDate: null,
+            logs: []
         }
     };
 
@@ -112,6 +119,14 @@ document.addEventListener('DOMContentLoaded', () => {
             front: "M93,108 C93,50 207,50 207,108 C195,72 175,60 150,60 C125,60 105,72 93,108 Z",
             back: "M86,100 L78,230 C76,265 100,278 115,255 L118,165 Z M214,100 L222,230 C224,265 200,278 185,255 L182,165 Z"
         },
+        mohawk: {
+            front: "M132,55 L150,22 L168,55 L164,72 L150,67 L136,72 Z",
+            back: "M142,50 L150,18 L158,50 Z"
+        },
+        spacebuns: {
+            front: "M93,108 C93,50 207,50 207,108 C195,72 175,60 150,60 C125,60 105,72 93,108 Z M90,55 C82,30 65,45 80,68 Z M210,55 C218,30 235,45 220,68 Z",
+            back: ""
+        },
         bald: {
             front: "",
             back: ""
@@ -121,7 +136,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const SVG_SHIRTS = {
         hoodie: "M85,200 C72,215 68,240 70,280 L70,340 L230,340 L230,280 C232,240 228,215 215,200 L195,192 L150,192 L105,200 Z",
         tshirt: "M90,200 C78,212 75,235 76,280 L76,340 L224,340 L224,280 C225,235 222,212 210,200 L195,196 L150,196 L105,196 Z",
-        sweater: "M82,198 C68,215 65,242 67,282 L67,340 L233,340 L233,282 C235,242 232,215 218,198 L195,190 L150,190 L105,190 Z"
+        sweater: "M82,198 C68,215 65,242 67,282 L67,340 L233,340 L233,282 C235,242 232,215 218,198 L195,190 L150,190 L105,190 Z",
+        varsity: "M85,200 C72,215 68,240 70,280 L70,340 L230,340 L230,280 C232,240 228,215 215,200 L195,192 L150,192 L105,200 Z",
+        armor: "M82,198 C68,215 65,242 67,282 L67,340 L233,340 L233,282 C235,242 232,215 218,198 L195,190 L150,190 L105,190 Z"
     };
 
     const SVG_PANTS = {
@@ -233,28 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
         anomalyDesc: document.getElementById('anomaly-banner-desc'),
         iotSyncStatus: document.getElementById('iot-sync-status'),
 
-        // Calm Hub Mixer
-        volBinaural: document.getElementById('vol-binaural'),
-        volRain: document.getElementById('vol-rain'),
-        volDrone: document.getElementById('vol-drone'),
-        btnBinaural: document.getElementById('btn-play-binaural'),
-        btnRain: document.getElementById('btn-play-rain'),
-        btnDrone: document.getElementById('btn-play-drone'),
-        
-        // Calm Hub Quiz
-        quizBox: document.getElementById('quiz-box'),
-        quizIntroState: document.getElementById('quiz-intro-state'),
-        quizActiveState: document.getElementById('quiz-active-state'),
-        quizResultsState: document.getElementById('quiz-results-state'),
-        quizRecBadge: document.getElementById('quiz-rec-badge'),
-        quizRecTitle: document.getElementById('quiz-rec-title'),
-        quizStartBtn: document.getElementById('quiz-start-btn'),
-        quizQuestionTitle: document.getElementById('quiz-question-title'),
-        quizOptionsContainer: document.getElementById('quiz-options-container'),
-        quizQCounter: document.getElementById('quiz-q-counter'),
-        quizProgressFill: document.getElementById('quiz-progress-fill'),
-        quizResultFeedback: document.getElementById('quiz-result-feedback'),
-        quizRestartBtn: document.getElementById('quiz-restart-btn'),
+
 
         // SOS modal
         sosModal: document.getElementById('sos-modal'),
@@ -266,28 +262,45 @@ document.addEventListener('DOMContentLoaded', () => {
         sosPreviewSentiment: document.getElementById('sos-preview-sentiment'),
         sosPreviewHR: document.getElementById('sos-preview-hr'),
         sosPreviewRant: document.getElementById('sos-preview-rant'),
-        toastContainer: document.getElementById('toast-container')
+        toastContainer: document.getElementById('toast-container'),
+
+        // Mood Calendar
+        calendarDaysGrid: document.getElementById('calendar-days-grid'),
+        calendarDetailBadge: document.getElementById('calendar-detail-badge'),
+        calendarEmptyPlaceholder: document.getElementById('calendar-empty-placeholder'),
+        calendarActiveDetail: document.getElementById('calendar-active-detail'),
+        calendarDetailDate: document.getElementById('calendar-detail-date'),
+        calendarDetailState: document.getElementById('calendar-detail-state'),
+        calendarDetailScore: document.getElementById('calendar-detail-score'),
+        calendarDetailMeterFill: document.getElementById('calendar-detail-meter-fill'),
+        calendarDetailSnippet: document.getElementById('calendar-detail-snippet')
     };
 
     // ----------------------------------------------------------------------
     // INITIALIZATION & TAB NAVIGATION
     // ----------------------------------------------------------------------
     function init() {
-        // Clone the main SVG into the studio preview container
-        const mainSVG = document.getElementById('mindbuddy-svg');
+        // Initialize Mock Calendar Data
+        state.calendar.logs = generateMockCalendarData();
+
+        // Clone the multi-layered avatar viewport into the studio preview container
+        const chatViewport = document.getElementById('chat-avatar-viewport');
         const studioContainer = document.getElementById('studio-avatar-container');
-        if (mainSVG && studioContainer) {
-            const clonedSVG = mainSVG.cloneNode(true);
-            clonedSVG.id = 'mindbuddy-studio-svg';
-            // Remap all IDs with a -studio suffix so both SVGs can coexist
-            clonedSVG.querySelectorAll('[id]').forEach(el => {
+        if (chatViewport && studioContainer) {
+            const clonedViewport = chatViewport.cloneNode(true);
+            clonedViewport.id = 'studio-avatar-viewport';
+            // Remap all IDs with -studio suffix so both viewports can coexist
+            clonedViewport.querySelectorAll('[id]').forEach(el => {
                 el.id = el.id + '-studio';
             });
-            studioContainer.appendChild(clonedSVG);
+            studioContainer.appendChild(clonedViewport);
         }
 
-        // Init SVG layout components
+        // Init all avatar layers and render sparks display
         renderAvatarVisuals();
+        updateSparksDisplay();
+        renderAllCatalogPanels();
+        renderDailyQuiz();
         
         // Hook up Sidebar Nav links
         DOM.navBtns.forEach(btn => {
@@ -309,6 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Bind events
         bindUIEvents();
+        bindSubNavEvents();
     }
 
     function switchPanel(panelId) {
@@ -331,10 +345,11 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (panelId === 'bio-panel') {
             DOM.headerTitle.innerText = "Biometric IoT Link Monitor";
             DOM.headerSubtitle.innerText = "Review smartwatch tracking parameters synced to stress evaluators.";
-        } else if (panelId === 'calm-panel') {
-            DOM.headerTitle.innerText = "Calm Sanctuary & Healing Soundscapes";
-            DOM.headerSubtitle.innerText = "Access synthesizers and mindfulness check-in quizzes.";
-            updateQuizRecommendation();
+
+        } else if (panelId === 'mood-panel') {
+            DOM.headerTitle.innerText = "Student Psychological State & Mood Calendar";
+            DOM.headerSubtitle.innerText = "A 7x4 vertical monthly mood calendar mapping student emotional logs.";
+            renderMoodCalendar();
         }
     }
 
@@ -361,87 +376,101 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------------------------
-    // AVATAR RENDERER (SVG MODIFICATION)
+    // AVATAR RENDERER (MULTI-LAYER SVG SYSTEM)
     // ----------------------------------------------------------------------
-    // Helper to apply props to a single SVG root element
-    function applyAvatarToSVG(svg, conf) {
-        if (!svg) return;
+    // Returns a querySelector scope for a given viewport prefix ("", "-studio")
+    function getViewportScope(suffix) {
+        const viewportId = suffix ? 'studio-avatar-viewport' : 'chat-avatar-viewport';
+        return document.getElementById(viewportId);
+    }
+
+    // Returns an element by ID within the correct viewport scope
+    function getLayerEl(viewport, id) {
+        if (!viewport) return null;
+        // Studio viewports have -studio suffix on all IDs
+        const suffix = viewport.id === 'studio-avatar-viewport' ? '-studio' : '';
+        return viewport.querySelector('#' + id + suffix);
+    }
+
+    // Helper to apply props to a single avatar viewport (new layered system)
+    function applyAvatarToViewport(viewport, conf) {
+        if (!viewport) return;
+
+        // q() — querySelector with auto-suffix for studio viewport
+        const q = (id) => getLayerEl(viewport, id);
 
         // ---- Skin tone propagation ----
-        const skinEls = ['avatar-head', 'avatar-neck', 'avatar-hand-l', 'avatar-hand-r', 'ear-l', 'ear-r'];
-        skinEls.forEach(id => {
-            const el = svg.querySelector('#' + id);
+        ['avatar-head', 'avatar-neck', 'avatar-hand-l', 'avatar-hand-r', 'ear-l', 'ear-r'].forEach(id => {
+            const el = q(id);
             if (el) el.setAttribute('fill', conf.skinTone);
         });
-        // Ears inner + nose + blush
-        const noseEl = svg.querySelector('#avatar-nose');
-        if (noseEl) {
-            // derive a slightly darker shade for nose/ear shading
-            noseEl.setAttribute('fill', shadeColor(conf.skinTone, -20));
-        }
+        const noseEl = q('avatar-nose');
+        if (noseEl) noseEl.setAttribute('fill', shadeColor(conf.skinTone, -20));
 
         // ---- Hair ----
-        const hairFront = svg.querySelector('#avatar-hair-front');
-        const hairBack  = svg.querySelector('#avatar-hair-back');
-        const hairPaths = SVG_HAIRSTYLES[conf.hairStyle];
-        if (hairFront && hairPaths) hairFront.setAttribute('d', hairPaths.front);
-        if (hairBack  && hairPaths) hairBack.setAttribute('d',  hairPaths.back);
-        // Apply hair color via attribute (CSS variable fallback also works)
-        if (hairFront) hairFront.setAttribute('fill', conf.hairColor);
-        if (hairBack)  hairBack.setAttribute('fill',  conf.hairColor);
-        const leftBrowEl  = svg.querySelector('#left-brow');
-        const rightBrowEl = svg.querySelector('#right-brow');
+        const hairFront = q('avatar-hair-front');
+        const hairBack  = q('avatar-hair-back');
+        const hairPaths = SVG_HAIRSTYLES[conf.hairStyle] || SVG_HAIRSTYLES.crop;
+        if (hairFront) { hairFront.setAttribute('d', hairPaths.front); hairFront.setAttribute('fill', conf.hairColor); }
+        if (hairBack)  { hairBack.setAttribute('d',  hairPaths.back);  hairBack.setAttribute('fill',  conf.hairColor); }
+        const leftBrowEl  = q('left-brow');
+        const rightBrowEl = q('right-brow');
         if (leftBrowEl)  leftBrowEl.setAttribute('stroke', conf.hairColor);
         if (rightBrowEl) rightBrowEl.setAttribute('stroke', conf.hairColor);
 
         // ---- Shirt / Hoodie ----
-        const clothes = svg.querySelector('#avatar-clothes');
-        const hood    = svg.querySelector('#avatar-hood');
+        const clothes  = q('avatar-clothes');
+        const hood     = q('avatar-hood');
+        const pocket   = q('avatar-pocket');
         const shirtPath = SVG_SHIRTS[conf.shirtStyle || 'hoodie'];
-        if (clothes && shirtPath) clothes.setAttribute('d', shirtPath);
-        if (clothes) clothes.setAttribute('fill', conf.shirtColor);
+        if (clothes) { if (shirtPath) clothes.setAttribute('d', shirtPath); clothes.setAttribute('fill', conf.shirtColor); }
+        if (hood)    hood.setAttribute('fill', shadeColor(conf.shirtColor, -30));
+        if (pocket)  pocket.setAttribute('fill', shadeColor(conf.shirtColor, -30));
 
-        // Arms must match shirt color
-        svg.querySelectorAll('#avatar-left-arm path, #avatar-right-arm path').forEach(el => {
+        // Arms must match shirt color (uses broader viewport querySelectorAll)
+        viewport.querySelectorAll('[id$="avatar-left-arm"] path, [id$="avatar-right-arm"] path').forEach(el => {
             el.setAttribute('fill', conf.shirtColor);
         });
-        // Hood slightly darker
-        if (hood) hood.setAttribute('fill', shadeColor(conf.shirtColor, -30));
 
-        // Pocket
-        const pocket = svg.querySelector('rect[rx="8"][y="285"]');
-        if (pocket) pocket.setAttribute('fill', shadeColor(conf.shirtColor, -30));
+        // Varsity / Cyber detail overlays
+        const varsity = q('varsity-details');
+        const cyber   = q('cyber-details');
+        if (varsity) varsity.setAttribute('opacity', conf.shirtStyle === 'varsity' ? '1' : '0');
+        if (cyber)   cyber.setAttribute('opacity',   conf.shirtStyle === 'armor'   ? '1' : '0');
+
+        // Drawstring visibility (hide on non-hoodie tops)
+        const ds = q('avatar-drawstrings');
+        if (ds) ds.setAttribute('opacity', conf.shirtStyle === 'hoodie' ? '1' : '0');
 
         // ---- Hoodie Chest Graphic ----
-        const allGraphics = ['graphic-pumpkin', 'graphic-heart', 'graphic-wave', 'graphic-star'];
-        allGraphics.forEach(gid => {
-            const g = svg.querySelector('#' + gid);
+        ['graphic-pumpkin','graphic-heart','graphic-wave','graphic-star'].forEach(gid => {
+            const g = q(gid);
             if (g) g.setAttribute('opacity', (conf.hoodieGraphic && gid === 'graphic-' + conf.hoodieGraphic) ? '1' : '0');
         });
 
         // ---- Pants ----
         const pantsSizes = SVG_PANTS[conf.pantsStyle || 'shorts'];
-        const pantsLeft  = svg.querySelector('#pants-left');
-        const pantsRight = svg.querySelector('#pants-right');
-        const hemLeft    = svg.querySelector('#hem-left');
-        const hemRight   = svg.querySelector('#hem-right');
+        const pantsLeft  = q('pants-left');
+        const pantsRight = q('pants-right');
+        const hemLeft    = q('hem-left');
+        const hemRight   = q('hem-right');
+        const rips       = q('pants-rips');
         if (pantsLeft && pantsRight && pantsSizes) {
-            pantsLeft.setAttribute('height', pantsSizes.leftH);
+            pantsLeft.setAttribute('height',  pantsSizes.leftH);
             pantsRight.setAttribute('height', pantsSizes.rightH);
-            // Hide shorts hem lines for long pants
             const showHem = conf.pantsStyle === 'shorts';
             if (hemLeft)  hemLeft.setAttribute('opacity',  showHem ? '1' : '0');
             if (hemRight) hemRight.setAttribute('opacity', showHem ? '1' : '0');
-            // cargo color is khaki, jogger is grey
             let pantsColor = '#1e293b';
-            if (conf.pantsStyle === 'cargo') pantsColor = '#78716c';
+            if (conf.pantsStyle === 'cargo')  pantsColor = '#78716c';
             if (conf.pantsStyle === 'jogger') pantsColor = '#374151';
             pantsLeft.setAttribute('fill',  pantsColor);
             pantsRight.setAttribute('fill', pantsColor);
         }
+        if (rips) rips.setAttribute('opacity', conf.pantsStyle === 'ripped' ? '1' : '0');
 
         // ---- Glasses ----
-        const glasses = svg.querySelector('#avatar-glasses');
+        const glasses = q('avatar-glasses');
         if (glasses) {
             if (conf.glasses === 'none') {
                 glasses.setAttribute('opacity', '0');
@@ -457,26 +486,51 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // ---- Headphone Accessories ----
-        const accs = svg.querySelector('#avatar-accessories');
-        if (accs) accs.setAttribute('opacity', conf.accessories === 'headphones' ? '1' : '0');
+        // ---- Accessories ----
+        const accs      = q('avatar-accessories');
+        const catears   = q('avatar-catears');
+        const vrgoggles = q('avatar-vrgoggles');
+        if (accs)      accs.setAttribute('opacity',      conf.accessories === 'headphones' ? '1' : '0');
+        if (catears)   catears.setAttribute('opacity',   conf.accessories === 'catears'    ? '1' : '0');
+        if (vrgoggles) vrgoggles.setAttribute('opacity', conf.accessories === 'vrgoggles'  ? '1' : '0');
+
+        // ---- Pet Companion ----
+        const pet = q('avatar-pet');
+        if (pet) pet.setAttribute('opacity', conf.pet === 'cat' ? '1' : '0');
+
+        // ---- Scene / Background ----
+        const sceneMap = {
+            yellow: { fill: '#facc15', starry: '0', zen: '0' },
+            purple: { fill: '#7c3aed', starry: '0', zen: '0' },
+            sky:    { fill: '#0ea5e9', starry: '0', zen: '0' },
+            starry: { fill: '#0f172a', starry: '1', zen: '0' },
+            zen:    { fill: '#d1fae5', starry: '0', zen: '1' }
+        };
+        const scene = sceneMap[conf.scene] || sceneMap.yellow;
+        const sceneBg   = q('avatar-scene-bg');
+        const starryEl  = q('scene-elements-starry');
+        const zenEl     = q('scene-elements-zen');
+        if (sceneBg)  sceneBg.setAttribute('fill', scene.fill);
+        viewport.style.backgroundColor = scene.fill;
+        if (starryEl) starryEl.setAttribute('opacity', scene.starry);
+        if (zenEl)    zenEl.setAttribute('opacity',    scene.zen);
 
         // ---- Expression / Face ----
-        const leftBrow  = svg.querySelector('#left-brow');
-        const rightBrow = svg.querySelector('#right-brow');
-        const mouth     = svg.querySelector('#avatar-mouth');
-        const teeth     = svg.querySelector('#avatar-teeth');
+        const leftBrow  = q('left-brow');
+        const rightBrow = q('right-brow');
+        const mouth     = q('avatar-mouth');
+        const teeth     = q('avatar-teeth');
         const exp = SVG_EXPRESSIONS[conf.expression] || SVG_EXPRESSIONS.friendly;
         if (leftBrow)  leftBrow.setAttribute('d', exp.leftBrow);
         if (rightBrow) rightBrow.setAttribute('d', exp.rightBrow);
-        if (mouth && !svg.classList.contains('speaking-now')) {
-            mouth.setAttribute('d', exp.mouth);
-        }
+        if (mouth && !viewport.classList.contains('speaking-now')) mouth.setAttribute('d', exp.mouth);
         if (teeth) teeth.setAttribute('opacity', exp.teethOpacity || 0);
 
-        // ---- Glow colors via CSS variables on the SVG ----
-        svg.style.setProperty('--glow-color-1', conf.glowColor1);
-        svg.style.setProperty('--glow-color-2', conf.glowColor2);
+        // ---- Glow colors via CSS variables on each SVG layer ----
+        viewport.querySelectorAll('svg').forEach(svg => {
+            svg.style.setProperty('--glow-color-1', conf.glowColor1);
+            svg.style.setProperty('--glow-color-2', conf.glowColor2);
+        });
     }
 
     function shadeColor(hex, amount) {
@@ -493,42 +547,37 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderAvatarVisuals() {
         const conf = state.avatar;
 
-        // Update root CSS variables for CSS-driven color props
-        document.documentElement.style.setProperty('--hair-color', conf.hairColor);
-        document.documentElement.style.setProperty('--shirt-color', conf.shirtColor);
+        // Update root CSS custom properties
+        document.documentElement.style.setProperty('--hair-color',   conf.hairColor);
+        document.documentElement.style.setProperty('--shirt-color',  conf.shirtColor);
         document.documentElement.style.setProperty('--glow-color-1', conf.glowColor1);
         document.documentElement.style.setProperty('--glow-color-2', conf.glowColor2);
 
-        // Apply to both the main chat avatar and the studio preview
-        const mainSVG   = document.getElementById('mindbuddy-svg');
-        const studioSVG = document.getElementById('mindbuddy-studio-svg');
-        applyAvatarToSVG(mainSVG, conf);
-        applyAvatarToSVG(studioSVG, conf);
+        // Apply to both layered viewports
+        const chatViewport   = document.getElementById('chat-avatar-viewport');
+        const studioViewport = document.getElementById('studio-avatar-viewport');
+        applyAvatarToViewport(chatViewport,   conf);
+        applyAvatarToViewport(studioViewport, conf);
 
-        // Update expression badge label
-        DOM.avatarExpressionLabel.innerText = conf.expression.charAt(0).toUpperCase() + conf.expression.slice(1);
-
-        // Expression class for CSS targeting
-        [mainSVG, studioSVG].forEach(svg => {
-            if (!svg) return;
-            svg.classList.remove('expression-friendly', 'expression-thoughtful', 'expression-attentive', 'expression-excited');
-            svg.classList.add('expression-' + conf.expression);
-        });
+        // Update expression badge label in sidebar
+        if (DOM.avatarExpressionLabel) {
+            DOM.avatarExpressionLabel.innerText = conf.expression.charAt(0).toUpperCase() + conf.expression.slice(1);
+        }
     }
 
-    // Dynamic speaking controls — targets both SVGs by ID
+    // Dynamic speaking controls — targets both viewports
     let mouthAnimationTimer = null;
     function triggerAvatarSpeechSpeak(durationMs) {
-        ['mindbuddy-svg', 'mindbuddy-studio-svg'].forEach(id => {
-            const svg = document.getElementById(id);
-            if (svg) svg.classList.add('speaking-now');
+        ['chat-avatar-viewport', 'studio-avatar-viewport'].forEach(id => {
+            const vp = document.getElementById(id);
+            if (vp) vp.classList.add('speaking-now');
         });
 
         if (mouthAnimationTimer) clearTimeout(mouthAnimationTimer);
         mouthAnimationTimer = setTimeout(() => {
-            ['mindbuddy-svg', 'mindbuddy-studio-svg'].forEach(id => {
-                const svg = document.getElementById(id);
-                if (svg) svg.classList.remove('speaking-now');
+            ['chat-avatar-viewport', 'studio-avatar-viewport'].forEach(id => {
+                const vp = document.getElementById(id);
+                if (vp) vp.classList.remove('speaking-now');
             });
             renderAvatarVisuals(); // Restore base mouth shape
         }, durationMs);
@@ -1461,388 +1510,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
         updateHeaderStatusBars();
     }
 
-    // ----------------------------------------------------------------------
-    // CALM HUB AMBIENT AUDIO SYNTHESISER (WEB AUDIO API)
-    // ----------------------------------------------------------------------
-    function initSynthContext() {
-        if (!state.synth.audioCtx) {
-            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-            state.synth.audioCtx = new AudioContextClass();
-            state.synth.mainGain = state.synth.audioCtx.createGain();
-            state.synth.mainGain.gain.setValueAtTime(0.6, state.synth.audioCtx.currentTime);
-            state.synth.mainGain.connect(state.synth.audioCtx.destination);
-        }
-        if (state.synth.audioCtx.state === 'suspended') {
-            state.synth.audioCtx.resume();
-        }
-    }
 
-    // Binaural Beats Synthesizer (432Hz Alpha Waves)
-    function toggleBinauralBeats(play) {
-        initSynthContext();
-        const b = state.synth.binaural;
-        const ctx = state.synth.audioCtx;
-
-        if (play && !b.isPlaying) {
-            b.leftOsc = ctx.createOscillator();
-            b.rightOsc = ctx.createOscillator();
-            b.gain = ctx.createGain();
-
-            // Set detuned frequencies to create a 6Hz Binaural Beat
-            b.leftOsc.frequency.setValueAtTime(200, ctx.currentTime);  // 200 Hz
-            b.rightOsc.frequency.setValueAtTime(206, ctx.currentTime); // 206 Hz (6Hz Theta diff)
-            
-            b.leftOsc.type = 'sine';
-            b.rightOsc.type = 'sine';
-
-            // Channels merger to target left and right ears individually
-            const merger = ctx.createChannelMerger(2);
-            
-            // Connect nodes
-            b.leftOsc.connect(merger, 0, 0);
-            b.rightOsc.connect(merger, 0, 1);
-            
-            const vol = parseFloat(DOM.volBinaural.value);
-            b.gain.gain.setValueAtTime(vol * 0.4, ctx.currentTime); // keep beat gentle
-
-            merger.connect(b.gain);
-            b.gain.connect(state.synth.mainGain);
-
-            b.leftOsc.start();
-            b.rightOsc.start();
-            b.isPlaying = true;
-
-            DOM.btnBinaural.innerText = "Stop";
-            DOM.btnBinaural.classList.add('playing');
-            showToast("Binaural beats activated. Wear headphones for full effect.", "success");
-        } else if (!play && b.isPlaying) {
-            b.leftOsc.stop();
-            b.rightOsc.stop();
-            b.leftOsc.disconnect();
-            b.rightOsc.disconnect();
-            b.isPlaying = false;
-            DOM.btnBinaural.innerText = "Play";
-            DOM.btnBinaural.classList.remove('playing');
-        }
-    }
-
-    // Pink Noise Rain Filter Synthesizer
-    function togglePinkRain(play) {
-        initSynthContext();
-        const r = state.synth.rain;
-        const ctx = state.synth.audioCtx;
-
-        if (play && !r.isPlaying) {
-            const bufferSize = 2 * ctx.sampleRate;
-            const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-            const output = noiseBuffer.getChannelData(0);
-
-            // Pink Noise Generation Algorithm (Paul Kellet's method)
-            let b0, b1, b2, b3, b4, b5, b6;
-            b0 = b1 = b2 = b3 = b4 = b5 = b6 = 0.0;
-
-            for (let i = 0; i < bufferSize; i++) {
-                let white = Math.random() * 2 - 1;
-                b0 = 0.99886 * b0 + white * 0.0555179;
-                b1 = 0.99332 * b1 + white * 0.0750759;
-                b2 = 0.96900 * b2 + white * 0.1538520;
-                b3 = 0.86650 * b3 + white * 0.3104856;
-                b4 = 0.55000 * b4 + white * 0.5329522;
-                b5 = -0.7616 * b5 - white * 0.0168980;
-                output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
-                output[i] *= 0.11; // normal scaling
-                b6 = white * 0.115926;
-            }
-
-            r.source = ctx.createBufferSource();
-            r.source.buffer = noiseBuffer;
-            r.source.loop = true;
-
-            // Lowpass filter to simulate rain muffling
-            const lowpass = ctx.createBiquadFilter();
-            lowpass.type = 'lowpass';
-            lowpass.frequency.setValueAtTime(600, ctx.currentTime);
-
-            r.gain = ctx.createGain();
-            const vol = parseFloat(DOM.volRain.value);
-            r.gain.gain.setValueAtTime(vol * 0.6, ctx.currentTime);
-
-            r.source.connect(lowpass);
-            lowpass.connect(r.gain);
-            r.gain.connect(state.synth.mainGain);
-
-            r.source.start();
-            r.isPlaying = true;
-
-            DOM.btnRain.innerText = "Stop";
-            DOM.btnRain.classList.add('playing');
-            showToast("Rain soundscape initialized.", "success");
-        } else if (!play && r.isPlaying) {
-            r.source.stop();
-            r.source.disconnect();
-            r.isPlaying = false;
-            DOM.btnRain.innerText = "Play";
-            DOM.btnRain.classList.remove('playing');
-        }
-    }
-
-    // Zen Drone Chord Synthesizer (Harmonized Triad + Slow LFO Volume Modulator)
-    function toggleZenDrone(play) {
-        initSynthContext();
-        const d = state.synth.drone;
-        const ctx = state.synth.audioCtx;
-
-        if (play && !d.isPlaying) {
-            d.osc1 = ctx.createOscillator();
-            d.osc2 = ctx.createOscillator();
-            d.osc3 = ctx.createOscillator();
-            d.gain = ctx.createGain();
-            d.filter = ctx.createBiquadFilter();
-
-            // Set triad chords C3 (130Hz) - G3 (196Hz) - C4 (261Hz)
-            d.osc1.frequency.setValueAtTime(130.81, ctx.currentTime);
-            d.osc2.frequency.setValueAtTime(196.00, ctx.currentTime);
-            d.osc3.frequency.setValueAtTime(261.63, ctx.currentTime);
-
-            d.osc1.type = 'triangle';
-            d.osc2.type = 'sine';
-            d.osc3.type = 'triangle';
-
-            d.filter.type = 'lowpass';
-            d.filter.frequency.setValueAtTime(450, ctx.currentTime);
-
-            // Connect voices to filter
-            d.osc1.connect(d.filter);
-            d.osc2.connect(d.filter);
-            d.osc3.connect(d.filter);
-
-            // Set main volume gain
-            const vol = parseFloat(DOM.volDrone.value);
-            d.gain.gain.setValueAtTime(vol * 0.35, ctx.currentTime);
-
-            // Create LFO to oscillate amplitude (simulating breathing)
-            d.lfo = ctx.createOscillator();
-            d.lfoGain = ctx.createGain();
-            d.lfo.frequency.setValueAtTime(0.12, ctx.currentTime); // ~8 second breathe cycles
-            d.lfoGain.gain.setValueAtTime(0.12, ctx.currentTime); // fluctuate up/down
-
-            d.lfo.connect(d.lfoGain);
-            d.lfoGain.connect(d.gain.gain); // Connect LFO to volume parameter
-
-            d.filter.connect(d.gain);
-            d.gain.connect(state.synth.mainGain);
-
-            d.osc1.start();
-            d.osc2.start();
-            d.osc3.start();
-            d.lfo.start();
-            d.isPlaying = true;
-
-            DOM.btnDrone.innerText = "Stop";
-            DOM.btnDrone.classList.add('playing');
-            showToast("Zen Meditation Drone activated.", "success");
-        } else if (!play && d.isPlaying) {
-            d.osc1.stop();
-            d.osc2.stop();
-            d.osc3.stop();
-            d.lfo.stop();
-            d.osc1.disconnect();
-            d.osc2.disconnect();
-            d.osc3.disconnect();
-            d.lfo.disconnect();
-            d.isPlaying = false;
-            DOM.btnDrone.innerText = "Play";
-            DOM.btnDrone.classList.remove('playing');
-        }
-    }
-
-    // ----------------------------------------------------------------------
-    // MINDFULNESS WELLNESS QUIZZES
-    // ----------------------------------------------------------------------
-    const QUIZ_LIBRARY = {
-        academic: {
-            title: "Study Alignment Check",
-            badge: "Recommended: Academic Burnout",
-            desc: "Use this quiz to reset expectations, analyze homework weight, and clear cognitive overload.",
-            questions: [
-                {
-                    q: "When you look at your upcoming homework deadline list, your first impulse is:",
-                    options: [
-                        { text: "Tackle it immediately to get it over with", score: "Attentive" },
-                        { text: "Feel paralyzed by the bulk and delay opening it", score: "Thoughtful" },
-                        { text: "Log off entirely and ignore it out of pure exhaustion", score: "Attentive" }
-                    ]
-                },
-                {
-                    q: "How does your body feel physically when sitting at your desk?",
-                    options: [
-                        { text: "Relatively relaxed, minor posture discomfort", score: "Friendly" },
-                        { text: "Tight shoulders, shallow breathing, clenched jaw", score: "Thoughtful" },
-                        { text: "Completely drained, head feels heavy, hard to focus", score: "Attentive" }
-                    ]
-                },
-                {
-                    q: "Which thought feels closest to your current academic goals?",
-                    options: [
-                        { text: "I just need to pass this week; perfection doesn't matter", score: "Friendly" },
-                        { text: "If I don't score highly, I am failing my expectations", score: "Thoughtful" },
-                        { text: "I want to learn, but my mental tank is completely empty", score: "Attentive" }
-                    ]
-                }
-            ]
-        },
-        burnout: {
-            title: "Energy & Rest Sanctuary Check",
-            badge: "Recommended: Chronic Burnout",
-            desc: "A small evaluation to see if your battery is in the red zone and suggest physical resets.",
-            questions: [
-                {
-                    q: "Over the past 48 hours, has sleeping felt recuperative?",
-                    options: [
-                        { text: "Yes, I feel relatively refreshed upon waking", score: "Friendly" },
-                        { text: "I wake up tired no matter how long I lay in bed", score: "Thoughtful" },
-                        { text: "My mind races when the lights go off, keeping me awake", score: "Attentive" }
-                    ]
-                },
-                {
-                    q: "When was the last time you spent 30 minutes doing absolutely nothing productive, guilt-free?",
-                    options: [
-                        { text: "Today! I schedule relaxation breaks", score: "Friendly" },
-                        { text: "A few days ago, but I felt anxious not working", score: "Thoughtful" },
-                        { text: "I cannot remember; I feel lazy if I am not busy", score: "Attentive" }
-                    ]
-                },
-                {
-                    q: "How does your emotional bandwidth feel when talking to others?",
-                    options: [
-                        { text: "Normal, I enjoy engaging with close friends", score: "Friendly" },
-                        { text: "Irritable, tiny inconveniences feel major", score: "Thoughtful" },
-                        { text: "Completely withdrawn, social messages look like chores", score: "Attentive" }
-                    ]
-                }
-            ]
-        },
-        general: {
-            title: "Mindfulness Grounding Check",
-            badge: "General Grounding Checkup",
-            desc: "Designed to anchor your awareness in the present moment and slow fast-moving anxious thoughts.",
-            questions: [
-                {
-                    q: "Take a slow deep breath. Where do you feel the tension focus in your body?",
-                    options: [
-                        { text: "Mainly in my chest or throat area", score: "Thoughtful" },
-                        { text: "Tightness around my forehead or eyes", score: "Attentive" },
-                        { text: "No significant tightness; feels open", score: "Friendly" }
-                    ]
-                },
-                {
-                    q: "Choose a calming sensory action that sounds nice right now:",
-                    options: [
-                        { text: "Splashing cool water on my face", score: "Friendly" },
-                        { text: "Listening to low binaural drone tones", score: "Attentive" },
-                        { text: "Stretching my neck and arms for 2 minutes", score: "Thoughtful" }
-                    ]
-                },
-                {
-                    q: "If your current mood was described as a weather condition, it would be:",
-                    options: [
-                        { text: "Bright sunshine, few clouds", score: "Friendly" },
-                        { text: "Heavy fog, difficult to navigate", score: "Thoughtful" },
-                        { text: "Stormy downpour, lightning spikes", score: "Attentive" }
-                    ]
-                }
-            ]
-        }
-    };
-
-    function updateQuizRecommendation() {
-        const diagnostics = state.diagnostics;
-        let selectedCategory = 'general';
-
-        if (diagnostics.burnout > 50) {
-            selectedCategory = 'burnout';
-        } else if (diagnostics.academicPressure > 50) {
-            selectedCategory = 'academic';
-        }
-
-        const data = QUIZ_LIBRARY[selectedCategory];
-        state.quiz.activeCategory = selectedCategory;
-        state.quiz.questions = data.questions;
-
-        DOM.quizRecBadge.innerText = data.badge;
-        DOM.quizRecTitle.innerText = data.title;
-        DOM.quizIntroState.querySelector('p').innerText = data.desc;
-    }
-
-    function startQuizSession() {
-        state.quiz.currentQuestionIdx = 0;
-        state.quiz.answers = [];
-
-        DOM.quizIntroState.classList.add('hidden');
-        DOM.quizResultsState.classList.add('hidden');
-        DOM.quizActiveState.classList.remove('hidden');
-
-        renderQuizQuestion();
-    }
-
-    function renderQuizQuestion() {
-        const idx = state.quiz.currentQuestionIdx;
-        const qList = state.quiz.questions;
-        const qData = qList[idx];
-
-        DOM.quizQCounter.innerText = `Question ${idx + 1} of ${qList.length}`;
-        DOM.quizProgressFill.style.width = `${((idx + 1) / qList.length) * 100}%`;
-        DOM.quizQuestionTitle.innerText = qData.q;
-
-        DOM.quizOptionsContainer.innerHTML = '';
-        qData.options.forEach((opt, oIdx) => {
-            const btn = document.createElement('button');
-            btn.className = 'quiz-opt-btn';
-            btn.innerText = opt.text;
-            btn.addEventListener('click', () => handleQuizAnswer(opt.score));
-            DOM.quizOptionsContainer.appendChild(btn);
-        });
-    }
-
-    function handleQuizAnswer(score) {
-        state.quiz.answers.push(score);
-        state.quiz.currentQuestionIdx++;
-
-        if (state.quiz.currentQuestionIdx < state.quiz.questions.length) {
-            renderQuizQuestion();
-        } else {
-            showQuizResults();
-        }
-    }
-
-    function showQuizResults() {
-        DOM.quizActiveState.classList.add('hidden');
-        DOM.quizResultsState.classList.remove('hidden');
-
-        // Tabulate results and choose avatar response modifier
-        let counts = { Friendly: 0, Thoughtful: 0, Attentive: 0 };
-        state.quiz.answers.forEach(val => {
-            if (counts[val] !== undefined) counts[val]++;
-        });
-
-        let dominantExpression = 'friendly';
-        let feedbackMessage = "Excellent work checking in with your mind. Taking a moment to trace how your body and thoughts are behaving is a core mindfulness skill. I've adjusted my active presence to match your state.";
-
-        if (counts.Attentive > counts.Friendly && counts.Attentive > counts.Thoughtful) {
-            dominantExpression = 'attentive';
-            feedbackMessage = "Your alignment check suggests you are carrying notable tension. Let's focus on calming down. Try toggling on the Pink Rain or Binaural Beats mixers below to ground your focus.";
-        } else if (counts.Thoughtful > counts.Friendly) {
-            dominantExpression = 'thoughtful';
-            feedbackMessage = "Your answers reflect deep analytical thoughts, likely reflecting school or task pressure. Allow yourself permission to step back from goals for just one hour tonight. I'm right here with you.";
-        }
-
-        // Apply updated expression
-        state.avatar.expression = dominantExpression;
-        renderAvatarVisuals();
-        
-        DOM.quizResultFeedback.innerText = feedbackMessage;
-        showToast("Wellness Check-in Complete.", "success");
-    }
 
     // ----------------------------------------------------------------------
     // UI EVENT BINDINGS
@@ -1952,44 +1620,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
             evaluateIoTBiometricState();
         });
 
-        // Calm Hub Mixer Synth controls
-        DOM.btnBinaural.addEventListener('click', () => {
-            toggleBinauralBeats(!state.synth.binaural.isPlaying);
-        });
-        DOM.btnRain.addEventListener('click', () => {
-            togglePinkRain(!state.synth.rain.isPlaying);
-        });
-        DOM.btnDrone.addEventListener('click', () => {
-            toggleZenDrone(!state.synth.drone.isPlaying);
-        });
 
-        // Synth Volume adjusters
-        DOM.volBinaural.addEventListener('input', (e) => {
-            const vol = parseFloat(e.target.value);
-            if (state.synth.binaural.gain) {
-                state.synth.binaural.gain.gain.setValueAtTime(vol * 0.4, state.synth.audioCtx.currentTime);
-            }
-        });
-        DOM.volRain.addEventListener('input', (e) => {
-            const vol = parseFloat(e.target.value);
-            if (state.synth.rain.gain) {
-                state.synth.rain.gain.gain.setValueAtTime(vol * 0.6, state.synth.audioCtx.currentTime);
-            }
-        });
-        DOM.volDrone.addEventListener('input', (e) => {
-            const vol = parseFloat(e.target.value);
-            if (state.synth.drone.gain) {
-                state.synth.drone.gain.gain.setValueAtTime(vol * 0.35, state.synth.audioCtx.currentTime);
-            }
-        });
-
-        // Calm Hub Quiz buttons
-        DOM.quizStartBtn.addEventListener('click', startQuizSession);
-        DOM.quizRestartBtn.addEventListener('click', () => {
-            updateQuizRecommendation();
-            DOM.quizResultsState.classList.add('hidden');
-            DOM.quizIntroState.classList.remove('hidden');
-        });
 
         // SOS modal triggers
         DOM.sosOpenBtn.addEventListener('click', () => {
@@ -2078,6 +1709,608 @@ Keep your conversational reply warm, human and concise. The student should feel 
             color += letters[Math.floor(Math.random() * 16)];
         }
         return color;
+    }
+
+    function generateMockCalendarData() {
+        return [
+            { date: "2026-06-01", psychologicalState: "Calm", emotionalScore: 0.1, journalSnippet: "Started the week fresh. Had a nice chat with my roommate." },
+            { date: "2026-06-02", psychologicalState: "Focused", emotionalScore: 0.2, journalSnippet: "Studied for 4 hours straight. Feels good to get things done." },
+            { date: "2026-06-03", psychologicalState: "Peaceful", emotionalScore: 0.05, journalSnippet: "Woke up early, meditated, and had a delicious breakfast." },
+            { date: "2026-06-04", psychologicalState: "Restless", emotionalScore: 0.45, journalSnippet: "Couldn't sleep well last night. Mind kept wandering." },
+            { date: "2026-06-05", psychologicalState: null, emotionalScore: null, journalSnippet: null }, // Missing Log
+            { date: "2026-06-06", psychologicalState: "Focused", emotionalScore: 0.15, journalSnippet: "Finished my history essay. Really satisfied with my argument." },
+            { date: "2026-06-07", psychologicalState: "Calm", emotionalScore: 0.25, journalSnippet: "Spent the Sunday reading a book in the park. Quiet day." },
+            { date: "2026-06-08", psychologicalState: "Anxious", emotionalScore: 0.6, journalSnippet: "Heard about a surprise quiz. My heart started beating fast." },
+            { date: "2026-06-09", psychologicalState: "Stressed", emotionalScore: 0.7, journalSnippet: "Too many deadlines overlapping. Feeling a bit crushed." },
+            { date: "2026-06-10", psychologicalState: "Burnout", emotionalScore: 0.9, journalSnippet: "Extremely exhausted. Can't bring myself to study anymore. Just want to sleep." },
+            { date: "2026-06-11", psychologicalState: "Fatigued", emotionalScore: 0.65, journalSnippet: "Slept for 10 hours but still feel drained. Took a slow day." },
+            { date: "2026-06-12", psychologicalState: "Calm", emotionalScore: 0.3, journalSnippet: "Slowly catching up. Listened to the soundscapes for grounding." },
+            { date: "2026-06-13", psychologicalState: "Peaceful", emotionalScore: 0.08, journalSnippet: "Weekend hike with friends. Nature really helped clear my head." },
+            { date: "2026-06-14", psychologicalState: null, emotionalScore: null, journalSnippet: null }, // Missing Log
+            { date: "2026-06-15", psychologicalState: "Focused", emotionalScore: 0.12, journalSnippet: "Met with my study group. Group study went surprisingly well." },
+            { date: "2026-06-16", psychologicalState: "Anxious", emotionalScore: 0.55, journalSnippet: "Worried about the math exam next week. Math has always been hard." },
+            { date: "2026-06-17", psychologicalState: "High Stress", emotionalScore: 0.78, journalSnippet: "Failed a mock test. Feel like I'm falling behind my classmates." },
+            { date: "2026-06-18", psychologicalState: "Burnout", emotionalScore: 0.85, journalSnippet: "Studied late until 3 AM. Head is pounding. Hard to think." },
+            { date: "2026-06-19", psychologicalState: "Fatigued", emotionalScore: 0.5, journalSnippet: "Decided to take the afternoon off. Brain feels like mush." },
+            { date: "2026-06-20", psychologicalState: "Calm", emotionalScore: 0.22, journalSnippet: "Feeling much better after taking a full day of rest. Ready to try again." },
+            { date: "2026-06-21", psychologicalState: "Peaceful", emotionalScore: 0.02, journalSnippet: "Had a great Sunday dinner. Feeling content and safe." },
+            { date: "2026-06-22", psychologicalState: "Focused", emotionalScore: 0.18, journalSnippet: "Reviewed 3 chapters of chemistry. Understood most of it." },
+            { date: "2026-06-23", psychologicalState: null, emotionalScore: null, journalSnippet: null }, // Missing Log
+            { date: "2026-06-24", psychologicalState: "Restless", emotionalScore: 0.4, journalSnippet: "Tired but had too much coffee. Can't focus properly." },
+            { date: "2026-06-25", psychologicalState: "Anxious", emotionalScore: 0.58, journalSnippet: "Presentation tomorrow. Terrified of public speaking." },
+            { date: "2026-06-26", psychologicalState: "High Stress", emotionalScore: 0.82, journalSnippet: "Presentation went okay, but I felt extremely tense throughout." },
+            { date: "2026-06-27", psychologicalState: "Calm", emotionalScore: 0.28, journalSnippet: "Vented in the rant room. Getting those words out really helped." },
+            { date: "2026-06-28", psychologicalState: "Peaceful", emotionalScore: 0.06, journalSnippet: "Played video games with my brother. Laughed a lot." },
+            { date: "2026-06-29", psychologicalState: "Focused", emotionalScore: 0.14, journalSnippet: "Planning my schedule for July. Feeling structured." },
+            { date: "2026-06-30", psychologicalState: "Calm", emotionalScore: 0.2, journalSnippet: "End of the month. Looking forward to the summer holidays." }
+        ];
+    }
+
+    function getMoodColor(score) {
+        if (score === null || score === undefined) return 'var(--border-glass)';
+        const hue = (1.0 - score) * 140;
+        return `hsl(${hue}, 85%, 45%)`;
+    }
+
+    function renderMoodCalendar() {
+        if (!DOM.calendarDaysGrid) return;
+        DOM.calendarDaysGrid.innerHTML = '';
+
+        const displayLogs = state.calendar.logs.slice(0, 28);
+
+        displayLogs.forEach((entry, idx) => {
+            const dayNum = idx + 1;
+            
+            const cell = document.createElement('div');
+            cell.className = 'calendar-day-cell';
+
+            const node = document.createElement('div');
+            node.className = 'calendar-day-node buoyant';
+            node.setAttribute('data-date', entry.date);
+
+            const numSpan = document.createElement('span');
+            numSpan.className = 'day-num';
+            numSpan.innerText = dayNum;
+            node.appendChild(numSpan);
+
+            if (entry.psychologicalState) {
+                const labelSpan = document.createElement('span');
+                labelSpan.className = 'day-label';
+                labelSpan.innerText = entry.psychologicalState;
+                node.appendChild(labelSpan);
+
+                const score = entry.emotionalScore;
+                const color = getMoodColor(score);
+                const hue = (1.0 - score) * 140;
+
+                const offset = (score - 0.5) * 16; 
+                node.style.setProperty('--day-offset', `${offset}px`);
+                
+                const shadowY = score > 0.5 ? 8 : 2;
+                const shadowBlur = score > 0.5 ? 6 : 14;
+                
+                node.style.setProperty('--day-shadow-y', `${shadowY}px`);
+                node.style.setProperty('--day-shadow-blur', `${shadowBlur}px`);
+                node.style.setProperty('--day-shadow-color', `hsla(${hue}, 85%, 45%, 0.2)`);
+                node.style.setProperty('--day-shadow-hover-color', `hsla(${hue}, 85%, 45%, 0.35)`);
+                
+                node.style.border = `1.5px solid ${color}`;
+                node.style.background = `radial-gradient(circle at center, hsla(${hue}, 85%, 45%, 0.12) 0%, hsla(${hue}, 85%, 45%, 0.03) 100%)`;
+            } else {
+                const labelSpan = document.createElement('span');
+                labelSpan.className = 'day-label';
+                labelSpan.innerText = 'No Log';
+                node.appendChild(labelSpan);
+
+                node.style.setProperty('--day-offset', '0px');
+                node.style.setProperty('--day-shadow-y', '2px');
+                node.style.setProperty('--day-shadow-blur', '4px');
+                node.style.setProperty('--day-shadow-color', 'rgba(0, 0, 0, 0.15)');
+                node.style.setProperty('--day-shadow-hover-color', 'rgba(255, 255, 255, 0.05)');
+                
+                node.style.border = `1.5px dashed rgba(255, 255, 255, 0.15)`;
+                node.style.background = `rgba(255, 255, 255, 0.01)`;
+            }
+
+            node.addEventListener('click', () => {
+                DOM.calendarDaysGrid.querySelectorAll('.calendar-day-node').forEach(n => {
+                    n.classList.remove('active-selected');
+                });
+                node.classList.add('active-selected');
+                state.calendar.selectedDate = entry.date;
+                showDayDetails(entry);
+            });
+
+            if (state.calendar.selectedDate === entry.date) {
+                node.classList.add('active-selected');
+            }
+
+            cell.appendChild(node);
+            DOM.calendarDaysGrid.appendChild(cell);
+        });
+
+        if (state.calendar.selectedDate) {
+            const selectedEntry = state.calendar.logs.find(e => e.date === state.calendar.selectedDate);
+            if (selectedEntry) showDayDetails(selectedEntry);
+        } else {
+            DOM.calendarEmptyPlaceholder.classList.remove('hidden');
+            DOM.calendarActiveDetail.classList.add('hidden');
+        }
+    }
+
+    function showDayDetails(entry) {
+        if (!DOM.calendarActiveDetail || !DOM.calendarEmptyPlaceholder) return;
+        
+        if (!entry || !entry.psychologicalState) {
+            DOM.calendarEmptyPlaceholder.classList.remove('hidden');
+            DOM.calendarActiveDetail.classList.add('hidden');
+            return;
+        }
+
+        DOM.calendarEmptyPlaceholder.classList.add('hidden');
+        DOM.calendarActiveDetail.classList.remove('hidden');
+
+        DOM.calendarDetailDate.innerText = entry.date;
+        DOM.calendarDetailState.innerText = entry.psychologicalState;
+        
+        const score = entry.emotionalScore;
+        const color = getMoodColor(score);
+        const hue = (1.0 - score) * 140;
+
+        DOM.calendarDetailScore.innerText = score.toFixed(2);
+        DOM.calendarDetailMeterFill.style.width = `${score * 100}%`;
+        
+        DOM.calendarDetailState.style.setProperty('--state-glow-color', `hsla(${hue}, 85%, 45%, 0.3)`);
+        DOM.calendarActiveDetail.style.setProperty('--state-color', color);
+        DOM.calendarDetailSnippet.innerText = `"${entry.journalSnippet}"`;
+
+        let category = "Normal Check";
+        if (score > 0.7) category = "Critical Support Required";
+        else if (score > 0.4) category = "Elevated Tension";
+        else if (score < 0.15) category = "Peaceful State";
+
+        DOM.calendarDetailBadge.innerText = category;
+        DOM.calendarDetailBadge.style.background = `hsla(${hue}, 85%, 45%, 0.15)`;
+        DOM.calendarDetailBadge.style.border = `1px solid ${color}`;
+        DOM.calendarDetailBadge.style.color = color;
+    }
+
+    // ----------------------------------------------------------------------
+    // SPARKS ECONOMY — DISPLAY UPDATE
+    // ----------------------------------------------------------------------
+    function updateSparksDisplay() {
+        const el = document.getElementById('sparks-balance-display');
+        if (el) el.innerText = state.sparks;
+    }
+
+    function awardSparks(amount, reason) {
+        state.sparks += amount;
+        updateSparksDisplay();
+        showToast(`+${amount} Sparks earned! ${reason}`, 'success');
+    }
+
+    // ----------------------------------------------------------------------
+    // CATALOG DATA (items for Fashion/Avatar/Pet/Scene panels)
+    // ----------------------------------------------------------------------
+    const CATALOG_DATA = {
+        fashion: {
+            title: 'Try a new look — Fashion',
+            sections: [
+                {
+                    label: '👕 Tops',
+                    prop: 'shirtStyle',
+                    items: [
+                        { id: 'top-hoodie',  val: 'hoodie',  label: 'Hoodie',       emoji: '🧥', cost: 0 },
+                        { id: 'top-tshirt',  val: 'tshirt',  label: 'T-Shirt',      emoji: '👕', cost: 0 },
+                        { id: 'top-sweater', val: 'sweater', label: 'Sweater',      emoji: '🧶', cost: 0 },
+                        { id: 'top-varsity', val: 'varsity', label: 'Varsity',      emoji: '🎽', cost: 50 },
+                        { id: 'top-armor',   val: 'armor',   label: 'Cyber Armor',  emoji: '🤖', cost: 120 },
+                    ]
+                },
+                {
+                    label: '👖 Bottoms',
+                    prop: 'pantsStyle',
+                    items: [
+                        { id: 'bottom-shorts', val: 'shorts',  label: 'Shorts',   emoji: '🩳', cost: 0 },
+                        { id: 'bottom-cargo',  val: 'cargo',   label: 'Cargo',    emoji: '🪖', cost: 0 },
+                        { id: 'bottom-jogger', val: 'jogger',  label: 'Joggers',  emoji: '🏃', cost: 0 },
+                        { id: 'bottom-ripped', val: 'ripped',  label: 'Ripped',   emoji: '✂️', cost: 40 },
+                    ]
+                },
+                {
+                    label: '👟 Shoes',
+                    prop: 'shoesStyle',
+                    items: [
+                        { id: 'shoes-sneakers', val: 'sneakers', label: 'Sneakers',  emoji: '👟', cost: 0 },
+                        { id: 'shoes-boots',    val: 'boots',    label: 'Boots',     emoji: '🥾', cost: 60 },
+                        { id: 'shoes-heels',    val: 'heels',    label: 'Heels',     emoji: '👠', cost: 60 },
+                    ]
+                },
+                {
+                    label: '🎨 Hoodie Graphics',
+                    prop: 'hoodieGraphic',
+                    items: [
+                        { id: 'graphic-none',    val: 'none',    label: 'None',      emoji: '🔲', cost: 0 },
+                        { id: 'graphic-pumpkin', val: 'pumpkin', label: 'Pumpkin',   emoji: '🎃', cost: 0 },
+                        { id: 'graphic-heart',   val: 'heart',   label: 'Heart',     emoji: '❤️', cost: 0 },
+                        { id: 'graphic-wave',    val: 'wave',    label: 'Wave',      emoji: '🌊', cost: 30 },
+                        { id: 'graphic-star',    val: 'star',    label: 'Star',      emoji: '⭐', cost: 0 },
+                    ]
+                },
+            ]
+        },
+        avatar: {
+            title: 'Try a new look — Avatar',
+            sections: [
+                {
+                    label: '💇 Hairstyle',
+                    prop: 'hairStyle',
+                    items: [
+                        { id: 'hair-crop',      val: 'crop',      label: 'Crop',       emoji: '✂️', cost: 0  },
+                        { id: 'hair-curly',     val: 'curly',     label: 'Curly',      emoji: '🌀', cost: 0  },
+                        { id: 'hair-bob',       val: 'bob',       label: 'Bob',        emoji: '💁', cost: 0  },
+                        { id: 'hair-long',      val: 'long',      label: 'Long',       emoji: '🧖', cost: 0  },
+                        { id: 'hair-mohawk',    val: 'mohawk',    label: 'Mohawk',     emoji: '🤘', cost: 50 },
+                        { id: 'hair-spacebuns', val: 'spacebuns', label: 'Space Buns', emoji: '👻', cost: 40 },
+                        { id: 'hair-bald',      val: 'bald',      label: 'Bald',       emoji: '🧑‍🦲', cost: 0 },
+                    ]
+                },
+                {
+                    label: '🕶️ Glasses',
+                    prop: 'glasses',
+                    items: [
+                        { id: 'acc-glasses-none',    val: 'none',    label: 'None',         emoji: '🔲', cost: 0  },
+                        { id: 'acc-glasses-emerald', val: 'green',   label: 'Emerald',      emoji: '💚', cost: 0  },
+                        { id: 'acc-glasses-gold',    val: 'gold',    label: 'Gold',         emoji: '💛', cost: 0  },
+                        { id: 'acc-glasses-cyber',   val: 'cyber',   label: 'Cyber',        emoji: '🤖', cost: 80 },
+                    ]
+                },
+                {
+                    label: '🎧 Accessories',
+                    prop: 'accessories',
+                    items: [
+                        { id: 'acc-headphones-none',  val: 'none',       label: 'None',        emoji: '🔲', cost: 0   },
+                        { id: 'acc-headphones',       val: 'headphones', label: 'Headphones',  emoji: '🎧', cost: 0   },
+                        { id: 'acc-catears',          val: 'catears',    label: 'Cat Ears',    emoji: '🐱', cost: 70  },
+                        { id: 'acc-vrgoggles',        val: 'vrgoggles',  label: 'VR Goggles',  emoji: '🥽', cost: 100 },
+                    ]
+                },
+            ]
+        },
+        pet: {
+            title: 'Try a new look — Pets',
+            sections: [
+                {
+                    label: '🐾 Companion',
+                    prop: 'pet',
+                    items: [
+                        { id: 'pet-none', val: 'none', label: 'None',        emoji: '🔲', cost: 0   },
+                        { id: 'pet-cat',  val: 'cat',  label: 'Cat',         emoji: '🐱', cost: 0   },
+                        { id: 'pet-dog',  val: 'dog',  label: 'Dog',         emoji: '🐶', cost: 80  },
+                        { id: 'pet-bunny',val: 'bunny',label: 'Bunny',       emoji: '🐰', cost: 80  },
+                        { id: 'pet-bird', val: 'bird', label: 'Bird',        emoji: '🐦', cost: 120 },
+                    ]
+                }
+            ]
+        },
+        scene: {
+            title: 'Try a new look — Scenes',
+            sections: [
+                {
+                    label: '🌅 Background Scene',
+                    prop: 'scene',
+                    items: [
+                        { id: 'scene-yellow', val: 'yellow', label: 'Sunshine',   emoji: '🌞', cost: 0  },
+                        { id: 'scene-purple', val: 'purple', label: 'Galaxy',     emoji: '🔮', cost: 0  },
+                        { id: 'scene-sky',    val: 'sky',    label: 'Ocean Sky',  emoji: '🌊', cost: 0  },
+                        { id: 'scene-starry', val: 'starry', label: 'Starry Night',emoji: '🌟',cost: 60 },
+                        { id: 'scene-zen',    val: 'zen',    label: 'Zen Garden', emoji: '🌿', cost: 60 },
+                    ]
+                }
+            ]
+        }
+    };
+
+    // ----------------------------------------------------------------------
+    // CATALOG RENDERING (Bitmoji-style "Try a new look" grid)
+    // ----------------------------------------------------------------------
+    function renderAllCatalogPanels() {
+        ['fashion', 'avatar', 'pet', 'scene'].forEach(tab => {
+            const panel = document.getElementById('catalog-' + tab);
+            if (!panel) return;
+            const data = CATALOG_DATA[tab];
+            if (!data) return;
+
+            panel.innerHTML = '';
+
+            data.sections.forEach(section => {
+                const sectionEl = document.createElement('div');
+                sectionEl.style.cssText = 'margin-bottom:20px;';
+
+                const labelEl = document.createElement('p');
+                labelEl.style.cssText = 'font-size:0.8rem; font-weight:600; color:var(--color-text-muted); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px;';
+                labelEl.innerText = section.label;
+                sectionEl.appendChild(labelEl);
+
+                const grid = document.createElement('div');
+                grid.style.cssText = 'display:grid; grid-template-columns:repeat(auto-fill, minmax(90px, 1fr)); gap:10px;';
+
+                section.items.forEach(item => {
+                    const owned = state.inventory.includes(item.id);
+                    const isActive = state.avatar[section.prop] === item.val;
+
+                    const card = document.createElement('button');
+                    card.className = 'catalog-item-card' + (isActive ? ' active' : '') + (owned ? '' : ' locked');
+                    card.setAttribute('data-item-id', item.id);
+                    card.setAttribute('data-prop', section.prop);
+                    card.setAttribute('data-val', item.val);
+                    card.setAttribute('data-cost', item.cost);
+                    card.style.cssText = `
+                        background: ${isActive ? 'rgba(139,92,246,0.2)' : 'rgba(255,255,255,0.03)'};
+                        border: 1.5px solid ${isActive ? 'var(--color-violet)' : (owned ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.04)')};
+                        border-radius: 14px;
+                        padding: 12px 8px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 6px;
+                        cursor: ${owned ? 'pointer' : 'default'};
+                        transition: all 0.2s ease;
+                        position: relative;
+                        opacity: ${owned ? '1' : '0.6'};
+                    `;
+
+                    const emojiEl = document.createElement('span');
+                    emojiEl.style.cssText = 'font-size:1.6rem; line-height:1;';
+                    emojiEl.innerText = item.emoji;
+
+                    const labelTxt = document.createElement('span');
+                    labelTxt.style.cssText = 'font-size:0.72rem; font-weight:500; color:var(--color-text-muted); text-align:center;';
+                    labelTxt.innerText = item.label;
+
+                    card.appendChild(emojiEl);
+                    card.appendChild(labelTxt);
+
+                    if (!owned && item.cost > 0) {
+                        const lockBadge = document.createElement('span');
+                        lockBadge.style.cssText = `
+                            position:absolute; top:6px; right:6px;
+                            background:rgba(245,158,11,0.15);
+                            border:1px solid rgba(245,158,11,0.3);
+                            border-radius:8px;
+                            font-size:0.6rem;
+                            font-weight:700;
+                            color:#f59e0b;
+                            padding:1px 5px;
+                        `;
+                        lockBadge.innerText = `⚡ ${item.cost}`;
+                        card.appendChild(lockBadge);
+                    }
+
+                    card.addEventListener('click', () => {
+                        if (!owned) {
+                            // Purchase flow
+                            if (item.cost > 0 && state.sparks >= item.cost) {
+                                state.sparks -= item.cost;
+                                state.inventory.push(item.id);
+                                updateSparksDisplay();
+                                showToast(`Purchased ${item.label}! (${item.cost} Sparks spent)`, 'success');
+                                // Apply immediately after purchase
+                                state.avatar[section.prop] = item.val;
+                                renderAvatarVisuals();
+                                renderAllCatalogPanels(); // Re-render to reflect ownership
+                            } else if (item.cost > 0) {
+                                showToast(`Not enough Sparks! You need ${item.cost} but have ${state.sparks}.`, 'error');
+                            }
+                            return;
+                        }
+
+                        // Equip flow
+                        state.avatar[section.prop] = item.val;
+                        renderAvatarVisuals();
+
+                        // Update active state on sibling cards
+                        const allCards = grid.querySelectorAll('.catalog-item-card');
+                        allCards.forEach(c => {
+                            const active = c.getAttribute('data-val') === item.val;
+                            c.style.background = active ? 'rgba(139,92,246,0.2)' : 'rgba(255,255,255,0.03)';
+                            c.style.border = `1.5px solid ${active ? 'var(--color-violet)' : 'rgba(255,255,255,0.08)'}`;
+                        });
+                    });
+
+                    grid.appendChild(card);
+                });
+
+                sectionEl.appendChild(grid);
+                panel.appendChild(sectionEl);
+            });
+        });
+    }
+
+    // ----------------------------------------------------------------------
+    // SUB-NAV SWITCHING (Fashion / Avatar / Pet / Scene / Selfie)
+    // ----------------------------------------------------------------------
+    function bindSubNavEvents() {
+        const subNavBtns = document.querySelectorAll('.studio-sub-nav .sub-nav-btn');
+        const catalogPanels = document.querySelectorAll('.catalog-panel');
+        const sheetTitle = document.getElementById('options-sheet-title');
+
+        subNavBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = btn.getAttribute('data-subnav');
+
+                subNavBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                catalogPanels.forEach(p => {
+                    if (p.id === 'catalog-' + target) {
+                        p.style.display = target === 'selfie' ? 'flex' : 'block';
+                        p.classList.add('active');
+                    } else {
+                        p.style.display = 'none';
+                        p.classList.remove('active');
+                    }
+                });
+
+                const titles = {
+                    fashion: 'Try a new look — Fashion',
+                    avatar:  'Try a new look — Avatar',
+                    pet:     'Try a new look — Pets',
+                    scene:   'Try a new look — Scenes',
+                    selfie:  'Daily Challenges & Selfie'
+                };
+                if (sheetTitle) sheetTitle.innerText = titles[target] || 'Try a new look';
+            });
+        });
+    }
+
+    // ----------------------------------------------------------------------
+    // DAILY QUIZ (Sparks earn mechanism)
+    // ----------------------------------------------------------------------
+    const QUIZ_QUESTIONS = [
+        {
+            q: "When you feel overwhelmed, which coping strategy do you prefer?",
+            options: ["Take a short walk", "Call a friend", "Write in a journal", "Deep breathing"],
+            correct: null, // Wellness quiz — all answers are 'right'
+            sparksReward: 20
+        },
+        {
+            q: "Which of these best describes psychological burnout?",
+            options: ["Being physically tired after sport", "Emotional exhaustion from prolonged stress", "Feeling hungry before lunch", "Short-term excitement"],
+            correct: 1,
+            sparksReward: 25
+        },
+        {
+            q: "A student notices their friend has been skipping meals and isolating. Best response?",
+            options: ["Mind your own business", "Tease them about it", "Gently check in and offer support", "Tell the whole friend group"],
+            correct: 2,
+            sparksReward: 30
+        },
+        {
+            q: "Which of these activities can improve mental wellbeing?",
+            options: ["Scrolling social media for 3+ hours", "Mindful journaling", "Procrastinating on tasks", "Avoiding sleep"],
+            correct: 1,
+            sparksReward: 20
+        },
+        {
+            q: "What does the 5-4-3-2-1 grounding technique involve?",
+            options: ["A countdown for stress", "Naming things you can sense in the present moment", "5 minutes of exercise", "Taking 5 deep breaths"],
+            correct: 1,
+            sparksReward: 35
+        }
+    ];
+
+    function renderDailyQuiz() {
+        const container = document.getElementById('quiz-container');
+        const statusMsg = document.getElementById('quiz-status-msg');
+        if (!container) return;
+
+        // Find an unanswered question
+        const answered = state.quiz ? state.quiz.answered : [];
+        const nextQ = QUIZ_QUESTIONS.find((_, i) => !answered.includes(i));
+
+        if (!nextQ) {
+            container.innerHTML = `<p style="color:var(--color-text-muted); font-size:0.9rem; text-align:center; padding:24px 0;">🎉 All daily challenges completed! Come back tomorrow.</p>`;
+            if (statusMsg) { statusMsg.innerText = 'Completed'; statusMsg.style.color = '#f59e0b'; }
+            return;
+        }
+
+        const qIdx = QUIZ_QUESTIONS.indexOf(nextQ);
+        if (statusMsg) statusMsg.innerText = `${qIdx + 1}/${QUIZ_QUESTIONS.length}`;
+
+        container.innerHTML = '';
+
+        const questionText = document.createElement('p');
+        questionText.style.cssText = 'font-size:0.9rem; color:white; font-weight:500; margin-bottom:14px; line-height:1.5;';
+        questionText.innerText = nextQ.q;
+        container.appendChild(questionText);
+
+        const optionsGrid = document.createElement('div');
+        optionsGrid.style.cssText = 'display:grid; grid-template-columns:1fr 1fr; gap:8px;';
+
+        nextQ.options.forEach((opt, optIdx) => {
+            const btn = document.createElement('button');
+            btn.style.cssText = `
+                background: rgba(255,255,255,0.03);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 10px;
+                padding: 10px 12px;
+                color: var(--color-text-muted);
+                font-size: 0.82rem;
+                text-align: left;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            `;
+            btn.innerText = opt;
+
+            btn.addEventListener('mouseenter', () => {
+                btn.style.background = 'rgba(139,92,246,0.12)';
+                btn.style.borderColor = 'rgba(139,92,246,0.4)';
+                btn.style.color = 'white';
+            });
+            btn.addEventListener('mouseleave', () => {
+                if (!btn.classList.contains('answered')) {
+                    btn.style.background = 'rgba(255,255,255,0.03)';
+                    btn.style.borderColor = 'rgba(255,255,255,0.1)';
+                    btn.style.color = 'var(--color-text-muted)';
+                }
+            });
+
+            btn.addEventListener('click', () => {
+                const isCorrect = nextQ.correct === null || nextQ.correct === optIdx;
+
+                // Visual feedback
+                optionsGrid.querySelectorAll('button').forEach(b => {
+                    b.disabled = true;
+                    b.classList.add('answered');
+                });
+
+                btn.style.background = isCorrect ? 'rgba(16,185,129,0.2)' : 'rgba(244,63,94,0.15)';
+                btn.style.borderColor = isCorrect ? '#10b981' : '#f43f5e';
+                btn.style.color = isCorrect ? '#10b981' : '#f43f5e';
+
+                if (nextQ.correct !== null && !isCorrect) {
+                    const correctBtn = optionsGrid.querySelectorAll('button')[nextQ.correct];
+                    if (correctBtn) {
+                        correctBtn.style.background = 'rgba(16,185,129,0.2)';
+                        correctBtn.style.borderColor = '#10b981';
+                        correctBtn.style.color = '#10b981';
+                    }
+                }
+
+                // Track answered
+                if (!state.quiz) state.quiz = { answered: [] };
+                state.quiz.answered.push(qIdx);
+
+                // Award sparks
+                const reward = isCorrect ? nextQ.sparksReward : Math.round(nextQ.sparksReward * 0.5);
+                awardSparks(reward, isCorrect ? 'Correct answer!' : 'Participation reward!');
+
+                // Show "Next" button
+                setTimeout(() => {
+                    const nextBtn = document.createElement('button');
+                    nextBtn.style.cssText = `
+                        margin-top:12px;
+                        width:100%;
+                        padding:10px;
+                        background: linear-gradient(135deg, var(--color-violet), #4f46e5);
+                        color: white;
+                        border: none;
+                        border-radius: 10px;
+                        font-size: 0.85rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                    `;
+                    nextBtn.innerText = 'Next Question →';
+                    nextBtn.addEventListener('click', () => renderDailyQuiz());
+                    container.appendChild(nextBtn);
+                }, 800);
+            });
+
+            optionsGrid.appendChild(btn);
+        });
+
+        container.appendChild(optionsGrid);
     }
 
     // Run launcher
