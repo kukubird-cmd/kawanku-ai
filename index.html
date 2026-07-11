@@ -53,6 +53,10 @@
                     <i data-lucide="music"></i>
                     <span>Calm Hub</span>
                 </button>
+                <button class="nav-btn" data-target="games-panel" id="nav-games">
+                    <i data-lucide="gamepad-2"></i>
+                    <span>Play & Relax</span>
+                </button>
             </nav>
 
             <div class="sidebar-footer">
@@ -858,6 +862,160 @@
 
                     </div>
                 </section>
+
+                <!-- Games & Relaxation Panel -->
+                <section class="panel" id="games-panel">
+                    <div class="games-layout">
+                        <!-- AI Mood Gateway Status Header -->
+                        <div class="mood-gateway-card">
+                            <div class="robot-mascot-wrapper">
+                                <div class="kawanku-robot" id="gateway-robot">
+                                    <div class="robot-antenna"></div>
+                                    <div class="robot-head">
+                                        <div class="robot-ears"></div>
+                                        <div class="robot-eyes">
+                                            <div class="eye eye-left"></div>
+                                            <div class="eye eye-right"></div>
+                                        </div>
+                                    </div>
+                                    <div class="robot-body">
+                                        <div class="robot-heart"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mood-bubble-content">
+                                <div class="bubble-header">
+                                    <span class="status-badge status-anxious" id="gateway-mood-badge">State A: Anxiety / Stress</span>
+                                    <div class="toggle-container">
+                                        <label class="switch-label">Simulate Mood State:</label>
+                                        <div class="status-switch" id="status-toggle-btn">
+                                            <span class="switch-option active" data-state="A">Anxious</span>
+                                            <span class="switch-option" data-state="B">Frustrated</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="bubble-text" id="gateway-speech-bubble">Hey Kawan, I sense you're feeling anxious or overwhelmed. Let's take a 2-minute break and clear your mind. I highly recommend playing our 'Cognitive Shifting Match-3'!</p>
+                            </div>
+                        </div>
+
+                        <!-- Games Main Dashboard Area -->
+                        <div class="games-dashboard-grid">
+                            <!-- Game Card 1: Stress-Free Match-3 -->
+                            <div class="game-card recommend-pulse" id="card-match3">
+                                <div class="game-card-header">
+                                    <div class="game-icon-title">
+                                        <i data-lucide="grid-3x3" class="text-violet"></i>
+                                        <h3>Stress-Free Match-3</h3>
+                                    </div>
+                                    <span class="recommend-tag" id="tag-match3">KawanKu's Choice ⭐</span>
+                                </div>
+                                <p class="game-desc" id="desc-match3">A calm, cognitive-shifting puzzle with no timers, no step limits, and pure relaxation. Swap cute Malaysian tiles and watch the worry melt away.</p>
+                                
+                                <!-- Active Match-3 Arena -->
+                                <div class="match3-arena hidden" id="match3-game-arena">
+                                    <div class="match3-header">
+                                        <div class="progress-lbl">Relaxation Progress:</div>
+                                        <div class="match3-progress-bar">
+                                            <div class="progress-fill" id="match3-progress" style="width: 0%;"></div>
+                                        </div>
+                                        <span class="progress-value" id="match3-progress-val">0%</span>
+                                    </div>
+                                    <div class="match3-grid" id="match3-board"></div>
+                                    <div class="match3-controls">
+                                        <button class="game-btn-secondary" id="btn-quit-match3">Quit Game</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="game-card-action" id="match3-start-action">
+                                    <button class="game-btn-primary" id="btn-start-match3">Play & Calm Down</button>
+                                </div>
+                            </div>
+
+                            <!-- Game Card 2: Emotional Trash Can -->
+                            <div class="game-card" id="card-trash">
+                                <div class="game-card-header">
+                                    <div class="game-icon-title">
+                                        <i data-lucide="trash-2" class="text-rose"></i>
+                                        <h3>Emotional Trash Can</h3>
+                                    </div>
+                                    <span class="recommend-tag hidden" id="tag-trash">KawanKu's Choice ⭐</span>
+                                </div>
+                                <p class="game-desc" id="desc-trash">Externalization therapy. Put down your stress, anger, or worries in words, and watch them get violently crushed and destroyed forever.</p>
+                                
+                                <!-- Trash Can Active Area -->
+                                <div class="trash-arena hidden" id="trash-game-arena">
+                                    <textarea class="trash-input" id="trash-text-input" placeholder="Apa yang buat you stress today? Type your worries, anger, or fears here in English, Malay, or Manglish..."></textarea>
+                                    <div class="trash-controls">
+                                        <button class="game-btn-primary bg-rose-gradient" id="btn-destroy-trash">
+                                            <i data-lucide="bomb"></i> CRUSH & DESTROY!
+                                        </button>
+                                        <button class="game-btn-secondary" id="btn-quit-trash">Quit</button>
+                                    </div>
+                                    
+                                    <!-- Animated crush box -->
+                                    <div class="crush-animation-container hidden" id="crush-stage">
+                                        <div class="crusher-claw claw-left"></div>
+                                        <div class="crusher-claw claw-right"></div>
+                                        <div class="crushed-rock-container">
+                                            <div class="crushed-rock" id="crushed-paper"></div>
+                                        </div>
+                                        <div class="explosion-flash" id="crush-flash"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="game-card-action" id="trash-start-action">
+                                    <button class="game-btn-primary" id="btn-start-trash">Start Catharsis</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Post-Game Survey Overlay -->
+                <div class="survey-overlay hidden" id="survey-modal">
+                    <div class="survey-card">
+                        <div class="survey-robot-avatar">
+                            <div class="kawanku-robot pulsing-robot">
+                                <div class="robot-antenna"></div>
+                                <div class="robot-head">
+                                    <div class="robot-ears"></div>
+                                    <div class="robot-eyes">
+                                        <div class="eye eye-happy-l"></div>
+                                        <div class="eye eye-happy-r"></div>
+                                    </div>
+                                </div>
+                                <div class="robot-body">
+                                    <div class="robot-heart pulse-heart"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <h3>Post-Game Reflection</h3>
+                        <p class="survey-prompt" id="survey-robot-prompt">Hey Kawan, after playing this, how are you feeling now?</p>
+                        
+                        <div class="emoji-options-grid">
+                            <button class="emoji-btn" data-mood="1">
+                                <span class="emoji">🌟</span>
+                                <span class="emoji-label">Much Better</span>
+                            </button>
+                            <button class="emoji-btn" data-mood="2">
+                                <span class="emoji">😊</span>
+                                <span class="emoji-label">Calmer</span>
+                            </button>
+                            <button class="emoji-btn" data-mood="3">
+                                <span class="emoji">😐</span>
+                                <span class="emoji-label">Neutral</span>
+                            </button>
+                            <button class="emoji-btn" data-mood="4">
+                                <span class="emoji">😕</span>
+                                <span class="emoji-label">Still Stressed</span>
+                            </button>
+                            <button class="emoji-btn" data-mood="5">
+                                <span class="emoji">😢</span>
+                                <span class="emoji-label">Chat with AI</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>

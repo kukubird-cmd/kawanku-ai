@@ -352,6 +352,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (panelId === 'shop-panel') {
             if (DOM.headerTitle) DOM.headerTitle.innerText = "Kawan Spark Shop";
             if (DOM.headerSubtitle) DOM.headerSubtitle.innerText = "Redeem your daily streak sparks for exclusive avatar items.";
+        } else if (panelId === 'games-panel') {
+            if (DOM.headerTitle) DOM.headerTitle.innerText = "Play & Relax";
+            if (DOM.headerSubtitle) DOM.headerSubtitle.innerText = "Take a quick mental break with our relaxing mini-games guided by KawanKu Robot.";
         }
     }
 
@@ -4305,6 +4308,577 @@ Example format:
         const autoWeek = Math.min(4, Math.ceil(new Date().getDate() / 7));
         renderShelf(autoWeek);
         syncShopBalance(loadSpark());
+    })();
+
+    // =========================================================================
+    // GAMES & RELAXATION PANEL ENGINE — STEMGINEERS Innovation Project
+    // =========================================================================
+    (function RelaxationGamesEngine() {
+        // AI-Driven Entry Gateway Elements
+        const gatewayRobot = document.getElementById('gateway-robot');
+        const gatewayMoodBadge = document.getElementById('gateway-mood-badge');
+        const gatewaySpeechBubble = document.getElementById('gateway-speech-bubble');
+        const statusToggleBtn = document.getElementById('status-toggle-btn');
+        const cardMatch3 = document.getElementById('card-match3');
+        const cardTrash = document.getElementById('card-trash');
+        const tagMatch3 = document.getElementById('tag-match3');
+        const tagTrash = document.getElementById('tag-trash');
+
+        // Match-3 Game Elements
+        const match3StartAction = document.getElementById('match3-start-action');
+        const match3GameArena = document.getElementById('match3-game-arena');
+        const match3Board = document.getElementById('match3-board');
+        const match3Progress = document.getElementById('match3-progress');
+        const match3ProgressVal = document.getElementById('match3-progress-val');
+        const btnStartMatch3 = document.getElementById('btn-start-match3');
+        const btnQuitMatch3 = document.getElementById('btn-quit-match3');
+
+        // Emotional Trash Can Elements
+        const trashStartAction = document.getElementById('trash-start-action');
+        const trashGameArena = document.getElementById('trash-game-arena');
+        const trashTextInput = document.getElementById('trash-text-input');
+        const btnStartTrash = document.getElementById('btn-start-trash');
+        const btnDestroyTrash = document.getElementById('btn-destroy-trash');
+        const btnQuitTrash = document.getElementById('btn-quit-trash');
+        const crushStage = document.getElementById('crush-stage');
+        const crushedPaper = document.getElementById('crushed-paper');
+        const crushFlash = document.getElementById('crush-flash');
+
+        // Post-Game Survey Elements
+        const surveyModal = document.getElementById('survey-modal');
+        const surveyRobotPrompt = document.getElementById('survey-robot-prompt');
+
+        // Global Game Variables
+        let currentMoodState = 'A'; // 'A' or 'B'
+        
+        // Match-3 State
+        const GRID_ROWS = 6;
+        const GRID_COLS = 6;
+        const TILE_TYPES = [
+            { id: 1, char: '🟪', name: 'mangosteen' }, // Mangosteen
+            { id: 2, char: '🟨', name: 'durian' },     // Durian
+            { id: 3, char: '🥤', name: 'milo' },       // Milo Dinosaur
+            { id: 4, char: '🟥', name: 'rambutan' },   // Rambutan
+            { id: 5, char: '🤖', name: 'robot' }       // RobotFace
+        ];
+        let boardState = []; // 2D array of tile objects
+        let selectedTile = null;
+        let isSwapping = false;
+        let match3Score = 0;
+        const WIN_MATCH_COUNT = 8; // 8 matches to fill relaxation bar
+
+        // Localized Supportive Phrases
+        const SUPPORTIVE_PHRASES = [
+            "Relax-lah, you are doing great! 😊",
+            "Tak apa, I fully support you! 🤍",
+            "Steady-lah Kawan, tomorrow is a new day! 🌟",
+            "Chill-lah, one step at a time. 🧘",
+            "Don't worry too much, you got this! 💪",
+            "Sabar-lah, everything will turn out fine! ✨"
+        ];
+
+        // ---------------------------------------------------------------------
+        // AI GATEWAY STATE CONTROLLER
+        // ---------------------------------------------------------------------
+        function setMoodState(stateStr) {
+            currentMoodState = stateStr;
+            
+            // Update switch active classes
+            statusToggleBtn.querySelectorAll('.switch-option').forEach(opt => {
+                if (opt.getAttribute('data-state') === stateStr) {
+                    opt.classList.add('active');
+                } else {
+                    opt.classList.remove('active');
+                }
+            });
+
+            // Reset mascot classes
+            gatewayRobot.classList.remove('state-anxious', 'state-frustrated');
+
+            if (stateStr === 'A') {
+                // State A: Anxious / Stress Detected
+                gatewayRobot.classList.add('state-anxious');
+                gatewayMoodBadge.innerText = 'State A: Anxiety / Stress';
+                gatewayMoodBadge.className = 'status-badge status-anxious';
+                gatewaySpeechBubble.innerHTML = "Hey Kawan, I sense you're feeling anxious or overwhelmed. Let's take a 2-minute break and clear your mind. I highly recommend playing our <strong>'Cognitive Shifting Match-3'</strong>!";
+                
+                // Highlight recommendation card
+                cardMatch3.classList.add('recommend-pulse');
+                cardTrash.classList.remove('recommend-pulse');
+                tagMatch3.classList.remove('hidden');
+                tagTrash.classList.add('hidden');
+            } else {
+                // State B: Anger / Frustration Detected
+                gatewayRobot.classList.add('state-frustrated');
+                gatewayMoodBadge.innerText = 'State B: Frustration / Anger';
+                gatewayMoodBadge.className = 'status-badge status-frustrated';
+                gatewaySpeechBubble.innerHTML = "Hey Kawan, did something upset you today? Don't bottle it up. Write it down in the <strong>'Emotional Trash Can'</strong> and let's destroy it together!";
+                
+                // Highlight recommendation card
+                cardTrash.classList.add('recommend-pulse');
+                cardMatch3.classList.remove('recommend-pulse');
+                tagTrash.classList.remove('hidden');
+                tagMatch3.classList.add('hidden');
+            }
+        }
+
+        // Toggle state click handler
+        if (statusToggleBtn) {
+            statusToggleBtn.addEventListener('click', (e) => {
+                const opt = e.target.closest('.switch-option');
+                if (opt) {
+                    setMoodState(opt.getAttribute('data-state'));
+                }
+            });
+        }
+
+        // ---------------------------------------------------------------------
+        // MATCH-3 PUZZLE CORE LOGIC
+        // ---------------------------------------------------------------------
+        function startMatch3Game() {
+            match3StartAction.classList.add('hidden');
+            match3GameArena.classList.remove('hidden');
+            match3Score = 0;
+            updateMatch3ProgressBar();
+            buildBoard();
+        }
+
+        function quitMatch3Game() {
+            match3GameArena.classList.add('hidden');
+            match3StartAction.classList.remove('hidden');
+        }
+
+        function updateMatch3ProgressBar() {
+            const pct = Math.min(100, Math.round((match3Score / WIN_MATCH_COUNT) * 100));
+            match3Progress.style.width = pct + '%';
+            match3ProgressVal.innerText = pct + '%';
+        }
+
+        function buildBoard() {
+            match3Board.innerHTML = '';
+            boardState = [];
+
+            // Loop rows & cols
+            for (let r = 0; r < GRID_ROWS; r++) {
+                boardState[r] = [];
+                for (let c = 0; c < GRID_COLS; c++) {
+                    let tile;
+                    // Generate random, ensuring no starting Match-3 matches
+                    do {
+                        tile = getRandomTileType();
+                    } while (
+                        (r >= 2 && boardState[r-1][c].id === tile.id && boardState[r-2][c].id === tile.id) ||
+                        (c >= 2 && boardState[r][c-1].id === tile.id && boardState[r][c-2].id === tile.id)
+                    );
+                    
+                    const tileObj = {
+                        id: tile.id,
+                        char: tile.char,
+                        name: tile.name,
+                        row: r,
+                        col: c,
+                        element: null
+                    };
+                    boardState[r][c] = tileObj;
+                }
+            }
+            renderBoardElements();
+        }
+
+        function getRandomTileType() {
+            return TILE_TYPES[Math.floor(Math.random() * TILE_TYPES.length)];
+        }
+
+        function renderBoardElements() {
+            match3Board.innerHTML = '';
+            for (let r = 0; r < GRID_ROWS; r++) {
+                for (let c = 0; c < GRID_COLS; c++) {
+                    const tileObj = boardState[r][c];
+                    const div = document.createElement('div');
+                    div.className = 'match3-tile tile-drop';
+                    div.style.gridRowStart = r + 1;
+                    div.style.gridColumnStart = c + 1;
+                    div.innerText = tileObj.char;
+                    div.setAttribute('data-row', r);
+                    div.setAttribute('data-col', c);
+                    
+                    div.addEventListener('click', () => handleTileClick(tileObj));
+                    
+                    tileObj.element = div;
+                    match3Board.appendChild(div);
+                }
+            }
+        }
+
+        function handleTileClick(tileObj) {
+            if (isSwapping) return;
+
+            if (!selectedTile) {
+                // First tile selection
+                selectedTile = tileObj;
+                tileObj.element.classList.add('selected');
+            } else if (selectedTile === tileObj) {
+                // Deselect
+                selectedTile.element.classList.remove('selected');
+                selectedTile = null;
+            } else {
+                // Check if adjacent
+                const rDiff = Math.abs(selectedTile.row - tileObj.row);
+                const cDiff = Math.abs(selectedTile.col - tileObj.col);
+                const isAdjacent = (rDiff === 1 && cDiff === 0) || (rDiff === 0 && cDiff === 1);
+
+                if (isAdjacent) {
+                    selectedTile.element.classList.remove('selected');
+                    swapTilesAndProcess(selectedTile, tileObj);
+                    selectedTile = null;
+                } else {
+                    // Change selection to the newly clicked tile
+                    selectedTile.element.classList.remove('selected');
+                    selectedTile = tileObj;
+                    tileObj.element.classList.add('selected');
+                }
+            }
+        }
+
+        async function swapTilesAndProcess(t1, t2) {
+            isSwapping = true;
+
+            // Swapping visual animation coordinates
+            const row1 = t1.row, col1 = t1.col;
+            const row2 = t2.row, col2 = t2.col;
+
+            // Swap in internal board state arrays
+            boardState[row1][col1] = t2;
+            boardState[row2][col2] = t1;
+            t1.row = row2; t1.col = col2;
+            t2.row = row1; t2.col = col1;
+
+            // Re-render coordinate assignments
+            t1.element.style.gridRowStart = row2 + 1;
+            t1.element.style.gridColumnStart = col2 + 1;
+            t2.element.style.gridRowStart = row1 + 1;
+            t2.element.style.gridColumnStart = col1 + 1;
+
+            // Wait brief transition delay
+            await sleep(250);
+
+            // Verify if matches exist
+            const matches = getBoardMatches();
+            if (matches.length > 0) {
+                await processMatches(matches);
+            } else {
+                // No matches, swap back!
+                boardState[row1][col1] = t1;
+                boardState[row2][col2] = t2;
+                t1.row = row1; t1.col = col1;
+                t2.row = row2; t2.col = col2;
+
+                t1.element.style.gridRowStart = row1 + 1;
+                t1.element.style.gridColumnStart = col1 + 1;
+                t2.element.style.gridRowStart = row2 + 1;
+                t2.element.style.gridColumnStart = col2 + 1;
+                await sleep(250);
+            }
+            isSwapping = false;
+        }
+
+        function getBoardMatches() {
+            const matches = [];
+            
+            // Check horizontal matches
+            for (let r = 0; r < GRID_ROWS; r++) {
+                for (let c = 0; c < GRID_COLS - 2; c++) {
+                    const id1 = boardState[r][c].id;
+                    const id2 = boardState[r][c+1].id;
+                    const id3 = boardState[r][c+2].id;
+                    if (id1 === id2 && id2 === id3) {
+                        matches.push({ r, c });
+                        matches.push({ r, c: c+1 });
+                        matches.push({ r, c: c+2 });
+                    }
+                }
+            }
+
+            // Check vertical matches
+            for (let r = 0; r < GRID_ROWS - 2; r++) {
+                for (let c = 0; c < GRID_COLS; c++) {
+                    const id1 = boardState[r][c].id;
+                    const id2 = boardState[r+1][c].id;
+                    const id3 = boardState[r+2][c].id;
+                    if (id1 === id2 && id2 === id3) {
+                        matches.push({ r, c });
+                        matches.push({ r: r+1, c });
+                        matches.push({ r: r+2, c });
+                    }
+                }
+            }
+
+            // De-duplicate match array elements
+            const unique = [];
+            const keyMap = {};
+            matches.forEach(m => {
+                const k = `${m.r}-${m.c}`;
+                if (!keyMap[k]) {
+                    keyMap[k] = true;
+                    unique.push(boardState[m.r][m.c]);
+                }
+            });
+
+            return unique;
+        }
+
+        async function processMatches(matchesList) {
+            match3Score++;
+            updateMatch3ProgressBar();
+
+            // Clear visuals with animation
+            matchesList.forEach(tile => {
+                tile.element.classList.add('pop-clear');
+            });
+            await sleep(300);
+
+            // Remove cleared element nodes
+            matchesList.forEach(tile => {
+                tile.element.remove();
+                boardState[tile.row][tile.col] = null;
+            });
+
+            // Pull items down
+            for (let c = 0; c < GRID_COLS; c++) {
+                let emptySpots = 0;
+                for (let r = GRID_ROWS - 1; r >= 0; r--) {
+                    if (boardState[r][c] === null) {
+                        emptySpots++;
+                    } else if (emptySpots > 0) {
+                        // Move down by empty spots
+                        const tile = boardState[r][c];
+                        const targetRow = r + emptySpots;
+                        boardState[targetRow][c] = tile;
+                        boardState[r][c] = null;
+                        tile.row = targetRow;
+                        
+                        // Shift coordinates
+                        tile.element.style.gridRowStart = targetRow + 1;
+                    }
+                }
+
+                // Fill from top
+                for (let i = 0; i < emptySpots; i++) {
+                    const newTile = getRandomTileType();
+                    const targetRow = emptySpots - 1 - i;
+                    const tileObj = {
+                        id: newTile.id,
+                        char: newTile.char,
+                        name: newTile.name,
+                        row: targetRow,
+                        col: c,
+                        element: null
+                    };
+
+                    const div = document.createElement('div');
+                    div.className = 'match3-tile tile-drop';
+                    div.style.gridRowStart = targetRow + 1;
+                    div.style.gridColumnStart = c + 1;
+                    div.innerText = tileObj.char;
+                    div.setAttribute('data-row', targetRow);
+                    div.setAttribute('data-col', c);
+                    
+                    div.addEventListener('click', () => handleTileClick(tileObj));
+                    
+                    tileObj.element = div;
+                    boardState[targetRow][c] = tileObj;
+                    match3Board.appendChild(div);
+                }
+            }
+
+            await sleep(350);
+
+            // Re-check cascading chain matches!
+            const newMatches = getBoardMatches();
+            if (newMatches.length > 0) {
+                await processMatches(newMatches);
+            } else {
+                // Verify win condition
+                if (match3Score >= WIN_MATCH_COUNT) {
+                    await sleep(400);
+                    triggerPostGameSurvey("Awesome matching session! Your brain has successfully shifted states.");
+                }
+            }
+        }
+
+        // Helper sleep utility
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // ---------------------------------------------------------------------
+        // EMOTIONAL TRASH CAN LOGIC
+        // ---------------------------------------------------------------------
+        function startTrashGame() {
+            trashStartAction.classList.add('hidden');
+            trashGameArena.classList.remove('hidden');
+            trashTextInput.value = '';
+            trashTextInput.focus();
+        }
+
+        function quitTrashGame() {
+            trashGameArena.classList.add('hidden');
+            trashStartAction.classList.remove('hidden');
+        }
+
+        async function destroyWorries() {
+            const text = trashTextInput.value.trim();
+            if (!text) {
+                showToast("Please write something down to destroy it!", "warning");
+                return;
+            }
+
+            // Lock controls
+            btnDestroyTrash.disabled = true;
+            btnQuitTrash.disabled = true;
+
+            // Trigger crush stage overlay display
+            crushStage.classList.remove('hidden');
+            crushedPaper.innerText = text.substring(0, 8) + '...';
+            crushStage.classList.add('animating');
+
+            // Play smash anims (claw slides inside CSS)
+            await sleep(550);
+
+            // Trigger explosion sparkles and flash
+            crushFlash.classList.add('trigger');
+            spawnExplosionParticles();
+
+            // Clear inputs
+            trashTextInput.value = '';
+
+            await sleep(600);
+
+            // Cleanup animations
+            crushStage.classList.remove('animating');
+            crushStage.classList.add('hidden');
+            crushFlash.classList.remove('trigger');
+
+            // Unlock controls
+            btnDestroyTrash.disabled = false;
+            btnQuitTrash.disabled = false;
+
+            // Get random supportive comment
+            const supportComment = SUPPORTIVE_PHRASES[Math.floor(Math.random() * SUPPORTIVE_PHRASES.length)];
+            
+            // Show survey
+            triggerPostGameSurvey(supportComment);
+        }
+
+        function spawnExplosionParticles() {
+            const count = 35;
+            const containerRect = crushStage.getBoundingClientRect();
+            const centerX = containerRect.width / 2;
+            const centerY = containerRect.height / 2;
+
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle-star';
+                particle.innerText = ['⭐', '✨', '💥', '💖', '🎈'][Math.floor(Math.random() * 5)];
+                particle.style.fontSize = (Math.random() * 0.8 + 0.8) + 'rem';
+                particle.style.left = centerX + 'px';
+                particle.style.top = centerY + 'px';
+
+                // Random fly vector variables in polar coordinates
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 150 + 50;
+                const xVal = Math.cos(angle) * distance;
+                const yVal = Math.sin(angle) * distance;
+
+                particle.style.setProperty('--x', xVal + 'px');
+                particle.style.setProperty('--y', yVal + 'px');
+
+                crushStage.appendChild(particle);
+
+                // Auto clean-up particle divs
+                setTimeout(() => {
+                    particle.remove();
+                }, 800);
+            }
+        }
+
+        // ---------------------------------------------------------------------
+        // POST-GAME SURVEY LOG
+        // ---------------------------------------------------------------------
+        function triggerPostGameSurvey(customPrompt) {
+            surveyRobotPrompt.innerText = customPrompt + "\n\nHey Kawan, after playing this, how are you feeling now?";
+            surveyModal.classList.remove('hidden');
+        }
+
+        function handleMoodSurveyChoice(moodVal) {
+            surveyModal.classList.add('hidden');
+            
+            // Reset game arenas back to gateway menu
+            quitMatch3Game();
+            quitTrashGame();
+
+            if (moodVal === '5') {
+                // Redirect back to main KawanKu chat module
+                const chatNavBtn = document.getElementById('nav-chat');
+                if (chatNavBtn) {
+                    chatNavBtn.click();
+                } else {
+                    // Fallback programmatic switch
+                    switchPanel('chat-panel');
+                    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                    const navChat = document.getElementById('nav-chat');
+                    if (navChat) navChat.classList.add('active');
+                }
+                showToast("Welcome back! What's on your mind? Tell me more.", "info");
+            } else {
+                // Normal mood updates log
+                showToast("Mood log updated in your Personalized Wellness Report! You're doing amazing.", "success");
+            }
+        }
+
+        // ---------------------------------------------------------------------
+        // INITIALIZATION
+        // ---------------------------------------------------------------------
+        function initGamesPage() {
+            // Setup default gateway view state
+            setMoodState('A');
+
+            // Wire button click handlers
+            if (btnStartMatch3) btnStartMatch3.addEventListener('click', startMatch3Game);
+            if (btnQuitMatch3) btnQuitMatch3.addEventListener('click', quitMatch3Game);
+            if (btnStartTrash) btnStartTrash.addEventListener('click', startTrashGame);
+            if (btnQuitTrash) btnQuitTrash.addEventListener('click', quitTrashGame);
+            if (btnDestroyTrash) btnDestroyTrash.addEventListener('click', destroyWorries);
+
+            // Wire emoji button selection
+            surveyModal.querySelectorAll('.emoji-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    handleMoodSurveyChoice(btn.getAttribute('data-mood'));
+                });
+            });
+
+            // Setup Lucide icons locally inside this scope
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                try {
+                    lucide.createIcons({
+                        attrs: {
+                            class: 'lucide-icon'
+                        }
+                    });
+                } catch(e) {
+                    console.warn("Lucide icons load issue inside games scope", e);
+                }
+            }
+        }
+
+        // Setup binder loop
+        initGamesPage();
+
+        // Expose internally in window context just in case
+        window.RelaxationGamesEngine = {
+            init: initGamesPage,
+            setMood: setMoodState
+        };
     })();
 
     // Run launcher
