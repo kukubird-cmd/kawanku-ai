@@ -1,6 +1,6 @@
 # Simple PowerShell static file server for MindBuddy
 $port = 8086
-$localDir = "C:\Users\shaoh\.gemini\antigravity\scratch\git"
+$localDir = "C:\Users\zheho\.gemini\antigravity\scratch\kawanku-ai"
 
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://localhost:$port/")
@@ -58,6 +58,10 @@ while ($listener.IsListening) {
             
             $response.ContentType = $contentType
             $response.ContentLength64 = $content.Length
+            # Force no-cache headers to prevent browser caching
+            $response.Headers.Add("Cache-Control", "no-cache, no-store, must-revalidate")
+            $response.Headers.Add("Pragma", "no-cache")
+            $response.Headers.Add("Expires", "0")
             $response.OutputStream.Write($content, 0, $content.Length)
         } else {
             $response.StatusCode = 404
