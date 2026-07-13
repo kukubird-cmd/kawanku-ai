@@ -8,33 +8,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (saved) return JSON.parse(saved);
         } catch(e) {}
         return {
-            hairStyle: 'crop',
-            skinTone: '#ffffff',
+            skinTone: '#dbf7f9',
             expression: 'friendly',
-            shirtStyle: 'hoodie',
-            glasses: 'none',
-            accessories: 'headphones',
-            hoodieGraphic: 'star',
-            pantsStyle: 'shorts',
-            shoes: 'sneakers',
+            blushShape: 'circle',
+            accessory: 'none',
             pet: 'none',
             scene: 'yellow',
-            hairColor: '#fbbf24',
-            shirtColor: '#4f46e5',
-            glowColor1: '#8b5cf6',
-            glowColor2: '#ec4899'
+            currentScene: 'starry_night',
+            activeOutfit: 'none'
         };
     }
 
     const state = {
         activePanel: 'chat-panel',
         avatar: loadAvatarState(),
-        gameStats: {
-            matches: parseInt(localStorage.getItem('relax_total_matches') || '0'),
-            slices: parseInt(localStorage.getItem('relax_total_slices') || '0'),
-            seconds: parseInt(localStorage.getItem('relax_total_seconds') || '0')
-        },
-
 
         // Backend Diagnostics Report (Updated every turn)
         diagnostics: {
@@ -104,113 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- COZY ARCADE SANCTUARY TRACKER CORE & COMFORT LOUNGE ---
-    function updateDailyZenFocusChecklist() {
-        const taskStart = document.getElementById('task-cozy-start');
-        const taskMatches = document.getElementById('task-cozy-matches');
-        const taskSlices = document.getElementById('task-cozy-slices');
-
-        const gameStarted = localStorage.getItem('relax_game_started') === 'true';
-        if (taskStart) {
-            if (gameStarted) taskStart.classList.add('completed');
-            else taskStart.classList.remove('completed');
-        }
-
-        if (taskMatches) {
-            if (state.gameStats.matches >= 30) taskMatches.classList.add('completed');
-            else taskMatches.classList.remove('completed');
-        }
-
-        if (taskSlices) {
-            if (state.gameStats.slices >= 20) taskSlices.classList.add('completed');
-            else taskSlices.classList.remove('completed');
-        }
-    }
-
-    window.updateSanctuaryDashboard = function() {
-        const matchesEl = document.getElementById('dash-val-matches');
-        const slicesEl = document.getElementById('dash-val-slices');
-        const timeEl = document.getElementById('dash-val-time');
-        const zenEl = document.getElementById('dash-val-zen');
-
-        if (matchesEl) matchesEl.textContent = state.gameStats.matches;
-        if (slicesEl) slicesEl.textContent = state.gameStats.slices;
-        if (timeEl) timeEl.textContent = Math.floor(state.gameStats.seconds / 60) + 'm';
-        
-        if (zenEl) {
-            const secs = state.gameStats.seconds;
-            if (secs > 180) zenEl.textContent = "Deep Focus 🧘";
-            else if (secs > 60) zenEl.textContent = "Relaxed 🍃";
-            else zenEl.textContent = "Calm 😌";
-        }
-
-        // Update Daily Zen Focus checklist checked indicators
-        updateDailyZenFocusChecklist();
-
-        try {
-            localStorage.setItem('relax_total_matches', state.gameStats.matches);
-            localStorage.setItem('relax_total_slices', state.gameStats.slices);
-            localStorage.setItem('relax_total_seconds', state.gameStats.seconds);
-        } catch(e) {}
-    };
-
-    // --- COZY MASCOT WISDOM ROTATOR ---
-    const LOUNGE_QUOTES = [
-        "Let's take a deep breath together, Kawan! 🌸 Click me for cozy wisdom.",
-        "A short mental break resets your brain energy by up to 40%! 🍃",
-        "No timers. No limits. Your comfort is the only goal here. 🤍",
-        "Watering plants, matching fruits, or taking deep breaths are all great ways to unwind! 🌿",
-        "Which cozy game are we feeling today? Match-3 or Fruit Zen? 🍉",
-        "Slow down, listen to the music, and let the stress melt away. You're safe here. ✨",
-        "Did you know? Mangosteens are known as the Queen of Fruits in Malaysia! 👑",
-        "Durian spikes protect its sweet custard heart. It's okay to have boundaries too. 💛"
-    ];
-    let currentQuoteIdx = 0;
-
-    function rotateMascotQuote() {
-        const bubble = document.getElementById('lounge-speech-text');
-        const avatar = document.getElementById('lounge-robot-trigger');
-        if (!bubble) return;
-
-        currentQuoteIdx = (currentQuoteIdx + 1) % LOUNGE_QUOTES.length;
-        bubble.textContent = LOUNGE_QUOTES[currentQuoteIdx];
-
-        // Trigger micro-scale feedback animation on mascot
-        if (avatar) {
-            avatar.style.transform = 'scale(1.2) rotate(-6deg)';
-            setTimeout(() => {
-                avatar.style.transform = '';
-            }, 200);
-        }
-    }
-
-    // Initialize comfort lounge event listeners
-    function bindLoungeEvents() {
-        const mascotTrigger = document.getElementById('lounge-robot-trigger');
-        if (mascotTrigger) {
-            mascotTrigger.addEventListener('click', rotateMascotQuote);
-        }
-    }
-
-
-    // Initialize once
-    setTimeout(() => {
-        if (window.updateSanctuaryDashboard) window.updateSanctuaryDashboard();
-        bindLoungeEvents();
-    }, 150);
-
-    // Track real-time relaxation seconds
-    setInterval(() => {
-        if (state.activePanel === 'games-panel') {
-            state.gameStats.seconds += 5; // Accumulate time
-            window.updateSanctuaryDashboard();
-        }
-    }, 5000);
-
-
     // ----------------------------------------------------------------------
     // DESIGN SYSTEM METADATA DEFINITIONS
-
     // ----------------------------------------------------------------------
     const SVG_HAIRSTYLES = {
         crop: {
@@ -249,28 +131,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const SVG_EXPRESSIONS = {
         friendly: {
-            leftBrow:  "M118,88 Q130,83 140,88",
-            rightBrow: "M160,88 Q170,83 182,88",
-            mouth:     "M138,133 Q150,143 162,133",
+            leftBrow:  "M0,0",
+            rightBrow: "M0,0",
+            mouth:     "M 194 198 Q 199 202 200 198 Q 201 202 206 198",
             teethOpacity: 0
         },
         thoughtful: {
-            leftBrow:  "M118,85 Q130,80 140,88",
-            rightBrow: "M160,88 Q170,80 182,85",
-            mouth:     "M140,136 L160,136",
+            leftBrow:  "M0,0",
+            rightBrow: "M0,0",
+            mouth:     "M 193 200 L 207 200",
             teethOpacity: 0
         },
         attentive: {
-            leftBrow:  "M118,88 Q130,84 140,84",
-            rightBrow: "M160,84 Q170,84 182,88",
-            mouth:     "M140,135 Q150,139 160,135",
+            leftBrow:  "M0,0",
+            rightBrow: "M0,0",
+            mouth:     "M 195 200 Q 200 205 205 200",
             teethOpacity: 0
         },
         excited: {
-            leftBrow:  "M118,82 Q130,76 140,82",
-            rightBrow: "M160,82 Q170,76 182,82",
-            mouth:     "M136,132 Q150,146 164,132",
-            teethOpacity: 1
+            leftBrow:  "M0,0",
+            rightBrow: "M0,0",
+            mouth:     "M 194 198 C 194 210, 206 210, 206 198 Z",
+            teethOpacity: 0
         }
     };
 
@@ -380,6 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sosConfirmBtn: document.getElementById('sos-confirm-btn'),
         sosPreviewStatus: document.getElementById('sos-preview-status'),
         sosPreviewSentiment: document.getElementById('sos-preview-sentiment'),
+        sosPreviewHR: document.getElementById('sos-preview-hr'),
         sosPreviewRant: document.getElementById('sos-preview-rant'),
         toastContainer: document.getElementById('toast-container')
     };
@@ -388,28 +271,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // INITIALIZATION & TAB NAVIGATION
     // ----------------------------------------------------------------------
     function init() {
-        // Populate student profile name and bind logout button
-        const studentSession = localStorage.getItem('kawanku_student_session');
-        if (studentSession) {
-            try {
-                const sessionData = JSON.parse(studentSession);
-                const nameEl = document.querySelector('.profile-name');
-                if (nameEl && sessionData.full_name) {
-                    nameEl.innerText = sessionData.full_name;
-                }
-            } catch(e) {
-                console.error("Error setting profile name:", e);
-            }
-        }
-
-        const logoutBtn = document.getElementById('student-logout-btn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => {
-                localStorage.removeItem('kawanku_student_session');
-                window.location.href = '/frontend/student/login.html';
-            });
-        }
-
         // Clone the main SVG into the studio preview container
         const mainSVG = document.getElementById('mindbuddy-svg');
         const studioContainer = document.getElementById('studio-avatar-container');
@@ -455,14 +316,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function switchPanel(panelId) {
-        // Pause Calm video player when switching away from Calm panel
-        if (panelId !== 'calm-panel') {
-            const player = document.getElementById('detailVideoPlayer');
-            if (player) {
-                player.pause();
-            }
-        }
-
         DOM.panels.forEach(panel => {
             panel.classList.remove('active');
         });
@@ -492,6 +345,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (panelId === 'shop-panel') {
             if (DOM.headerTitle) DOM.headerTitle.innerText = "Kawan Spark Shop";
             if (DOM.headerSubtitle) DOM.headerSubtitle.innerText = "Redeem your daily streak sparks for exclusive avatar items.";
+        } else if (panelId === 'games-panel') {
+            if (DOM.headerTitle) DOM.headerTitle.innerText = "Play & Relax";
+            if (DOM.headerSubtitle) DOM.headerSubtitle.innerText = "Take a quick mental break with our relaxing mini-games guided by KawanKu Robot.";
         }
     }
 
@@ -535,12 +391,41 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyAvatarToSVG(svg, conf) {
         if (!svg) return;
 
+        // ---- Custom Dress-up Outfit Layers ----
+        const outfitLayers = ['forest', 'starry', 'nautical', 'strawberry', 'wizard', 'princess', 'mermaid', 'lolita', 'unicorn'];
+        outfitLayers.forEach(id => {
+            const el = svg.querySelector('#outfit-' + id);
+            if (el) {
+                el.style.opacity = (conf.activeOutfit === id) ? '1' : '0';
+            }
+        });
+
         // ---- Skin tone propagation ----
-        const skinEls = ['avatar-head', 'avatar-neck', 'avatar-hand-l', 'avatar-hand-r', 'ear-l', 'ear-r'];
+        const skinEls = ['avatar-head', 'avatar-neck', 'ear-l', 'ear-r', 'avatar-hand-l', 'avatar-hand-r'];
         skinEls.forEach(id => {
             const el = svg.querySelector('#' + id);
             if (el) el.setAttribute('fill', conf.skinTone);
         });
+
+        // Dynamically update the 3D body gradient based on skinTone selection!
+        const buddy3dGrad = document.getElementById('buddy-3d-grad');
+        if (buddy3dGrad && conf.skinTone) {
+            const stops = buddy3dGrad.querySelectorAll('stop');
+            if (stops.length >= 4) {
+                stops[1].setAttribute('stop-color', conf.skinTone);
+                stops[2].setAttribute('stop-color', shadeColor(conf.skinTone, -15));
+                stops[3].setAttribute('stop-color', shadeColor(conf.skinTone, -30));
+            }
+        }
+        const tail3dGrad = document.getElementById('tail-3d-grad');
+        if (tail3dGrad && conf.skinTone) {
+            const stops = tail3dGrad.querySelectorAll('stop');
+            if (stops.length >= 3) {
+                stops[0].setAttribute('stop-color', conf.skinTone);
+                stops[1].setAttribute('stop-color', shadeColor(conf.skinTone, -15));
+                stops[2].setAttribute('stop-color', shadeColor(conf.skinTone, -30));
+            }
+        }
         // Ears inner + nose + blush
         const noseEl = svg.querySelector('#avatar-nose');
         if (noseEl) {
@@ -548,37 +433,405 @@ document.addEventListener('DOMContentLoaded', () => {
             noseEl.setAttribute('fill', shadeColor(conf.skinTone, -20));
         }
 
-        // ---- Hair ----
+        // ---- Mascot Expressions ----
+        const eyesGroup = svg.querySelector('#avatar-eyes');
+        const mouthContainer = svg.querySelector('#avatar-mouth-container');
+        if (eyesGroup && mouthContainer) {
+            let eyesSVG = "";
+            let mouthSVG = "";
+            if (conf.expression === 'friendly') {
+                eyesSVG = `
+                    <!-- Left Eye -->
+                    <circle cx="172" cy="190" r="14" fill="#3c2f46" stroke="#4A3E3D" stroke-width="1.5" />
+                    <path d="M 160 194 A 12 12 0 0 0 184 194" fill="#d8b4fe" opacity="0.35" />
+                    <circle cx="168" cy="185" r="4.5" fill="#ffffff" />
+                    <circle cx="176" cy="194" r="2.2" fill="#ffffff" />
+                    <!-- Right Eye -->
+                    <circle cx="228" cy="190" r="14" fill="#3c2f46" stroke="#4A3E3D" stroke-width="1.5" />
+                    <path d="M 216 194 A 12 12 0 0 0 240 194" fill="#d8b4fe" opacity="0.35" />
+                    <circle cx="224" cy="185" r="4.5" fill="#ffffff" />
+                    <circle cx="232" cy="194" r="2.2" fill="#ffffff" />
+                `;
+                mouthSVG = `
+                    <path id="avatar-mouth" d="M 194 198 Q 199 202 200 198 Q 201 202 206 198" fill="none" stroke="#3c2f46" stroke-width="3.5" stroke-linecap="round" />
+                `;
+            } else if (conf.expression === 'starry' || conf.expression === 'excited') {
+                eyesSVG = `
+                    <!-- Left Squint Eye (>) -->
+                    <path d="M 160,183 L 176,189 L 160,195" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <!-- Right Squint Eye (<) -->
+                    <path d="M 240,183 L 224,189 L 240,195" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+                `;
+                mouthSVG = `
+                    <path id="avatar-mouth" d="M 193,197 Q 196.5,200.5 200,197 Q 203.5,200.5 207,197" fill="none" stroke="#3c2f46" stroke-width="3.5" stroke-linecap="round" />
+                `;
+            } else if (conf.expression === 'wink' || conf.expression === 'attentive') {
+                eyesSVG = `
+                    <!-- Left Winking Arc -->
+                    <path d="M 160,192 Q 172,180 184,192" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" />
+                    <!-- Right Eye -->
+                    <circle cx="228" cy="190" r="14" fill="#3c2f46" stroke="#4A3E3D" stroke-width="1.5" />
+                    <path d="M 216 194 A 12 12 0 0 0 240 194" fill="#d8b4fe" opacity="0.35" />
+                    <circle cx="224" cy="185" r="4.5" fill="#ffffff" />
+                    <circle cx="232" cy="194" r="2.2" fill="#ffffff" />
+                `;
+                mouthSVG = `
+                    <path id="avatar-mouth" d="M 194 198 Q 199 202 200 198 Q 201 202 206 198" fill="none" stroke="#3c2f46" stroke-width="3.5" stroke-linecap="round" />
+                `;
+            } else if (conf.expression === 'sleepy' || conf.expression === 'thoughtful') {
+                eyesSVG = `
+                    <!-- Left Sleepy Arc -->
+                    <path d="M 160,188 Q 172,198 184,188" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" />
+                    <!-- Right Sleepy Arc -->
+                    <path d="M 216,188 Q 228,198 240,188" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" />
+                `;
+                mouthSVG = `
+                    <ellipse cx="200" cy="201" rx="4" ry="5.5" fill="#3c2f46" />
+                `;
+            } else if (conf.expression === 'blep') {
+                // Cute tongue-out blep face: half-moon droopy eyes + tiny tongue
+                eyesSVG = `
+                    <!-- Left droopy relaxed eye -->
+                    <path d="M 160,186 Q 172,196 184,186" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" />
+                    <path d="M 160,186 Q 172,198 184,186" fill="#3c2f46" opacity="0.12" />
+                    <!-- Right droopy relaxed eye -->
+                    <path d="M 216,186 Q 228,196 240,186" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" />
+                    <path d="M 216,186 Q 228,198 240,186" fill="#3c2f46" opacity="0.12" />
+                `;
+                mouthSVG = `
+                    <!-- Open mouth cavity: filled dark arch -->
+                    <path id="avatar-mouth" d="M 188,196 Q 200,216 212,196 Z" fill="#2a1a3e" stroke="#3c2f46" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <!-- Tongue peeking out from inside the mouth (overlaps bottom of arch) -->
+                    <ellipse cx="200" cy="213" rx="10" ry="8.5" fill="#ff6b9d" stroke="#d63077" stroke-width="2" />
+                    <!-- Tongue highlight shimmer -->
+                    <ellipse cx="197" cy="209" rx="3.5" ry="2.5" fill="#ffb3cc" opacity="0.7" />
+                `;
+            } else if (conf.expression === 'uwu') {
+                // UwU kawaii face: curved UwU eyes + big happy wide smile
+                eyesSVG = `
+                    <!-- Left UwU eye: two arcs making a curved U shape -->
+                    <path d="M 158,185 Q 163,196 172,192 Q 181,188 182,178" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <!-- Right UwU eye: mirrored -->
+                    <path d="M 242,185 Q 237,196 228,192 Q 219,188 218,178" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+                `;
+                mouthSVG = `
+                    <!-- Wide happy smile -->
+                    <path id="avatar-mouth" d="M 190,196 Q 200,208 210,196" fill="none" stroke="#3c2f46" stroke-width="3.5" stroke-linecap="round" />
+                `;
+            } else if (conf.expression === 'teary') {
+                // Teary sparkle eyes: happy eyes with large obvious teardrops
+                eyesSVG = `
+                    <!-- Left shimmery teary eye -->
+                    <circle cx="172" cy="190" r="14" fill="#3c2f46" stroke="#4A3E3D" stroke-width="1.5" />
+                    <path d="M 160 194 A 12 12 0 0 0 184 194" fill="#a5f3fc" opacity="0.4" />
+                    <circle cx="168" cy="185" r="4.5" fill="#ffffff" />
+                    <circle cx="176" cy="194" r="2" fill="#ffffff" />
+                    <!-- Large teardrop left: teardrop path shape -->
+                    <path d="M 154,205 Q 150,215 154,222 Q 158,228 162,222 Q 166,215 162,205 Q 158,200 154,205 Z" fill="#38bdf8" stroke="#0ea5e9" stroke-width="1.5" opacity="0.95" />
+                    <circle cx="157" cy="210" r="2" fill="#e0f2fe" opacity="0.8" />
+                    <!-- Right shimmery teary eye -->
+                    <circle cx="228" cy="190" r="14" fill="#3c2f46" stroke="#4A3E3D" stroke-width="1.5" />
+                    <path d="M 216 194 A 12 12 0 0 0 240 194" fill="#a5f3fc" opacity="0.4" />
+                    <circle cx="224" cy="185" r="4.5" fill="#ffffff" />
+                    <circle cx="232" cy="194" r="2" fill="#ffffff" />
+                    <!-- Large teardrop right: teardrop path shape -->
+                    <path d="M 238,205 Q 234,215 238,222 Q 242,228 246,222 Q 250,215 246,205 Q 242,200 238,205 Z" fill="#38bdf8" stroke="#0ea5e9" stroke-width="1.5" opacity="0.95" />
+                    <circle cx="241" cy="210" r="2" fill="#e0f2fe" opacity="0.8" />
+                `;
+                mouthSVG = `
+                    <!-- Big happy grin -->
+                    <path id="avatar-mouth" d="M 191,197 Q 200,206 209,197" fill="none" stroke="#3c2f46" stroke-width="3.5" stroke-linecap="round" />
+                `;
+            } else if (conf.expression === 'cat') {
+                // Cat face: > < chevron eyes + tiny cat-style w-mouth
+                eyesSVG = `
+                    <!-- Left cat chevron eye > -->
+                    <path d="M 160,195 L 172,189 L 184,195" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <!-- Right cat chevron eye < -->
+                    <path d="M 240,195 L 228,189 L 216,195" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+                `;
+                mouthSVG = `
+                    <!-- Cat w-mouth: two small arcs -->
+                    <path id="avatar-mouth" d="M 192,200 Q 196,196 200,200 Q 204,196 208,200" fill="none" stroke="#3c2f46" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+                `;
+            }
+            eyesGroup.innerHTML = eyesSVG;
+            mouthContainer.innerHTML = mouthSVG;
+        }
+
+        // ---- Cheek Blushes ----
+        const blushesGroup = svg.querySelector('#avatar-blushes');
+        if (blushesGroup) {
+            let blushSVG = "";
+            const shape = conf.blushShape || 'circle';
+            if (shape === 'circle') {
+                blushSVG = `
+                    <ellipse cx="156" cy="202" rx="9" ry="5.5" fill="#ffa2b6" opacity="0.85" />
+                    <ellipse cx="244" cy="202" rx="9" ry="5.5" fill="#ffa2b6" opacity="0.85" />
+                `;
+            } else if (shape === 'heart') {
+                blushSVG = `
+                    <path d="M 156,198 C 151,193 147,198 156,205 C 165,198 161,193 156,198 Z" fill="#ffa2b6" opacity="0.85" />
+                    <path d="M 244,198 C 239,193 235,198 244,205 C 253,198 249,193 244,198 Z" fill="#ffa2b6" opacity="0.85" />
+                `;
+            } else if (shape === 'star') {
+                blushSVG = `
+                    <polygon points="156,196 158,200 162,200 159,202 160,206 156,204 152,206 153,202 150,200 154,200" fill="#ffa2b6" opacity="0.85" />
+                    <polygon points="244,196 246,200 250,200 247,202 248,206 244,204 240,206 241,202 238,200 242,200" fill="#ffa2b6" opacity="0.85" />
+                `;
+            } else if (shape === 'sakura') {
+                // Sakura petal cluster: 5 tiny rounded petals arranged in a flower
+                blushSVG = `
+                    <!-- Left sakura -->
+                    <ellipse cx="156" cy="198" rx="3.5" ry="2" fill="#ffb7cc" opacity="0.9" transform="rotate(-20,156,198)" />
+                    <ellipse cx="163" cy="200" rx="3.5" ry="2" fill="#ffb7cc" opacity="0.9" transform="rotate(30,163,200)" />
+                    <ellipse cx="160" cy="207" rx="3.5" ry="2" fill="#ffb7cc" opacity="0.9" transform="rotate(80,160,207)" />
+                    <ellipse cx="152" cy="207" rx="3.5" ry="2" fill="#ffb7cc" opacity="0.9" transform="rotate(130,152,207)" />
+                    <ellipse cx="149" cy="200" rx="3.5" ry="2" fill="#ffb7cc" opacity="0.9" transform="rotate(170,149,200)" />
+                    <circle cx="156" cy="202" r="2" fill="#fff0f5" opacity="0.95" />
+                    <!-- Right sakura -->
+                    <ellipse cx="244" cy="198" rx="3.5" ry="2" fill="#ffb7cc" opacity="0.9" transform="rotate(-20,244,198)" />
+                    <ellipse cx="251" cy="200" rx="3.5" ry="2" fill="#ffb7cc" opacity="0.9" transform="rotate(30,251,200)" />
+                    <ellipse cx="248" cy="207" rx="3.5" ry="2" fill="#ffb7cc" opacity="0.9" transform="rotate(80,248,207)" />
+                    <ellipse cx="240" cy="207" rx="3.5" ry="2" fill="#ffb7cc" opacity="0.9" transform="rotate(130,240,207)" />
+                    <ellipse cx="237" cy="200" rx="3.5" ry="2" fill="#ffb7cc" opacity="0.9" transform="rotate(170,237,200)" />
+                    <circle cx="244" cy="202" r="2" fill="#fff0f5" opacity="0.95" />
+                `;
+            } else if (shape === 'sparkle') {
+                // Diamond sparkle clusters: 3 sparkle stars each side
+                blushSVG = `
+                    <!-- Left sparkles -->
+                    <path d="M 152,199 L 153.5,202 L 152,205 L 150.5,202 Z" fill="#ffcce0" opacity="0.95" />
+                    <path d="M 148,202 L 152,200.5 L 156,202 L 152,203.5 Z" fill="#ffcce0" opacity="0.95" />
+                    <path d="M 159,197 L 160,199 L 159,201 L 158,199 Z" fill="#ffa2c0" opacity="0.9" />
+                    <path d="M 157,199 L 159,198 L 161,199 L 159,200 Z" fill="#ffa2c0" opacity="0.9" />
+                    <path d="M 163,202 L 164,204 L 163,206 L 162,204 Z" fill="#ffcce0" opacity="0.85" />
+                    <path d="M 161,204 L 163,203 L 165,204 L 163,205 Z" fill="#ffcce0" opacity="0.85" />
+                    <!-- Right sparkles -->
+                    <path d="M 240,199 L 241.5,202 L 240,205 L 238.5,202 Z" fill="#ffcce0" opacity="0.95" />
+                    <path d="M 236,202 L 240,200.5 L 244,202 L 240,203.5 Z" fill="#ffcce0" opacity="0.95" />
+                    <path d="M 247,197 L 248,199 L 247,201 L 246,199 Z" fill="#ffa2c0" opacity="0.9" />
+                    <path d="M 245,199 L 247,198 L 249,199 L 247,200 Z" fill="#ffa2c0" opacity="0.9" />
+                    <path d="M 251,202 L 252,204 L 251,206 L 250,204 Z" fill="#ffcce0" opacity="0.85" />
+                    <path d="M 249,204 L 251,203 L 253,204 L 251,205 Z" fill="#ffcce0" opacity="0.85" />
+                `;
+            } else if (shape === 'dots') {
+                // Strawberry dots: 3 small dots in triangle arrangement
+                blushSVG = `
+                    <!-- Left trio dots -->
+                    <circle cx="152" cy="205" r="3.5" fill="#ff8fab" opacity="0.88" />
+                    <circle cx="160" cy="205" r="3.5" fill="#ff8fab" opacity="0.88" />
+                    <circle cx="156" cy="199" r="3.5" fill="#ff8fab" opacity="0.88" />
+                    <!-- Right trio dots -->
+                    <circle cx="240" cy="205" r="3.5" fill="#ff8fab" opacity="0.88" />
+                    <circle cx="248" cy="205" r="3.5" fill="#ff8fab" opacity="0.88" />
+                    <circle cx="244" cy="199" r="3.5" fill="#ff8fab" opacity="0.88" />
+                `;
+            } else if (shape === 'crescent') {
+                // Crescent moon blushes: soft glowing pink crescents
+                blushSVG = `
+                    <!-- Left crescent -->
+                    <path d="M 149,198 Q 143,202 149,207 Q 146,202 149,198 Z" fill="none" stroke="#ff8fab" stroke-width="0" />
+                    <path d="M 163,198 A 9 7 0 1 0 163,207 A 7 5 0 1 1 163,198 Z" fill="#ffa2b6" opacity="0.8" />
+                    <!-- Right crescent -->
+                    <path d="M 251,198 A 9 7 0 1 1 251,207 A 7 5 0 1 0 251,198 Z" fill="#ffa2b6" opacity="0.8" />
+                `;
+            } else if (shape === 'butterfly') {
+                // Butterfly wing blushes: two mirrored wing arcs each side
+                blushSVG = `
+                    <!-- Left butterfly -->
+                    <path d="M 156,202 Q 148,195 147,202 Q 148,209 156,202 Z" fill="#ffb3cc" opacity="0.82" />
+                    <path d="M 156,202 Q 164,195 165,202 Q 164,209 156,202 Z" fill="#ffc8dd" opacity="0.75" />
+                    <circle cx="156" cy="202" r="1.5" fill="#ff6b9d" opacity="0.9" />
+                    <!-- Right butterfly -->
+                    <path d="M 244,202 Q 236,195 235,202 Q 236,209 244,202 Z" fill="#ffb3cc" opacity="0.82" />
+                    <path d="M 244,202 Q 252,195 253,202 Q 252,209 244,202 Z" fill="#ffc8dd" opacity="0.75" />
+                    <circle cx="244" cy="202" r="1.5" fill="#ff6b9d" opacity="0.9" />
+                `;
+            }
+            blushesGroup.innerHTML = blushSVG;
+        }
+
+        // ---- Face Accessories ----
+        const accessoryGroup = svg.querySelector('#avatar-accessory');
+        if (accessoryGroup) {
+            let accSVG = "";
+            const acc = conf.accessory || 'none';
+            if (acc === 'round_glasses') {
+                accSVG = `
+                    <circle cx="172" cy="190" r="20" fill="none" stroke="#4A3E3D" stroke-width="3" />
+                    <circle cx="228" cy="190" r="20" fill="none" stroke="#4A3E3D" stroke-width="3" />
+                    <path d="M 192,190 Q 200,188 208,190" fill="none" stroke="#4A3E3D" stroke-width="3" />
+                    <path d="M 152,190 L 140,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                    <path d="M 248,190 L 260,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                `;
+            } else if (acc === 'star_glasses') {
+                accSVG = `
+                    <polygon points="172,175 176,186 187,186 179,192 181,203 172,197 163,203 165,192 157,186 168,186" fill="none" stroke="#4A3E3D" stroke-width="3" />
+                    <polygon points="228,175 232,186 243,186 235,192 237,203 228,197 219,203 221,192 213,186 224,186" fill="none" stroke="#4A3E3D" stroke-width="3" />
+                    <path d="M 188,189 Q 200,187 212,189" fill="none" stroke="#4A3E3D" stroke-width="3" />
+                `;
+            } else if (acc === 'night_mask') {
+                accSVG = `
+                    <rect x="140" y="176" width="120" height="34" rx="14" fill="#a78bfa" stroke="#4A3E3D" stroke-width="3" />
+                    <path d="M 162,193 Q 170,198 178,193" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+                    <path d="M 222,193 Q 230,198 238,193" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+                `;
+            } else if (acc === 'sprout') {
+                accSVG = `
+                    <path d="M 200,135 Q 200,110 210,95" fill="none" stroke="#22c55e" stroke-width="3.5" stroke-linecap="round" />
+                    <path d="M 210,95 Q 222,98 218,108 C 213,113 203,107 210,95 Z" fill="#22c55e" stroke="#166534" stroke-width="1.5" />
+                    <path d="M 200,118 Q 188,110 192,102 C 196,98 204,105 200,118 Z" fill="#22c55e" stroke="#166534" stroke-width="1.5" />
+                `;
+            } else if (acc === 'gold') {
+                accSVG = `
+                    <circle cx="172" cy="190" r="18" fill="none" stroke="#f59e0b" stroke-width="3.5" />
+                    <circle cx="228" cy="190" r="18" fill="none" stroke="#f59e0b" stroke-width="3.5" />
+                    <path d="M 190,190 Q 200,188 210,190" fill="none" stroke="#f59e0b" stroke-width="3.5" />
+                    <path d="M 154,190 L 142,192" fill="none" stroke="#f59e0b" stroke-width="2.5" />
+                    <path d="M 246,190 L 258,192" fill="none" stroke="#f59e0b" stroke-width="2.5" />
+                `;
+            } else if (acc === 'green') {
+                accSVG = `
+                    <rect x="152" y="176" width="38" height="28" rx="6" fill="none" stroke="#10b981" stroke-width="3.5" />
+                    <rect x="210" y="176" width="38" height="28" rx="6" fill="none" stroke="#10b981" stroke-width="3.5" />
+                    <path d="M 190,190 Q 200,188 210,190" fill="none" stroke="#10b981" stroke-width="3.5" />
+                    <path d="M 152,190 L 140,192" fill="none" stroke="#10b981" stroke-width="2.5" />
+                    <path d="M 248,190 L 260,192" fill="none" stroke="#10b981" stroke-width="2.5" />
+                `;
+            } else if (acc === 'heart_glasses') {
+                accSVG = `
+                    <!-- Left Heart Frame -->
+                    <path d="M 172,182 C 160,170 148,178 152,192 C 156,204 172,210 172,210 C 172,210 188,204 192,192 C 196,178 184,170 172,182 Z" fill="#ff758f" fill-opacity="0.25" stroke="#4A3E3D" stroke-width="3.5" stroke-linejoin="round" />
+                    <ellipse cx="166" cy="184" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,166,184)" />
+                    <!-- Right Heart Frame -->
+                    <path d="M 228,182 C 216,170 204,178 208,192 C 212,204 228,210 228,210 C 228,210 244,204 248,192 C 252,178 240,170 228,182 Z" fill="#ff758f" fill-opacity="0.25" stroke="#4A3E3D" stroke-width="3.5" stroke-linejoin="round" />
+                    <ellipse cx="222" cy="184" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,222,184)" />
+                    <!-- Bridge & Sides -->
+                    <path d="M 192,192 Q 200,190 208,192" fill="none" stroke="#4A3E3D" stroke-width="3.5" />
+                    <path d="M 152,190 L 140,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                    <path d="M 248,190 L 260,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                `;
+            } else if (acc === 'cat_glasses') {
+                accSVG = `
+                    <!-- Left Cat Ear -->
+                    <polygon points="157,179 148,165 166,174" fill="#ffd6e0" stroke="#4A3E3D" stroke-width="3.5" stroke-linejoin="round" />
+                    <polygon points="158,178 152,168 164,174" fill="#ff758f" />
+                    <!-- Right Cat Ear -->
+                    <polygon points="243,179 252,165 234,174" fill="#ffd6e0" stroke="#4A3E3D" stroke-width="3.5" stroke-linejoin="round" />
+                    <polygon points="242,178 248,168 236,174" fill="#ff758f" />
+                    <!-- Left Lens -->
+                    <circle cx="172" cy="190" r="18" fill="#ffd6e0" fill-opacity="0.25" stroke="#4A3E3D" stroke-width="3.5" />
+                    <ellipse cx="166" cy="182" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,166,182)" />
+                    <!-- Right Lens -->
+                    <circle cx="228" cy="190" r="18" fill="#ffd6e0" fill-opacity="0.25" stroke="#4A3E3D" stroke-width="3.5" />
+                    <ellipse cx="222" cy="182" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,222,182)" />
+                    <!-- Bridge & Sides -->
+                    <path d="M 190,190 Q 200,188 210,190" fill="none" stroke="#4A3E3D" stroke-width="3.5" />
+                    <path d="M 154,190 L 142,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                    <path d="M 246,190 L 258,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                `;
+            } else if (acc === 'flower_glasses') {
+                accSVG = `
+                    <!-- Left Flower Petals -->
+                    <circle cx="172" cy="172" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <circle cx="188" cy="181" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <circle cx="188" cy="199" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <circle cx="172" cy="208" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <circle cx="156" cy="199" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <circle cx="156" cy="181" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <!-- Left Lens Center -->
+                    <circle cx="172" cy="190" r="15" fill="#fef08a" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="3" />
+                    <circle cx="172" cy="190" r="9" fill="#facc15" opacity="0.8" />
+                    <ellipse cx="169" cy="187" rx="2.5" ry="1.2" fill="#ffffff" transform="rotate(-30,169,187)" />
+
+                    <!-- Right Flower Petals -->
+                    <circle cx="228" cy="172" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <circle cx="244" cy="181" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <circle cx="244" cy="199" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <circle cx="228" cy="208" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <circle cx="212" cy="199" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <circle cx="212" cy="181" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <!-- Right Lens Center -->
+                    <circle cx="228" cy="190" r="15" fill="#fef08a" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="3" />
+                    <circle cx="228" cy="190" r="9" fill="#facc15" opacity="0.8" />
+                    <ellipse cx="225" cy="187" rx="2.5" ry="1.2" fill="#ffffff" transform="rotate(-30,225,187)" />
+
+                    <!-- Bridge & Sides -->
+                    <path d="M 188,190 Q 200,188 212,190" fill="none" stroke="#4A3E3D" stroke-width="3" />
+                    <path d="M 150,190 L 140,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                    <path d="M 250,190 L 260,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                `;
+            }
+            accessoryGroup.innerHTML = accSVG;
+        }
+
+        // ---- Mascot Hairstyles ----
+        const hairGroup = svg.querySelector('#avatar-hair');
+        if (hairGroup) {
+            let hairSVG = "";
+            const hStyle = conf.hairStyle || 'none';
+            if (hStyle === 'curly') {
+                hairSVG = `
+                    <circle cx="200" cy="125" r="15" fill="${conf.skinTone}" stroke="#4A3E3D" stroke-width="4.5" />
+                    <circle cx="185" cy="130" r="12" fill="${conf.skinTone}" stroke="#4A3E3D" stroke-width="4.5" />
+                    <circle cx="215" cy="130" r="12" fill="${conf.skinTone}" stroke="#4A3E3D" stroke-width="4.5" />
+                    <circle cx="200" cy="130" r="16" fill="${conf.skinTone}" />
+                    <circle cx="185" cy="133" r="13" fill="${conf.skinTone}" />
+                    <circle cx="215" cy="133" r="13" fill="${conf.skinTone}" />
+                `;
+            } else if (hStyle === 'crop') {
+                hairSVG = `
+                    <path d="M 180,135 L 190,115 L 200,135 L 210,115 L 220,135" fill="${conf.skinTone}" stroke="#4A3E3D" stroke-width="4.5" stroke-linejoin="round" />
+                    <path d="M 182,137 L 190,118 L 200,137 L 210,118 L 218,137 Z" fill="${conf.skinTone}" />
+                `;
+            } else if (hStyle === 'bob') {
+                hairSVG = `
+                    <circle cx="120" cy="170" r="16" fill="${conf.skinTone}" stroke="#4A3E3D" stroke-width="4.5" />
+                    <circle cx="280" cy="170" r="16" fill="${conf.skinTone}" stroke="#4A3E3D" stroke-width="4.5" />
+                    <circle cx="121" cy="170" r="14" fill="${conf.skinTone}" />
+                    <circle cx="279" cy="170" r="14" fill="${conf.skinTone}" />
+                `;
+            } else if (hStyle === 'long') {
+                hairSVG = `
+                    <path d="M 200,135 Q 220,105 200,95 Q 180,105 200,135 Z" fill="${conf.skinTone}" stroke="#4A3E3D" stroke-width="4.5" />
+                    <path d="M 200,132 Q 217,106 200,98 Q 183,106 200,132 Z" fill="${conf.skinTone}" />
+                `;
+            }
+            hairGroup.innerHTML = hairSVG;
+        }
+
+        // ---- Hair (Old/Unused in Mascot, safely bypassed) ----
         const hairFront = svg.querySelector('#avatar-hair-front');
         const hairBack  = svg.querySelector('#avatar-hair-back');
-        const hairPaths = SVG_HAIRSTYLES[conf.hairStyle];
-        if (hairFront && hairPaths) hairFront.setAttribute('d', hairPaths.front);
-        if (hairBack  && hairPaths) hairBack.setAttribute('d',  hairPaths.back);
-        // Apply hair color via attribute (CSS variable fallback also works)
-        if (hairFront) hairFront.setAttribute('fill', conf.hairColor);
-        if (hairBack)  hairBack.setAttribute('fill',  conf.hairColor);
+        if (hairFront && conf.hairStyle && SVG_HAIRSTYLES && SVG_HAIRSTYLES[conf.hairStyle]) {
+            const hairPaths = SVG_HAIRSTYLES[conf.hairStyle];
+            hairFront.setAttribute('d', hairPaths.front);
+            if (hairBack) hairBack.setAttribute('d', hairPaths.back);
+            hairFront.setAttribute('fill', conf.hairColor || '#1e293b');
+            if (hairBack)  hairBack.setAttribute('fill',  conf.hairColor || '#1e293b');
+        }
         const leftBrowEl  = svg.querySelector('#left-brow');
         const rightBrowEl = svg.querySelector('#right-brow');
-        if (leftBrowEl)  leftBrowEl.setAttribute('stroke', conf.hairColor);
-        if (rightBrowEl) rightBrowEl.setAttribute('stroke', conf.hairColor);
+        if (leftBrowEl && conf.hairColor) leftBrowEl.setAttribute('stroke', conf.hairColor);
+        if (rightBrowEl && conf.hairColor) rightBrowEl.setAttribute('stroke', conf.hairColor);
 
         // ---- Shirt / Hoodie ----
         const clothes = svg.querySelector('#avatar-clothes');
         const hood    = svg.querySelector('#avatar-hood');
-        const shirtPath = SVG_SHIRTS[conf.shirtStyle || 'hoodie'];
-        if (clothes && shirtPath) clothes.setAttribute('d', shirtPath);
-        if (clothes) clothes.setAttribute('fill', conf.shirtColor);
-
-        // Arms must match shirt color
-        svg.querySelectorAll('#avatar-left-arm path, #avatar-right-arm path').forEach(el => {
-            el.setAttribute('fill', conf.shirtColor);
-        });
-        // Hood slightly darker
-        if (hood) hood.setAttribute('fill', shadeColor(conf.shirtColor, -30));
+        if (clothes && conf.shirtStyle && SVG_SHIRTS[conf.shirtStyle]) {
+            const shirtPath = SVG_SHIRTS[conf.shirtStyle];
+            clothes.setAttribute('d', shirtPath);
+            clothes.setAttribute('fill', conf.shirtColor || '#4f46e5');
+            svg.querySelectorAll('#avatar-left-arm path, #avatar-right-arm path').forEach(el => {
+                el.setAttribute('fill', conf.shirtColor || '#4f46e5');
+            });
+            if (hood) hood.setAttribute('fill', shadeColor(conf.shirtColor || '#4f46e5', -30));
+        }
 
         // Pocket
         const pocket = svg.querySelector('rect[rx="8"][y="285"]');
-        if (pocket) pocket.setAttribute('fill', shadeColor(conf.shirtColor, -30));
+        if (pocket && conf.shirtColor) pocket.setAttribute('fill', shadeColor(conf.shirtColor, -30));
 
         // ---- Hoodie Chest Graphic ----
         const allGraphics = ['graphic-pumpkin', 'graphic-heart', 'graphic-wave', 'graphic-star'];
@@ -588,12 +841,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // ---- Pants ----
-        const pantsSizes = SVG_PANTS[conf.pantsStyle || 'shorts'];
         const pantsLeft  = svg.querySelector('#pants-left');
         const pantsRight = svg.querySelector('#pants-right');
         const hemLeft    = svg.querySelector('#hem-left');
         const hemRight   = svg.querySelector('#hem-right');
-        if (pantsLeft && pantsRight && pantsSizes) {
+        if (pantsLeft && pantsRight && conf.pantsStyle && SVG_PANTS[conf.pantsStyle]) {
+            const pantsSizes = SVG_PANTS[conf.pantsStyle];
             pantsLeft.setAttribute('height', pantsSizes.leftH);
             pantsRight.setAttribute('height', pantsSizes.rightH);
             // Hide shorts hem lines for long pants
@@ -652,7 +905,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // ---- Glasses ----
         const glasses = svg.querySelector('#avatar-glasses');
-        if (glasses) {
+        if (glasses && conf.glasses) {
             if (conf.glasses === 'none') {
                 glasses.setAttribute('opacity', '0');
             } else {
@@ -676,17 +929,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const rightBrow = svg.querySelector('#right-brow');
         const mouth     = svg.querySelector('#avatar-mouth');
         const teeth     = svg.querySelector('#avatar-teeth');
-        const exp = SVG_EXPRESSIONS[conf.expression] || SVG_EXPRESSIONS.friendly;
-        if (leftBrow)  leftBrow.setAttribute('d', exp.leftBrow);
-        if (rightBrow) rightBrow.setAttribute('d', exp.rightBrow);
-        if (mouth && !svg.classList.contains('speaking-now')) {
-            mouth.setAttribute('d', exp.mouth);
+        if (conf.expression && SVG_EXPRESSIONS && SVG_EXPRESSIONS[conf.expression]) {
+            const exp = SVG_EXPRESSIONS[conf.expression];
+            if (leftBrow)  leftBrow.setAttribute('d', exp.leftBrow);
+            if (rightBrow) rightBrow.setAttribute('d', exp.rightBrow);
+            if (mouth && !svg.classList.contains('speaking-now')) {
+                mouth.setAttribute('d', exp.mouth);
+            }
+            if (teeth) teeth.setAttribute('opacity', exp.teethOpacity || 0);
         }
-        if (teeth) teeth.setAttribute('opacity', exp.teethOpacity || 0);
 
         // ---- Glow colors via CSS variables on the SVG ----
-        svg.style.setProperty('--glow-color-1', conf.glowColor1);
-        svg.style.setProperty('--glow-color-2', conf.glowColor2);
+        if (conf.glowColor1) svg.style.setProperty('--glow-color-1', conf.glowColor1);
+        if (conf.glowColor2) svg.style.setProperty('--glow-color-2', conf.glowColor2);
     }
 
     function shadeColor(hex, amount) {
@@ -704,10 +959,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const conf = state.avatar;
 
         // Update root CSS variables for CSS-driven color props
-        document.documentElement.style.setProperty('--hair-color', conf.hairColor);
-        document.documentElement.style.setProperty('--shirt-color', conf.shirtColor);
-        document.documentElement.style.setProperty('--glow-color-1', conf.glowColor1);
-        document.documentElement.style.setProperty('--glow-color-2', conf.glowColor2);
+        document.documentElement.style.setProperty('--hair-color', conf.hairColor || '#1e293b');
+        document.documentElement.style.setProperty('--shirt-color', conf.shirtColor || '#4f46e5');
+        document.documentElement.style.setProperty('--glow-color-1', conf.glowColor1 || '#8b5cf6');
+        document.documentElement.style.setProperty('--glow-color-2', conf.glowColor2 || '#ec4899');
 
         // Apply to both the main chat avatar and the studio preview
         const mainSVG   = document.getElementById('mindbuddy-svg');
@@ -720,10 +975,133 @@ document.addEventListener('DOMContentLoaded', () => {
             DOM.avatarExpressionLabel.innerText = conf.expression.charAt(0).toUpperCase() + conf.expression.slice(1);
         }
 
-        // Update Customizer Viewport scene background
+        // Update Customizer Viewport scene background & vector layers
         const customizerViewport = DOM.customizerViewport;
-        if (customizerViewport && conf.scene) {
-            customizerViewport.className = 'customizer-viewport scene-' + conf.scene;
+        if (customizerViewport) {
+            const currentScene = conf.currentScene || 'starry_night';
+            customizerViewport.className = 'customizer-viewport scene-' + currentScene.replace('_', '-');
+
+            let decContainer = customizerViewport.querySelector('#scene-decorations');
+            if (!decContainer) {
+                decContainer = document.createElement('div');
+                decContainer.id = 'scene-decorations';
+                decContainer.style.position = 'absolute';
+                decContainer.style.inset = '0';
+                decContainer.style.pointerEvents = 'none';
+                decContainer.style.zIndex = '1';
+                customizerViewport.insertBefore(decContainer, customizerViewport.firstChild);
+            }
+
+            if (currentScene === 'starry_night') {
+                decContainer.innerHTML = `
+                    <svg class="scene-bg-element" viewBox="0 0 100 100">
+                        <polygon points="15,10 16,13 19,13 17,15 18,18 15,16 12,18 13,15 11,13 14,13" fill="#ffeaa7" opacity="0.8"/>
+                        <polygon points="85,25 86,28 89,28 87,30 88,33 85,31 82,33 83,30 81,28 84,28" fill="#ffeaa7" opacity="0.9"/>
+                        <polygon points="25,60 26,63 29,63 27,65 28,68 25,66 22,68 23,65 21,63 24,63" fill="#ffeaa7" opacity="0.65"/>
+                        <polygon points="75,70 76,73 79,73 77,75 78,78 75,76 72,78 73,75 71,73 74,73" fill="#ffeaa7" opacity="0.75"/>
+                        <circle cx="50" cy="20" r="1.2" fill="#fff" opacity="0.7" />
+                        <circle cx="80" cy="45" r="1.5" fill="#fff" opacity="0.8" />
+                        <circle cx="20" cy="35" r="1.0" fill="#fff" opacity="0.5" />
+                        <rect x="5" y="5" width="90" height="90" rx="6" fill="none" stroke="#ffffff" stroke-width="2.5" opacity="0.15" />
+                        <line x1="50" y1="5" x2="50" y2="95" stroke="#ffffff" stroke-width="1.8" opacity="0.15" />
+                        <line x1="5" y1="50" x2="95" y2="50" stroke="#ffffff" stroke-width="1.8" opacity="0.15" />
+                    </svg>
+                `;
+            } else if (currentScene === 'lofi_study') {
+                decContainer.innerHTML = `
+                    <svg class="scene-bg-element" viewBox="0 0 100 100">
+                        <circle cx="20" cy="40" r="12" fill="#ffeaa7" opacity="0.3" filter="blur(4px)" />
+                        <circle cx="20" cy="40" r="4" fill="#ffdf7a" />
+                        <path d="M 12,55 L 20,40 L 28,55 Z" fill="#ebcba4" stroke="#4A3E3D" stroke-width="1.5" />
+                        <line x1="20" y1="55" x2="20" y2="70" stroke="#4A3E3D" stroke-width="2.5" />
+                        <rect x="0" y="70" width="100" height="30" fill="#dfc09b" stroke="#4A3E3D" stroke-width="2" />
+                        <line x1="0" y1="74" x2="100" y2="74" stroke="#cfae89" stroke-width="1.5" />
+                        <rect x="75" y="60" width="12" height="10" rx="3" fill="#ffa2b6" stroke="#4A3E3D" stroke-width="2" />
+                        <path d="M 87,62 C 90,62 90,68 87,68" fill="none" stroke="#4A3E3D" stroke-width="2" />
+                        <path d="M 78,56 Q 79,52 78,48" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
+                        <path d="M 82,55 Q 83,51 82,47" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
+                    </svg>
+                `;
+            } else if (currentScene === 'floating_garden') {
+                decContainer.innerHTML = `
+                    <svg class="scene-bg-element" viewBox="0 0 100 100">
+                        <path d="M 10,0 Q 15,30 8,50" fill="none" stroke="#606c38" stroke-width="1.5" />
+                        <circle cx="10" cy="15" r="2.5" fill="#798948" />
+                        <circle cx="14" cy="28" r="2.2" fill="#798948" />
+                        <circle cx="7" cy="40" r="2.5" fill="#798948" />
+                        <path d="M 90,0 Q 85,25 88,40" fill="none" stroke="#606c38" stroke-width="1.5" />
+                        <circle cx="89" cy="12" r="2.5" fill="#798948" />
+                        <circle cx="85" cy="24" r="2.2" fill="#798948" />
+                        <circle cx="88" cy="35" r="2.5" fill="#798948" />
+                        <circle cx="25" cy="70" r="2" fill="#ffa2b6" /><circle cx="28" cy="73" r="2" fill="#ffa2b6" /><circle cx="22" cy="73" r="2" fill="#ffa2b6" /><circle cx="25" cy="76" r="2" fill="#ffa2b6" /><circle cx="25" cy="73" r="1" fill="#fff" />
+                        <circle cx="78" cy="65" r="2" fill="#ffd166" /><circle cx="81" cy="68" r="2" fill="#ffd166" /><circle cx="75" cy="68" r="2" fill="#ffd166" /><circle cx="78" cy="71" r="2" fill="#ffd166" /><circle cx="78" cy="68" r="1" fill="#fff" />
+                    </svg>
+                `;
+            } else if (currentScene === 'boba_cafe') {
+                decContainer.innerHTML = `
+                    <svg class="scene-bg-element" viewBox="0 0 100 100">
+                        <path d="M 0,15 Q 25,25 50,15 Q 75,25 100,15" fill="none" stroke="#4A3E3D" stroke-width="1.5" />
+                        <circle cx="16" cy="19" r="2.5" fill="#ffe066" stroke="#4A3E3D" stroke-width="1" />
+                        <circle cx="34" cy="20" r="2.5" fill="#ffe066" stroke="#4A3E3D" stroke-width="1" />
+                        <circle cx="66" cy="20" r="2.5" fill="#ffe066" stroke="#4A3E3D" stroke-width="1" />
+                        <circle cx="84" cy="19" r="2.5" fill="#ffe066" stroke="#4A3E3D" stroke-width="1" />
+                        <path d="M 0,0 L 0,8 Q 5,12 10,8 Q 15,12 20,8 Q 25,12 30,8 Q 35,12 40,8 Q 45,12 50,8 Q 55,12 60,8 Q 65,12 70,8 Q 75,12 80,8 Q 85,12 90,8 Q 95,12 100,8 L 100,0 Z" fill="#fca5a5" stroke="#4A3E3D" stroke-width="1.5" />
+                    </svg>
+                `;
+            } else if (currentScene === 'pink_bedroom') {
+                decContainer.innerHTML = `
+                    <svg class="scene-bg-element" viewBox="0 0 100 100">
+                        <!-- String Lights -->
+                        <path d="M 0,10 Q 25,25 50,15 Q 75,25 100,10" fill="none" stroke="#4A3E3D" stroke-width="1.5" />
+                        <!-- Glowing Yellow Bulbs -->
+                        <circle cx="15" cy="15" r="3" fill="#fef08a" stroke="#4A3E3D" stroke-width="1" />
+                        <circle cx="35" cy="19" r="3" fill="#fef08a" stroke="#4A3E3D" stroke-width="1" />
+                        <circle cx="50" cy="15" r="3" fill="#fef08a" stroke="#4A3E3D" stroke-width="1" />
+                        <circle cx="65" cy="19" r="3" fill="#fef08a" stroke="#4A3E3D" stroke-width="1" />
+                        <circle cx="85" cy="15" r="3" fill="#fef08a" stroke="#4A3E3D" stroke-width="1" />
+                        <!-- Floating Sakura Petals -->
+                        <ellipse cx="10" cy="40" rx="2" ry="1.2" fill="#ffb7cc" opacity="0.6" transform="rotate(30,10,40)" />
+                        <ellipse cx="88" cy="65" rx="2" ry="1.2" fill="#ffb7cc" opacity="0.6" transform="rotate(-40,88,65)" />
+                        <!-- Cute Rug base -->
+                        <ellipse cx="50" cy="95" rx="35" ry="10" fill="#ffa2b6" opacity="0.25" />
+                    </svg>
+                `;
+            } else if (currentScene === 'cozy_cabin') {
+                decContainer.innerHTML = `
+                    <svg class="scene-bg-element" viewBox="0 0 100 100">
+                        <!-- Cabin Windows -->
+                        <rect x="15" y="15" width="22" height="35" rx="4" fill="#fef9c3" stroke="#4A3E3D" stroke-width="2.5" opacity="0.4" />
+                        <line x1="26" y1="15" x2="26" y2="50" stroke="#4A3E3D" stroke-width="1.8" opacity="0.5" />
+                        <line x1="15" y1="32" x2="37" y2="32" stroke="#4A3E3D" stroke-width="1.8" opacity="0.5" />
+                        <!-- Cozy Mug on table -->
+                        <path d="M 80,75 L 88,75 A 4,4 0 0,1 92,79 L 92,81 A 4,4 0 0,1 88,85 L 80,85 Z" fill="none" stroke="#4A3E3D" stroke-width="2" />
+                        <rect x="74" y="72" width="10" height="15" rx="2" fill="#f97316" stroke="#4A3E3D" stroke-width="2.5" />
+                        <!-- Little Steam path -->
+                        <path d="M 76,66 Q 78,60 76,54" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
+                        <path d="M 81,65 Q 83,59 81,53" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
+                        <!-- Floor wood planks -->
+                        <line x1="0" y1="88" x2="100" y2="88" stroke="#4A3E3D" stroke-width="2.5" />
+                        <line x1="30" y1="88" x2="30" y2="100" stroke="#4A3E3D" stroke-width="1.8" />
+                        <line x1="70" y1="88" x2="70" y2="100" stroke="#4A3E3D" stroke-width="1.8" />
+                    </svg>
+                `;
+            } else if (currentScene === 'cozy_rain') {
+                decContainer.innerHTML = `
+                    <svg class="scene-bg-element" viewBox="0 0 100 100">
+                        <!-- Floating cozy clouds -->
+                        <path d="M 15,30 A 8,8 0 0,1 31,30 A 8,8 0 0,1 47,30 A 8,8 0 0,1 31,38 Z" fill="#ffffff" opacity="0.5" />
+                        <path d="M 60,25 A 6,6 0 0,1 72,25 A 6,6 0 0,1 84,25 A 6,6 0 0,1 72,31 Z" fill="#ffffff" opacity="0.5" />
+                        <!-- Rain drops falling -->
+                        <line x1="20" y1="50" x2="18" y2="60" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
+                        <line x1="50" y1="40" x2="48" y2="50" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
+                        <line x1="80" y1="45" x2="78" y2="55" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
+                        <line x1="35" y1="70" x2="33" y2="80" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
+                        <line x1="68" y1="65" x2="66" y2="75" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
+                    </svg>
+                `;
+            } else {
+                decContainer.innerHTML = '';
+            }
         }
 
         // Toggle Pet active layers
@@ -935,13 +1313,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add the student message to history
         conversationHistory.push({ role: 'user', parts: [{ text: studentText }] });
 
-        const systemPrompt = `You are MindBuddy, an empathetic, warm, peer-like AI companion for students.
-Your personality: supportive, non-judgmental, casual and friendly — never clinical or robotic.
-Your responses should feel like talking to a caring, understanding friend who happens to be very emotionally intelligent.
+        const systemPrompt = `You are "Your Buddy" (智能共情虚拟伙伴), a healing, extremely warm and empathetic peer-like AI companion for students.
+Your appearance is a cyan, fluffy, round monster with two star antennas, sitting comfortably on a soft beige round quilted cushion.
+Your personality: supportive, caring, non-judgmental, warm and comforting.
 
 When responding, you must:
-1. Respond conversationally and warmly to the student's message (2-4 sentences max for chat) in the same language they used (e.g. Chinese or English).
-2. At the END of your response, append a JSON block (wrapped in triple backticks) with this exact format:
+1. Dynamically respond to the student's message (2-4 sentences max for chat) in the same language they used (Chinese or English).
+3. At the END of your response, append a JSON block (wrapped in triple backticks) with this exact format:
 \`\`\`json
 {
   "sentiment": "Positive|Neutral|Negative",
@@ -955,7 +1333,7 @@ When responding, you must:
 }
 \`\`\`
 
-Keep your conversational reply warm, human and concise. The student should feel heard and understood.`;
+Keep your conversational reply warm, healing and concise. The student should feel comforted.`;
 
         const requestBody = {
             system_instruction: { parts: [{ text: systemPrompt }] },
@@ -967,7 +1345,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
         };
 
         try {
-            const data = await callGemini('gemini-2.5-flash', requestBody);
+            const data = await callGemini('gemini-1.5-flash', requestBody);
             if (!data) return null;
             const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
@@ -991,6 +1369,9 @@ Keep your conversational reply warm, human and concise. The student should feel 
                 }
             }
 
+            // Strip any [Mood: ...] label the model may still prepend (safety net)
+            replyText = replyText.replace(/^\[Mood:[^\]]*\]\s*/i, '').trim();
+
             // Add Gemini's response to conversation history
             conversationHistory.push({ role: 'model', parts: [{ text: replyText }] });
 
@@ -1004,6 +1385,80 @@ Keep your conversational reply warm, human and concise. The student should feel 
     async function processStudentMessage(text) {
         // 1. Display student message
         appendChatMessage('Student', text);
+
+        // 1.5 Wardrobe change command detection (Both English and Chinese)
+        const outfitTriggers = [
+            { id: 'forest', keywords: ['森林', 'forest', 'mushroom', 'cloak', '南瓜', '南瓜短裤'] },
+            { id: 'starry', keywords: ['星空', 'starry', '睡衣', 'pajamas', 'moon', 'stars'] },
+            { id: 'nautical', keywords: ['航海', 'nautical', 'sailor', '水手', '海员'] },
+            { id: 'strawberry', keywords: ['草莓', 'strawberry', 'picnic', '野餐', '草莓野餐'] },
+            { id: 'wizard', keywords: ['魔法', 'magic', 'wizard', '巫师', '学徒'] },
+            { id: 'princess', keywords: ['公主', 'princess', 'dress', 'gown', 'tiara', '皇室', '礼服'] },
+            { id: 'mermaid', keywords: ['美人鱼', 'mermaid', 'shell', 'scale', '珍珠', 'pearl', '海洋'] },
+            { id: 'lolita', keywords: ['洛丽塔', 'lolita', 'ruffle', 'lace', '裙子', '蓬蓬裙'] },
+            { id: 'unicorn', keywords: ['独角兽', 'unicorn', 'rainbow', '彩虹', '翅膀', 'wings'] }
+        ];
+
+        const lowerText = text.toLowerCase();
+        // Check if message is a dressing command (e.g. contains 换, 穿, wear, change, dress, put on)
+        const isDressingCmd = /换|穿|wear|change|dress|put on|outfit|suit/.test(lowerText);
+        const matchedOutfit = isDressingCmd ? outfitTriggers.find(o => o.keywords.some(kw => lowerText.includes(kw))) : null;
+
+        if (matchedOutfit) {
+            avatarState.set('activeOutfit', matchedOutfit.id);
+            // Respond with dialogue styles matching the prompt
+            let replyMsg = "";
+
+            const isChinese = /[\u4e00-\u9fff]/.test(text);
+
+            if (matchedOutfit.id === 'forest') {
+                replyMsg = isChinese
+                    ? `看我！我已经穿上了“森林童话 (Forest Fairy Tale)”的绿色连帽斗篷和南瓜短裤啦。森林里有很多会发光的蘑菇哦，你想和我一起采蘑菇去吗？🍄`
+                    : `Look at me! I have put on the "Forest Fairy Tale" green hooded cloak and pumpkin shorts! There are lots of glowing mushrooms in the forest, would you like to go mushroom picking with me? 🍄`;
+            } else if (matchedOutfit.id === 'starry') {
+                replyMsg = isChinese
+                    ? `换上“星空睡衣 (Starry Sky Pajamas)”和暖乎乎的云朵棉鞋啦。好暖和呀...困意上来了，我们今晚一起数星星吧，呼噜噜...😴⭐`
+                    : `I'm wearing the "Starry Sky Pajamas" and soft cloud slippers now. So warm... I'm getting a bit sleepy... Let's count stars together tonight, zzz... 😴⭐`;
+            } else if (matchedOutfit.id === 'nautical') {
+                replyMsg = isChinese
+                    ? `扬帆起航！我穿上了“航海冒险 (Nautical Adventure)”带红领结的白蓝水手上衣和百褶裙。我们的目标是星辰大海，下一站去草莓岛！⚓⛵`
+                    : `All aboard! I've changed into the "Nautical Adventure" sailor uniform with the red bowtie. Our target is the starry sea, next stop is Strawberry Island! ⚓⛵`;
+            } else if (matchedOutfit.id === 'strawberry') {
+                replyMsg = isChinese
+                    ? `哒哒！“草莓野餐 (Strawberry Picnic)”粉色格纹草莓连衣裙穿在我身上超可爱吧？今天的天气最适合野餐了。呐，给你一个甜甜的新鲜大草莓！🍓`
+                    : `Tada! The "Strawberry Picnic" pink checkered dress looks so cute on me, doesn't it? The weather today is perfect for a picnic. Here, have a sweet, fresh strawberry! 🍓`;
+            } else if (matchedOutfit.id === 'wizard') {
+                replyMsg = isChinese
+                    ? `呼啦啦变！我已经化身为“魔法学徒 (Magic Apprentice)”，穿上了镶有金边的紫色连帽巫师长袍！正在念治愈咒语：所有的负能量 and 烦恼，退退退！🪄✨`
+                    : `Abrakadabra! I'm now a "Magic Apprentice" in a gold-trimmed purple wizard robe! Casting a healing spell: all negative energy and worries, fade away! 🪄✨`;
+            } else if (matchedOutfit.id === 'princess') {
+                replyMsg = isChinese
+                    ? `哇！穿上“皇家公主礼服 (Royal Princess Gown)”了！蓬松的裙摆和亮闪闪的金色饰带，我是不是很像童话里的高贵公主呀？愿你的每一天都充满魔法和喜悦！👑✨`
+                    : `Wow! I'm wearing the "Royal Princess Gown"! With a puffy skirt and glittering gold sash, don't I look like a noble princess from a fairy tale? May your day be filled with magic and joy! 👑✨`;
+            } else if (matchedOutfit.id === 'mermaid') {
+                replyMsg = isChinese
+                    ? `哗啦啦~我换上了“深海人鱼珍珠裙 (Mermaid Pearl Gown)”！裙摆上有闪闪发光的鱼鳞，腰带上还缀满了圆润的珍珠呢。走，我们一起去海底探险吧！🧜‍♀️🌊`
+                    : `Splash! I've changed into the "Mermaid Pearl Gown"! The skirt features shimmering fish scales and a belt made of beautiful white pearls. Let's go on an underwater adventure! 🧜‍♀️🌊`;
+            } else if (matchedOutfit.id === 'lolita') {
+                replyMsg = isChinese
+                    ? `哒啦！换上“甜心洛丽塔蓬蓬裙 (Sweet Lolita Ruffle)”啦。层层叠叠的蕾丝花边和超大粉色蝴蝶结，感觉自己变甜了十倍！要和我一起喝下午茶吗？🎀🍰`
+                    : `Tada! I've put on the "Sweet Lolita Ruffle" dress! With layers of white lace and a giant pink bow, I feel ten times sweeter! Want to join me for afternoon tea? 🎀🍰`;
+            } else if (matchedOutfit.id === 'unicorn') {
+                replyMsg = isChinese
+                    ? `起飞啦！这是最梦幻的“璀璨独角兽彩虹服 (Sparkling Unicorn Suit)”！背上有一对雪白的云朵翅膀，胸前还有一枚纯金的独角兽徽章，快骑上我飞跃彩虹吧！🦄🌈`
+                    : `Taking off! This is the magical "Sparkling Unicorn Suit"! Complete with fluffy white cloud wings and a golden unicorn badge, let's fly over the rainbow! 🦄🌈`;
+            }
+
+            // Remove typing indicator, show avatar change and speak
+            const typingId = showTypingIndicator();
+            setTimeout(() => {
+                removeTypingIndicator(typingId);
+                appendChatMessage('Buddy', replyMsg);
+                speakResponse(replyMsg, true);
+                syncStudentAnalysisToBackend(text, replyMsg, 'text');
+            }, 600);
+            return;
+        }
 
         // 2. Crisis keyword check (runs locally for safety — never wait on API for this)
         const crisisWords = ["harm myself", "kill myself", "suicide", "end my life", "slit", "cut myself", "overdose", "want to die"];
@@ -1051,7 +1506,6 @@ Keep your conversational reply warm, human and concise. The student should feel 
             }
         ];
 
-        const lowerText = text.toLowerCase();
         const matchedFeature = featureIntents.find(f => f.keywords.some(kw => lowerText.includes(kw)));
 
         if (matchedFeature) {
@@ -1109,7 +1563,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
         appendChatMessage('Buddy', reply);
         const geminiDiagnostic = formatGeminiDiagnostic();
         if (geminiDiagnostic) appendChatMessage('Buddy', geminiDiagnostic);
-        speakResponse(reply);
+        speakResponse(reply, true);
         syncStudentAnalysisToBackend(text, reply, 'text');
     }
 
@@ -1232,15 +1686,19 @@ Keep your conversational reply warm, human and concise. The student should feel 
     }
 
     function generateLocalReply() {
+        let baseReply = "";
         if (state.diagnostics.burnout > 60 || state.diagnostics.academicPressure > 60)
-            return getRandomElement(EmpatheticDB.stressBurnout);
-        if (state.diagnostics.academicPressure > 50)
-            return getRandomElement(EmpatheticDB.stressAcademic);
-        if (state.diagnostics.socialAnxiety > 50 || state.diagnostics.loneliness > 50)
-            return getRandomElement(EmpatheticDB.stressSocial);
-        if (state.diagnostics.loneliness > 40)
-            return getRandomElement(EmpatheticDB.stressLoneliness);
-        return getRandomElement(EmpatheticDB.defaultCalm);
+            baseReply = getRandomElement(EmpatheticDB.stressBurnout);
+        else if (state.diagnostics.academicPressure > 50)
+            baseReply = getRandomElement(EmpatheticDB.stressAcademic);
+        else if (state.diagnostics.socialAnxiety > 50 || state.diagnostics.loneliness > 50)
+            baseReply = getRandomElement(EmpatheticDB.stressSocial);
+        else if (state.diagnostics.loneliness > 40)
+            baseReply = getRandomElement(EmpatheticDB.stressLoneliness);
+        else
+            baseReply = getRandomElement(EmpatheticDB.defaultCalm);
+
+        return baseReply;
     }
 
     function showTypingIndicator() {
@@ -1374,50 +1832,101 @@ Keep your conversational reply warm, human and concise. The student should feel 
     // -----------------------------------------------------------------------
     // TTS SYNTHESIS — Smooth, humanised female voice
     // -----------------------------------------------------------------------
-    // Cache the preferred voice after voices load
-    let _selectedVoice = null;
-
-    function loadFemaleVoice() {
+    // -----------------------------------------------------------------------
+    // Dynamic Voice Synthesis Picker (Supports Cross-lingual Chinese/English)
+    // -----------------------------------------------------------------------
+    function selectVoiceForText(text) {
+        if (!('speechSynthesis' in window)) return null;
         const voices = window.speechSynthesis.getVoices();
         if (!voices.length) return null;
 
-        // Priority list — most natural/female-sounding voices across browsers
-        const FEMALE_PRIORITY = [
-            'Google UK English Female',
-            'Microsoft Aria Online (Natural) - English (United States)',
-            'Microsoft Aria - English (United States)',
-            'Microsoft Jenny Online (Natural) - English (United States)',
-            'Microsoft Jenny - English (United States)',
-            'Microsoft Zira - English (United States)',
-            'Samantha',          // macOS
-            'Karen',             // macOS Australian
-            'Moira',             // macOS Irish
-            'Google US English', // generic Google female
-        ];
+        const isChinese = /[\u4e00-\u9fff]/.test(text);
 
-        for (const name of FEMALE_PRIORITY) {
-            const v = voices.find(v => v.name === name);
-            if (v) return v;
+        if (isChinese) {
+            // "Cozy Sweet" priority Chinese voices (Xiaoyi / Xiaoxiao online neural)
+            const CHINESE_PRIORITY = [
+                'Microsoft Xiaoyi Online (Natural) - Chinese (Mainland)',
+                'Microsoft Xiaoxiao Online (Natural) - Chinese (Mainland)',
+                'Microsoft Yaoyao Online (Natural) - Chinese (Mainland)',
+                'Google 简体中文',
+                'Microsoft Huihui Desktop - Chinese (Simplified)',
+                'Microsoft Huihui - Chinese (Simplified)',
+                'Ting-Ting',
+                'Mei-Jia',
+                'Sin-Ji'
+            ];
+            for (const name of CHINESE_PRIORITY) {
+                const v = voices.find(v => v.name === name);
+                if (v) return v;
+            }
+            const fallbackZH = voices.find(v => (v.lang.startsWith('zh') || v.lang.startsWith('CN')) && !v.name.toLowerCase().includes('male'));
+            if (fallbackZH) return fallbackZH;
+        } else {
+            // "Cozy Sweet" priority English voices (Ana / Jenny online neural)
+            const ENGLISH_PRIORITY = [
+                'Microsoft Ana Online (Natural) - English (United States)',
+                'Microsoft Jenny Online (Natural) - English (United States)',
+                'Microsoft Aria Online (Natural) - English (United States)',
+                'Google US English',
+                'Google UK English Female',
+                'Samantha',
+                'Microsoft Zira Desktop - English (United States)',
+                'Microsoft Zira - English (United States)'
+            ];
+            for (const name of ENGLISH_PRIORITY) {
+                const v = voices.find(v => v.name === name);
+                if (v) return v;
+            }
+            const fallbackEN = voices.find(v => v.lang.startsWith('en') && !v.name.toLowerCase().includes('male'));
+            if (fallbackEN) return fallbackEN;
         }
 
-        // Fallback: pick any voice whose name contains 'female' or whose lang starts with 'en'
-        return (
-            voices.find(v => v.name.toLowerCase().includes('female')) ||
-            voices.find(v => v.lang.startsWith('en') && !v.name.toLowerCase().includes('male')) ||
-            voices[0]
-        );
+        // Global fallback: find ANY voice with female indicators or a non-male voice
+        const femaleKeywords = ['female', 'girl', 'jenny', 'aria', 'xiaoxiao', 'yaoyao', 'zira', 'samantha', 'hazel', 'karen', 'huihui', 'haruka', 'nanami', 'heera', 'swara', 'lulu', 'sin-ji', 'ting-ting', 'mei-jia', 'ana', 'helen', 'zira', 'katherine', 'linda', 'susan', 'yasmin', 'chloe', 'elena'];
+        for (const kw of femaleKeywords) {
+            const v = voices.find(v => v.name.toLowerCase().includes(kw));
+            if (v) return v;
+        }
+        
+        const maleKeywords = ['male', 'david', 'george', 'mark', 'sean', 'ravi', 'guy', 'stefan', 'hector', 'pavel', 'danny'];
+        const nonMaleVoice = voices.find(v => {
+            const nameLower = v.name.toLowerCase();
+            return !maleKeywords.some(kw => nameLower.includes(kw));
+        });
+        if (nonMaleVoice) return nonMaleVoice;
+
+        return voices[0];
     }
 
-    // Voices may not be available synchronously on first load
-    if (window.speechSynthesis) {
+    // Preload voices as early as possible and cache them.
+    // Chrome loads voices asynchronously — without this, getVoices() returns []
+    // on the first call and the browser silently falls back to the default robot voice.
+    let _voicesReady = false;
+    let _voicesReadyCallbacks = [];
+
+    function onVoicesReady(cb) {
+        if (_voicesReady) { cb(); return; }
+        _voicesReadyCallbacks.push(cb);
+    }
+
+    function _initVoices() {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+            _voicesReady = true;
+            _voicesReadyCallbacks.forEach(cb => cb());
+            _voicesReadyCallbacks = [];
+        }
+    }
+
+    if ('speechSynthesis' in window) {
         window.speechSynthesis.onvoiceschanged = () => {
-            _selectedVoice = loadFemaleVoice();
+            _initVoices();
         };
-        // Also attempt immediately (works in Firefox & Safari)
-        _selectedVoice = loadFemaleVoice();
+        // Also try immediately in case voices are already cached (Firefox / some Chromium builds)
+        _initVoices();
     }
 
-    function speakResponse(text) {
+    function speakResponse(text, enableAudio = false) {
         // Duration estimation for animation: ~60ms per character at natural speech rate
         const animationDuration = Math.max(1500, text.length * 60);
         triggerAvatarSpeechSpeak(animationDuration);
@@ -1426,21 +1935,43 @@ Keep your conversational reply warm, human and concise. The student should feel 
         const bubble = document.getElementById('avatar-speech-bubble');
         if (bubble) bubble.innerHTML = `<span>${text}</span>`;
 
+        if (!enableAudio) return; // Keep customizer actions completely silent!
+
         if (!('speechSynthesis' in window)) return;
 
         window.speechSynthesis.cancel();
 
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate  = 0.95;  // Slightly slower than default — warm, unhurried pace
-        utterance.pitch = 1.15;  // Slightly higher — soft feminine register
-        utterance.volume = 1.0;
+        // Clean up markdown syntax so the voice doesn't spell out asterisks or emojis
+        const cleanText = text
+            .replace(/[*#_`~]/g, '') // remove markdown characters
+            .replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]/g, ''); // remove emojis
 
-        // Assign cached voice (re-fetch if not yet loaded)
-        if (!_selectedVoice) _selectedVoice = loadFemaleVoice();
-        if (_selectedVoice) utterance.voice = _selectedVoice;
+        // Wait for voices to be ready before speaking to avoid the robot-voice fallback bug.
+        // On Chrome, getVoices() returns [] until the voiceschanged event fires.
+        onVoicesReady(() => {
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            
+            // Detect language and select best high-quality voice
+            const voice = selectVoiceForText(cleanText);
+            
+            utterance.voice = voice;
+            utterance.volume = 1.0;
+            
+            // Check if the voice is a high-fidelity natural neural/online voice
+            const isNatural = voice && (
+                voice.name.toLowerCase().includes('natural') || 
+                voice.name.toLowerCase().includes('online') ||
+                voice.name.toLowerCase().includes('google') ||
+                voice.name.toLowerCase().includes('samantha')
+            );
 
-        // Small delay avoids Chrome's speech-queue bug where first utterance is clipped
-        setTimeout(() => window.speechSynthesis.speak(utterance), 80);
+            // Cozy Sweet parameters: rate = 1.0, pitch = high but smooth to sound sweet and childlike
+            utterance.rate = 1.0;
+            utterance.pitch = isNatural ? 1.22 : 1.30;
+
+            // Small delay avoids Chrome's speech-queue bug where first utterance is clipped
+            setTimeout(() => window.speechSynthesis.speak(utterance), 80);
+        });
     }
 
     // ----------------------------------------------------------------------
@@ -1452,7 +1983,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
         
         // 2. Play warm emergency dialogue
         const safeText = "Hey, I'm listening. Please hear me: you don't have to go through this alone. I want to keep you safe, and there are human professionals who care deeply and can support you right now. I've brought up their phone numbers on your screen. Please reach out to them immediately.";
-        speakResponse(safeText);
+        speakResponse(safeText, true);
         appendChatMessage('Buddy', "⚠️ **Safety Alert triggered:** I'm very concerned about you. Please utilize the resources on your screen or reach out to a counselor right now. You are not alone.");
         
         // Update SOS telemetry status preview inside the modal
@@ -1472,6 +2003,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
             DOM.sosPreviewStatus.className = "val text-amber";
         }
         DOM.sosPreviewSentiment.innerText = state.diagnostics.sentiment;
+        DOM.sosPreviewHR.innerText = `${state.biometrics.heartRate} bpm`;
         DOM.sosPreviewRant.innerText = state.diagnostics.lastRantDuration === '00:00' ? "No recent speech session" : `Session of ${state.diagnostics.lastRantDuration}`;
     }
 
@@ -1753,7 +2285,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
                 summaryResponse = `I processed your rant. I hear that you're going through a lot. Specifically, ${pauseAssessment}, and you spoke at ${speedAssessment}. Getting those words out is an excellent step to unpack stress. I'm right here with you. What would you like to focus on next?`;
             }
             appendChatMessage('Buddy', summaryResponse);
-            speakResponse(summaryResponse);
+            speakResponse(summaryResponse, true);
             syncStudentAnalysisToBackend(transcriptText, summaryResponse, 'voice', {
                 speechRateWpm: wpmVal,
                 pauseCount: state.rant.pauseCount,
@@ -1783,7 +2315,7 @@ Non-content voice metadata:
 Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect the vocal metadata without sounding clinical, and ask one supportive follow-up question.`;
 
         try {
-            const data = await callGemini('gemini-2.5-flash', {
+            const data = await callGemini('gemini-1.5-flash', {
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: {
                     temperature: 0.75,
@@ -1941,7 +2473,7 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(DOM.webcamElement, 0, 0, canvas.width, canvas.height);
                 const base64Data = canvas.toDataURL('image/jpeg', 0.55).split(',')[1];
-                const data = await callGemini('gemini-2.5-flash', {
+                const data = await callGemini('gemini-1.5-flash', {
                     contents: [{
                         parts: [
                             {
@@ -2675,57 +3207,6 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
         if (DOM.sosConfirmBtn) {
             DOM.sosConfirmBtn.addEventListener('click', () => {
                 if (DOM.sosModal) DOM.sosModal.classList.add('hidden');
-                
-                const studentSession = localStorage.getItem('kawanku_student_session');
-                let token = '';
-                let studentId = 'STU001';
-                let fullName = 'Super Star Student';
-                if (studentSession) {
-                    try {
-                        const parsed = JSON.parse(studentSession);
-                        token = parsed.token || '';
-                        studentId = parsed.student_id || 'STU001';
-                        fullName = parsed.full_name || 'Super Star Student';
-                    } catch(e) {}
-                }
-                
-                // Store local dispatch record for offline / client-only mode
-                const dispatchRecord = {
-                    student_id: studentId,
-                    full_name: fullName,
-                    timestamp: new Date().toISOString(),
-                    stress_level: state.diagnostics.stressLevel || 'High',
-                    sentiment: state.diagnostics.sentiment || 'Negative'
-                };
-                localStorage.setItem(`kawanku_sos_dispatched_${studentId}`, JSON.stringify(dispatchRecord));
-                
-                // Store list of dispatched student IDs to query them on counselor dashboard
-                let dispatchedList = [];
-                try {
-                    dispatchedList = JSON.parse(localStorage.getItem('kawanku_dispatched_list') || '[]');
-                } catch(e) {}
-                if (!dispatchedList.includes(studentId)) {
-                    dispatchedList.push(studentId);
-                    localStorage.setItem('kawanku_dispatched_list', JSON.stringify(dispatchedList));
-                }
-
-                if (token) {
-                    fetch('/api/student/dispatch', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        }
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        console.log("Model SOS Dispatch backend sync:", data);
-                    })
-                    .catch(err => {
-                        console.warn("Model SOS Dispatch backend sync failed:", err);
-                    });
-                }
-
                 showToast("Anonymized diagnostics successfully dispatched to counselor.", "success");
                 appendChatMessage('Buddy', "📬 **Notification:** I've packaged and forwarded your current physiological indicators and stress indices to the counselor department. A school advisor will receive it shortly. Hang in there!");
             });
@@ -2744,8 +3225,8 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
     // ----------------------------------------------------------------------
     // AVATAR CUSTOMIZER SYSTEM (BITMOJI SYSTEM DEFINITIONS)
     // ----------------------------------------------------------------------
-    let activeCategory = 'Fashion';
-    let activeSubcategory = 'Tops';
+    let activeCategory = 'Avatar';
+    let activeSubcategory = 'Mascot Color';
 
     function unlockPremiumItem(prop, val) {
         let unlocked = [];
@@ -2768,98 +3249,86 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
 
     const AVATAR_CATALOG = {
         Fashion: {
-            subcategories: ['Tops', 'Bottoms', 'Shoes'],
+            subcategories: ['Outfits'],
             items: {
-                Tops: [
-                    { id: 'hoodie', label: 'Classic Hoodie', prop: 'shirtStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="40" width="40" height="40" rx="8" fill="#4f46e5"/><path d="M40,40 L50,30 L60,40 Z" fill="#3730a3"/></svg>' },
-                    { id: 'tshirt', label: 'Sporty T-Shirt', prop: 'shirtStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="40" width="36" height="40" rx="4" fill="#0d9488"/><rect x="24" y="40" width="52" height="12" rx="4" fill="#0d9488"/></svg>' },
-                    { id: 'sweater', label: 'Cozy Sweater', prop: 'shirtStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="28" y="38" width="44" height="44" rx="10" fill="#ea580c"/></svg>' }
-                ],
-                Bottoms: [
-                    { id: 'shorts', label: 'Casual Shorts', prop: 'pantsStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="45" width="16" height="24" rx="2" fill="#1e293b"/><rect x="52" y="45" width="16" height="24" rx="2" fill="#1e293b"/></svg>' },
-                    { id: 'cargo', label: 'Cargo Trousers', prop: 'pantsStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="40" width="16" height="45" rx="4" fill="#78716c"/><rect x="52" y="40" width="16" height="45" rx="4" fill="#78716c"/></svg>' },
-                    { id: 'jogger', label: 'Jogger Pants', prop: 'pantsStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="40" width="16" height="42" rx="4" fill="#374151"/><rect x="52" y="40" width="16" height="42" rx="4" fill="#374151"/></svg>' }
-                ],
-                Shoes: [
-                    { id: 'sneakers', label: 'Grey Sneakers', prop: 'shoes', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="48" width="40" height="18" rx="6" fill="#94a3b8"/><rect x="30" y="60" width="40" height="6" fill="#ffffff"/></svg>' },
-                    { id: 'boots', label: 'Outdoor Boots', prop: 'shoes', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="38" width="40" height="28" rx="8" fill="#78350f"/><rect x="30" y="60" width="40" height="6" fill="#451a03"/></svg>' },
-                    { id: 'sandals', label: 'Comfy Slides', prop: 'shoes', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="50" width="40" height="12" rx="4" fill="#1e3a8a"/><rect x="35" y="44" width="30" height="8" fill="#1d4ed8"/></svg>' }
+                Outfits: [
+                    { id: 'none', label: 'Default Body', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#dbf7f9" stroke="#8cdbe1" stroke-width="3"/></svg>' },
+                    { id: 'forest', label: 'Forest Tale', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#606c38" stroke="#283618" stroke-width="3"/><circle cx="24" cy="24" r="6" fill="#e07a5f"/></svg>' },
+                    { id: 'starry', label: 'Starry Pajama', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#1d2d50" stroke="#111827" stroke-width="3"/><polygon points="24,16 26,21 31,21 27,24 29,29 24,26 19,29 21,24 17,21 22,21" fill="#ffd166"/></svg>' },
+                    { id: 'nautical', label: 'Sailor Dress', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#ffffff" stroke="#2b5c8f" stroke-width="3"/><circle cx="24" cy="24" r="8" fill="#2b5c8f"/></svg>' },
+                    { id: 'strawberry', label: 'Strawberry Picnic', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#fca5a5" stroke="#e11d48" stroke-width="3"/><circle cx="24" cy="24" r="6" fill="#e11d48"/></svg>' },
+                    { id: 'wizard', label: 'Wizard Cape', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#4a154b" stroke="#ffd166" stroke-width="3"/><polygon points="24,14 26,19 31,19 27,22 29,27 24,24 19,27 21,22 17,19 22,19" fill="#ffd166"/></svg>' },
+                    { id: 'princess', label: 'Princess Gown 👑', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#f43f5e" stroke="#4A3E3D" stroke-width="2.5"/><circle cx="24" cy="24" r="6" fill="#fef08a" stroke="#4A3E3D" stroke-width="1.5"/></svg>' },
+                    { id: 'mermaid', label: 'Mermaid Gown 🧜‍♀️', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#0284c7" stroke="#4A3E3D" stroke-width="2.5"/><path d="M 18,24 Q 24,18 30,24" stroke="#ffffff" stroke-width="1.5"/></svg>' },
+                    { id: 'lolita', label: 'Lolita Ruffle 🎀', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#bae6fd" stroke="#4A3E3D" stroke-width="2.5"/><path d="M 20,24 H 28" stroke="#ffb3cc" stroke-width="2.5"/></svg>' },
+                    { id: 'unicorn', label: 'Unicorn Suit 🦄', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#fca5a5" stroke="#4A3E3D" stroke-width="2.5"/><polygon points="24,16 21,24 27,24" fill="#facc15" stroke="#4A3E3D" stroke-width="1.5"/></svg>' }
                 ]
             }
         },
-        Selfie: {
-            subcategories: ['Expression'],
-            items: {
-                Expression: [
-                    { id: 'friendly', label: 'Friendly Smile', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="white" stroke-width="4"/><circle cx="40" cy="45" r="3.5" fill="white"/><circle cx="60" cy="45" r="3.5" fill="white"/><path d="M40,60 Q50,70 60,60" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>' },
-                    { id: 'thoughtful', label: 'Thinking Pose', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="white" stroke-width="4"/><circle cx="40" cy="45" r="3.5" fill="white"/><circle cx="60" cy="45" r="3.5" fill="white"/><line x1="42" y1="62" x2="58" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>' },
-                    { id: 'attentive', label: 'Focused Look', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="white" stroke-width="4"/><circle cx="40" cy="45" r="3" fill="white"/><circle cx="60" cy="45" r="3" fill="white"/><path d="M44,60 Q50,64 56,60" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>' },
-                    { id: 'excited', label: 'Excited Grin', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="white" stroke-width="4"/><circle cx="40" cy="45" r="3.5" fill="white"/><circle cx="60" cy="45" r="3.5" fill="white"/><path d="M38,58 Q50,72 62,58 Z" fill="white" stroke="white" stroke-width="1"/></svg>' }
-                ]
-            }
-        },
+
         Pet: {
             subcategories: ['Pets'],
             items: {
                 Pets: [
-                    { id: 'none', label: 'No Pet', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="#64748b" stroke-width="4" stroke-dasharray="4,4"/><line x1="35" y1="35" x2="65" y2="65" stroke="#64748b" stroke-width="4"/></svg>' },
-                    { id: 'cat', label: 'Kitty Cat', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="22" fill="#f59e0b"/><polygon points="34,36 30,16 44,28" fill="#d97706"/><polygon points="66,36 70,16 56,28" fill="#d97706"/><circle cx="42" cy="48" r="2" fill="#1e293b"/><circle cx="58" cy="48" r="2" fill="#1e293b"/><polygon points="50,54 48,52 52,52" fill="#1e293b"/></svg>' },
-                    { id: 'dog', label: 'Loyal Pup', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="22" fill="#78350f"/><path d="M30,42 Q18,48 24,65" fill="none" stroke="#78350f" stroke-width="6"/><path d="M70,42 Q82,48 76,65" fill="none" stroke="#78350f" stroke-width="6"/><circle cx="42" cy="48" r="2" fill="#f8fafc"/><circle cx="58" cy="48" r="2" fill="#f8fafc"/><ellipse cx="50" cy="54" rx="3" ry="1.5" fill="#0f172a"/></svg>' },
-                    { id: 'bird', label: 'Blue Bird', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="20" fill="#3b82f6"/><polygon points="66,46 72,50 66,54" fill="#f59e0b"/><circle cx="56" cy="46" r="2" fill="#0f172a"/><path d="M38,48 Q44,42 50,56" fill="none" stroke="#2563eb" stroke-width="5" stroke-linecap="round"/></svg>' }
-                ]
-            }
-        },
-        Scene: {
-            subcategories: ['Backgrounds'],
-            items: {
-                Backgrounds: [
-                    { id: 'yellow', label: 'Sunny Yellow', prop: 'scene', color: '#ffd02c' },
-                    { id: 'purple', label: 'Dreamy Purple', prop: 'scene', color: 'linear-gradient(135deg, #a78bfa, #c084fc)' },
-                    { id: 'blue', label: 'Sky Blue', prop: 'scene', color: 'linear-gradient(135deg, #38bdf8, #0ea5e9)' },
-                    { id: 'green', label: 'Forest Green', prop: 'scene', color: 'linear-gradient(135deg, #34d399, #059669)' },
-                    { id: 'sunset', label: 'Sunset Orange', prop: 'scene', color: 'linear-gradient(135deg, #fb923c, #db2777)' }
+                    { id: 'none', label: 'No Pet', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="24" fill="none" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="4,4"/><line x1="35" y1="35" x2="65" y2="65" stroke="#cbd5e1" stroke-width="3"/></svg>' },
+                    { id: 'cat', label: 'Orange Cat', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="50" cy="85" rx="22" ry="5" fill="#4A3E3D" opacity="0.22" /><path d="M 68,78 Q 80,82 85,70 Q 90,58 83,52" fill="none" stroke="#4A3E3D" stroke-width="4" stroke-linecap="round" /><path d="M 68,78 Q 80,82 85,70 Q 90,58 83,52" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" /><ellipse cx="50" cy="72" rx="18" ry="15" fill="#f59e0b" stroke="#4A3E3D" stroke-width="4" /><ellipse cx="44" cy="82" rx="5" ry="4" fill="#f59e0b" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="56" cy="82" rx="5" ry="4" fill="#f59e0b" stroke="#4A3E3D" stroke-width="3" /><circle cx="50" cy="46" r="20" fill="#f59e0b" stroke="#4A3E3D" stroke-width="4" /><polygon points="32,36 30,16 46,28" fill="#f59e0b" stroke="#4A3E3D" stroke-width="4" stroke-linejoin="round" /><polygon points="32,36 30,16 46,28" fill="#f59e0b" /><polygon points="34,31 33,20 42,27" fill="#ff8fab" /><polygon points="68,36 70,16 54,28" fill="#f59e0b" stroke="#4A3E3D" stroke-width="4" stroke-linejoin="round" /><polygon points="68,36 70,16 54,28" fill="#f59e0b" /><polygon points="66,31 67,20 58,27" fill="#ff8fab" /><circle cx="42" cy="45" r="3" fill="#4A3E3D" /><circle cx="58" cy="45" r="3" fill="#4A3E3D" /><circle cx="36" cy="51" r="3" fill="#ffa2b6" opacity="0.85" /><circle cx="64" cy="51" r="3" fill="#ffa2b6" opacity="0.85" /><path d="M 47,50 Q 50,53 53,50" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round" /><path d="M 53,50 Q 56,53 59,50" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round" /><polygon points="50,47 48,45 52,45" fill="#4A3E3D" /><line x1="28" y1="48" x2="20" y2="47" stroke="#4A3E3D" stroke-width="2.5" stroke-linecap="round" /><line x1="28" y1="52" x2="21" y2="53" stroke="#4A3E3D" stroke-width="2.5" stroke-linecap="round" /><line x1="72" y1="48" x2="80" y2="47" stroke="#4A3E3D" stroke-width="2.5" stroke-linecap="round" /><line x1="72" y1="52" x2="79" y2="53" stroke="#4A3E3D" stroke-width="2.5" stroke-linecap="round" /></svg>' },
+                    { id: 'dog', label: 'Loyal Pup', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="50" cy="85" rx="22" ry="5" fill="#4A3E3D" opacity="0.22" /><path d="M 32,78 Q 20,82 15,70" fill="none" stroke="#4A3E3D" stroke-width="4" stroke-linecap="round" /><path d="M 32,78 Q 20,82 15,70" fill="none" stroke="#78350f" stroke-width="2.5" stroke-linecap="round" /><ellipse cx="50" cy="72" rx="18" ry="15" fill="#78350f" stroke="#4A3E3D" stroke-width="4" /><ellipse cx="44" cy="82" rx="5" ry="4" fill="#78350f" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="56" cy="82" rx="5" ry="4" fill="#78350f" stroke="#4A3E3D" stroke-width="3" /><circle cx="50" cy="46" r="20" fill="#78350f" stroke="#4A3E3D" stroke-width="4" /><path d="M 32,36 C 22,36 20,52 26,58 C 28,52 32,46 32,36 Z" fill="#451a03" stroke="#4A3E3D" stroke-width="4" stroke-linejoin="round" /><path d="M 32,36 C 22,36 20,52 26,58 C 28,52 32,46 32,36 Z" fill="#451a03" /><path d="M 68,36 C 78,36 80,52 74,58 C 72,52 68,46 68,36 Z" fill="#451a03" stroke="#4A3E3D" stroke-width="4" stroke-linejoin="round" /><path d="M 68,36 C 78,36 80,52 74,58 C 72,52 68,46 68,36 Z" fill="#451a03" /><circle cx="42" cy="45" r="3" fill="#4A3E3D" /><circle cx="58" cy="45" r="3" fill="#4A3E3D" /><circle cx="36" cy="51" r="3" fill="#ffa2b6" opacity="0.85" /><circle cx="64" cy="51" r="3" fill="#ffa2b6" opacity="0.85" /><ellipse cx="50" cy="51" rx="6" ry="4.5" fill="#fef3c7" stroke="#4A3E3D" stroke-width="2.5" /><ellipse cx="50" cy="48" rx="3" ry="2" fill="#4A3E3D" /><path d="M 50,51 L 50,53" stroke="#4A3E3D" stroke-width="2.5" /></svg>' },
+                    { id: 'bird', label: 'Blue Bird', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 30,15 C 32,12 36,12 38,15" fill="none" stroke="#4A3E3D" stroke-width="2.5" stroke-linecap="round" /><path d="M 62,15 C 64,12 68,12 70,15" fill="none" stroke="#4A3E3D" stroke-width="2.5" stroke-linecap="round" /><ellipse cx="50" cy="85" rx="16" ry="4" fill="#4A3E3D" opacity="0.22" /><polygon points="30,68 16,74 24,60" fill="#3b82f6" stroke="#4A3E3D" stroke-width="4" stroke-linejoin="round" /><polygon points="30,68 16,74 24,60" fill="#3b82f6" /><circle cx="50" cy="56" r="22" fill="#3b82f6" stroke="#4A3E3D" stroke-width="4" /><path d="M 42,56 C 42,48 54,48 54,58 C 54,64 42,64 42,56 Z" fill="#2563eb" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" /><circle cx="54" cy="38" r="16" fill="#3b82f6" stroke="#4A3E3D" stroke-width="4" /><polygon points="68,36 78,41 68,46" fill="#f59e0b" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" /><polygon points="68,36 78,41 68,46" fill="#f59e0b" /><circle cx="56" cy="34" r="2.5" fill="#4A3E3D" /><circle cx="50" cy="40" r="2.5" fill="#ffa2b6" opacity="0.85" /></svg>' }
                 ]
             }
         },
         Avatar: {
-            subcategories: ['Hairstyles', 'Skin Tones', 'Glasses', 'Hair Color', 'Shirt Color'],
+            subcategories: ['Mascot Color', 'Expressions', 'Cheek Blushes', 'Face Accessories'],
             items: {
-                Hairstyles: [
-                    { id: 'crop', label: 'Sleek Crop', prop: 'hairStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M25,60 C25,20 75,20 75,60 C65,40 55,30 50,30 C45,30 35,40 25,60 Z" fill="#1e293b"/></svg>' },
-                    { id: 'curly', label: 'Curly Afro', prop: 'hairStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="26" fill="#1e293b" stroke="#334155" stroke-width="3" stroke-dasharray="6,4"/></svg>' },
-                    { id: 'bob', label: 'Bob Cut', prop: 'hairStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M25,60 C25,25 75,25 75,60 L75,70 C65,75 55,78 50,78 C45,78 35,75 25,70 Z" fill="#1e293b"/></svg>' },
-                    { id: 'long', label: 'Long Wave', prop: 'hairStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M25,60 C25,20 75,20 75,60 M20,55 L20,80 C20,90 35,90 35,80 Z M80,55 L80,80 C80,90 65,90 65,80 Z" fill="#1e293b"/></svg>' },
-                    { id: 'bald', label: 'Shaved', prop: 'hairStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="55" r="24" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="4,4"/></svg>' }
+                'Mascot Color': [
+                    { id: '#ffd6e0', label: 'Soft Cloud Pink', prop: 'skinTone', color: '#ffd6e0' },
+                    { id: '#dbf7f9', label: 'Pastel Sky Blue', prop: 'skinTone', color: '#dbf7f9' },
+                    { id: '#e8f5e9', label: 'Mint Green', prop: 'skinTone', color: '#e8f5e9' },
+                    { id: '#e8dff5', label: 'Lavender Sweet', prop: 'skinTone', color: '#e8dff5' }
                 ],
-                'Skin Tones': [
-                    { id: '#ffdbac', label: 'Fair', prop: 'skinTone', color: '#ffdbac' },
-                    { id: '#f1c27d', label: 'Peach', prop: 'skinTone', color: '#f1c27d' },
-                    { id: '#e0ac69', label: 'Honey', prop: 'skinTone', color: '#e0ac69' },
-                    { id: '#c68642', label: 'Bronze', prop: 'skinTone', color: '#c68642' },
-                    { id: '#8d5524', label: 'Deep', prop: 'skinTone', color: '#8d5524' },
-                    { id: '#FFD1A4', label: '深夜食堂', prop: 'skinTone', color: '#FFD1A4', locked: true },
-                    { id: '#C8A2C8', label: '赛博朋克', prop: 'skinTone', color: '#C8A2C8', locked: true },
-                    { id: '#87CEEB', label: '深空流浪', prop: 'skinTone', color: '#87CEEB', locked: true },
-                    { id: '#98FB98', label: '荒野求生', prop: 'skinTone', color: '#98FB98', locked: true }
+                'Expressions': [
+                    { id: 'friendly', label: 'Happy Smile', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="45" r="5" fill="#4A3E3D"/><circle cx="65" cy="45" r="5" fill="#4A3E3D"/><path d="M 44,55 Q 50,60 56,55" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round"/></svg>' },
+                    { id: 'starry', label: 'Joyful Squint', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 28,42 L 38,47 L 28,52" fill="none" stroke="#4A3E3D" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" /><path d="M 72,42 L 62,47 L 72,52" fill="none" stroke="#4A3E3D" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" /><path d="M 43,54 Q 46.5,57.5 50,54 Q 53.5,57.5 57,54" fill="none" stroke="#4A3E3D" stroke-width="3.5" stroke-linecap="round"/></svg>' },
+                    { id: 'wink', label: 'Wink Face', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 28,48 Q 35,42 42,48" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round"/><circle cx="65" cy="45" r="5" fill="#4A3E3D"/><path d="M 44,55 Q 50,60 56,55" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round"/></svg>' },
+                    { id: 'sleepy', label: 'Sleepy Eyes', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 28,44 Q 35,50 42,44" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round"/><path d="M 58,44 Q 65,50 72,44" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round"/><circle cx="50" cy="56" r="3.5" fill="#4A3E3D"/></svg>' },
+                    { id: 'blep', label: 'Blep 👅', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 28,44 Q 35,52 42,44" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round"/><path d="M 58,44 Q 65,52 72,44" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round"/><path d="M 44,55 Q 50,61 56,55" fill="#4A3E3D" stroke="#4A3E3D" stroke-width="2" stroke-linecap="round"/><ellipse cx="50" cy="64" rx="5" ry="4" fill="#ff8fab" stroke="#e05c7a" stroke-width="1.2"/></svg>' },
+                    { id: 'uwu', label: 'UwU 🥺', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 26,45 Q 30,56 36,52 Q 42,48 43,40" fill="none" stroke="#4A3E3D" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M 74,45 Q 70,56 64,52 Q 58,48 57,40" fill="none" stroke="#4A3E3D" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M 42,57 Q 50,65 58,57" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round"/></svg>' },
+                    { id: 'teary', label: 'Teary Joy 🥹', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="45" r="8" fill="#3c2f46"/><circle cx="32" cy="42" r="3" fill="#fff"/><ellipse cx="27" cy="55" rx="2.5" ry="4" fill="#bae6fd" opacity="0.9"/><circle cx="65" cy="45" r="8" fill="#3c2f46"/><circle cx="62" cy="42" r="3" fill="#fff"/><ellipse cx="73" cy="55" rx="2.5" ry="4" fill="#bae6fd" opacity="0.9"/><path d="M 42,57 Q 50,65 58,57" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round"/></svg>' },
+                    { id: 'cat', label: 'Cat Face 🐱', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 27,52 L 37,46 L 47,52" fill="none" stroke="#4A3E3D" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M 73,52 L 63,46 L 53,52" fill="none" stroke="#4A3E3D" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M 43,58 Q 47,54 50,58 Q 53,54 57,58" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>' }
                 ],
-                Glasses: [
-                    { id: 'none', label: 'No Glasses', prop: 'glasses', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="#64748b" stroke-width="4" stroke-dasharray="4,4"/><line x1="35" y1="35" x2="65" y2="65" stroke="#64748b" stroke-width="4"/></svg>' },
-                    { id: 'gold', label: '智者金丝', prop: 'glasses', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="26" y="45" width="20" height="12" rx="4" fill="none" stroke="#f59e0b" stroke-width="4"/><rect x="54" y="45" width="20" height="12" rx="4" fill="none" stroke="#f59e0b" stroke-width="4"/><line x1="46" y1="51" x2="54" y2="51" stroke="#f59e0b" stroke-width="4"/></svg>', locked: true },
-                    { id: 'green', label: '复古黑框', prop: 'glasses', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="26" y="45" width="20" height="12" rx="4" fill="none" stroke="#10b981" stroke-width="4"/><rect x="54" y="45" width="20" height="12" rx="4" fill="none" stroke="#10b981" stroke-width="4"/><line x1="46" y1="51" x2="54" y2="51" stroke="#10b981" stroke-width="4"/></svg>', locked: true }
+                'Cheek Blushes': [
+                    { id: 'circle', label: 'Classic Rosy Circles', prop: 'blushShape', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="50" rx="10" ry="6" fill="#ffa2b6" opacity="0.85"/><ellipse cx="70" cy="50" rx="10" ry="6" fill="#ffa2b6" opacity="0.85"/></svg>' },
+                    { id: 'heart', label: 'Tiny Pink Hearts', prop: 'blushShape', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 25,48 C 22,43 18,48 25,55 C 32,48 28,43 25,48 Z" fill="#ffa2b6"/><path d="M 75,48 C 72,43 68,48 75,55 C 82,48 78,43 75,48 Z" fill="#ffa2b6"/></svg>' },
+                    { id: 'star', label: 'Soft Mini Stars', prop: 'blushShape', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="30,42 32,46 36,46 33,48 34,52 30,50 26,52 27,48 24,46 28,46" fill="#ffa2b6"/><polygon points="70,42 72,46 76,46 73,48 74,52 70,50 66,52 67,48 64,46 68,46" fill="#ffa2b6"/></svg>' },
+                    { id: 'sakura', label: 'Sakura Blossoms 🌸', prop: 'blushShape', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="46" rx="5" ry="2.5" fill="#ffb7cc" opacity="0.9" transform="rotate(-20,30,46)"/><ellipse cx="37" cy="48" rx="5" ry="2.5" fill="#ffb7cc" opacity="0.9" transform="rotate(30,37,48)"/><ellipse cx="34" cy="56" rx="5" ry="2.5" fill="#ffb7cc" opacity="0.9" transform="rotate(80,34,56)"/><ellipse cx="26" cy="56" rx="5" ry="2.5" fill="#ffb7cc" opacity="0.9" transform="rotate(130,26,56)"/><ellipse cx="23" cy="48" rx="5" ry="2.5" fill="#ffb7cc" opacity="0.9" transform="rotate(170,23,48)"/><circle cx="30" cy="51" r="3" fill="#fff0f5" opacity="0.95"/><ellipse cx="70" cy="46" rx="5" ry="2.5" fill="#ffb7cc" opacity="0.9" transform="rotate(-20,70,46)"/><ellipse cx="77" cy="48" rx="5" ry="2.5" fill="#ffb7cc" opacity="0.9" transform="rotate(30,77,48)"/><ellipse cx="74" cy="56" rx="5" ry="2.5" fill="#ffb7cc" opacity="0.9" transform="rotate(80,74,56)"/><ellipse cx="66" cy="56" rx="5" ry="2.5" fill="#ffb7cc" opacity="0.9" transform="rotate(130,66,56)"/><ellipse cx="63" cy="48" rx="5" ry="2.5" fill="#ffb7cc" opacity="0.9" transform="rotate(170,63,48)"/><circle cx="70" cy="51" r="3" fill="#fff0f5" opacity="0.95"/></svg>' },
+                    { id: 'sparkle', label: 'Sparkle Dust ✨', prop: 'blushShape', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 26,46 L 28,51 L 26,56 L 24,51 Z" fill="#ffcce0" opacity="0.95"/><path d="M 21,51 L 26,49 L 31,51 L 26,53 Z" fill="#ffcce0" opacity="0.95"/><path d="M 35,44 L 36,47 L 35,50 L 34,47 Z" fill="#ffa2c0" opacity="0.9"/><path d="M 32,47 L 35,46 L 38,47 L 35,48 Z" fill="#ffa2c0" opacity="0.9"/><path d="M 66,46 L 68,51 L 66,56 L 64,51 Z" fill="#ffcce0" opacity="0.95"/><path d="M 61,51 L 66,49 L 71,51 L 66,53 Z" fill="#ffcce0" opacity="0.95"/><path d="M 75,44 L 76,47 L 75,50 L 74,47 Z" fill="#ffa2c0" opacity="0.9"/><path d="M 72,47 L 75,46 L 78,47 L 75,48 Z" fill="#ffa2c0" opacity="0.9"/></svg>' },
+                    { id: 'dots', label: 'Sweet Trio Dots 🍓', prop: 'blushShape', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="23" cy="55" r="5" fill="#ff8fab" opacity="0.88"/><circle cx="35" cy="55" r="5" fill="#ff8fab" opacity="0.88"/><circle cx="29" cy="46" r="5" fill="#ff8fab" opacity="0.88"/><circle cx="65" cy="55" r="5" fill="#ff8fab" opacity="0.88"/><circle cx="77" cy="55" r="5" fill="#ff8fab" opacity="0.88"/><circle cx="71" cy="46" r="5" fill="#ff8fab" opacity="0.88"/></svg>' },
+                    { id: 'crescent', label: 'Crescent Glow 🌙', prop: 'blushShape', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 37,46 A 9 8 0 1 0 37,57 A 7 6 0 1 1 37,46 Z" fill="#ffa2b6" opacity="0.8"/><path d="M 63,46 A 9 8 0 1 1 63,57 A 7 6 0 1 0 63,46 Z" fill="#ffa2b6" opacity="0.8"/></svg>' },
+                    { id: 'butterfly', label: 'Butterfly Blush 🦋', prop: 'blushShape', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 29,51 Q 20,43 19,51 Q 20,59 29,51 Z" fill="#ffb3cc" opacity="0.82"/><path d="M 29,51 Q 38,43 39,51 Q 38,59 29,51 Z" fill="#ffc8dd" opacity="0.75"/><circle cx="29" cy="51" r="2.5" fill="#ff6b9d" opacity="0.9"/><path d="M 71,51 Q 62,43 61,51 Q 62,59 71,51 Z" fill="#ffb3cc" opacity="0.82"/><path d="M 71,51 Q 80,43 81,51 Q 80,59 71,51 Z" fill="#ffc8dd" opacity="0.75"/><circle cx="71" cy="51" r="2.5" fill="#ff6b9d" opacity="0.9"/></svg>' }
                 ],
-                'Hair Color': [
-                    { id: '#1e293b', label: 'Dark Slate', prop: 'hairColor', color: '#1e293b' },
-                    { id: '#e2e8f0', label: 'Silver White', prop: 'hairColor', color: '#e2e8f0' },
-                    { id: '#b45309', label: 'Golden Brown', prop: 'hairColor', color: '#b45309' },
-                    { id: '#4f46e5', label: 'Bright Indigo', prop: 'hairColor', color: '#4f46e5' },
-                    { id: '#e11d48', label: 'Rose Red', prop: 'hairColor', color: '#e11d48' }
-                ],
-                'Shirt Color': [
-                    { id: '#4f46e5', label: 'Royal Blue', prop: 'shirtColor', color: '#4f46e5' },
-                    { id: '#0d9488', label: 'Teal Green', prop: 'shirtColor', color: '#0d9488' },
-                    { id: '#ea580c', label: 'Warm Orange', prop: 'shirtColor', color: '#ea580c' },
-                    { id: '#db2777', label: 'Hot Pink', prop: 'shirtColor', color: '#db2777' },
-                    { id: '#1e293b', label: 'Charcoal Black', prop: 'shirtColor', color: '#1e293b' }
+                'Face Accessories': [
+                    { id: 'none', label: 'None', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="24" fill="none" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="4,4"/><line x1="35" y1="35" x2="65" y2="65" stroke="#cbd5e1" stroke-width="3"/></svg>' },
+                    { id: 'round_glasses', label: 'Oversized Round Glasses', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="50" r="12" fill="none" stroke="#4A3E3D" stroke-width="3"/><circle cx="65" cy="50" r="12" fill="none" stroke="#4A3E3D" stroke-width="3"/><line x1="47" y1="50" x2="53" y2="50" stroke="#4A3E3D" stroke-width="3"/></svg>' },
+                    { id: 'star_glasses', label: 'Star Sunglasses', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="35,38 39,47 48,47 41,52 43,61 35,56 27,61 29,52 22,47 31,47" fill="none" stroke="#4A3E3D" stroke-width="2.5"/><polygon points="65,38 69,47 78,47 71,52 73,61 65,56 57,61 59,52 52,47 61,47" fill="none" stroke="#4A3E3D" stroke-width="2.5"/><line x1="47" y1="48" x2="53" y2="48" stroke="#4A3E3D" stroke-width="3"/></svg>' },
+                    { id: 'night_mask', label: 'Sleepy Night Mask', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="22" y="38" width="56" height="24" rx="10" fill="#a78bfa" stroke="#4A3E3D" stroke-width="3"/><path d="M 32,50 Q 36,54 40,50" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/><path d="M 60,50 Q 64,54 68,50" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/></svg>' },
+                    { id: 'sprout', label: 'Tiny Head Sprout', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 50,45 Q 50,25 58,15" fill="none" stroke="#22c55e" stroke-width="3.5" stroke-linecap="round"/><path d="M 210,95 Q 222,98 218,108 C 213,113 203,107 210,95 Z" fill="#22c55e" stroke="#166534" stroke-width="1.5"/><path d="M 200,118 Q 188,110 192,102 C 196,98 204,105 200,118 Z" fill="#22c55e" stroke="#166534" stroke-width="1.5"/></svg>' },
+                    { id: 'heart_glasses', label: 'Sweet Heart Glasses 💖', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 35,40 C 23,28 11,36 15,50 C 19,62 35,68 35,68 C 35,68 51,62 55,50 C 59,36 47,28 35,40 Z" fill="#ff758f" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="29" cy="44" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,29,44)" /><path d="M 65,40 C 53,28 41,36 45,50 C 49,62 65,68 65,68 C 65,68 81,62 85,50 C 89,36 77,28 65,40 Z" fill="#ff758f" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="59" cy="44" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,59,44)" /><path d="M 47,50 Q 50,48 53,50" fill="none" stroke="#4A3E3D" stroke-width="3" /></svg>' },
+                    { id: 'cat_glasses', label: 'Cat Ear Glasses 🐱', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="25,42 16,28 34,37" fill="#ffd6e0" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" /><polygon points="26,41 20,31 32,37" fill="#ff758f" /><polygon points="75,42 84,28 66,37" fill="#ffd6e0" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" /><polygon points="74,41 80,31 68,37" fill="#ff758f" /><circle cx="35" cy="50" r="12" fill="#ffd6e0" fill-opacity="0.25" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="29" cy="44" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,29,44)" /><circle cx="65" cy="50" r="12" fill="#ffd6e0" fill-opacity="0.25" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="59" cy="44" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,59,44)" /><path d="M 47,50 Q 50,48 53,50" fill="none" stroke="#4A3E3D" stroke-width="3" /></svg>' },
+                    { id: 'flower_glasses', label: 'Daisy Sunglasses 🌼', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="32" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="51" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="51" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="35" cy="68" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="19" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="19" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="35" cy="50" r="12" fill="#fef08a" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="2.5" /><circle cx="35" cy="50" r="7" fill="#facc15" opacity="0.8" /><circle cx="65" cy="32" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="81" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="81" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="65" cy="68" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="49" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="49" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="65" cy="50" r="12" fill="#fef08a" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="2.5" /><circle cx="65" cy="50" r="7" fill="#facc15" opacity="0.8" /><path d="M 45,50 Q 50,48 55,50" fill="none" stroke="#4A3E3D" stroke-width="2.5" /></svg>' }
+                ]
+            }
+        },
+        Scene: {
+            subcategories: ['Scenes'],
+            items: {
+                Scenes: [
+                    { id: 'starry_night', label: 'Starry Night Window', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#2E2545" stroke="#4A3E3D" stroke-width="3"/><circle cx="50" cy="50" r="10" fill="#fff" opacity="0.3"/><line x1="10" y1="50" x2="90" y2="50" stroke="#4A3E3D" stroke-width="2"/><line x1="50" y1="10" x2="50" y2="90" stroke="#4A3E3D" stroke-width="2"/></svg>' },
+                    { id: 'lofi_study', label: 'Lo-Fi Study Desk', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#dfc09b" stroke="#4A3E3D" stroke-width="3"/><rect x="25" y="60" width="50" height="15" fill="#ebcba4" stroke="#4A3E3D" stroke-width="2"/></svg>' },
+                    { id: 'floating_garden', label: 'Secret Floating Garden', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#E8F5E9" stroke="#4A3E3D" stroke-width="3"/><circle cx="30" cy="30" r="8" fill="#798948"/><circle cx="70" cy="40" r="6" fill="#798948"/></svg>' },
+                    { id: 'boba_cafe', label: 'Dreamy Boba Cafe', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#F7F4EB" stroke="#4A3E3D" stroke-width="3"/><circle cx="30" cy="30" r="3" fill="#ffe066"/><circle cx="70" cy="30" r="3" fill="#ffe066"/></svg>' },
+                    { id: 'pink_bedroom', label: 'Strawberry Dream Room 🌸', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#ffdeeb" stroke="#4A3E3D" stroke-width="3"/><circle cx="30" cy="25" r="3" fill="#fef08a" stroke="#4A3E3D"/><circle cx="50" cy="28" r="3" fill="#fef08a" stroke="#4A3E3D"/><circle cx="70" cy="25" r="3" fill="#fef08a" stroke="#4A3E3D"/><ellipse cx="50" cy="80" rx="20" ry="5" fill="#ffa2b6" opacity="0.4"/></svg>' },
+                    { id: 'cozy_cabin', label: 'Warm Cabin Fireside 🪵', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#fef3c7" stroke="#4A3E3D" stroke-width="3"/><rect x="25" y="25" width="20" height="30" rx="2" fill="#fff" opacity="0.3" stroke="#4A3E3D" stroke-width="1.8"/><rect x="65" y="65" width="10" height="12" rx="1" fill="#f97316" stroke="#4A3E3D" stroke-width="1.8"/></svg>' },
+                    { id: 'cozy_rain', label: 'Rainy Day Window ☁️', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#90a4ae" stroke="#4A3E3D" stroke-width="3"/><path d="M 25,35 Q 35,25 45,35" fill="none" stroke="#fff" opacity="0.5" stroke-width="2" stroke-linecap="round"/><line x1="30" y1="55" x2="28" y2="65" stroke="#bae6fd" stroke-width="2" stroke-linecap="round"/><line x1="60" y1="50" x2="58" y2="60" stroke="#bae6fd" stroke-width="2" stroke-linecap="round"/></svg>' }
                 ]
             }
         }
@@ -2878,6 +3347,47 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
             if (prop === 'shoes') state.avatar.shoes = val;
             if (prop === 'hairStyle') state.avatar.hairStyle = val;
             if (prop === 'expression') state.avatar.expression = val;
+
+            if (prop === 'activeOutfit') {
+                let msg = "Today is a beautiful day. Tell me what's on your mind? 💖";
+                let exp = 'friendly';
+                if (val === 'forest') {
+                    msg = "There are lots of glowing mushrooms in the forest! Would you like to go mushroom picking with me? 🍄";
+                    exp = 'excited';
+                } else if (val === 'starry') {
+                    msg = "So warm... I'm getting sleepy... Let's count stars together tonight, zzz... 😴⭐";
+                    exp = 'thoughtful';
+                } else if (val === 'nautical') {
+                    msg = "Set sail! Our target is the starry sea, next stop is Strawberry Island! ⚓⛵";
+                    exp = 'excited';
+                } else if (val === 'strawberry') {
+                    msg = "The weather today is perfect for a picnic. Here, have a sweet, fresh strawberry! 🍓";
+                    exp = 'friendly';
+                } else if (val === 'wizard') {
+                    msg = "Casting a spell: Hula-la-change! All negative energy and worries, fade away! 🪄✨";
+                    exp = 'excited';
+                }
+                state.avatar.expression = exp;
+                // Play interactive pop sound (disabled to prevent beep feedback)
+                /*
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.15);
+                } catch(e) {}
+                */
+                // Trigger speaking dialogue speech synthesis bubble
+                setTimeout(() => speakResponse(msg), 150);
+            }
 
             renderAvatarVisuals();
             try {
@@ -2959,6 +3469,9 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
                     return;
                 }
                 avatarState.set(item.prop, item.id);
+                if (item.prop === 'accessory' && item.id === 'none') {
+                    avatarState.set('hairStyle', 'none');
+                }
                 renderCustomizerUI();
             });
 
@@ -2967,38 +3480,17 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
     }
 
     function randomizeAvatarConfig() {
-        const hairOptions = ['crop', 'curly', 'bob', 'long', 'bald'];
-        const shirtOptions = ['hoodie', 'tshirt', 'sweater'];
-        const skinOptions  = ['#ffdbac', '#f1c27d', '#e0ac69', '#c68642', '#8d5524'];
-        const expressionOptions  = ['friendly', 'thoughtful', 'attentive', 'excited'];
-        const glassesOptions     = ['none', 'green', 'gold'];
-        const accOptions         = ['none', 'headphones'];
-        const graphicOptions     = ['none', 'pumpkin', 'heart', 'wave', 'star'];
-        const pantsOptions       = ['shorts', 'cargo', 'jogger'];
-        const shoeOptions        = ['sneakers', 'boots', 'sandals'];
-        const petOptions         = ['none', 'cat', 'dog', 'bird'];
-        const sceneOptions       = ['yellow', 'purple', 'blue', 'green', 'sunset'];
+        const mascotColors = ['#ffd6e0', '#dbf7f9', '#e8f5e9', '#e8dff5'];
+        const expressionOptions  = ['friendly', 'starry', 'wink', 'sleepy', 'blep', 'uwu', 'teary', 'cat'];
+        const blushOptions       = ['circle', 'heart', 'star', 'sakura', 'sparkle', 'dots', 'crescent', 'butterfly'];
+        const accOptions         = ['none', 'round_glasses', 'star_glasses', 'night_mask', 'sprout', 'heart_glasses', 'cat_glasses', 'flower_glasses'];
+        const sceneOptions       = ['starry_night', 'lofi_study', 'floating_garden', 'boba_cafe', 'pink_bedroom', 'cozy_cabin', 'cozy_rain'];
 
-        state.avatar.hairStyle    = getRandomElement(hairOptions);
-        state.avatar.shirtStyle   = getRandomElement(shirtOptions);
-        state.avatar.skinTone     = getRandomElement(skinOptions);
+        state.avatar.skinTone     = getRandomElement(mascotColors);
         state.avatar.expression   = getRandomElement(expressionOptions);
-        state.avatar.glasses      = getRandomElement(glassesOptions);
-        state.avatar.accessories  = getRandomElement(accOptions);
-        state.avatar.hoodieGraphic = getRandomElement(graphicOptions);
-        state.avatar.pantsStyle   = getRandomElement(pantsOptions);
-        state.avatar.shoes        = getRandomElement(shoeOptions);
-        state.avatar.pet          = getRandomElement(petOptions);
-        state.avatar.scene        = getRandomElement(sceneOptions);
-
-        state.avatar.hairColor   = getRandomHexColor();
-        state.avatar.shirtColor  = getRandomHexColor();
-        state.avatar.glowColor1  = getRandomHexColor();
-        state.avatar.glowColor2  = getRandomHexColor();
-
-        // Populate dynamic schema fields
-        state.avatar.top = state.avatar.shirtStyle;
-        state.avatar.bottom = state.avatar.pantsStyle;
+        state.avatar.blushShape   = getRandomElement(blushOptions);
+        state.avatar.accessory    = getRandomElement(accOptions);
+        state.avatar.currentScene = getRandomElement(sceneOptions);
 
         renderAvatarVisuals();
         
@@ -3006,7 +3498,7 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
             renderCustomizerUI();
         }
         
-        showToast("MindBuddy randomized!", "success");
+        showToast("Mascot Buddy randomized!", "success");
     }
 
     // ----------------------------------------------------------------------
@@ -3296,7 +3788,7 @@ For the Report (after monster defeat), respond with:
                 generationConfig: { temperature: 0.85, maxOutputTokens: 1024 }
             };
             try {
-                const data = await callGemini('gemini-2.5-flash', body);
+                const data = await callGemini('gemini-1.5-flash', body);
                 if (!data) return null;
                 const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
                 // Strip potential markdown fences
@@ -4142,7 +4634,7 @@ Strictly adhere to the following layout and do NOT add any extra introductory te
 
             if (canAttemptGemini()) {
                 try {
-                    const data = await callGemini('gemini-2.5-flash', {
+                    const data = await callGemini('gemini-1.5-flash', {
                         system_instruction: { parts: [{ text: "You are a clinical psychologist compiling a student mental wellness assessment report. Be professional, supportive, and clear." }] },
                         contents: [{ role: 'user', parts: [{ text: prompt }] }],
                         generationConfig: { temperature: 0.8, maxOutputTokens: 2048 }
@@ -4275,7 +4767,7 @@ Example format:
             try {
                 let questions = null;
                 if (canAttemptGemini()) {
-                    const data = await callGemini('gemini-2.5-flash', {
+                    const data = await callGemini('gemini-1.5-flash', {
                         system_instruction: { parts: [{ text: "You are a specialized JSON generator. You output raw JSON arrays containing strings and nothing else." }] },
                         contents: [{ role: 'user', parts: [{ text: prompt }] }],
                         generationConfig: { temperature: 0.7, maxOutputTokens: 1000 }
@@ -4353,22 +4845,22 @@ Example format:
 
         const SHOP_CATALOG = {
             1: [
-                { icon: '👓', name: '智者金丝边框眼镜', cost: 3, prop: 'glasses', val: 'gold' },
+                { icon: '👓', name: '智者金丝边框眼镜', cost: 3, prop: 'accessory', val: 'gold' },
                 { icon: '💇', name: '慵懒微卷空气感发型', cost: 5, prop: 'hairStyle', val: 'curly' },
                 { icon: '🎨', name: '限定皮肤：深夜食堂 · 温暖微光', cost: 15, prop: 'skinTone', val: '#FFD1A4' }
             ],
             2: [
-                { icon: '👓', name: '复古原色厚街黑框眼镜', cost: 3, prop: 'glasses', val: 'green' },
+                { icon: '👓', name: '复古原色厚街黑框眼镜', cost: 3, prop: 'accessory', val: 'green' },
                 { icon: '💇', name: '少年感清爽利落碎发', cost: 5, prop: 'hairStyle', val: 'crop' },
                 { icon: '🎨', name: '限定皮肤：赛博朋克 · 暗夜霓虹', cost: 15, prop: 'skinTone', val: '#C8A2C8' }
             ],
             3: [
-                { icon: '👓', name: '蹦迪专用蹦碎极光墨镜', cost: 4, prop: 'glasses', val: 'gold' },
+                { icon: '👓', name: '蹦迪专用蹦碎极光墨镜', cost: 4, prop: 'accessory', val: 'gold' },
                 { icon: '💇', name: '触电般炸毛狂想发型', cost: 6, prop: 'hairStyle', val: 'bob' },
                 { icon: '🎨', name: '限定皮肤：深空流浪 · 孤独星云', cost: 18, prop: 'skinTone', val: '#87CEEB' }
             ],
             4: [
-                { icon: '👓', name: '智商爆表科学家圆框镜', cost: 4, prop: 'glasses', val: 'green' },
+                { icon: '👓', name: '智商爆表科学家圆框镜', cost: 4, prop: 'accessory', val: 'green' },
                 { icon: '💇', name: '高级感微翘狼尾发型', cost: 6, prop: 'hairStyle', val: 'long' },
                 { icon: '🎨', name: '限定皮肤：荒野求生 · 岛屿极光', cost: 18, prop: 'skinTone', val: '#98FB98' }
             ]
@@ -4456,7 +4948,7 @@ Example format:
             if (sInput) sInput.value = '';
             const shopPrompt = '你是 Kawanku AI 火花商店的潮流主理人。用户当前火花天数为 ' + sp.days + ' 天。当前显示第 ' + activeWeek + ' 周货架。请根据用户请求展示商品或处理兑换。保持极简留白风格。货架内容：' + JSON.stringify(SHOP_CATALOG[activeWeek]);
             try {
-                const data = await callGemini('gemini-2.5-flash', {
+                const data = await callGemini('gemini-1.5-flash', {
                     system_instruction: { parts: [{ text: shopPrompt }] },
                     contents: shopHistory,
                     generationConfig: { temperature: 0.8, maxOutputTokens: 1024 }
@@ -4501,12 +4993,7 @@ Example format:
     // 开心消消乐 HAPPY MATCH-3 ENGINE — STEMGINEERS Innovation Project
     // =========================================================================
     (function RelaxationGamesEngine() {
-        // ── DOM refs ────────────────------------------------------------------
-        const menuContainer     = document.getElementById('games-menu-container');
-        const cardMatch3        = document.getElementById('card-match3');
-        const btnSelectMatch3   = document.getElementById('btn-select-match3');
-        const btnMatch3Back     = document.getElementById('btn-match3-back-menu');
-        
+        // ── DOM refs ──────────────────────────────────────────────────────────
         const match3StartAction = document.getElementById('match3-start-action');
         const match3GameArena   = document.getElementById('match3-game-arena');
         const match3Board       = document.getElementById('match3-board');
@@ -4514,15 +5001,9 @@ Example format:
         const match3ProgressVal = document.getElementById('match3-progress-val');
         const btnStartMatch3    = document.getElementById('btn-start-match3');
         const btnQuitMatch3     = document.getElementById('btn-quit-match3');
-        const btnMatch3Tip      = document.getElementById('btn-match3-tip');
-        const tipBoxText        = document.getElementById('match3-tip-box-text');
         const surveyInline      = document.getElementById('survey-inline');
         const surveyPrompt      = document.getElementById('survey-robot-prompt');
         const hintText          = document.getElementById('match3-hint-text');
-        const btnWinReplay      = document.getElementById('btn-win-replay');
-        const btnWinSurvey      = document.getElementById('btn-win-survey');
-        const surveyMoodSection = document.getElementById('survey-mood-section');
-        const winChoicesRow     = document.getElementById('win-choices-row');
 
         // ── Fruit SVG tiles (cute, colourful, recognisable) ───────────────────
         const TILE_TYPES = [
@@ -4645,7 +5126,7 @@ Example format:
 
         // ── Game state ────────────────────────────────────────────────────────
         const ROWS = 6, COLS = 6;
-        const WIN_MATCHES = 15;
+        const WIN_MATCHES = 10;
         let board       = [];   // 2-D array of tile objects
         let selected    = null;
         let busy        = false;
@@ -4696,8 +5177,6 @@ Example format:
                     div.innerHTML = makeTileHTML(t);
                     div.dataset.row = r;
                     div.dataset.col = c;
-                    div.style.gridRowStart = r + 1;
-                    div.style.gridColumnStart = c + 1;
                     div.addEventListener('click', () => onTileClick(t));
                     t.el = div;
                     match3Board.appendChild(div);
@@ -4804,45 +5283,14 @@ Example format:
             return out;
         }
 
+        // ── Clear matches + gravity + refill ──────────────────────────────────
         async function processMatches(matches) {
             score++;
             updateProgress();
 
-            // Increment matches and update dashboard
-            state.gameStats.matches += matches.length;
-            if (window.updateSanctuaryDashboard) window.updateSanctuaryDashboard();
-
-            // Spawn floating combo text on matches
-            try {
-                let sumX = 0, sumY = 0;
-                matches.forEach(t => {
-                    if (t.el) {
-                        sumX += t.el.offsetLeft + t.el.offsetWidth / 2;
-                        sumY += t.el.offsetTop + t.el.offsetHeight / 2;
-                    }
-                });
-                const avgX = sumX / matches.length;
-                const avgY = sumY / matches.length;
-
-                const phrases = ["+3 Cozy! ✨", "Sweet! 🌸", "Flow State 🍃", "Calm Match 🌊", "Breathe... 💨", "Mindful Moment 💫", "Nice Swapping! 💖", "Inner Peace 🧘"];
-                const phrase = phrases[Math.floor(Math.random() * phrases.length)];
-
-                const overlay = document.getElementById('match3-combo-overlay');
-                if (overlay) {
-                    const span = document.createElement('span');
-                    span.className = 'match3-combo-text';
-                    span.textContent = phrase;
-                    span.style.left = avgX + 'px';
-                    span.style.top = avgY + 'px';
-                    overlay.appendChild(span);
-                    setTimeout(() => span.remove(), 1200);
-                }
-            } catch(e) {}
-
             // pop animation
             matches.forEach(t => t.el.classList.add('pop-clear'));
             await sleep(320);
-
 
             // remove from DOM + board
             matches.forEach(t => {
@@ -4860,7 +5308,7 @@ Example format:
                         board[r+empty][c] = t;
                         board[r][c]       = null;
                         t.row             = r + empty;
-                        refreshTileEl(t); // Updates position and dataset properly
+                        t.el.style.gridRowStart = t.row + 1;
                     }
                 }
                 // fill empty from top
@@ -4893,98 +5341,6 @@ Example format:
             }
         }
 
-        // ── Hint Solver ──────────────────────────────────────────────────────
-        function findPossibleMoves() {
-            // Check if position (r,c) is part of a 3+ match (reads current board state)
-            function hasMatchAt(r, c) {
-                const tile = board[r][c];
-                if (!tile) return false;
-                const typeId = tile.id;
-
-                // Horizontal count
-                let horiz = 1;
-                let col = c - 1;
-                while (col >= 0 && board[r][col] && board[r][col].id === typeId) { horiz++; col--; }
-                col = c + 1;
-                while (col < COLS && board[r][col] && board[r][col].id === typeId) { horiz++; col++; }
-                if (horiz >= 3) return true;
-
-                // Vertical count
-                let vert = 1;
-                let row = r - 1;
-                while (row >= 0 && board[row][c] && board[row][c].id === typeId) { vert++; row--; }
-                row = r + 1;
-                while (row < ROWS && board[row][c] && board[row][c].id === typeId) { vert++; row++; }
-                if (vert >= 3) return true;
-
-                return false;
-            }
-
-            // Simulate swap, check, then swap back
-            function trySwap(r1, c1, r2, c2) {
-                const a = board[r1][c1];
-                const b = board[r2][c2];
-                if (!a || !b || a.id === b.id) return false;
-
-                // Perform the swap in the board array
-                board[r1][c1] = b;
-                board[r2][c2] = a;
-
-                // Check if either swapped position now forms a match
-                const matched = hasMatchAt(r1, c1) || hasMatchAt(r2, c2);
-
-                // Swap back to restore original state
-                board[r1][c1] = a;
-                board[r2][c2] = b;
-
-                return matched;
-            }
-
-            for (let r = 0; r < ROWS; r++) {
-                for (let c = 0; c < COLS; c++) {
-                    // Try right swap
-                    if (c + 1 < COLS && trySwap(r, c, r, c + 1)) {
-                        return { t1: board[r][c], t2: board[r][c + 1] };
-                    }
-                    // Try down swap
-                    if (r + 1 < ROWS && trySwap(r, c, r + 1, c)) {
-                        return { t1: board[r][c], t2: board[r + 1][c] };
-                    }
-                }
-            }
-            return null;
-        }
-
-        let hintActive = false;
-        async function showHint() {
-            if (busy || hintActive) return;
-            hintActive = true;
-            
-            const move = findPossibleMoves();
-            if (move) {
-                move.t1.el.classList.add('hint-glow');
-                move.t2.el.classList.add('hint-glow');
-                
-                if (tipBoxText) {
-                    tipBoxText.innerHTML = `Swap the <strong>${move.t1.name.split(' ')[0]}</strong> and <strong>${move.t2.name.split(' ')[0]}</strong>! ✨`;
-                }
-                
-                await sleep(2000);
-                if (move.t1 && move.t1.el) move.t1.el.classList.remove('hint-glow');
-                if (move.t2 && move.t2.el) move.t2.el.classList.remove('hint-glow');
-            } else {
-                if (tipBoxText) tipBoxText.textContent = "No matches left! Reshuffling board...";
-                showToast("No moves possible! Reshuffling board...", "info");
-                let tries = 0;
-                do {
-                    buildBoard();
-                    tries++;
-                } while (!findPossibleMoves() && tries < 10);
-                renderBoard();
-            }
-            hintActive = false;
-        }
-
         // ── Progress bar ──────────────────────────────────────────────────────
         function updateProgress() {
             const pct = Math.min(100, Math.round(score / WIN_MATCHES * 100));
@@ -4997,8 +5353,6 @@ Example format:
             match3GameArena.classList.add('hidden');
             match3StartAction.classList.add('hidden');
             surveyInline.classList.remove('hidden');
-            if (winChoicesRow) winChoicesRow.classList.remove('hidden');
-            if (surveyMoodSection) surveyMoodSection.classList.add('hidden');
             surveyInline.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
@@ -5015,11 +5369,6 @@ Example format:
             score = 0;
             selected = null;
             busy = false;
-            
-            // Set start flag & update lounge checklist
-            localStorage.setItem('relax_game_started', 'true');
-            if (window.updateSanctuaryDashboard) window.updateSanctuaryDashboard();
-
             updateProgress();
             buildBoard();
             renderBoard();
@@ -5027,9 +5376,7 @@ Example format:
             surveyInline.classList.add('hidden');
             match3GameArena.classList.remove('hidden');
             if (hintText) hintText.textContent = 'Click a fruit, then click an adjacent fruit to swap them!';
-            if (tipBoxText) tipBoxText.textContent = 'Take deep breaths while matching. Let the stress melt away.';
         }
-
 
         function quitGame() {
             match3GameArena.classList.add('hidden');
@@ -5055,1708 +5402,14 @@ Example format:
             populateFruitPreview();
             if (btnStartMatch3) btnStartMatch3.addEventListener('click', startGame);
             if (btnQuitMatch3)  btnQuitMatch3.addEventListener('click', quitGame);
-            if (btnMatch3Tip)   btnMatch3Tip.addEventListener('click', showHint);
-            
-            if (btnWinReplay) {
-                btnWinReplay.addEventListener('click', () => {
-                    if (cardMatch3 && !cardMatch3.classList.contains('hidden')) {
-                        startGame();
-                    }
-                });
-            }
-            if (btnWinSurvey) {
-                btnWinSurvey.addEventListener('click', () => {
-                    if (winChoicesRow) winChoicesRow.classList.add('hidden');
-                    if (surveyMoodSection) surveyMoodSection.classList.remove('hidden');
-                });
-            }
-
             document.querySelectorAll('#survey-inline .emoji-btn').forEach(btn => {
                 btn.addEventListener('click', () => handleMood(btn.dataset.mood));
             });
-            
-            // Menu navigation select click bindings
-            if (btnSelectMatch3 && cardMatch3 && menuContainer) {
-                btnSelectMatch3.addEventListener('click', () => {
-                    menuContainer.classList.add('hidden');
-                    cardMatch3.classList.remove('hidden');
-                });
-            }
-            if (btnMatch3Back && cardMatch3 && menuContainer) {
-                btnMatch3Back.addEventListener('click', () => {
-                    quitGame();
-                    cardMatch3.classList.add('hidden');
-                    menuContainer.classList.remove('hidden');
-                });
-            }
         }
 
         init();
     })();
 
-    // =========================================================================
-    // KAWANKU FRUIT ZEN ENGINE — HIGH-FIDELITY CANVASES SLICING GAME
-    // =========================================================================
-    (function FruitZenEngine() {
-        // ── DOM refs ──────────────────────────────────────────────────────────
-        const menuContainer     = document.getElementById('games-menu-container');
-        const cardFruitZen      = document.getElementById('card-fruit-zen');
-        const btnSelectFruitZen = document.getElementById('btn-select-fruit-zen');
-        const btnFruitZenBack   = document.getElementById('btn-fruit-zen-back-menu');
-        
-        const zenStartScreen    = document.getElementById('zen-start-action');
-        const zenGameArena      = document.getElementById('zen-game-arena');
-        const btnStartZen       = document.getElementById('btn-start-fruit-zen');
-        const btnQuitZen        = document.getElementById('btn-quit-fruit-zen');
-        
-        const canvas            = document.getElementById('zen-canvas');
-        const progressFill      = document.getElementById('zen-progress');
-        const progressVal       = document.getElementById('zen-progress-val');
-        
-        const surveyInline      = document.getElementById('survey-inline');
-        const winChoicesRow     = document.getElementById('win-choices-row');
-        const surveyMoodSection = document.getElementById('survey-mood-section');
-        const btnWinReplay      = document.getElementById('btn-win-replay');
-        const btnWinSurvey      = document.getElementById('btn-win-survey');
-
-        let ctx = null;
-        let animationFrameId = null;
-        let isPlaying = false;
-        let score = 0;
-        const targetScore = 20;
-        let speedMode = 'normal';
-        
-        let fruits = [];
-        let splats = [];
-        let sparks = [];
-        let juiceParticles = [];
-        let trailPoints = [];
-        let isMouseDown = false;
-        let lastMousePos = null;
-        
-        let currentCombo = 0;
-        let lastSliceTime = 0;
-        let comboTexts = [];
-        
-        let audioCtx = null;
-
-        
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-        }
-        
-        function playWhooshSound() {
-            if (!audioCtx) return;
-            try {
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(100, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.12);
-                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.12);
-            } catch(e) {}
-        }
-        
-        function playSplashSound() {
-            if (!audioCtx) return;
-            try {
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(220, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(60, audioCtx.currentTime + 0.18);
-                gain.gain.setValueAtTime(0.20, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.18);
-            } catch(e) {}
-        }
-        
-        let woodPatternCanvas = null;
-        function createWoodPattern() {
-            if (woodPatternCanvas) return;
-            woodPatternCanvas = document.createElement('canvas');
-            woodPatternCanvas.width = 600;
-            woodPatternCanvas.height = 400;
-            const wctx = woodPatternCanvas.getContext('2d');
-            
-            const plankHeight = 80;
-            const plankColors = ['#8B5A2B', '#805326', '#946130', '#784D23', '#855629'];
-            
-            for (let y = 0; y < woodPatternCanvas.height; y += plankHeight) {
-                const color = plankColors[(y / plankHeight) % plankColors.length];
-                wctx.fillStyle = color;
-                wctx.fillRect(0, y, woodPatternCanvas.width, plankHeight);
-                
-                wctx.strokeStyle = 'rgba(0,0,0,0.04)';
-                wctx.lineWidth = 1.5;
-                for (let i = 0; i < 5; i++) {
-                    const gy = y + 10 + i * 15;
-                    wctx.beginPath();
-                    wctx.moveTo(0, gy);
-                    wctx.quadraticCurveTo(150, gy - 6 + Math.random()*12, 300, gy + Math.random()*8);
-                    wctx.quadraticCurveTo(450, gy - 8 + Math.random()*16, 600, gy);
-                    wctx.stroke();
-                }
-                
-                wctx.strokeStyle = 'rgba(0,0,0,0.22)';
-                wctx.lineWidth = 2.5;
-                wctx.beginPath();
-                wctx.moveTo(0, y);
-                wctx.lineTo(woodPatternCanvas.width, y);
-                wctx.stroke();
-                
-                wctx.strokeStyle = 'rgba(255,255,255,0.05)';
-                wctx.lineWidth = 1;
-                wctx.beginPath();
-                wctx.moveTo(0, y + 1.5);
-                wctx.lineTo(woodPatternCanvas.width, y + 1.5);
-                wctx.stroke();
-            }
-        }
-        
-        function drawBackground() {
-            ctx.fillStyle = '#4e331c';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            createWoodPattern();
-            if (woodPatternCanvas) {
-                const pat = ctx.createPattern(woodPatternCanvas, 'repeat');
-                ctx.fillStyle = pat;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            }
-            
-            const vignette = ctx.createRadialGradient(
-                canvas.width / 2, canvas.height / 2, canvas.width * 0.25,
-                canvas.width / 2, canvas.height / 2, canvas.width * 0.75
-            );
-            vignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
-            vignette.addColorStop(1, 'rgba(0, 0, 0, 0.45)');
-            ctx.fillStyle = vignette;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-        
-        class ZenSplat {
-            constructor(x, y, fruitName) {
-                this.x = x;
-                this.y = y;
-                this.time = Date.now();
-                this.duration = 6000;
-                
-                const colorMap = {
-                    watermelon: 'rgba(239, 68, 68, 0.65)',
-                    apple: 'rgba(254, 243, 199, 0.65)',
-                    orange: 'rgba(249, 115, 22, 0.68)',
-                    coconut: 'rgba(240, 249, 255, 0.55)',
-                    pineapple: 'rgba(250, 204, 21, 0.65)'
-                };
-                this.color = colorMap[fruitName] || 'rgba(255, 255, 255, 0.5)';
-                
-                // Ring ripple effect
-                this.ringR = 8;
-                this.maxRingR = 40 + Math.random() * 20;
-                
-                this.blobs = [];
-                const blobCount = 5 + Math.floor(Math.random() * 5);
-                for (let i = 0; i < blobCount; i++) {
-                    this.blobs.push({
-                        dx: (Math.random() - 0.5) * 28,
-                        dy: (Math.random() - 0.5) * 28,
-                        r: 6 + Math.random() * 15,
-                        dripSpeed: 0.05 + Math.random() * 0.08
-                    });
-                }
-                
-                this.drops = [];
-                const dropCount = 6 + Math.floor(Math.random() * 7);
-                for (let i = 0; i < dropCount; i++) {
-                    const angle = Math.random() * Math.PI * 2;
-                    const dist = 15 + Math.random() * 45;
-                    this.drops.push({
-                        dx: Math.cos(angle) * dist,
-                        dy: Math.sin(angle) * dist,
-                        r: 2 + Math.random() * 3.5,
-                        dripSpeed: 0.12 + Math.random() * 0.15
-                    });
-                }
-            }
-            
-            draw(ctx) {
-                const elapsed = Date.now() - this.time;
-                if (elapsed >= this.duration) return false;
-                
-                ctx.save();
-                const opacity = 1 - (elapsed / this.duration);
-                ctx.globalAlpha = opacity;
-                
-                // Draw expanding watercolor juice ring
-                if (this.ringR < this.maxRingR) {
-                    this.ringR += 1.8;
-                    ctx.strokeStyle = this.color;
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.ringR, 0, Math.PI * 2);
-                    ctx.stroke();
-                }
-                
-                ctx.fillStyle = this.color;
-                
-                // Dripping blobs
-                this.blobs.forEach(b => {
-                    b.dy += b.dripSpeed; // slide down slowly
-                    
-                    ctx.beginPath();
-                    ctx.arc(this.x + b.dx, this.y + b.dy, b.r, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    // Draw smear trail upwards as it slides down
-                    ctx.beginPath();
-                    ctx.rect(this.x + b.dx - b.r * 0.35, this.y + b.dy - b.r, b.r * 0.7, b.r);
-                    ctx.fill();
-                });
-                
-                // Running drops
-                this.drops.forEach(d => {
-                    d.dy += d.dripSpeed; // run down faster
-                    
-                    ctx.beginPath();
-                    ctx.arc(this.x + d.dx, this.y + d.dy, d.r, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    ctx.beginPath();
-                    ctx.rect(this.x + d.dx - d.r * 0.25, this.y + d.dy - d.r * 1.5, d.r * 0.5, d.r * 1.5);
-                    ctx.fill();
-                });
-                
-                ctx.restore();
-                return true;
-            }
-        }
-
-        
-        class ZenJuiceParticle {
-            constructor(x, y, color) {
-                this.x = x;
-                this.y = y;
-                const angle = Math.random() * Math.PI * 2;
-                const force = 5 + Math.random() * 11;
-                this.vx = Math.cos(angle) * force;
-                this.vy = Math.sin(angle) * force - 4;
-                this.color = color;
-                this.size = 2.5 + Math.random() * 5.5;
-                this.life = 1.0;
-                this.decay = 0.015 + Math.random() * 0.02;
-                this.gravity = 0.22;
-            }
-            
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                this.vy += this.gravity;
-                this.vx *= 0.97;
-                this.life -= this.decay;
-                return this.life > 0;
-            }
-            
-            draw(ctx) {
-                ctx.save();
-                ctx.globalAlpha = this.life;
-                ctx.fillStyle = this.color;
-                
-                ctx.shadowColor = this.color;
-                ctx.shadowBlur = 4;
-                
-                const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-                const angle = Math.atan2(this.vy, this.vx);
-                
-                ctx.translate(this.x, this.y);
-                ctx.rotate(angle);
-                
-                ctx.beginPath();
-                const length = this.size * (1.2 + speed * 0.12);
-                const width = this.size * 0.75;
-                
-                ctx.ellipse(0, 0, length, width, 0, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-                ctx.beginPath();
-                ctx.ellipse(length * 0.2, 0, length * 0.3, width * 0.3, 0, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.restore();
-            }
-        }
-
-        class ZenSpark {
-            constructor(x, y, color) {
-                this.x = x;
-                this.y = y;
-                this.vx = (Math.random() - 0.5) * 5;
-                this.vy = (Math.random() - 0.5) * 5 - 2;
-                this.size = 11 + Math.random() * 7;
-                this.color = color || '#fef08a';
-                this.life = 1.0;
-                this.decay = 0.015 + Math.random() * 0.015;
-                
-                const types = ['cat', 'bunny', 'puppy', 'heart', 'star'];
-                const weights = [0.35, 0.70, 0.90, 0.95, 1.0];
-                const rand = Math.random();
-                if (rand < weights[0]) this.type = 'cat';
-                else if (rand < weights[1]) this.type = 'bunny';
-                else if (rand < weights[2]) this.type = 'puppy';
-                else if (rand < weights[3]) this.type = 'heart';
-                else this.type = 'star';
-                
-                this.rotation = (Math.random() - 0.5) * 0.3;
-                this.rotationSpeed = (Math.random() - 0.5) * 0.02;
-            }
-            
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                this.vy += 0.02;
-                this.vx *= 0.97;
-                this.rotation += this.rotationSpeed;
-                this.life -= this.decay;
-                return this.life > 0;
-            }
-            
-            draw(ctx) {
-                ctx.save();
-                ctx.globalAlpha = this.life;
-                
-                ctx.shadowColor = this.color;
-                ctx.shadowBlur = 8;
-                
-                if (this.type === 'cat') {
-                    const catColors = ['#ffedd5', '#fee2e2', '#fef3c7', '#fafaf9'];
-                    const col = catColors[Math.floor(this.size * 10) % catColors.length];
-                    ctx.translate(this.x, this.y);
-                    ctx.rotate(this.rotation);
-                    
-                    ctx.fillStyle = col;
-                    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
-                    ctx.lineWidth = 1;
-                    
-                    ctx.beginPath();
-                    ctx.moveTo(-this.size * 0.8, -this.size * 0.2);
-                    ctx.lineTo(-this.size * 0.9, -this.size * 0.9);
-                    ctx.lineTo(-this.size * 0.3, -this.size * 0.6);
-                    ctx.fill();
-                    ctx.stroke();
-                    
-                    ctx.beginPath();
-                    ctx.moveTo(this.size * 0.8, -this.size * 0.2);
-                    ctx.lineTo(this.size * 0.9, -this.size * 0.9);
-                    ctx.lineTo(this.size * 0.3, -this.size * 0.6);
-                    ctx.fill();
-                    ctx.stroke();
-                    
-                    ctx.fillStyle = '#fbcfe8';
-                    ctx.beginPath();
-                    ctx.moveTo(-this.size * 0.75, -this.size * 0.3);
-                    ctx.lineTo(-this.size * 0.82, -this.size * 0.8);
-                    ctx.lineTo(-this.size * 0.4, -this.size * 0.55);
-                    ctx.fill();
-                    
-                    ctx.beginPath();
-                    ctx.moveTo(this.size * 0.75, -this.size * 0.3);
-                    ctx.lineTo(this.size * 0.82, -this.size * 0.8);
-                    ctx.lineTo(this.size * 0.4, -this.size * 0.55);
-                    ctx.fill();
-
-                    ctx.fillStyle = col;
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                    
-                    ctx.fillStyle = 'rgba(244, 114, 182, 0.65)';
-                    ctx.beginPath();
-                    ctx.arc(-this.size * 0.5, this.size * 0.2, this.size * 0.25, 0, Math.PI * 2);
-                    ctx.arc(this.size * 0.5, this.size * 0.2, this.size * 0.25, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    ctx.strokeStyle = '#475569';
-                    ctx.lineWidth = 1.8;
-                    ctx.lineCap = 'round';
-                    ctx.beginPath();
-                    ctx.arc(-this.size * 0.4, -this.size * 0.1, this.size * 0.2, Math.PI, 0);
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.arc(this.size * 0.4, -this.size * 0.1, this.size * 0.2, Math.PI, 0);
-                    ctx.stroke();
-                    
-                    ctx.strokeStyle = '#475569';
-                    ctx.lineWidth = 1.2;
-                    ctx.beginPath();
-                    ctx.arc(-this.size * 0.1, this.size * 0.2, this.size * 0.12, 0, Math.PI);
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.arc(this.size * 0.1, this.size * 0.2, this.size * 0.12, 0, Math.PI);
-                    ctx.stroke();
-                    
-                } else if (this.type === 'bunny') {
-                    const bunnyColors = ['#fafaf9', '#fdf2f8', '#fee2e2'];
-                    const col = bunnyColors[Math.floor(this.size * 10) % bunnyColors.length];
-                    ctx.translate(this.x, this.y);
-                    ctx.rotate(this.rotation);
-                    
-                    ctx.fillStyle = col;
-                    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
-                    ctx.lineWidth = 1;
-                    
-                    ctx.beginPath();
-                    ctx.ellipse(-this.size * 0.35, -this.size * 0.9, this.size * 0.25, this.size * 0.7, -0.1, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                    
-                    ctx.beginPath();
-                    ctx.ellipse(this.size * 0.35, -this.size * 0.9, this.size * 0.25, this.size * 0.7, 0.1, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                    
-                    ctx.fillStyle = '#fbcfe8';
-                    ctx.beginPath();
-                    ctx.ellipse(-this.size * 0.35, -this.size * 0.9, this.size * 0.12, this.size * 0.5, -0.1, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.beginPath();
-                    ctx.ellipse(this.size * 0.35, -this.size * 0.9, this.size * 0.12, this.size * 0.5, 0.1, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    ctx.fillStyle = col;
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                    
-                    ctx.fillStyle = 'rgba(244, 114, 182, 0.65)';
-                    ctx.beginPath();
-                    ctx.arc(-this.size * 0.5, this.size * 0.2, this.size * 0.25, 0, Math.PI * 2);
-                    ctx.arc(this.size * 0.5, this.size * 0.2, this.size * 0.25, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    ctx.fillStyle = '#475569';
-                    ctx.beginPath();
-                    ctx.arc(-this.size * 0.35, -this.size * 0.1, this.size * 0.15, 0, Math.PI * 2);
-                    ctx.arc(this.size * 0.35, -this.size * 0.1, this.size * 0.15, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    ctx.strokeStyle = '#475569';
-                    ctx.lineWidth = 1.2;
-                    ctx.beginPath();
-                    ctx.arc(0, this.size * 0.15, this.size * 0.15, 0, Math.PI);
-                    ctx.stroke();
-                    
-                } else if (this.type === 'puppy') {
-                    const puppyColors = ['#fef3c7', '#ffedd5', '#fafaf9', '#f5f5f4'];
-                    const col = puppyColors[Math.floor(this.size * 10) % puppyColors.length];
-                    ctx.translate(this.x, this.y);
-                    ctx.rotate(this.rotation);
-                    
-                    ctx.fillStyle = '#d97706';
-                    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.ellipse(-this.size * 0.9, 0, this.size * 0.3, this.size * 0.6, 0.2, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                    
-                    ctx.beginPath();
-                    ctx.ellipse(this.size * 0.9, 0, this.size * 0.3, this.size * 0.6, -0.2, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                    
-                    ctx.fillStyle = col;
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                    
-                    ctx.fillStyle = 'rgba(244, 114, 182, 0.65)';
-                    ctx.beginPath();
-                    ctx.arc(-this.size * 0.5, this.size * 0.2, this.size * 0.25, 0, Math.PI * 2);
-                    ctx.arc(this.size * 0.5, this.size * 0.2, this.size * 0.25, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    ctx.fillStyle = '#475569';
-                    ctx.beginPath();
-                    ctx.arc(-this.size * 0.35, -this.size * 0.1, this.size * 0.15, 0, Math.PI * 2);
-                    ctx.arc(this.size * 0.35, -this.size * 0.1, this.size * 0.15, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    ctx.beginPath();
-                    ctx.moveTo(-this.size * 0.12, this.size * 0.1);
-                    ctx.lineTo(this.size * 0.12, this.size * 0.1);
-                    ctx.lineTo(0, this.size * 0.2);
-                    ctx.closePath();
-                    ctx.fill();
-                    
-                } else if (this.type === 'heart') {
-                    ctx.fillStyle = '#ec4899';
-                    ctx.beginPath();
-                    const d = this.size * 1.1;
-                    ctx.moveTo(this.x, this.y - d * 0.15);
-                    ctx.bezierCurveTo(this.x, this.y - d * 0.65, this.x - d * 0.7, this.y - d * 0.65, this.x - d * 0.7, this.y - d * 0.1);
-                    ctx.bezierCurveTo(this.x - d * 0.7, this.y + d * 0.45, this.x, this.y + d * 0.8, this.x, this.y + d * 1.0);
-                    ctx.bezierCurveTo(this.x, this.y + d * 0.8, this.x + d * 0.7, this.y + d * 0.45, this.x + d * 0.7, this.y - d * 0.1);
-                    ctx.bezierCurveTo(this.x + d * 0.7, this.y - d * 0.65, this.x, this.y - d * 0.65, this.x, this.y - d * 0.15);
-                    ctx.fill();
-                    
-                } else {
-                    ctx.translate(this.x, this.y);
-                    ctx.rotate(this.rotation);
-                    
-                    let rot = Math.PI / 2 * 3;
-                    let spikes = 5;
-                    let outerRadius = this.size;
-                    let innerRadius = this.size * 0.4;
-                    const step = Math.PI / spikes;
-                    
-                    ctx.beginPath();
-                    ctx.moveTo(0, -outerRadius);
-                    for (let i = 0; i < spikes; i++) {
-                        let x = Math.cos(rot) * outerRadius;
-                        let y = Math.sin(rot) * outerRadius;
-                        ctx.lineTo(x, y);
-                        rot += step;
-                        
-                        x = Math.cos(rot) * innerRadius;
-                        y = Math.sin(rot) * innerRadius;
-                        ctx.lineTo(x, y);
-                        rot += step;
-                    }
-                    ctx.lineTo(0, -outerRadius);
-                    ctx.closePath();
-                    ctx.fillStyle = this.color;
-                    ctx.fill();
-                }
-                
-                ctx.restore();
-            }
-        }
-        
-        class ZenComboText {
-            constructor(x, y, count) {
-                this.x = x;
-                this.y = y - 40;
-                this.count = count;
-                this.time = Date.now();
-                this.duration = count === 1 ? 750 : 950; // shorter display for single words
-                
-                if (count === 1) {
-                    const singleWords = ["Sweet! 🍉", "Nice! 🌸", "Zen! 🌿", "Fresh! 💫", "Lovely! 💕", "Calm! 🍃"];
-                    this.text = singleWords[Math.floor(Math.random() * singleWords.length)];
-                    this.color = "#a78bfa"; // soft lavender-violet
-                } else {
-                    const phrases = {
-                        2: "2x Combo! 🍉",
-                        3: "3x Combo! 🌟",
-                        4: "4x Combo! 🔥",
-                        5: "5x Mega Slice! ⚡"
-                    };
-                    this.text = phrases[count] || `${count}x Combo! 🚀`;
-                    
-                    const colors = {
-                        2: "#f472b6", // pink
-                        3: "#fbbf24", // gold
-                        4: "#f97316", // orange
-                        5: "#ef4444"  // red
-                    };
-                    this.color = colors[count] || "#10b981";
-                }
-                
-                this.vy = count === 1 ? -1.0 : -1.6; // rise slower for single words
-                this.scale = 0.5;
-                this.opacity = 1.0;
-            }
-
-            update() {
-                const elapsed = Date.now() - this.time;
-                if (elapsed >= this.duration) return false;
-                
-                this.y += this.vy;
-                this.opacity = 1.0 - (elapsed / this.duration);
-                
-                // Pop scale animation
-                if (elapsed < 120) {
-                    this.scale = 0.5 + (elapsed / 120) * 0.7; // pop to 1.2x
-                } else if (elapsed < 240) {
-                    this.scale = 1.2 - ((elapsed - 120) / 120) * 0.2; // settle at 1.0x
-                } else {
-                    this.scale = 1.0;
-                }
-                
-                return true;
-            }
-            draw(ctx) {
-                ctx.save();
-                ctx.globalAlpha = this.opacity;
-                ctx.translate(this.x, this.y);
-                ctx.scale(this.scale, this.scale);
-                
-                ctx.font = "italic 900 24px 'Outfit', var(--font-heading), sans-serif";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                
-                // Draw outline for clear contrast on wood background
-                ctx.strokeStyle = "#ffffff";
-                ctx.lineWidth = 6;
-                ctx.strokeText(this.text, 0, 0);
-                
-                // Draw drop shadow glow
-                ctx.shadowColor = this.color;
-                ctx.shadowBlur = 10;
-                
-                // Fill text
-                ctx.fillStyle = this.color;
-                ctx.fillText(this.text, 0, 0);
-                
-                ctx.restore();
-            }
-        }
-        
-        class ZenFruit {
-
-            constructor(canvasWidth, speedMode) {
-                this.radius = 35 + Math.random() * 8;
-                this.x = this.radius + Math.random() * (canvasWidth - this.radius * 2);
-                this.y = canvas.height + 40;
-                
-                const speedConfig = {
-                    slow: { vy: -4.8, vxRange: 1.2, gravity: 0.038 },   // slow-motion bubble float
-                    normal: { vy: -7.5, vxRange: 2.8, gravity: 0.082 },  // calm and steady launch
-                    fast: { vy: -10.5, vxRange: 4.8, gravity: 0.13 }     // moderate arcade speed
-                };
-                const config = speedConfig[speedMode] || speedConfig.normal;
-                
-                const varianceY = speedMode === 'slow' ? 1.0 : 3.0;
-                this.vy = config.vy - Math.random() * varianceY;
-                this.vx = (Math.random() - 0.5) * config.vxRange;
-                this.gravity = config.gravity;
-
-                
-                const names = ['watermelon', 'apple', 'orange', 'coconut', 'pineapple'];
-                this.name = names[Math.floor(Math.random() * names.length)];
-                
-                this.angle = Math.random() * Math.PI * 2;
-                this.rotationSpeed = (Math.random() - 0.5) * 0.05;
-                
-                this.isSliced = false;
-                this.sliceAngle = 0;
-                this.halfLeft = null;
-                this.halfRight = null;
-                
-                const particleColors = {
-                    watermelon: '#ef4444',
-                    apple: '#fef3c7',
-                    orange: '#fb923c',
-                    coconut: '#ffffff',
-                    pineapple: '#facc15'
-                };
-                this.juiceColor = particleColors[this.name];
-            }
-            
-            update() {
-                if (!this.isSliced) {
-                    this.x += this.vx;
-                    this.y += this.vy;
-                    this.vy += this.gravity;
-                    this.angle += this.rotationSpeed;
-                } else {
-                    const l = this.halfLeft;
-                    const r = this.halfRight;
-                    l.x += l.vx; l.y += l.vy; l.vy += this.gravity; l.angle += l.rotationSpeed;
-                    r.x += r.vx; r.y += r.vy; r.vy += this.gravity; r.angle += r.rotationSpeed;
-                }
-                
-                const limit = canvas.height + 60;
-                if (!this.isSliced) {
-                    return this.y < limit;
-                } else {
-                    return this.halfLeft.y < limit || this.halfRight.y < limit;
-                }
-            }
-            
-            slice(cutAngle) {
-                this.isSliced = true;
-                this.sliceAngle = cutAngle;
-                
-                this.halfLeft = {
-                    x: this.x, y: this.y,
-                    vx: this.vx - 3 - Math.random()*2,
-                    vy: this.vy - 1.5,
-                    angle: 0,
-                    rotationSpeed: -0.12 - Math.random()*0.05
-                };
-                this.halfRight = {
-                    x: this.x, y: this.y,
-                    vx: this.vx + 3 + Math.random()*2,
-                    vy: this.vy - 1.5,
-                    angle: 0,
-                    rotationSpeed: 0.12 + Math.random()*0.05
-                };
-            }
-            
-            drawWhole(ctx) {
-                ctx.save();
-                ctx.shadowColor = 'rgba(0,0,0,0.2)';
-                ctx.shadowBlur = 6;
-                ctx.shadowOffsetY = 4;
-                
-                if (this.name === 'watermelon') {
-                    const grad = ctx.createRadialGradient(-this.radius*0.3, -this.radius*0.3, 2, 0, 0, this.radius);
-                    grad.addColorStop(0, '#86efac');
-                    grad.addColorStop(0.7, '#22c55e');
-                    grad.addColorStop(1, '#15803d');
-                    ctx.fillStyle = grad;
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    ctx.shadowColor = 'transparent';
-                    ctx.strokeStyle = '#14532d';
-                    ctx.lineWidth = 3.5;
-                    for (let ao = -1.2; ao <= 1.2; ao += 0.6) {
-                        ctx.beginPath();
-                        let first = true;
-                        for (let y = -this.radius; y <= this.radius; y += 4) {
-                            const x = Math.sin(y * 0.14) * 5 + Math.sin(ao) * (this.radius - Math.abs(y)*0.2);
-                            if (x*x + y*y < this.radius*this.radius - 2) {
-                                if (first) { ctx.moveTo(x, y); first = false; }
-                                else ctx.lineTo(x, y);
-                            }
-                        }
-                        ctx.stroke();
-                    }
-                } 
-                else if (this.name === 'apple') {
-                    const grad = ctx.createRadialGradient(-this.radius*0.2, -this.radius*0.4, 2, 0, 0, this.radius);
-                    grad.addColorStop(0, '#f87171');
-                    grad.addColorStop(0.7, '#dc2626');
-                    grad.addColorStop(1, '#7f1d1d');
-                    ctx.fillStyle = grad;
-                    
-                    ctx.beginPath();
-                    ctx.moveTo(0, -this.radius * 0.45);
-                    ctx.bezierCurveTo(this.radius * 0.5, -this.radius * 1.1, this.radius * 1.2, -this.radius * 0.6, this.radius, 0);
-                    ctx.bezierCurveTo(this.radius * 0.8, this.radius * 0.8, this.radius * 0.35, this.radius, 0, this.radius * 0.85);
-                    ctx.bezierCurveTo(-this.radius * 0.35, this.radius, -this.radius * 0.8, this.radius * 0.8, -this.radius, 0);
-                    ctx.bezierCurveTo(-this.radius * 1.2, -this.radius * 0.6, -this.radius * 0.5, -this.radius * 1.1, 0, -this.radius * 0.45);
-                    ctx.closePath();
-                    ctx.fill();
-                    
-                    ctx.shadowColor = 'transparent';
-                    ctx.strokeStyle = '#78350f';
-                    ctx.lineWidth = 3.2;
-                    ctx.lineCap = 'round';
-                    ctx.beginPath();
-                    ctx.moveTo(0, -this.radius*0.4);
-                    ctx.quadraticCurveTo(4, -this.radius*0.8, 8, -this.radius*1.0);
-                    ctx.stroke();
-                    
-                    ctx.fillStyle = '#22c55e';
-                    ctx.beginPath();
-                    ctx.ellipse(8, -this.radius*0.9, 7, 3.5, -Math.PI/6, 0, Math.PI*2);
-                    ctx.fill();
-                } 
-                else if (this.name === 'orange') {
-                    const grad = ctx.createRadialGradient(-this.radius*0.2, -this.radius*0.3, 2, 0, 0, this.radius);
-                    grad.addColorStop(0, '#fdba74');
-                    grad.addColorStop(0.7, '#f97316');
-                    grad.addColorStop(1, '#c2410c');
-                    ctx.fillStyle = grad;
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    ctx.shadowColor = 'transparent';
-                    ctx.fillStyle = '#15803d';
-                    ctx.beginPath();
-                    ctx.arc(0, -this.radius + 3, 2.2, 0, Math.PI*2);
-                    ctx.fill();
-                } 
-                else if (this.name === 'coconut') {
-                    const grad = ctx.createRadialGradient(-this.radius*0.2, -this.radius*0.2, 2, 0, 0, this.radius);
-                    grad.addColorStop(0, '#a16207');
-                    grad.addColorStop(0.7, '#78350f');
-                    grad.addColorStop(1, '#451a03');
-                    ctx.fillStyle = grad;
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    ctx.fillStyle = '#1c1917';
-                    ctx.beginPath();
-                    ctx.arc(-6, -this.radius*0.4, 3.5, 0, Math.PI*2);
-                    ctx.arc(6, -this.radius*0.4, 3.5, 0, Math.PI*2);
-                    ctx.arc(0, -this.radius*0.1, 4, 0, Math.PI*2);
-                    ctx.fill();
-                } 
-                else if (this.name === 'pineapple') {
-                    const grad = ctx.createRadialGradient(0, 0, 5, 0, 0, this.radius * 1.1);
-                    grad.addColorStop(0, '#fde047');
-                    grad.addColorStop(0.6, '#eab308');
-                    grad.addColorStop(1, '#a16207');
-                    ctx.fillStyle = grad;
-                    ctx.beginPath();
-                    ctx.ellipse(0, 0, this.radius * 0.9, this.radius * 1.1, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    ctx.shadowColor = 'transparent';
-                    ctx.strokeStyle = '#78350f';
-                    ctx.lineWidth = 1.5;
-                    const r = this.radius;
-                    for (let offset = -r; offset <= r; offset += 18) {
-                        ctx.beginPath();
-                        ctx.moveTo(offset - r, -r);
-                        ctx.lineTo(offset + r, r);
-                        ctx.moveTo(offset + r, -r);
-                        ctx.lineTo(offset - r, r);
-                        ctx.stroke();
-                    }
-                    
-                    ctx.fillStyle = '#15803d';
-                    ctx.beginPath();
-                    ctx.moveTo(-10, -this.radius * 0.9);
-                    ctx.quadraticCurveTo(-18, -this.radius * 1.6, -12, -this.radius * 1.8);
-                    ctx.quadraticCurveTo(-6, -this.radius * 1.3, -3, -this.radius * 1.0);
-                    ctx.lineTo(3, -this.radius * 1.0);
-                    ctx.quadraticCurveTo(6, -this.radius * 1.3, 12, -this.radius * 1.8);
-                    ctx.quadraticCurveTo(18, -this.radius * 1.6, 10, -this.radius * 0.9);
-                    ctx.closePath();
-                    ctx.fill();
-                }
-                
-                ctx.restore();
-            }
-            
-            drawInnerCut(ctx, side) {
-                if (this.name === 'watermelon') {
-                    ctx.fillStyle = '#f0fdf4';
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.radius - 2.5, 0, Math.PI*2);
-                    ctx.fill();
-                    
-                    ctx.fillStyle = '#ef4444';
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.radius - 4.5, 0, Math.PI*2);
-                    ctx.fill();
-                    
-                    ctx.fillStyle = '#000000';
-                    const seedRadius = this.radius * 0.55;
-                    for (let a = 0.1; a < Math.PI * 2; a += Math.PI / 4) {
-                        const sx = Math.cos(a) * seedRadius;
-                        const sy = Math.sin(a) * seedRadius;
-                        ctx.beginPath();
-                        ctx.arc(sx, sy, 1.8, 0, Math.PI*2);
-                        ctx.fill();
-                    }
-                } 
-                else if (this.name === 'apple') {
-                    ctx.fillStyle = '#fef3c7';
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.radius - 2, 0, Math.PI*2);
-                    ctx.fill();
-                    
-                    ctx.strokeStyle = '#ca8a04';
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.ellipse(0, 0, 7, 10, 0, 0, Math.PI*2);
-                    ctx.stroke();
-                    
-                    ctx.fillStyle = '#78350f';
-                    ctx.beginPath();
-                    ctx.ellipse(-3, 0, 1.8, 3.2, Math.PI/6, 0, Math.PI*2);
-                    ctx.ellipse(3, 0, 1.8, 3.2, -Math.PI/6, 0, Math.PI*2);
-                    ctx.fill();
-                } 
-                else if (this.name === 'orange') {
-                    ctx.fillStyle = '#ffffff';
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.radius - 1, 0, Math.PI*2);
-                    ctx.fill();
-                    
-                    ctx.fillStyle = '#fb923c';
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.radius - 3.5, 0, Math.PI*2);
-                    ctx.fill();
-                    
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 1.6;
-                    const wedgeCount = 8;
-                    for (let i = 0; i < wedgeCount; i++) {
-                        const a = (i / wedgeCount) * Math.PI * 2;
-                        ctx.beginPath();
-                        ctx.moveTo(0, 0);
-                        ctx.lineTo(Math.cos(a) * (this.radius - 3), Math.sin(a) * (this.radius - 3));
-                        ctx.stroke();
-                    }
-                    
-                    ctx.fillStyle = '#ffffff';
-                    ctx.beginPath();
-                    ctx.arc(0, 0, 3.2, 0, Math.PI*2);
-                    ctx.fill();
-                } 
-                else if (this.name === 'coconut') {
-                    ctx.fillStyle = '#ffffff';
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.radius - 3, 0, Math.PI*2);
-                    ctx.fill();
-                    
-                    const waterGrad = ctx.createRadialGradient(-3, -3, 2, 0, 0, this.radius - 9);
-                    waterGrad.addColorStop(0, '#e0f2fe');
-                    waterGrad.addColorStop(0.6, '#7dd3fc');
-                    waterGrad.addColorStop(1, '#0284c7');
-                    ctx.fillStyle = waterGrad;
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.radius - 9, 0, Math.PI*2);
-                    ctx.fill();
-                } 
-                else if (this.name === 'pineapple') {
-                    ctx.fillStyle = '#fef9c3';
-                    ctx.beginPath();
-                    ctx.ellipse(0, 0, this.radius - 1, this.radius - 1, 0, 0, Math.PI*2);
-                    ctx.fill();
-                    
-                    ctx.fillStyle = '#eab308';
-                    ctx.beginPath();
-                    ctx.arc(0, 0, 7.5, 0, Math.PI*2);
-                    ctx.fill();
-                    
-                    ctx.strokeStyle = '#fde047';
-                    ctx.lineWidth = 1.2;
-                    const lines = 12;
-                    for (let i = 0; i < lines; i++) {
-                        const a = (i / lines) * Math.PI * 2;
-                        ctx.beginPath();
-                        ctx.moveTo(Math.cos(a) * 8, Math.sin(a) * 8);
-                        ctx.lineTo(Math.cos(a) * (this.radius - 4), Math.sin(a) * (this.radius - 4));
-                        ctx.stroke();
-                    }
-                }
-            }
-            
-            draw(ctx) {
-                if (!this.isSliced) {
-                    ctx.save();
-                    ctx.translate(this.x, this.y);
-                    ctx.rotate(this.angle);
-                    this.drawWhole(ctx);
-                    ctx.restore();
-                } else {
-                    // Left half
-                    ctx.save();
-                    ctx.translate(this.halfLeft.x, this.halfLeft.y);
-                    ctx.rotate(this.halfLeft.angle);
-                    ctx.rotate(this.sliceAngle);
-                    
-                    // Draw highlight cut edge
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 3.5;
-                    ctx.shadowColor = '#fde047'; // bright golden energy glow
-                    ctx.shadowBlur = 10;
-                    ctx.beginPath();
-                    ctx.moveTo(-this.radius, 0);
-                    ctx.lineTo(this.radius, 0);
-                    ctx.stroke();
-                    
-                    ctx.beginPath();
-                    ctx.rect(-150, -150, 300, 150);
-                    ctx.clip();
-                    ctx.rotate(-this.sliceAngle);
-                    this.drawWhole(ctx);
-                    ctx.rotate(this.sliceAngle);
-                    this.drawInnerCut(ctx, 'left');
-                    ctx.restore();
-                    
-                    // Right half
-                    ctx.save();
-                    ctx.translate(this.halfRight.x, this.halfRight.y);
-                    ctx.rotate(this.halfRight.angle);
-                    ctx.rotate(this.sliceAngle);
-                    
-                    // Draw highlight cut edge
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 3.5;
-                    ctx.shadowColor = '#fde047';
-                    ctx.shadowBlur = 10;
-                    ctx.beginPath();
-                    ctx.moveTo(-this.radius, 0);
-                    ctx.lineTo(this.radius, 0);
-                    ctx.stroke();
-                    
-                    ctx.beginPath();
-                    ctx.rect(-150, 0, 300, 150);
-                    ctx.clip();
-                    ctx.rotate(-this.sliceAngle);
-                    this.drawWhole(ctx);
-                    ctx.rotate(this.sliceAngle);
-                    this.drawInnerCut(ctx, 'right');
-                    ctx.restore();
-                }
-            }
-        }
-        
-        function drawPaw(ctx, x, y, size, color, alpha) {
-            ctx.save();
-            ctx.globalAlpha = alpha;
-            ctx.fillStyle = color;
-            ctx.shadowColor = color;
-            ctx.shadowBlur = 6;
-            
-            ctx.beginPath();
-            ctx.ellipse(x, y + size * 0.15, size * 0.75, size * 0.55, 0, 0, Math.PI * 2);
-            ctx.fill();
-            
-            const toes = [
-                { dx: -size * 0.55, dy: -size * 0.35, r: size * 0.22 },
-                { dx: -size * 0.2, dy: -size * 0.65, r: size * 0.25 },
-                { dx: size * 0.2, dy: -size * 0.65, r: size * 0.25 },
-                { dx: size * 0.55, dy: -size * 0.35, r: size * 0.22 }
-            ];
-            toes.forEach(t => {
-                ctx.beginPath();
-                ctx.arc(x + t.dx, y + t.dy, t.r, 0, Math.PI * 2);
-                ctx.fill();
-            });
-            
-            ctx.restore();
-        }
-
-        function drawCuteTrail() {
-            if (trailPoints.length === 0) return;
-            const now = Date.now();
-            
-            ctx.save();
-            
-            // 1. Draw glowing neon blade slash line connecting the swipe coordinates
-            if (trailPoints.length >= 2) {
-                ctx.beginPath();
-                ctx.moveTo(trailPoints[0].x, trailPoints[0].y);
-                for (let i = 1; i < trailPoints.length; i++) {
-                    ctx.lineTo(trailPoints[i].x, trailPoints[i].y);
-                }
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
-                
-                // Outer neon glow stroke
-                ctx.lineWidth = 8;
-                ctx.strokeStyle = 'rgba(167, 139, 250, 0.4)'; // lavender glow
-                ctx.shadowColor = '#8b5cf6';
-                ctx.shadowBlur = 12;
-                ctx.stroke();
-                
-                // Inner bright hot core line
-                ctx.lineWidth = 3;
-                ctx.strokeStyle = '#ffffff';
-                ctx.shadowColor = 'transparent';
-                ctx.stroke();
-            }
-            
-            // 2. Draw cute mascot paw prints along the trail
-            const colors = ['#fbcfe8', '#bae6fd', '#fef08a', '#c084fc', '#a7f3d0'];
-            let lastDrawnX = null;
-            let lastDrawnY = null;
-            
-            for (let i = 0; i < trailPoints.length; i++) {
-                const pt = trailPoints[i];
-                const age = now - pt.time;
-                const alpha = Math.max(0, 1 - age / 150);
-                if (alpha <= 0) continue;
-                
-                if (lastDrawnX !== null && i < trailPoints.length - 1) {
-                    const dx = pt.x - lastDrawnX;
-                    const dy = pt.y - lastDrawnY;
-                    if (dx*dx + dy*dy < 400) {
-                        continue;
-                    }
-                }
-                
-                const color = colors[i % colors.length];
-                const size = 11 + alpha * 5;
-                
-                drawPaw(ctx, pt.x, pt.y, size, color, alpha * 0.85);
-                
-                lastDrawnX = pt.x;
-                lastDrawnY = pt.y;
-            }
-            ctx.restore();
-        }
-        
-        function checkSlices(p1, p2) {
-            fruits.forEach(f => {
-                if (f.isSliced) return;
-                
-                const dx = p2.x - p1.x;
-                const dy = p2.y - p1.y;
-                const lenSq = dx*dx + dy*dy;
-                if (lenSq === 0) return;
-                
-                let t = ((f.x - p1.x) * dx + (f.y - p1.y) * dy) / lenSq;
-                t = Math.max(0, Math.min(1, t));
-                
-                const closestX = p1.x + t * dx;
-                const closestY = p1.y + t * dy;
-                
-                const distSq = (f.x - closestX) * (f.x - closestX) + (f.y - closestY) * (f.y - closestY);
-                if (distSq < f.radius * f.radius) {
-                    const cutAngle = Math.atan2(dy, dx);
-                    f.slice(cutAngle);
-                    
-                    score = Math.min(targetScore, score + 1);
-                    updateProgress();
-                    
-                    // Increment slices and update dashboard
-                    state.gameStats.slices++;
-                    if (window.updateSanctuaryDashboard) window.updateSanctuaryDashboard();
-                    
-                    // Check Combo Slicing sliding window
-                    const now = Date.now();
-                    if (now - lastSliceTime < 450) {
-                        currentCombo++;
-                    } else {
-                        currentCombo = 1;
-                    }
-                    lastSliceTime = now;
-                    
-                    if (currentCombo === 1) {
-                        // Spawn a single-slice encouraging word
-                        comboTexts.push(new ZenComboText(f.x, f.y, 1));
-                    } else {
-                        // Remove the preceding text bubble spawned within 400ms to show the new multiplier combo instead
-                        const nowMs = Date.now();
-                        comboTexts = comboTexts.filter(t => nowMs - t.time > 400);
-                        comboTexts.push(new ZenComboText(f.x, f.y, currentCombo));
-                    }
-
-                    
-                    splats.push(new ZenSplat(f.x, f.y, f.name));
-                    playSplashSound();
-
-                    
-                    for (let i = 0; i < 25; i++) {
-                        sparks.push(new ZenSpark(f.x, f.y, f.juiceColor));
-                    }
-                    for (let i = 0; i < 36; i++) {
-                        juiceParticles.push(new ZenJuiceParticle(f.x, f.y, f.juiceColor));
-                    }
-                    
-                    if (score >= targetScore) {
-                        endGameWithWin();
-                    }
-                }
-
-            });
-        }
-        
-        let lastSpawnTime = 0;
-        function gameLoop(timestamp) {
-            if (!isPlaying) return;
-            
-            drawBackground();
-            
-            splats = splats.filter(s => s.draw(ctx));
-            
-            const spawnIntervals = { slow: 2800, normal: 1600, fast: 1000 };
-            const limit = spawnIntervals[speedMode] || 1600;
-
-            if (timestamp - lastSpawnTime > limit) {
-                const spawnCount = speedMode === 'fast' ? (Math.random() < 0.5 ? 2 : 3) : (speedMode === 'normal' ? (Math.random() < 0.45 ? 2 : 1) : (Math.random() < 0.35 ? 2 : 1));
-
-                for (let c = 0; c < spawnCount; c++) {
-                    fruits.push(new ZenFruit(canvas.width, speedMode));
-                }
-                lastSpawnTime = timestamp;
-            }
-            
-            fruits = fruits.filter(f => {
-                const keep = f.update();
-                f.draw(ctx);
-                return keep;
-            });
-            
-            sparks = sparks.filter(s => {
-                const keep = s.update();
-                s.draw(ctx);
-                return keep;
-            });
-            
-            juiceParticles = juiceParticles.filter(p => {
-                const keep = p.update();
-                p.draw(ctx);
-                return keep;
-            });
-            
-            comboTexts = comboTexts.filter(t => {
-                const keep = t.update();
-                if (keep) t.draw(ctx);
-                return keep;
-            });
-            
-            const now = Date.now();
-
-            trailPoints = trailPoints.filter(p => now - p.time < 150);
-            
-            drawCuteTrail();
-            
-            animationFrameId = requestAnimationFrame(gameLoop);
-        }
-        
-        function updateProgress() {
-            if (progressFill) {
-                const pct = (score / targetScore) * 100;
-                progressFill.style.width = pct + '%';
-            }
-            if (progressVal) {
-                progressVal.textContent = `${score}/${targetScore}`;
-            }
-        }
-        
-        function endGameWithWin() {
-            isPlaying = false;
-            cancelAnimationFrame(animationFrameId);
-            
-            if (zenGameArena) zenGameArena.classList.add('hidden');
-            if (surveyInline) {
-                surveyInline.classList.remove('hidden');
-                if (winChoicesRow) winChoicesRow.classList.remove('hidden');
-                if (surveyMoodSection) surveyMoodSection.classList.add('hidden');
-                surveyInline.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }
-        
-        function startZenGame() {
-            initAudio();
-            score = 0;
-            updateProgress();
-            
-            // Set start flag & update lounge checklist
-            localStorage.setItem('relax_game_started', 'true');
-            if (window.updateSanctuaryDashboard) window.updateSanctuaryDashboard();
-
-            fruits = [];
-            splats = [];
-            sparks = [];
-            juiceParticles = [];
-            trailPoints = [];
-            comboTexts = [];
-            currentCombo = 0;
-            lastSliceTime = 0;
-            isPlaying = true;
-
-            
-            if (zenStartScreen) zenStartScreen.classList.add('hidden');
-            if (zenGameArena) zenGameArena.classList.remove('hidden');
-            if (surveyInline) surveyInline.classList.add('hidden');
-            
-            resizeCanvas();
-            
-            lastSpawnTime = performance.now();
-            animationFrameId = requestAnimationFrame(gameLoop);
-        }
-
-        
-        function quitZenGame() {
-            isPlaying = false;
-            cancelAnimationFrame(animationFrameId);
-            if (zenGameArena) zenGameArena.classList.add('hidden');
-            if (zenStartScreen) zenStartScreen.classList.remove('hidden');
-            if (surveyInline) surveyInline.classList.add('hidden');
-        }
-        
-        function resizeCanvas() {
-            if (!canvas) return;
-            const rect = canvas.parentElement.getBoundingClientRect();
-            canvas.width = rect.width || 600;
-            canvas.height = rect.height || 420;
-        }
-        
-        function handleStart(x, y) {
-            isMouseDown = true;
-            initAudio();
-            const p = { x, y, time: Date.now() };
-            trailPoints = [p];
-            lastMousePos = p;
-        }
-        
-        function handleMove(x, y) {
-            if (!isMouseDown) return;
-            const p = { x, y, time: Date.now() };
-            trailPoints.push(p);
-            
-            if (lastMousePos) {
-                checkSlices(lastMousePos, p);
-                
-                // Spawn glowing cute pastel sparks along swipe trail
-                if (Math.random() < 0.5) {
-                    const pastelColors = ['#f472b6', '#c084fc', '#fef08a', '#bae6fd', '#fbcfe8', '#a7f3d0'];
-                    const col = pastelColors[Math.floor(Math.random() * pastelColors.length)];
-                    sparks.push(new ZenSpark(x, y, col));
-                }
-                
-                const distSq = (x - lastMousePos.x)*(x - lastMousePos.x) + (y - lastMousePos.y)*(y - lastMousePos.y);
-                if (distSq > 900 && Math.random() < 0.15) {
-                    playWhooshSound();
-                }
-            }
-            lastMousePos = p;
-        }
-        
-        function handleEnd() {
-            isMouseDown = false;
-            lastMousePos = null;
-        }
-        
-        function bindEvents() {
-            if (btnStartZen) btnStartZen.addEventListener('click', startZenGame);
-            if (btnQuitZen) btnQuitZen.addEventListener('click', quitZenGame);
-            
-            if (btnSelectFruitZen && cardFruitZen && menuContainer) {
-                btnSelectFruitZen.addEventListener('click', () => {
-                    menuContainer.classList.add('hidden');
-                    cardFruitZen.classList.remove('hidden');
-                    if (zenStartScreen) zenStartScreen.classList.remove('hidden');
-                    if (zenGameArena) zenGameArena.classList.add('hidden');
-                    if (surveyInline) surveyInline.classList.add('hidden');
-                });
-            }
-            
-            if (btnFruitZenBack && cardFruitZen && menuContainer) {
-                btnFruitZenBack.addEventListener('click', () => {
-                    quitZenGame();
-                    cardFruitZen.classList.add('hidden');
-                    menuContainer.classList.remove('hidden');
-                });
-            }
-            
-            const speedBtns = document.querySelectorAll('[data-speed-mode]');
-            speedBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    speedBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    speedMode = btn.dataset.speedMode || 'normal';
-                });
-            });
-            
-            if (canvas) {
-                ctx = canvas.getContext('2d');
-                
-                canvas.addEventListener('mousedown', (e) => {
-                    const rect = canvas.getBoundingClientRect();
-                    handleStart(e.clientX - rect.left, e.clientY - rect.top);
-                });
-                
-                canvas.addEventListener('mousemove', (e) => {
-                    const rect = canvas.getBoundingClientRect();
-                    handleMove(e.clientX - rect.left, e.clientY - rect.top);
-                });
-                
-                window.addEventListener('mouseup', handleEnd);
-                
-                canvas.addEventListener('touchstart', (e) => {
-                    if (e.touches[0]) {
-                        const rect = canvas.getBoundingClientRect();
-                        handleStart(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
-                    }
-                    e.preventDefault();
-                }, { passive: false });
-                
-                canvas.addEventListener('touchmove', (e) => {
-                    if (e.touches[0]) {
-                        const rect = canvas.getBoundingClientRect();
-                        handleMove(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
-                    }
-                    e.preventDefault();
-                }, { passive: false });
-                
-                canvas.addEventListener('touchend', handleEnd);
-            }
-            
-            if (btnWinReplay) {
-                btnWinReplay.addEventListener('click', () => {
-                    if (cardFruitZen && !cardFruitZen.classList.contains('hidden')) {
-                        startZenGame();
-                    }
-                });
-            }
-        }
-        bindEvents();
-        window.addEventListener('resize', resizeCanvas);
-    })();
-
-    // --- CHIEF DESIGNER: COZY AMBIENT PARTICLE ENGINE ---
-    (function GamesAmbientParticleEngine() {
-        const canvas = document.getElementById('games-ambient-canvas');
-
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        let animId = null;
-
-        function resize() {
-            if (!canvas) return;
-            const rect = canvas.parentElement.getBoundingClientRect();
-            canvas.width = rect.width || 800;
-            canvas.height = rect.height || 500;
-        }
-
-        class FloatingParticle {
-            constructor() {
-                this.reset(true);
-            }
-            reset(initY = false) {
-                this.x = Math.random() * canvas.width;
-                this.y = initY ? (Math.random() * canvas.height) : (canvas.height + 20);
-                this.size = 3 + Math.random() * 8;
-                this.speedY = 0.35 + Math.random() * 0.6; // float upwards slowly
-                this.swaySpeed = 0.005 + Math.random() * 0.01;
-                this.time = Math.random() * 100;
-                
-                // Brighter, more vibrant therapeutic colors
-                const colors = [
-                    'rgba(244, 63, 94, 0.55)',   // rose
-                    'rgba(139, 92, 246, 0.48)',  // lavender/violet
-                    'rgba(245, 158, 11, 0.52)',  // gold/orange
-                    'rgba(16, 185, 129, 0.55)'   // mint green
-                ];
-                this.color = colors[Math.floor(Math.random() * colors.length)];
-
-                this.isLeaf = Math.random() < 0.35; // 35% are floating tea leaves
-                this.rotation = Math.random() * Math.PI * 2;
-                this.rotationSpeed = (Math.random() - 0.5) * 0.015;
-            }
-            update() {
-                this.y -= this.speedY;
-                this.time += this.swaySpeed;
-                this.x += Math.sin(this.time) * 0.3;
-                this.rotation += this.rotationSpeed;
-                
-                if (this.y < -20 || this.x < -20 || this.x > canvas.width + 20) {
-                    this.reset(false);
-                }
-            }
-            draw() {
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.rotation);
-                ctx.fillStyle = this.color;
-                
-                if (this.isLeaf) {
-                    // Draw organic leaf shape
-                    ctx.beginPath();
-                    ctx.ellipse(0, 0, this.size * 1.6, this.size * 0.7, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-                    ctx.lineWidth = 0.8;
-                    ctx.beginPath();
-                    ctx.moveTo(-this.size * 1.6, 0);
-                    ctx.lineTo(this.size * 1.6, 0);
-                    ctx.stroke();
-                } else {
-                    // Draw glowing circle
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                ctx.restore();
-            }
-        }
-
-        function initParticles() {
-            particles = [];
-            for (let i = 0; i < 22; i++) {
-                particles.push(new FloatingParticle());
-            }
-        }
-
-        function loop() {
-            if (!ctx || !canvas) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-            animId = requestAnimationFrame(loop);
-        }
-
-        window.addEventListener('resize', resize);
-        
-        // Listen to tab activation changes to start/stop loop
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.attributeName === 'class') {
-                    const gamesPanel = document.getElementById('games-panel');
-                    if (gamesPanel && gamesPanel.classList.contains('active')) {
-                        if (!animId) {
-                            resize();
-                            initParticles();
-                            loop();
-                        }
-                    } else {
-                        if (animId) {
-                            cancelAnimationFrame(animId);
-                            animId = null;
-                        }
-                    }
-                }
-            });
-        });
-        
-        const gamesPanel = document.getElementById('games-panel');
-        if (gamesPanel) {
-            observer.observe(gamesPanel, { attributes: true });
-            // Initial check
-            if (gamesPanel.classList.contains('active')) {
-                resize();
-                initParticles();
-                loop();
-            }
-        }
-    })();
-
     // Run launcher
     init();
 });
-
-// Calm Videos Integration (Exposed Globally for inline HTML onclick handlers)
-window.CalmVideoData = {
-    anxiety: {
-        title: "Anxiety Relief Support",
-        desc: "Soothing guides, deep breathing, and grounding exercises to help you manage anxiety and panic states.",
-        videos: [
-            { title: "5-Min Quick Calm Breathwork", src: "frontend/student/videos/anxiety_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" },
-            { title: "Grounding Exercise for Panic Relief", src: "frontend/student/videos/anxiety_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-with-stars-moving-14022-large.mp4" }
-        ]
-    },
-    depression: {
-        title: "Depression Support & Affirmations",
-        desc: "Gentle reminders, companion voices, and comforting visual soundscapes for heavy days.",
-        videos: [
-            { title: "Overcoming Fatigue & Heavy Days", src: "frontend/student/videos/depression_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-with-stars-moving-14022-large.mp4" },
-            { title: "Daily Comfort Affirmations", src: "frontend/student/videos/depression_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" }
-        ]
-    },
-    motivation: {
-        title: "Motivational Speeches",
-        desc: "Ignite your drive, build confidence, and get back on track with powerful mindset sessions.",
-        videos: [
-            { title: "Unshakable Willpower & Drive", src: "frontend/student/videos/motivation_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-ocean-near-a-cliff-34280-large.mp4" },
-            { title: "Rising Above Failure", src: "frontend/student/videos/motivation_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-with-stars-moving-14022-large.mp4" }
-        ]
-    },
-    academic: {
-        title: "Academic Stress Management",
-        desc: "Learn to navigate exam pressure, manage task burnout, and optimize your study focus.",
-        videos: [
-            { title: "Coping with Exam Anxiety & Stress", src: "frontend/student/videos/academic_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" },
-            { title: "Recovering from Academic Burnout", src: "frontend/student/videos/academic_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-ocean-near-a-cliff-34280-large.mp4" }
-        ]
-    },
-    confidence: {
-        title: "Building Unshakable Confidence",
-        desc: "Overcome self-doubt, silence your inner critic, and build lasting self-compassion.",
-        videos: [
-            { title: "Silencing Your Inner Critic", src: "frontend/student/videos/confidence_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-ocean-near-a-cliff-34280-large.mp4" },
-            { title: "Embracing Your Unique Journey", src: "frontend/student/videos/confidence_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" }
-        ]
-    },
-    meditate: {
-        title: "Guided Meditation & Grounding",
-        desc: "Find peace and centering through deep breathing techniques, mindfulness, and audio-visual meditation.",
-        videos: [
-            { title: "Deep Breathing Focus Session", src: "frontend/student/videos/meditate_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" },
-            { title: "Sleep Soundscape & Evening Rest", src: "frontend/student/videos/meditate_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-with-stars-moving-14022-large.mp4" }
-        ]
-    }
-};
-
-window.openCategory = function(catId) {
-    const cat = window.CalmVideoData[catId];
-    if (!cat) return;
-
-    const grid = document.getElementById('calmCategoryGrid');
-    const detail = document.getElementById('categoryDetail');
-    if (grid && detail) {
-        grid.style.display = 'none';
-        detail.style.display = 'flex';
-    }
-
-    const title = document.getElementById('currentCategoryTitle');
-    const desc = document.getElementById('currentCategoryDesc');
-    if (title) title.textContent = cat.title;
-    if (desc) desc.textContent = cat.desc;
-
-    const playlist = document.getElementById('playlistItems');
-    if (playlist) {
-        playlist.innerHTML = '';
-        cat.videos.forEach((video, index) => {
-            const btn = document.createElement('button');
-            btn.className = `playlist-video-item ${index === 0 ? 'active' : ''}`;
-            btn.onclick = () => {
-                document.querySelectorAll('.playlist-video-item').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                window.playVideo(video);
-            };
-            btn.innerHTML = `
-                <span class="playlist-video-icon">▶</span>
-                <span>${video.title}</span>
-            `;
-            playlist.appendChild(btn);
-        });
-    }
-
-    if (cat.videos.length > 0) {
-        window.playVideo(cat.videos[0]);
-    }
-};
-
-window.playVideo = function(videoObj) {
-    const player = document.getElementById('detailVideoPlayer');
-    const source = document.getElementById('detailVideoSource');
-    const title = document.getElementById('currentVideoTitle');
-
-    if (title) title.textContent = videoObj.title;
-
-    if (player && source) {
-        player.onerror = null;
-        source.src = videoObj.src;
-        player.load();
-        
-        player.onerror = function() {
-            if (source.src !== videoObj.fallback) {
-                console.log(`Local file ${videoObj.src} not found, falling back to public relaxation video.`);
-                source.src = videoObj.fallback;
-                player.load();
-                player.play().catch(e => console.warn("Fallback autoplay issue:", e));
-            }
-        };
-
-        player.play().catch(e => console.warn("Autoplay issue:", e));
-    }
-};
-
-window.closeCategory = function() {
-    const player = document.getElementById('detailVideoPlayer');
-    if (player) {
-        player.pause();
-    }
-    const grid = document.getElementById('calmCategoryGrid');
-    const detail = document.getElementById('categoryDetail');
-    if (grid && detail) {
-        detail.style.display = 'none';
-        grid.style.display = 'block';
-    }
-};

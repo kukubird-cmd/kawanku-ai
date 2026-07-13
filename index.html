@@ -1,27 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Authentication Session Check -->
-    <script>
-        (function() {
-            const session = localStorage.getItem('kawanku_student_session');
-            if (!session) {
-                window.location.href = '/frontend/student/login.html';
-            }
-        })();
-    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MindBuddy - Your Empathetic AI Companion</title>
     <meta name="description" content="MindBuddy is a customizable, supportive AI personal companion for students. Express your emotions, analyze speech rants, scan facial gestures, sync biometric trackers, and restore peace of mind.">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%238b5cf6'/%3E%3Cpath d='M18 36c4 8 10 12 14 12s10-4 14-12c4-8-1-18-10-18-4 0-7 2-9 5-2-3-5-5-9-5-9 0-14 10-10 18z' fill='white'/%3E%3C/svg%3E">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23ff8b72'/%3E%3Cpath d='M18 36c4 8 10 12 14 12s10-4 14-12c4-8-1-18-10-18-4 0-7 2-9 5-2-3-5-5-9-5-9 0-14 10-10 18z' fill='white'/%3E%3C/svg%3E">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="lucide.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
     <div class="app-container">
@@ -29,22 +20,13 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="logo-icon">
-                    <svg class="logo-brain-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-                        <!-- Star elements -->
-                        <polygon points="12,18 14,22 18,22 15,24 16,28 12,26 8,28 9,24 6,22 10,22" fill="#fbbf24"/>
-                        <polygon points="52,14 53.5,17 56.5,17 54.5,18.5 55,21.5 52,20 49,21.5 49.5,18.5 47.5,17 50.5,17" fill="#fbbf24"/>
-                        <polygon points="46,48 47,50 49,50 47.5,51 48,53 46,52 44,53 44.5,51 43,50 45,50" fill="#fbbf24"/>
-                        <!-- Headphones band -->
-                        <path d="M12,32 A20,20 0 0,1 52,32" fill="none" stroke="#4a3728" stroke-width="4.5" stroke-linecap="round"/>
-                        <!-- Brain left hemisphere -->
-                        <path d="M22,34 C16,34 14,26 22,22 C22,16 30,16 32,22 C34,22 34,26 32,28 C34,28 34,34 28,34 C26,34 24,32 22,34 Z" fill="#ffb3c1" stroke="#4a3728" stroke-width="2.5" stroke-linejoin="round"/>
-                        <!-- Brain right hemisphere -->
-                        <path d="M42,34 C48,34 50,26 42,22 C42,16 34,16 32,22 C30,22 30,26 32,28 C30,28 30,34 36,34 C38,34 40,32 42,34 Z" fill="#ffb3c1" stroke="#4a3728" stroke-width="2.5" stroke-linejoin="round"/>
-                        <!-- Heart in center of brain -->
-                        <path d="M32,28 C32,28 30,25.5 30,23.5 C30,22.2 31.1,21.5 32,22.2 C32.9,21.5 34,22.2 34,23.5 C34,25.5 32,28 32,28 Z" fill="#f43f5e"/>
-                        <!-- Ear cups (headphones) -->
-                        <rect x="8" y="28" width="8" height="14" rx="4" fill="#a78bfa" stroke="#4a3728" stroke-width="2.5"/>
-                        <rect x="48" y="28" width="8" height="14" rx="4" fill="#a78bfa" stroke="#4a3728" stroke-width="2.5"/>
+                    <svg viewBox="0 0 64 64" width="24" height="24" fill="white" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="20" cy="20" r="10"/>
+                        <circle cx="44" cy="20" r="10"/>
+                        <rect x="12" y="24" width="40" height="32" rx="16"/>
+                        <circle cx="24" cy="36" r="3" fill="#3D3431"/>
+                        <circle cx="40" cy="36" r="3" fill="#3D3431"/>
+                        <path d="M 28 44 Q 32 48 36 44" stroke="#3D3431" stroke-width="2" fill="none" stroke-linecap="round"/>
                     </svg>
                 </div>
                 <div class="logo-text">
@@ -55,95 +37,224 @@
             
             <nav class="sidebar-nav">
                 <button class="nav-btn active" data-target="chat-panel" id="nav-chat">
-                    <span class="nav-btn-left">
-                        <span class="nav-btn-icon">🎙️</span>
-                        <span>Chat & Rant</span>
-                    </span>
+                    <span>Chat & Rant</span>
+                    <!-- illustrated mic -->
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="order: 2;"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
                 </button>
                 <button class="nav-btn" data-target="quiz-panel" id="nav-quiz">
-                    <span class="nav-btn-left">
-                        <span class="nav-btn-icon">📖</span>
-                        <span>Emotion Quiz</span>
-                    </span>
+                    <span>Emotion Quiz</span>
+                    <!-- illustrated book -->
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="order: 2;"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10M6 10h10M6 14h10"/></svg>
                 </button>
                 <button class="nav-btn" data-target="shop-panel" id="nav-shop">
-                    <span class="nav-btn-left">
-                        <span class="nav-btn-icon">📦</span>
-                        <span>Spark Shop</span>
-                    </span>
+                    <span>Spark Shop</span>
+                    <!-- treasure chest -->
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="order: 2;"><path d="M2 9h20M2 15h20M2 9v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9M2 9V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3"/><path d="M12 9v6"/></svg>
                 </button>
                 <button class="nav-btn" data-target="studio-panel" id="nav-studio">
-                    <span class="nav-btn-left">
-                        <span class="nav-btn-icon">🎨</span>
-                        <span>Avatar Studio</span>
-                    </span>
+                    <span>Avatar Studio</span>
+                    <!-- smiling brain -->
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="order: 2;"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.9 1M14.5 2a2.5 2.5 0 0 0-2.5 2.5v15a2.5 2.5 0 0 0 4.9 1M12 4a5 5 0 0 0-5 5v2a5 5 0 0 0 10 0V9a5 5 0 0 0-5-5Z"/><path d="M9 13h.01M15 13h.01"/><path d="M10 16q2 2 4 0"/></svg>
                 </button>
                 <button class="nav-btn" data-target="bio-panel" id="nav-bio">
-                    <span class="nav-btn-left">
-                        <span class="nav-btn-icon">🩺</span>
-                        <span>Biometric Link</span>
-                    </span>
+                    <span>Biometric Link</span>
+                    <!-- link chain -->
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="order: 2;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                 </button>
                 <button class="nav-btn" data-target="calm-panel" id="nav-calm">
-                    <span class="nav-btn-left">
-                        <span class="nav-btn-icon">🎵</span>
-                        <span>Calm Hub</span>
-                    </span>
+                    <span>Calm Hub</span>
+                    <!-- music / steam cup -->
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="order: 2;"><path d="M18 8h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4Z"/><path d="M6 2v2M10 2v2M14 2v2"/></svg>
                 </button>
                 <button class="nav-btn" data-target="games-panel" id="nav-games">
-                    <span class="nav-btn-left">
-                        <span class="nav-btn-icon">🎮</span>
-                        <span>Play & Relax</span>
-                    </span>
+                    <span>Play & Relax</span>
+                    <!-- gamepad -->
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="order: 2;"><rect x="2" y="6" width="20" height="12" rx="3"/><path d="M6 12h4M8 10v4M15 11h.01M18 13h.01"/></svg>
                 </button>
             </nav>
 
             <div class="sidebar-footer">
-                <div class="profile-card" style="position: relative; display: flex; align-items: center; width: 100%;">
-                    <div class="profile-avatar" style="font-size: 1.2rem; display: flex; align-items: center; justify-content: center;">
-                        🐻‍🎓
+                <!-- Bear mascot floats above the profile card -->
+                <div class="profile-card-wrapper" style="position:relative;">
+                    <div class="bear-mascot-container">
+                        <!-- Cute brown teddy bear with graduation cap -->
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Ears -->
+                            <circle cx="25" cy="35" r="14" fill="#8B5A2B" stroke="#3D3431" stroke-width="3"/>
+                            <circle cx="25" cy="35" r="7" fill="#F3A59B"/>
+                            <circle cx="75" cy="35" r="14" fill="#8B5A2B" stroke="#3D3431" stroke-width="3"/>
+                            <circle cx="75" cy="35" r="7" fill="#F3A59B"/>
+                            <!-- Head -->
+                            <circle cx="50" cy="55" r="30" fill="#8B5A2B" stroke="#3D3431" stroke-width="3"/>
+                            <!-- Muzzle -->
+                            <ellipse cx="50" cy="64" rx="14" ry="10" fill="#FFE8D6" stroke="#3D3431" stroke-width="2"/>
+                            <!-- Nose -->
+                            <polygon points="50,60 45,56 55,56" fill="#3D3431"/>
+                            <!-- Mouth -->
+                            <path d="M 46 66 Q 50 70 54 66" stroke="#3D3431" stroke-width="2" fill="none"/>
+                            <!-- Eyes -->
+                            <circle cx="38" cy="52" r="4" fill="#3D3431"/>
+                            <circle cx="62" cy="52" r="4" fill="#3D3431"/>
+                            <!-- Graduation Cap -->
+                            <polygon points="50,14 80,24 50,34 20,24" fill="#3D3431"/>
+                            <rect x="44" y="24" width="12" height="10" fill="#3D3431"/>
+                            <circle cx="20" cy="24" r="3" fill="#FFE8D6"/>
+                        </svg>
                     </div>
-                    <div class="profile-info">
-                        <span class="profile-name">Super Star Student</span>
-                        <span class="profile-role">Active Session</span>
+                    <div class="profile-card">
+                        <div class="profile-avatar">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                            </svg>
+                        </div>
+                        <div class="profile-info">
+                            <span class="profile-name">Super Star Student</span>
+                            <span class="profile-role">Active Session</span>
+                        </div>
                     </div>
-                    <button id="student-logout-btn" title="Log Out" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; margin-left: auto; color: var(--text-color); opacity: 0.6; transition: opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6">
-                        🚪
-                    </button>
                 </div>
-                <button class="sos-trigger-btn" id="sos-open-btn">
-                    <span style="font-size: 1.1rem; margin-right: 6px;">🧸</span>
-                    <span>Hugged with a Counselor</span>
+                <button class="sos-trigger-btn huggeet-btn" id="sos-open-btn">
+                    <span class="huggeet-blobs">
+                        <svg viewBox="0 0 40 24" width="36" height="22" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Left blob -->
+                            <ellipse cx="12" cy="12" rx="10" ry="11" fill="#FF8FAB" opacity="0.9"/>
+                            <circle cx="8" cy="9"  r="3" fill="#FFCDD7"/>
+                            <!-- Right blob -->
+                            <ellipse cx="28" cy="12" rx="10" ry="11" fill="#FF8FAB" opacity="0.9"/>
+                            <circle cx="32" cy="9"  r="3" fill="#FFCDD7"/>
+                            <!-- Heart in center -->
+                            <path d="M20,14 C20,14 16,11 16,8.5 A3,3 0 0,1 20,7.5 A3,3 0 0,1 24,8.5 C24,11 20,14 20,14 Z" fill="white" opacity="0.9"/>
+                        </svg>
+                    <span>Huggeet with a Counselor</span>
                 </button>
             </div>
+            <!-- Wavy border edge overlays the boundary -->
+            <div class="sidebar-wave-edge"></div>
         </aside>
+
+        <!-- Global Hidden SVG Definitions Container (Prevents Duplicate ID lookup conflicts in cloned SVGs) -->
+        <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" aria-hidden="true">
+            <defs>
+                <!-- Clipping path for the quilted backrest circle -->
+                <clipPath id="backrest-clip">
+                    <circle cx="200" cy="190" r="130" />
+                </clipPath>
+                <!-- 3D Spherical Radial Gradient for the mascot body -->
+                <radialGradient id="buddy-3d-grad" cx="35%" cy="30%" r="65%" fx="35%" fy="30%">
+                    <stop offset="0%" stop-color="#ffffff" />
+                    <stop offset="20%" stop-color="#dbf7f9" />
+                    <stop offset="75%" stop-color="#a8e3e7" />
+                    <stop offset="100%" stop-color="#80becc" />
+                </radialGradient>
+                <!-- 3D Radial Gradient for the tail -->
+                <radialGradient id="tail-3d-grad" cx="35%" cy="35%" r="65%">
+                    <stop offset="0%" stop-color="#dbf7f9" />
+                    <stop offset="75%" stop-color="#a8e3e7" />
+                    <stop offset="100%" stop-color="#72abb5" />
+                </radialGradient>
+                <!-- Cushion shading gradient -->
+                <linearGradient id="cushion-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#fffdfa" />
+                    <stop offset="100%" stop-color="#f5ede2" />
+                </linearGradient>
+                <!-- 3D Torso/Shading Gradients for Outfits -->
+                <linearGradient id="forest-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#464f29" />
+                    <stop offset="25%" stop-color="#606c38" />
+                    <stop offset="50%" stop-color="#798948" />
+                    <stop offset="75%" stop-color="#606c38" />
+                    <stop offset="100%" stop-color="#464f29" />
+                </linearGradient>
+                <linearGradient id="starry-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#111a2d" />
+                    <stop offset="25%" stop-color="#1d2d50" />
+                    <stop offset="50%" stop-color="#2c416e" />
+                    <stop offset="75%" stop-color="#1d2d50" />
+                    <stop offset="100%" stop-color="#111a2d" />
+                </linearGradient>
+                <linearGradient id="sailor-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#e2e8f0" />
+                    <stop offset="50%" stop-color="#ffffff" />
+                    <stop offset="100%" stop-color="#e2e8f0" />
+                </linearGradient>
+                <linearGradient id="skirt-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#142842" />
+                    <stop offset="25%" stop-color="#2b5c8f" />
+                    <stop offset="50%" stop-color="#3d7ab8" />
+                    <stop offset="75%" stop-color="#2b5c8f" />
+                    <stop offset="100%" stop-color="#142842" />
+                </linearGradient>
+                <linearGradient id="strawberry-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#e07d7d" />
+                    <stop offset="25%" stop-color="#fca5a5" />
+                    <stop offset="50%" stop-color="#ffc6c6" />
+                    <stop offset="75%" stop-color="#fca5a5" />
+                    <stop offset="100%" stop-color="#e07d7d" />
+                </linearGradient>
+                <linearGradient id="wizard-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#2a0c2b" />
+                    <stop offset="25%" stop-color="#4a154b" />
+                    <stop offset="50%" stop-color="#6b276d" />
+                    <stop offset="75%" stop-color="#4a154b" />
+                    <stop offset="100%" stop-color="#2a0c2b" />
+                </linearGradient>
+                <linearGradient id="princess-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#f43f5e" />
+                    <stop offset="35%" stop-color="#fda4af" />
+                    <stop offset="50%" stop-color="#fef08a" />
+                    <stop offset="65%" stop-color="#fda4af" />
+                    <stop offset="100%" stop-color="#f43f5e" />
+                </linearGradient>
+                <linearGradient id="mermaid-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#0284c7" />
+                    <stop offset="50%" stop-color="#38bdf8" />
+                    <stop offset="100%" stop-color="#c084fc" />
+                </linearGradient>
+                <linearGradient id="lolita-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#0284c7" />
+                    <stop offset="35%" stop-color="#bae6fd" />
+                    <stop offset="50%" stop-color="#f1f5f9" />
+                    <stop offset="65%" stop-color="#bae6fd" />
+                    <stop offset="100%" stop-color="#0284c7" />
+                </linearGradient>
+                <linearGradient id="unicorn-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#fca5a5" />
+                    <stop offset="33%" stop-color="#fef08a" />
+                    <stop offset="66%" stop-color="#a7f3d0" />
+                    <stop offset="100%" stop-color="#bae6fd" />
+                </linearGradient>
+            </defs>
+        </svg>
 
         <!-- Main Workspace -->
         <main class="main-content">
             <!-- Header -->
             <header class="content-header">
                 <div class="welcome-section">
-                    <h2 id="header-title">Hello there!</h2>
+                    <h2 id="header-title">Empathetic Connection Studio</h2>
                     <p id="header-subtitle">How are you holding up today?</p>
                 </div>
-                <div class="quick-status-bar">
-                    <div class="status-metric" id="status-sentiment">
-                        <span class="metric-label">Mood State</span>
-                        <span class="metric-value positive">☁️ Calm</span>
-                    </div>
-                    <div class="status-metric" id="status-stress">
-                        <span class="metric-label">Stress Level</span>
-                        <span class="metric-value low">🌱 Low</span>
+                <div class="vibe-widget-cloud">
+                    <div class="quick-status-bar">
+                        <div class="status-metric" id="status-sentiment">
+                            <span class="metric-label">Mood State</span>
+                            <span class="metric-value positive"><i data-lucide="smile"></i> Neutral</span>
+                        </div>
+                        <div class="status-metric" id="status-stress">
+                            <span class="metric-label">Stress Level</span>
+                            <span class="metric-value low"><i data-lucide="trending-down"></i> Low</span>
+                        </div>
                     </div>
                 </div>
             </header>
-
-            <!-- Wavy, cloud-like SVG divider -->
-            <div class="cloud-divider-container">
-                <svg viewBox="0 0 1440 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="cloud-divider-svg">
-                    <path d="M0,40 C150,90 350,90 500,40 C650,-10 850,-10 1000,40 C1150,90 1350,90 1440,40 L1440,100 L0,100 Z" fill="#FAF4E8"/>
+            <!-- Top Divider Wave (Lavender Fluid Wave) -->
+            <div class="header-wave-divider">
+                <svg viewBox="0 0 1200 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%; display: block;">
+                    <path d="M0,20 C150,45 350,-10 600,20 C850,50 1050,-5 1200,20 L1200,40 L0,40 Z" fill="#D1C4E9" opacity="0.6"/>
+                    <path d="M0,30 C200,5 400,38 700,22 C1000,5 1100,32 1200,30 L1200,40 L0,40 Z" fill="#E1D5F9" opacity="0.4"/>
                 </svg>
             </div>
+
 
             <!-- Panels -->
             <div class="panel-container">
@@ -152,236 +263,362 @@
                 <section class="panel active" id="chat-panel">
                     <div class="chat-layout">
                         <!-- Left Panel: Avatar Viewport -->
-                        <div class="avatar-card">
+                        <div class="avatar-card cloud-companion-frame">
                             <div class="avatar-card-header">
                                 <h3>Your Buddy</h3>
                                 <span class="expression-badge" id="avatar-expression-label">Friendly</span>
                             </div>
                             
-                            <div class="avatar-viewport-container">
-                                <!-- Customizable SVG Avatar Container -->
-                                <div class="avatar-svg-container" id="avatar-container">
-                                    <svg id="mindbuddy-svg" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
-                                        <defs>
-                                            <radialGradient id="floor-shadow" cx="50%" cy="50%" r="50%">
-                                                <stop offset="0%" stop-color="#000" stop-opacity="0.3"/>
-                                                <stop offset="100%" stop-color="#000" stop-opacity="0"/>
-                                            </radialGradient>
-                                            <linearGradient id="avatar-glow" x1="0%" y1="0%" x2="100%" y2="100%">
-                                                <stop offset="0%" stop-color="var(--glow-color-1,#8b5cf6)"/>
-                                                <stop offset="100%" stop-color="var(--glow-color-2,#ec4899)"/>
-                                            </linearGradient>
-                                            <linearGradient id="light-ray-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-                                                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25"/>
-                                                <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
-                                            </linearGradient>
-                                        </defs>
+                            <div class="avatar-viewport-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
+                                <!-- Big Pink Fluffy Cloud Mascot Framing a Text Box inside -->
+                                <div class="mascot-frame-wrapper" style="position: relative; width: 100%; max-width: 250px; display: flex; justify-content: center; align-items: center; filter: drop-shadow(0 4px 10px rgba(74, 62, 61, 0.1));">
+                                    <svg id="mindbuddy-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto;">
 
-                                        <!-- Pedestal Shadow -->
-                                        <ellipse cx="150" cy="495" rx="100" ry="15" fill="url(#floor-shadow)"/>
+
+                                        <!-- Ambient hearts & stars & clouds (Matching Kawaii Illustration) -->
+                                        <!-- Hearts -->
+                                        <path d="M 60,150 C 53,143 46,150 60,162 C 74,150 67,143 60,150 Z" fill="#ffa2b6" stroke="#4A3E3D" stroke-width="2.5" />
+                                        <path d="M 105,120 C 98,113 91,120 105,132 C 119,120 112,113 105,120 Z" fill="#ffa2b6" stroke="#4A3E3D" stroke-width="2.5" />
+                                        <path d="M 295,120 C 288,113 281,120 295,132 C 309,120 302,113 295,120 Z" fill="#ffa2b6" stroke="#4A3E3D" stroke-width="2.5" />
+                                        <path d="M 345,150 C 338,143 331,150 345,162 C 359,150 352,143 345,150 Z" fill="#ffa2b6" stroke="#4A3E3D" stroke-width="2.5" />
+                                        <path d="M 345,305 C 338,298 331,305 345,317 C 359,305 352,298 345,305 Z" fill="#ffa2b6" stroke="#4A3E3D" stroke-width="2.5" />
                                         
-                                        <!-- Ambient Glow -->
-                                        <circle cx="150" cy="230" r="130" fill="url(#avatar-glow)" opacity="0.08" class="glow-pulse"/>
+                                        <!-- Stars -->
+                                        <polygon points="80,180 83,187 90,187 85,192 87,199 80,195 73,199 75,192 70,187 77,187" fill="#ffd166" stroke="#4A3E3D" stroke-width="2.5" />
+                                        <polygon points="320,180 323,187 330,187 325,192 327,199 320,195 313,199 315,192 310,187 317,187" fill="#ffd166" stroke="#4A3E3D" stroke-width="2.5" />
+                                        
+                                        <!-- Tiny Cloud at bottom right -->
+                                        <path d="M 320,325 C 315,325 312,320 316,315 C 316,310 324,308 328,312 C 332,308 340,310 340,315 C 344,318 342,325 335,325 Z" fill="#e8f4fd" stroke="#4A3E3D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
 
-                                        <!-- Vertical Spotlight Ray from Top -->
-                                        <polygon points="60,0 240,0 220,460 80,460" fill="url(#light-ray-grad)" opacity="0.2"/>
+                                        <!-- Quilted chair backrest circle base -->
+                                        <circle cx="200" cy="190" r="130" fill="#fff5ea" stroke="#4A3E3D" stroke-width="4.5" />
+                                        <!-- Quilted grid lines inside clip path -->
+                                        <g clip-path="url(#backrest-clip)">
+                                            <!-- Diagonal lines: Top-Left to Bottom-Right -->
+                                            <path d="M 50,-100 L 350,200 M 50,-30 L 350,270 M 50,40 L 350,340 M 50,110 L 350,410 M 50,180 L 350,480" stroke="#ebd8c8" stroke-width="3" fill="none" />
+                                            <!-- Diagonal lines: Bottom-Left to Top-Right -->
+                                            <path d="M 50,200 L 350,-100 M 50,270 L 350,-30 M 50,340 L 350,40 M 50,410 L 350,110 M 50,480 L 350,180" stroke="#ebd8c8" stroke-width="3" fill="none" />
+                                            <!-- Small tufting buttons at intersections -->
+                                            <circle cx="200" cy="190" r="3.5" fill="#dcbba3" />
+                                            <circle cx="200" cy="120" r="3.5" fill="#dcbba3" />
+                                            <circle cx="200" cy="260" r="3.5" fill="#dcbba3" />
+                                            <circle cx="130" cy="190" r="3.5" fill="#dcbba3" />
+                                            <circle cx="270" cy="190" r="3.5" fill="#dcbba3" />
+                                            <circle cx="165" cy="155" r="3.5" fill="#dcbba3" />
+                                            <circle cx="235" cy="155" r="3.5" fill="#dcbba3" />
+                                            <circle cx="165" cy="225" r="3.5" fill="#dcbba3" />
+                                            <circle cx="235" cy="225" r="3.5" fill="#dcbba3" />
+                                            <circle cx="130" cy="120" r="3.5" fill="#dcbba3" />
+                                            <circle cx="270" cy="120" r="3.5" fill="#dcbba3" />
+                                            <circle cx="130" cy="260" r="3.5" fill="#dcbba3" />
+                                            <circle cx="270" cy="260" r="3.5" fill="#dcbba3" />
+                                        </g>
+                                        
+                                        <!-- Bolster cushion base ring shadow -->
+                                        <ellipse cx="200" cy="318" rx="108" ry="20" fill="rgba(74, 62, 61, 0.25)" />
+                                        
+                                        <!-- Cushion bottom rim (light blue) -->
+                                        <ellipse cx="200" cy="310" rx="106" ry="28" fill="#dbebff" stroke="#4A3E3D" stroke-width="4.5" />
+                                        
+                                        <!-- Cushion top bolster (cream) -->
+                                        <ellipse cx="200" cy="302" rx="102" ry="24" fill="url(#cushion-grad)" stroke="#4A3E3D" stroke-width="4.5" />
+                                        
+                                        <!-- Cushion tufting folds/seams -->
+                                        <path d="M 125 292 Q 135 310 140 320" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round" />
+                                        <path d="M 160 286 Q 170 312 172 324" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round" />
+                                        <path d="M 200 284 Q 200 310 200 326" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round" />
+                                        <path d="M 240 286 Q 230 312 228 324" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round" />
+                                        <path d="M 275 292 Q 265 310 260 320" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round" />
 
-                                        <!-- Black Pedestal Stand -->
-                                        <!-- Cylinder Body -->
-                                        <path d="M70,450 L70,490 C70,505 230,505 230,490 L230,450 Z" fill="#0b0f19" />
-                                        <!-- Cylinder Top -->
-                                        <ellipse cx="150" cy="450" rx="80" ry="20" fill="#161b22" stroke="#30363d" stroke-width="2" />
-                                        <!-- Inner Cylinder Ring -->
-                                        <ellipse cx="150" cy="450" rx="68" ry="15" fill="#0d1117" />
-                                        <!-- Pedestal Logo -->
-                                        <text x="150" y="482" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="900" fill="#8b949e" text-anchor="middle" letter-spacing="3.5">WAYGROUND</text>
+                                        <!-- 1. Star Antennae Curved -->
+                                        <g id="antennae">
+                                            <path d="M165 140 Q138 105 142 80" fill="none" stroke="#8c9ba5" stroke-width="5" stroke-linecap="round"/>
+                                            <polygon points="142,65 145,74 154,74 147,80 150,89 142,83 134,89 137,80 130,74 139,74" fill="#ffd166" stroke="#4A3E3D" stroke-width="2.5" />
+                                            
+                                            <path d="M235 140 Q262 105 258 80" fill="none" stroke="#8c9ba5" stroke-width="5" stroke-linecap="round"/>
+                                            <polygon points="258,65 261,74 270,74 263,80 266,89 258,83 250,89 253,80 246,74 255,74" fill="#ffd166" stroke="#4A3E3D" stroke-width="2.5" />
+                                        </g>
 
-                                        <!-- Full-body character group with float animation -->
-                                        <g class="character-group">
+                                        <!-- 2. Fluffy tail (left back) with 3D gradient -->
+                                        <path d="M 120,250 C 102,245 92,260 98,272 C 88,282 102,295 118,290 C 126,280 128,265 120,250 Z" fill="url(#tail-3d-grad)" stroke="#4A3E3D" stroke-width="4.5" />
 
-                                            <!-- Backpack / Oxygen Tank on the Back -->
-                                            <g id="avatar-backpack">
-                                                <rect x="202" y="210" width="22" height="75" rx="11" fill="#4b5563" />
-                                                <rect x="210" y="222" width="14" height="42" rx="7" fill="#1f2937" />
-                                                <circle cx="213" cy="216" r="4" fill="#9ca3af" />
-                                            </g>
+                                        <!-- Cushion shadow directly under the body -->
+                                        <ellipse cx="200" cy="294" rx="68" ry="10" fill="#4A3E3D" opacity="0.22" />
 
-                                            <!-- Hijab Back Layer -->
-                                            <path id="avatar-hair-back" d="M92,110 C92,48 208,48 208,110 C208,142 188,175 150,175 C112,175 92,142 92,110 Z" fill="#1f2937"/>
+                                        <!-- Little feet blobs with 3D gradient -->
+                                        <ellipse cx="160" cy="292" rx="12" ry="8" fill="url(#tail-3d-grad)" stroke="#4A3E3D" stroke-width="3.5" />
+                                        <ellipse cx="240" cy="292" rx="12" ry="8" fill="url(#tail-3d-grad)" stroke="#4A3E3D" stroke-width="3.5" />
 
-                                            <!-- SOCKS -->
-                                            <g id="avatar-socks">
-                                                <rect x="110" y="380" width="28" height="25" rx="4" fill="#f43f5e"/>
-                                                <rect x="162" y="380" width="28" height="25" rx="4" fill="#f43f5e"/>
-                                                <!-- Sock stripes -->
-                                                <rect x="110" y="386" width="28" height="4" rx="1" fill="#ffffff" opacity="0.8"/>
-                                                <rect x="162" y="386" width="28" height="4" rx="1" fill="#ffffff" opacity="0.8"/>
-                                            </g>
+                                        <!-- 3. Fluffy Cotton-ball Body contour with 3D gradient -->
+                                        <path id="avatar-body" d="M 200,135 C 190,130 180,135 175,142 C 165,138 155,145 152,155 C 142,152 135,162 138,172 C 128,172 122,185 128,195 C 118,198 115,212 125,222 C 115,228 118,245 130,252 C 120,260 125,275 138,280 C 132,288 145,295 158,292 C 170,298 185,296 200,296 C 215,296 230,298 242,292 C 255,295 268,288 262,280 C 275,275 280,260 270,252 C 282,245 285,228 275,222 C 285,212 282,198 272,195 C 278,185 272,172 262,172 C 265,162 258,152 248,155 C 245,145 235,138 225,142 C 220,135 210,130 200,135 Z" fill="url(#buddy-3d-grad)" stroke="#4A3E3D" stroke-width="4.5" />
 
-                                            <!-- SNEAKERS / SHOES -->
-                                            <g id="avatar-shoes">
-                                                <!-- Left shoe -->
-                                                <rect x="104" y="398" width="40" height="15" rx="7" fill="#e2e8f0"/>
-                                                <rect x="104" y="407" width="40" height="5" rx="2" fill="#0f172a"/>
-                                                <line x1="112" y1="402" x2="136" y2="402" stroke="#64748b" stroke-width="2" stroke-dasharray="3,3"/>
-                                                <!-- Right shoe -->
-                                                <rect x="156" y="398" width="40" height="15" rx="7" fill="#e2e8f0"/>
-                                                <rect x="156" y="407" width="40" height="5" rx="2" fill="#0f172a"/>
-                                                <line x1="164" y1="402" x2="188" y2="402" stroke="#64748b" stroke-width="2" stroke-dasharray="3,3"/>
-                                            </g>
+                                        <!-- Specular 3D Gloss Highlights on the body -->
+                                        <path d="M 152,158 C 160,148 180,144 195,148" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" opacity="0.45" />
+                                        <path d="M 132,185 C 130,195 132,205 138,212" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.35" />
 
-                                            <!-- PANTS / TROUSERS -->
-                                            <g id="avatar-pants">
-                                                <rect id="pants-left" x="108" y="325" width="32" height="60" rx="8" fill="#10b981"/>
-                                                <rect id="pants-right" x="160" y="325" width="32" height="60" rx="8" fill="#10b981"/>
-                                                <line x1="108" y1="375" x2="140" y2="375" stroke="#047857" stroke-width="2" id="hem-left"/>
-                                                <line x1="160" y1="375" x2="192" y2="375" stroke="#047857" stroke-width="2" id="hem-right"/>
-                                            </g>
+                                        <!-- Mascot Hairstyle decoration Group (populates dynamically by JS) -->
+                                        <g id="avatar-hair"></g>
 
-                                            <!-- CLOTHES / DRESS -->
-                                            <g>
-                                                <!-- Main dress body -->
-                                                <path id="avatar-clothes" d="M90,200 C80,210 75,230 75,270 L75,340 C75,342 77,344 80,344 L220,344 C223,344 225,342 225,340 L225,270 C225,230 220,210 210,200 Z" fill="#fbbf24" />
-                                                <path id="avatar-hood" d="M95,200 L205,200 L195,205 L105,205 Z" fill="#d97706" opacity="0.3" />
-                                                
-                                                <!-- Chest graphic (reused for swappable designs or default daisy patterns) -->
-                                                <!-- Daisy pattern 1 (Center) -->
-                                                <g class="flower-pattern">
-                                                    <circle cx="150" cy="270" r="4.5" fill="#ffffff" />
-                                                    <circle cx="143" cy="270" r="4.5" fill="#ffffff" />
-                                                    <circle cx="157" cy="270" r="4.5" fill="#ffffff" />
-                                                    <circle cx="150" cy="263" r="4.5" fill="#ffffff" />
-                                                    <circle cx="150" cy="277" r="4.5" fill="#ffffff" />
-                                                    <circle cx="150" cy="270" r="3.5" fill="#d97706" />
-                                                </g>
-                                                <!-- Daisy pattern 2 (Left Bottom) -->
-                                                <g class="flower-pattern">
-                                                    <circle cx="120" cy="305" r="4.5" fill="#ffffff" />
-                                                    <circle cx="113" cy="305" r="4.5" fill="#ffffff" />
-                                                    <circle cx="127" cy="305" r="4.5" fill="#ffffff" />
-                                                    <circle cx="120" cy="298" r="4.5" fill="#ffffff" />
-                                                    <circle cx="120" cy="312" r="4.5" fill="#ffffff" />
-                                                    <circle cx="120" cy="305" r="3.5" fill="#d97706" />
-                                                </g>
-                                                <!-- Daisy pattern 3 (Right Bottom) -->
-                                                <g class="flower-pattern">
-                                                    <circle cx="180" cy="305" r="4.5" fill="#ffffff" />
-                                                    <circle cx="173" cy="305" r="4.5" fill="#ffffff" />
-                                                    <circle cx="187" cy="305" r="4.5" fill="#ffffff" />
-                                                    <circle cx="180" cy="298" r="4.5" fill="#ffffff" />
-                                                    <circle cx="180" cy="312" r="4.5" fill="#ffffff" />
-                                                    <circle cx="180" cy="305" r="3.5" fill="#d97706" />
-                                                </g>
-                                                <!-- Daisy pattern 4 (Left Upper) -->
-                                                <g class="flower-pattern">
-                                                    <circle cx="125" cy="235" r="4.5" fill="#ffffff" />
-                                                    <circle cx="118" cy="235" r="4.5" fill="#ffffff" />
-                                                    <circle cx="132" cy="235" r="4.5" fill="#ffffff" />
-                                                    <circle cx="125" cy="228" r="4.5" fill="#ffffff" />
-                                                    <circle cx="125" cy="242" r="4.5" fill="#ffffff" />
-                                                    <circle cx="125" cy="235" r="3.5" fill="#d97706" />
-                                                </g>
-                                                <!-- Daisy pattern 5 (Right Upper) -->
-                                                <g class="flower-pattern">
-                                                    <circle cx="175" cy="235" r="4.5" fill="#ffffff" />
-                                                    <circle cx="168" cy="235" r="4.5" fill="#ffffff" />
-                                                    <circle cx="182" cy="235" r="4.5" fill="#ffffff" />
-                                                    <circle cx="175" cy="228" r="4.5" fill="#ffffff" />
-                                                    <circle cx="175" cy="242" r="4.5" fill="#ffffff" />
-                                                    <circle cx="175" cy="235" r="3.5" fill="#d97706" />
-                                                </g>
+                                        <!-- 5. Eyes with bottom gradient glow and dual reflections -->
+                                        <!-- Eyes Group (populates dynamically by JS) -->
+                                        <g id="avatar-eyes">
+                                            <!-- Left Eye -->
+                                            <circle cx="172" cy="190" r="14" fill="#3c2f46" stroke="#4A3E3D" stroke-width="1.5" />
+                                            <path d="M 160 194 A 12 12 0 0 0 184 194" fill="#d8b4fe" opacity="0.35" />
+                                            <circle cx="168" cy="185" r="4.5" fill="#ffffff" />
+                                            <circle cx="176" cy="194" r="2.2" fill="#ffffff" />
+                                            
+                                            <!-- Right Eye -->
+                                            <circle cx="228" cy="190" r="14" fill="#3c2f46" stroke="#4A3E3D" stroke-width="1.5" />
+                                            <path d="M 216 194 A 12 12 0 0 0 240 194" fill="#d8b4fe" opacity="0.35" />
+                                            <circle cx="224" cy="185" r="4.5" fill="#ffffff" />
+                                            <circle cx="232" cy="194" r="2.2" fill="#ffffff" />
+                                        </g>
 
-                                                <!-- Chest swappable graphic layer (retained to prevent JavaScript errors) -->
-                                                <g id="graphic-pumpkin" opacity="0"><circle cx="150" cy="270" r="10" fill="none"/></g>
-                                                <g id="graphic-heart" opacity="0"><circle cx="150" cy="270" r="10" fill="none"/></g>
-                                                <g id="graphic-wave" opacity="0"><circle cx="150" cy="270" r="10" fill="none"/></g>
-                                                <g id="graphic-star" opacity="0"><circle cx="150" cy="270" r="10" fill="none"/></g>
-                                            </g>
+                                        <!-- Blushes Group (populates dynamically by JS) -->
+                                        <g id="avatar-blushes">
+                                            <ellipse cx="156" cy="202" rx="9" ry="5.5" fill="#ffa2b6" opacity="0.85" />
+                                            <ellipse cx="244" cy="202" rx="9" ry="5.5" fill="#ffa2b6" opacity="0.85" />
+                                        </g>
 
-                                            <!-- ARMS (Rendered on Top of Clothes) -->
-                                            <g id="avatar-left-arm">
-                                                <path d="M72,210 C62,225 62,250 74,285 L88,285 C82,255 82,225 86,210 Z" fill="#ffffff" />
-                                                <ellipse cx="81" cy="283" rx="7" ry="5" fill="#ffdbac" id="avatar-hand-l" />
-                                            </g>
-                                            <g id="avatar-right-arm">
-                                                <path d="M228,210 C238,225 238,250 226,285 L212,285 C218,255 218,225 214,210 Z" fill="#ffffff" />
-                                                <ellipse cx="219" cy="283" rx="7" ry="5" fill="#ffdbac" id="avatar-hand-r" />
-                                            </g>
+                                        <!-- Cute mouth (populates dynamically by JS) -->
+                                        <g id="avatar-mouth-container">
+                                            <path id="avatar-mouth" d="M 194 198 Q 199 202 200 198 Q 201 202 206 198" fill="none" stroke="#3c2f46" stroke-width="3.5" stroke-linecap="round" />
+                                        </g>
 
-                                            <!-- NECK -->
-                                            <rect id="avatar-neck" x="135" y="145" width="30" height="60" rx="8" fill="#ffffff"/>
+                                        <!-- Face Accessories Group (populates dynamically by JS) -->
+                                        <g id="avatar-accessory"></g>
 
-                                            <!-- HEAD -->
-                                            <g>
-                                                <!-- White Head Base -->
-                                                <ellipse id="avatar-head" cx="150" cy="112" rx="46" ry="46" fill="#ffffff"/>
-                                                
-                                                <!-- Ear cover nodes (ears are hidden, keep to prevent JS errors) -->
-                                                <ellipse cx="93" cy="112" rx="10" ry="13" fill="#ffffff" id="ear-l" opacity="0"/>
-                                                <ellipse cx="207" cy="112" rx="10" ry="13" fill="#ffffff" id="ear-r" opacity="0"/>
-                                            </g>
+                                        <!-- OUTFIT LAYERS (Aligned to Torso y=220 to y=290 with sleeves) -->
+                                        <!-- 1. Forest Cape & Pants -->
+                                        <g id="outfit-forest" class="outfit-layer" style="opacity: 0; transition: opacity 0.25s ease;">
+                                            <!-- Sleeves -->
+                                            <path d="M 132,232 Q 148,238 163,245" fill="none" stroke="#283618" stroke-width="12" stroke-linecap="round" />
+                                            <path d="M 132,232 Q 148,238 163,245" fill="none" stroke="url(#forest-grad)" stroke-width="7" stroke-linecap="round" />
+                                            <path d="M 268,232 Q 252,238 237,245" fill="none" stroke="#283618" stroke-width="12" stroke-linecap="round" />
+                                            <path d="M 268,232 Q 252,238 237,245" fill="none" stroke="url(#forest-grad)" stroke-width="7" stroke-linecap="round" />
+                                            <!-- Cape -->
+                                            <path d="M 125,230 C 115,250 120,285 200,285 C 280,285 285,250 275,230 C 240,220 160,220 125,230 Z" fill="url(#forest-grad)" stroke="#283618" stroke-width="3.5" />
+                                            <!-- Gold Trim -->
+                                            <path d="M 125,230 Q 200,240 275,230" fill="none" stroke="#ffd166" stroke-width="2" />
+                                            <path d="M 120,285 Q 200,287 280,285" fill="none" stroke="#ffd166" stroke-width="2" />
+                                            <!-- Orange Gem -->
+                                            <circle cx="200" cy="232" r="6" fill="#e07a5f" stroke="#4A3E3D" stroke-width="1.5" />
+                                            <circle cx="198" cy="230" r="1.5" fill="#ffffff" />
+                                            <!-- Dark Pumpkin Pants -->
+                                            <path d="M 140,282 C 140,296 260,296 260,282 Z" fill="url(#forest-grad)" stroke="#111827" stroke-width="3" />
+                                        </g>
+ 
+                                        <!-- 2. Starry Pajamas & Cloud Slippers -->
+                                        <g id="outfit-starry" class="outfit-layer" style="opacity: 0; transition: opacity 0.25s ease;">
+                                            <!-- Sleeves -->
+                                            <path d="M 132,232 Q 148,238 163,245" fill="none" stroke="#111827" stroke-width="12" stroke-linecap="round" />
+                                            <path d="M 132,232 Q 148,238 163,245" fill="none" stroke="url(#starry-grad)" stroke-width="7" stroke-linecap="round" />
+                                            <path d="M 268,232 Q 252,238 237,245" fill="none" stroke="#111827" stroke-width="12" stroke-linecap="round" />
+                                            <path d="M 268,232 Q 252,238 237,245" fill="none" stroke="url(#starry-grad)" stroke-width="7" stroke-linecap="round" />
+                                            <!-- Pajama Cuffs (white borders at hands) -->
+                                            <circle cx="163" cy="245" r="7" fill="none" stroke="#f3f4f6" stroke-width="2" />
+                                            <circle cx="237" cy="245" r="7" fill="none" stroke="#f3f4f6" stroke-width="2" />
+                                            <!-- Pajamas Body -->
+                                            <path d="M 126,225 C 115,245 118,290 200,290 C 282,290 285,245 274,225 C 245,218 155,218 126,225 Z" fill="url(#starry-grad)" stroke="#111827" stroke-width="3.5" />
+                                            <path d="M 126,225 Q 200,235 274,225" fill="none" stroke="#f3f4f6" stroke-width="2.5" />
+                                            <!-- Moon/Stars patterns -->
+                                            <path d="M 160,242 A 6 6 0 0 1 168,252 A 5 5 0 0 0 160,244 Z" fill="#ffd166" />
+                                            <polygon points="230,245 232,249 237,249 233,252 235,257 230,254 225,257 227,252 223,249 228,249" fill="#ffd166" />
+                                            <polygon points="200,265 202,269 207,269 203,272 205,277 200,274 195,277 197,272 193,269 198,269" fill="#ffd166" />
+                                            <circle cx="168" cy="270" r="2" fill="#ffd166" />
+                                            <!-- Cloud Slippers -->
+                                            <path d="M 148,292 C 144,288 154,282 160,285 C 166,282 176,288 172,292 Z" fill="#ffffff" stroke="#111827" stroke-width="2" />
+                                            <path d="M 228,292 C 224,288 234,282 240,285 C 246,282 256,288 252,292 Z" fill="#ffffff" stroke="#111827" stroke-width="2" />
+                                        </g>
 
-                                            <!-- Hair Back Layer (Long Yellow/Golden Hair) -->
-                                            <path id="avatar-hair-back" d="M104,112 C104,40 196,40 196,112 C196,180 205,260 190,270 C175,280 180,210 150,210 C120,210 125,280 110,270 C95,260 104,180 104,112 Z" fill="#fbbf24"/>
+                                        <!-- 3. Sailor Dress & Striped Socks -->
+                                        <g id="outfit-nautical" class="outfit-layer" style="opacity: 0; transition: opacity 0.25s ease;">
+                                            <!-- Sleeves -->
+                                            <path d="M 132,232 Q 148,238 163,245" fill="none" stroke="#2b5c8f" stroke-width="12" stroke-linecap="round" />
+                                            <path d="M 132,232 Q 148,238 163,245" fill="none" stroke="url(#sailor-grad)" stroke-width="7" stroke-linecap="round" />
+                                            <path d="M 268,232 Q 252,238 237,245" fill="none" stroke="#2b5c8f" stroke-width="12" stroke-linecap="round" />
+                                            <path d="M 268,232 Q 252,238 237,245" fill="none" stroke="url(#sailor-grad)" stroke-width="7" stroke-linecap="round" />
+                                            <!-- Sailor Cuffs -->
+                                            <circle cx="163" cy="245" r="7" fill="none" stroke="url(#skirt-grad)" stroke-width="2.5" />
+                                            <circle cx="237" cy="245" r="7" fill="none" stroke="url(#skirt-grad)" stroke-width="2.5" />
+                                            <!-- White Sailor Shirt -->
+                                            <path d="M 128,225 C 118,245 122,275 200,275 C 278,275 282,245 272,225 C 245,218 155,218 128,225 Z" fill="url(#sailor-grad)" stroke="#2b5c8f" stroke-width="3.5" />
+                                            <!-- Blue Collar -->
+                                            <path d="M 128,225 L 155,225 L 200,250 L 245,225 L 272,225 L 200,218 Z" fill="url(#skirt-grad)" stroke="#1d3557" stroke-width="1.5" />
+                                            <!-- Red Bowtie -->
+                                            <polygon points="200,252 188,244 188,260" fill="#e63946" stroke="#a81a24" stroke-width="1.5" />
+                                            <polygon points="200,252 212,244 212,260" fill="#e63946" stroke="#a81a24" stroke-width="1.5" />
+                                            <circle cx="200" cy="252" r="4.5" fill="#e63946" stroke="#a81a24" stroke-width="1.5" />
+                                            <!-- Navy Skirt -->
+                                            <path d="M 132,270 L 122,292 L 278,292 L 268,270 Z" fill="url(#skirt-grad)" stroke="#1d3557" stroke-width="3" />
+                                            <line x1="165" y1="270" x2="160" y2="292" stroke="#1d3557" stroke-width="2" />
+                                            <line x1="200" y1="270" x2="200" y2="292" stroke="#1d3557" stroke-width="2" />
+                                            <line x1="235" y1="270" x2="240" y2="292" stroke="#1d3557" stroke-width="2" />
+                                            <!-- Red Striped Socks (overlays on feet) -->
+                                            <path d="M 152,292 L 168,292" fill="none" stroke="#e63946" stroke-width="3" stroke-linecap="round" />
+                                            <path d="M 232,292 L 248,292" fill="none" stroke="#e63946" stroke-width="3" stroke-linecap="round" />
+                                        </g>
+ 
+                                        <!-- 4. Strawberry Dress & Slippers -->
+                                        <g id="outfit-strawberry" class="outfit-layer" style="opacity: 0; transition: opacity 0.25s ease;">
+                                            <!-- Sleeves -->
+                                            <path d="M 132,232 Q 148,238 163,245" fill="none" stroke="#e11d48" stroke-width="12" stroke-linecap="round" />
+                                            <path d="M 132,232 Q 148,238 163,245" fill="none" stroke="url(#strawberry-grad)" stroke-width="7" stroke-linecap="round" />
+                                            <path d="M 268,232 Q 252,238 237,245" fill="none" stroke="#e11d48" stroke-width="12" stroke-linecap="round" />
+                                            <path d="M 268,232 Q 252,238 237,245" fill="none" stroke="url(#strawberry-grad)" stroke-width="7" stroke-linecap="round" />
+                                            <!-- Gingham Dress Base -->
+                                            <path d="M 126,225 C 115,245 118,285 200,285 C 282,285 285,245 274,225 C 245,218 155,218 126,225 Z" fill="url(#strawberry-grad)" stroke="#e11d48" stroke-width="3.5" />
+                                            <!-- Grids -->
+                                            <path d="M 120,240 Q 200,248 280,240 M 120,265 Q 200,273 280,265" fill="none" stroke="#ffffff" stroke-width="2.2" opacity="0.75" />
+                                            <path d="M 160,222 L 160,285 M 200,220 L 200,285 M 240,222 L 240,285" fill="none" stroke="#ffffff" stroke-width="2.2" opacity="0.75" />
+                                            <!-- Strawberry Applique -->
+                                            <path d="M 200,252 C 194,252 194,242 200,242 C 206,242 206,252 200,252 Z" fill="#e11d48" />
+                                            <polygon points="200,242 196,238 204,238" fill="#22c55e" />
+                                            <circle cx="197" cy="247" r="0.8" fill="#ffd166" />
+                                            <circle cx="203" cy="247" r="0.8" fill="#ffd166" />
+                                            <!-- Strawberry Slippers (feet decorations) -->
+                                            <circle cx="160" cy="292" r="5" fill="#e11d48" stroke="#4A3E3D" stroke-width="1.5" />
+                                            <circle cx="240" cy="292" r="5" fill="#e11d48" stroke="#4A3E3D" stroke-width="1.5" />
+                                        </g>
+ 
+                                        <!-- 5. Wizard Cape & Gem -->
+                                        <g id="outfit-wizard" class="outfit-layer" style="opacity: 0; transition: opacity 0.25s ease;">
+                                            <!-- Sleeves -->
+                                            <path d="M 132,232 Q 148,238 163,245" fill="none" stroke="#310a33" stroke-width="12" stroke-linecap="round" />
+                                            <path d="M 132,232 Q 148,238 163,245" fill="none" stroke="url(#wizard-grad)" stroke-width="7" stroke-linecap="round" />
+                                            <path d="M 268,232 Q 252,238 237,245" fill="none" stroke="#310a33" stroke-width="12" stroke-linecap="round" />
+                                            <path d="M 268,232 Q 252,238 237,245" fill="none" stroke="url(#wizard-grad)" stroke-width="7" stroke-linecap="round" />
+                                            <!-- Wizard Cuffs -->
+                                            <circle cx="163" cy="245" r="7" fill="none" stroke="#ffd166" stroke-width="2.5" />
+                                            <circle cx="237" cy="245" r="7" fill="none" stroke="#ffd166" stroke-width="2.5" />
+                                            <!-- Cape -->
+                                            <path d="M 126,225 C 115,245 118,290 200,290 C 282,290 285,245 274,225 C 245,218 155,218 126,225 Z" fill="url(#wizard-grad)" stroke="#310a33" stroke-width="3.5" />
+                                            <path d="M 126,225 C 115,245 118,290 200,290 C 282,290 285,245 274,225" fill="none" stroke="#ffd166" stroke-width="2.5" />
+                                            <!-- Gold Star Pendant -->
+                                            <circle cx="200" cy="235" r="7" fill="#ffd166" stroke="#b58d12" stroke-width="1.5" />
+                                            <circle cx="200" cy="235" r="3" fill="#e63946" />
+                                            <!-- Gold Star embroidery patterns -->
+                                            <polygon points="155,255 157,258 161,258 158,260 159,264 155,262 151,264 152,260 149,258 153,258" fill="#ffd166" />
+                                            <polygon points="245,255 247,258 251,258 248,260 249,264 245,262 241,264 242,260 239,258 243,258" fill="#ffd166" />
+                                        </g>
 
-                                            <!-- FACE FEATURES -->
-                                            <g id="avatar-face-features">
-                                                <!-- Eyebrows -->
-                                                <path id="left-brow" d="M118,92 Q126,89 134,92" stroke="#1f2937" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="1"/>
-                                                <path id="right-brow" d="M166,92 Q174,89 182,92" stroke="#1f2937" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="1"/>
+                                        <!-- 6. Royal Princess Gown -->
+                                        <g id="outfit-princess" class="outfit-layer" style="opacity: 0; transition: opacity 0.25s ease;">
+                                            <!-- Puffy Sleeves -->
+                                            <circle cx="140" cy="235" r="14" fill="url(#princess-grad)" stroke="#4A3E3D" stroke-width="2.5" />
+                                            <circle cx="260" cy="235" r="14" fill="url(#princess-grad)" stroke="#4A3E3D" stroke-width="2.5" />
+                                            <!-- Forearms -->
+                                            <path d="M 140,235 Q 152,244 163,245" fill="none" stroke="#4A3E3D" stroke-width="12" stroke-linecap="round" />
+                                            <path d="M 140,235 Q 152,244 163,245" fill="none" stroke="url(#princess-grad)" stroke-width="7" stroke-linecap="round" />
+                                            <path d="M 260,235 Q 248,244 237,245" fill="none" stroke="#4A3E3D" stroke-width="12" stroke-linecap="round" />
+                                            <path d="M 260,235 Q 248,244 237,245" fill="none" stroke="url(#princess-grad)" stroke-width="7" stroke-linecap="round" />
+                                            <!-- Princess Bodice -->
+                                            <path d="M 128,225 C 118,245 122,275 200,275 C 278,275 282,245 272,225 C 245,218 155,218 128,225 Z" fill="url(#princess-grad)" stroke="#4A3E3D" stroke-width="3" />
+                                            <!-- V-Neck Lace & Gold Tiara Accent on bodice -->
+                                            <path d="M 160,221 L 200,240 L 240,221" fill="none" stroke="#fef08a" stroke-width="2" />
+                                            <circle cx="200" cy="242" r="4.5" fill="#f43f5e" stroke="#4A3E3D" stroke-width="1" />
+                                            <!-- Layered Princess Skirt -->
+                                            <path d="M 130,270 Q 200,275 270,270 L 285,294 Q 200,298 115,294 Z" fill="url(#princess-grad)" stroke="#4A3E3D" stroke-width="3" />
+                                            <!-- Sparkle gold dots on skirt -->
+                                            <circle cx="150" cy="285" r="1.5" fill="#fff" />
+                                            <circle cx="200" cy="288" r="1.5" fill="#fff" />
+                                            <circle cx="250" cy="285" r="1.5" fill="#fff" />
+                                            <circle cx="175" cy="278" r="1" fill="#fff" />
+                                            <circle cx="225" cy="278" r="1" fill="#fff" />
+                                            <!-- Gold Sash -->
+                                            <path d="M 130,270 Q 200,276 270,270" fill="none" stroke="#fef08a" stroke-width="3.5" />
+                                        </g>
 
-                                                <!-- Eyes (Big simple oval eyes) -->
-                                                <g id="left-eye-group">
-                                                    <ellipse cx="124" cy="116" rx="7" ry="12" fill="#000000" class="avatar-eye"/>
-                                                </g>
-                                                <g id="right-eye-group">
-                                                    <ellipse cx="176" cy="116" rx="7" ry="12" fill="#000000" class="avatar-eye"/>
-                                                </g>
+                                        <!-- 7. Mermaid Pearl Gown -->
+                                        <g id="outfit-mermaid" class="outfit-layer" style="opacity: 0; transition: opacity 0.25s ease;">
+                                            <!-- Aqua Sleeves -->
+                                            <path d="M 132,232 Q 148,238 163,245" fill="none" stroke="#4A3E3D" stroke-width="12" stroke-linecap="round" />
+                                            <path d="M 132,232 Q 148,238 163,245" fill="none" stroke="url(#mermaid-grad)" stroke-width="7" stroke-linecap="round" />
+                                            <path d="M 268,232 Q 252,238 237,245" fill="none" stroke="#4A3E3D" stroke-width="12" stroke-linecap="round" />
+                                            <path d="M 268,232 Q 252,238 237,245" fill="none" stroke="url(#mermaid-grad)" stroke-width="7" stroke-linecap="round" />
+                                            <!-- Scale Bodice -->
+                                            <path d="M 128,225 C 118,245 122,275 200,275 C 278,275 282,245 272,225 C 245,218 155,218 128,225 Z" fill="url(#mermaid-grad)" stroke="#4A3E3D" stroke-width="3" />
+                                            <!-- Scale textures -->
+                                            <path d="M 175,240 Q 180,245 185,240 M 190,240 Q 195,245 200,240 M 205,240 Q 210,245 215,240" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.6" />
+                                            <path d="M 180,250 Q 185,255 190,250 M 195,250 Q 200,255 205,250 M 210,250 Q 215,255 220,250" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.6" />
+                                            <!-- Pearl Belt -->
+                                            <circle cx="160" cy="270" r="3.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="1" />
+                                            <circle cx="170" cy="271" r="3.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="1" />
+                                            <circle cx="180" cy="272" r="3.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="1" />
+                                            <circle cx="190" cy="272.5" r="3.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="1" />
+                                            <circle cx="200" cy="273" r="3.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="1" />
+                                            <circle cx="210" cy="272.5" r="3.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="1" />
+                                            <circle cx="220" cy="272" r="3.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="1" />
+                                            <circle cx="230" cy="271" r="3.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="1" />
+                                            <circle cx="240" cy="270" r="3.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="1" />
+                                            <!-- Flared tail skirt ruffle -->
+                                            <path d="M 130,270 Q 200,275 270,270 L 280,294 Q 200,298 120,294 Z" fill="url(#mermaid-grad)" stroke="#4A3E3D" stroke-width="3" />
+                                            <!-- Pearl Slippers -->
+                                            <circle cx="160" cy="292" r="4.5" fill="#e0f2fe" stroke="#4A3E3D" stroke-width="1.5" />
+                                            <circle cx="240" cy="292" r="4.5" fill="#e0f2fe" stroke="#4A3E3D" stroke-width="1.5" />
+                                        </g>
 
-                                                <!-- Blush Cheeks -->
-                                                <ellipse cx="114" cy="126" rx="9" ry="6" fill="#f43f5e" opacity="0.35"/>
-                                                <ellipse cx="186" cy="126" rx="9" ry="6" fill="#f43f5e" opacity="0.35"/>
+                                        <!-- 8. Sweet Lolita Ruffle -->
+                                        <g id="outfit-lolita" class="outfit-layer" style="opacity: 0; transition: opacity 0.25s ease;">
+                                            <!-- Ruffled Sleeves -->
+                                            <circle cx="140" cy="235" r="12" fill="url(#lolita-grad)" stroke="#4A3E3D" stroke-width="2.5" />
+                                            <circle cx="260" cy="235" r="12" fill="url(#lolita-grad)" stroke="#4A3E3D" stroke-width="2.5" />
+                                            <!-- Forearms -->
+                                            <path d="M 140,235 Q 152,244 163,245" fill="none" stroke="#4A3E3D" stroke-width="12" stroke-linecap="round" />
+                                            <path d="M 140,235 Q 152,244 163,245" fill="none" stroke="url(#lolita-grad)" stroke-width="7" stroke-linecap="round" />
+                                            <path d="M 260,235 Q 248,244 237,245" fill="none" stroke="#4A3E3D" stroke-width="12" stroke-linecap="round" />
+                                            <path d="M 260,235 Q 248,244 237,245" fill="none" stroke="url(#lolita-grad)" stroke-width="7" stroke-linecap="round" />
+                                            <!-- White lace trim cuffs -->
+                                            <path d="M 155,245 Q 163,247 171,245" fill="none" stroke="#ffffff" stroke-width="2" />
+                                            <path d="M 229,245 Q 237,247 245,245" fill="none" stroke="#ffffff" stroke-width="2" />
+                                            <!-- Lolita Bodice -->
+                                            <path d="M 128,225 C 118,245 122,275 200,275 C 278,275 282,245 272,225 C 245,218 155,218 128,225 Z" fill="url(#lolita-grad)" stroke="#4A3E3D" stroke-width="3" />
+                                            <!-- White Lacy Apron / Collar -->
+                                            <path d="M 160,222 Q 200,230 240,222 L 230,245 Q 200,255 170,245 Z" fill="#ffffff" stroke="#4A3E3D" stroke-width="1.5" />
+                                            <!-- Pink Bow on Chest -->
+                                            <polygon points="200,236 188,228 188,244" fill="#ffb3cc" stroke="#4A3E3D" stroke-width="1.5" />
+                                            <polygon points="200,236 212,228 212,244" fill="#ffb3cc" stroke="#4A3E3D" stroke-width="1.5" />
+                                            <circle cx="200" cy="236" r="4" fill="#ff8fab" stroke="#4A3E3D" stroke-width="1" />
+                                            <!-- Layered Ruffled Skirt -->
+                                            <path d="M 130,270 L 118,294 L 282,294 L 270,270 Z" fill="url(#lolita-grad)" stroke="#4A3E3D" stroke-width="3" />
+                                            <!-- White lace trim at bottom -->
+                                            <path d="M 118,294 Q 130,298 140,294 Q 150,298 160,294 Q 170,298 180,294 Q 190,298 200,294 Q 210,298 220,294 Q 230,298 240,294 Q 250,298 260,294 Q 270,298 282,294" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+                                        </g>
 
-                                                <!-- Nose (keep opacity 0) -->
-                                                <path id="avatar-nose" d="M150,118 C149,121 147,121 145,122 C146,122 154,122 155,122 C153,121 151,121 150,118 Z" fill="#e0a96d" opacity="0"/>
+                                        <!-- 9. Sparkling Unicorn Suit -->
+                                        <g id="outfit-unicorn" class="outfit-layer" style="opacity: 0; transition: opacity 0.25s ease;">
+                                            <!-- Rainbow Sleeves -->
+                                            <path d="M 132,232 Q 148,238 163,245" fill="none" stroke="#4A3E3D" stroke-width="12" stroke-linecap="round" />
+                                            <path d="M 132,232 Q 148,238 163,245" fill="none" stroke="url(#unicorn-grad)" stroke-width="7" stroke-linecap="round" />
+                                            <path d="M 268,232 Q 252,238 237,245" fill="none" stroke="#4A3E3D" stroke-width="12" stroke-linecap="round" />
+                                            <path d="M 268,232 Q 252,238 237,245" fill="none" stroke="url(#unicorn-grad)" stroke-width="7" stroke-linecap="round" />
+                                            <!-- Rainbow Body -->
+                                            <path d="M 126,225 C 115,245 118,285 200,285 C 282,285 285,245 274,225 C 245,218 155,218 126,225 Z" fill="url(#unicorn-grad)" stroke="#4A3E3D" stroke-width="3.5" />
+                                            <!-- Fluffy Cloud Wings (drawn on sides) -->
+                                            <path d="M 115,240 C 105,240 100,255 115,260 C 100,265 110,280 125,275 Z" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" />
+                                            <path d="M 285,240 C 295,240 300,255 285,260 C 300,265 290,280 275,275 Z" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" />
+                                            <!-- Golden Horn Badge on chest -->
+                                            <polygon points="200,232 195,250 205,250" fill="#facc15" stroke="#4A3E3D" stroke-width="1.8" stroke-linejoin="round" />
+                                            <line x1="198" y1="238" x2="202" y2="244" stroke="#4A3E3D" stroke-width="1" />
+                                            <!-- Pastel Star decals -->
+                                            <polygon points="160,255 162,258 165,258 163,260 164,263 160,261 156,263 157,260 155,258 158,258" fill="#c084fc" />
+                                            <polygon points="240,255 242,258 245,258 243,260 244,263 240,261 236,263 237,260 235,258 238,258" fill="#60a5fa" />
+                                        </g>
 
-                                                <!-- Mouth (Happy Smile) -->
-                                                <path id="avatar-mouth" d="M140,128 Q150,138 160,128" stroke="#1f2937" stroke-width="3.5" stroke-linecap="round" fill="none" opacity="1"/>
-                                                <path id="avatar-teeth" d="M140,128 Q150,138 160,128 Z" fill="white" opacity="0"/>
-                                            </g>
-
-                                            <!-- Hair Front Layer (Bangs framing face) -->
-                                            <path id="avatar-hair-front" d="M104,112 C104,56 196,56 196,112 C185,90 170,82 150,88 C130,82 115,90 104,112 Z" fill="#fbbf24"/>
-
-                                            <!-- Glasses overlay (retained to prevent JS errors) -->
-                                            <g id="avatar-glasses" opacity="0">
-                                                <rect x="110" y="105" width="24" height="18" rx="5" stroke="#10b981" stroke-width="2" fill="none"/>
-                                                <rect x="166" y="105" width="24" height="18" rx="5" stroke="#10b981" stroke-width="2" fill="none"/>
-                                                <line x1="134" y1="114" x2="166" y2="114" stroke="#10b981" stroke-width="2"/>
-                                            </g>
-
-                                            <!-- Headphone Accessories (Drawn on the Head/Ears) -->
-                                            <g id="avatar-accessories" opacity="1">
-                                                <!-- Left Ear Cup -->
-                                                <circle cx="98" cy="112" r="14" fill="#2d3748"/>
-                                                <circle cx="98" cy="112" r="9" fill="#1a202c"/>
-                                                <circle cx="98" cy="112" r="5" fill="#4a5568"/>
-                                                <!-- Right Ear Cup -->
-                                                <circle cx="202" cy="112" r="14" fill="#2d3748"/>
-                                                <circle cx="202" cy="112" r="9" fill="#1a202c"/>
-                                                <circle cx="202" cy="112" r="5" fill="#4a5568"/>
-                                                <!-- Connecting headband -->
-                                                <path d="M98,112 A52,52 0 0,1 202,112" fill="none" stroke="#2d3748" stroke-width="7" stroke-linecap="round"/>
-                                                <path d="M98,112 A52,52 0 0,1 202,112" fill="none" stroke="#4a5568" stroke-width="3" stroke-linecap="round"/>
-                                            </g>
-
+                                        <!-- 4. Cute hands (Resting on top of sleeves/outfits) -->
+                                        <g id="avatar-hands">
+                                            <!-- Left Hand (curves inward like a cute hook, filled and outlined) -->
+                                            <path id="avatar-hand-l" d="M 165,226 C 157,232 168,246 181,241 C 187,239 184,228 172,228 Z" fill="#ffffff" stroke="#4A3E3D" stroke-width="3.5" stroke-linejoin="round" />
+                                            <!-- Right Hand (curves inward like a cute hook, filled and outlined) -->
+                                            <path id="avatar-hand-r" d="M 235,226 C 243,232 232,246 219,241 C 213,239 216,228 228,228 Z" fill="#ffffff" stroke="#4A3E3D" stroke-width="3.5" stroke-linejoin="round" />
                                         </g>
                                     </svg>
-                                </div>
 
-                                <!-- Speech bubble display -->
-                                <div class="avatar-bubble" id="avatar-speech-bubble">
-                                    <span>Hey! I'm here for you. Tell me what's on your mind.</span>
+                                    <!-- Inner vertical speech bubble framed below the character's face -->
+                                    <div class="avatar-bubble" id="avatar-speech-bubble" style="position: absolute; width: 68%; height: 35%; top: 68%; left: 50%; transform: translate(-50%, -50%); background: #FFFDF9; border: 3.5px solid #4A3E3D; border-radius: 18px; display: flex; align-items: center; justify-content: center; padding: 10px; box-sizing: border-box; overflow-y: auto; z-index: 10; box-shadow: none;">
+                                        <span style="font-size: 0.76rem; font-weight: 700; line-height: 1.4; color: #4A3E3D; text-align: center; display: block;">Hey! I'm here for you. Tell me what's on your mind.</span>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -449,7 +686,7 @@
                                     <i data-lucide="camera"></i>
                                 </button>
                                 
-                                <textarea class="chat-input" id="chat-text-input" placeholder="Type a message or press 'Start Rant Mode' below to speak your mind..." rows="1"></textarea>
+                                <textarea class="chat-input" id="chat-text-input" placeholder="Type a message or whisper your thoughts to MindBuddy..." rows="1"></textarea>
                                 
                                 <button class="chat-send-btn" id="chat-send-btn">
                                     <i data-lucide="send"></i>
@@ -558,46 +795,66 @@
                                 <div class="pet-overlay-container" id="studio-pet-container">
                                     <!-- Cat SVG -->
                                     <svg id="pet-cat" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                                        <ellipse cx="50" cy="70" rx="20" ry="25" fill="#f59e0b"/>
-                                        <circle cx="50" cy="40" r="16" fill="#f59e0b"/>
-                                        <!-- Ears -->
-                                        <polygon points="36,36 34,20 46,30" fill="#d97706"/>
-                                        <polygon points="64,36 66,20 54,30" fill="#d97706"/>
-                                        <!-- Eyes -->
-                                        <circle cx="44" cy="38" r="2.5" fill="#1e293b"/>
-                                        <circle cx="56" cy="38" r="2.5" fill="#1e293b"/>
-                                        <!-- Nose/Mouth -->
-                                        <polygon points="50,44 48,42 52,42" fill="#1e293b"/>
-                                        <!-- Tail -->
-                                        <path d="M68,75 Q85,75 80,50" fill="none" stroke="#f59e0b" stroke-width="5" stroke-linecap="round"/>
+                                        <ellipse cx="50" cy="85" rx="22" ry="5" fill="#4A3E3D" opacity="0.22" />
+                                        <path d="M 68,78 Q 80,82 85,70 Q 90,58 83,52" fill="none" stroke="#4A3E3D" stroke-width="4" stroke-linecap="round" />
+                                        <path d="M 68,78 Q 80,82 85,70 Q 90,58 83,52" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" />
+                                        <ellipse cx="50" cy="72" rx="18" ry="15" fill="#f59e0b" stroke="#4A3E3D" stroke-width="4" />
+                                        <ellipse cx="44" cy="82" rx="5" ry="4" fill="#f59e0b" stroke="#4A3E3D" stroke-width="3" />
+                                        <ellipse cx="56" cy="82" rx="5" ry="4" fill="#f59e0b" stroke="#4A3E3D" stroke-width="3" />
+                                        <circle cx="50" cy="46" r="20" fill="#f59e0b" stroke="#4A3E3D" stroke-width="4" />
+                                        <polygon points="32,36 30,16 46,28" fill="#f59e0b" stroke="#4A3E3D" stroke-width="4" stroke-linejoin="round" />
+                                        <polygon points="32,36 30,16 46,28" fill="#f59e0b" />
+                                        <polygon points="34,31 33,20 42,27" fill="#ff8fab" />
+                                        <polygon points="68,36 70,16 54,28" fill="#f59e0b" stroke="#4A3E3D" stroke-width="4" stroke-linejoin="round" />
+                                        <polygon points="68,36 70,16 54,28" fill="#f59e0b" />
+                                        <polygon points="66,31 67,20 58,27" fill="#ff8fab" />
+                                        <circle cx="42" cy="45" r="3" fill="#4A3E3D" />
+                                        <circle cx="58" cy="45" r="3" fill="#4A3E3D" />
+                                        <circle cx="36" cy="51" r="3" fill="#ffa2b6" opacity="0.85" />
+                                        <circle cx="64" cy="51" r="3" fill="#ffa2b6" opacity="0.85" />
+                                        <path d="M 47,50 Q 50,53 53,50" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round" />
+                                        <path d="M 53,50 Q 56,53 59,50" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round" />
+                                        <polygon points="50,47 48,45 52,45" fill="#4A3E3D" />
+                                        <line x1="28" y1="48" x2="20" y2="47" stroke="#4A3E3D" stroke-width="2.5" stroke-linecap="round" />
+                                        <line x1="28" y1="52" x2="21" y2="53" stroke="#4A3E3D" stroke-width="2.5" stroke-linecap="round" />
+                                        <line x1="72" y1="48" x2="80" y2="47" stroke="#4A3E3D" stroke-width="2.5" stroke-linecap="round" />
+                                        <line x1="72" y1="52" x2="79" y2="53" stroke="#4A3E3D" stroke-width="2.5" stroke-linecap="round" />
                                     </svg>
                                     <!-- Dog SVG -->
                                     <svg id="pet-dog" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                                        <ellipse cx="50" cy="70" rx="22" ry="24" fill="#78350f"/>
-                                        <circle cx="50" cy="42" r="16" fill="#78350f"/>
-                                        <!-- Ears -->
-                                        <path d="M34,34 Q22,40 28,55" fill="none" stroke="#78350f" stroke-width="8" stroke-linecap="round"/>
-                                        <path d="M66,34 Q78,40 72,55" fill="none" stroke="#78350f" stroke-width="8" stroke-linecap="round"/>
-                                        <!-- Eyes -->
-                                        <circle cx="44" cy="40" r="2.5" fill="#f8fafc"/>
-                                        <circle cx="56" cy="40" r="2.5" fill="#f8fafc"/>
-                                        <!-- Nose -->
-                                        <ellipse cx="50" cy="46" rx="3.5" ry="2" fill="#0f172a"/>
-                                        <!-- Tail -->
-                                        <path d="M68,78 Q82,85 88,72" fill="none" stroke="#78350f" stroke-width="5" stroke-linecap="round"/>
+                                        <ellipse cx="50" cy="85" rx="22" ry="5" fill="#4A3E3D" opacity="0.22" />
+                                        <path d="M 32,78 Q 20,82 15,70" fill="none" stroke="#4A3E3D" stroke-width="4" stroke-linecap="round" />
+                                        <path d="M 32,78 Q 20,82 15,70" fill="none" stroke="#78350f" stroke-width="2.5" stroke-linecap="round" />
+                                        <ellipse cx="50" cy="72" rx="18" ry="15" fill="#78350f" stroke="#4A3E3D" stroke-width="4" />
+                                        <ellipse cx="44" cy="82" rx="5" ry="4" fill="#78350f" stroke="#4A3E3D" stroke-width="3" />
+                                        <ellipse cx="56" cy="82" rx="5" ry="4" fill="#78350f" stroke="#4A3E3D" stroke-width="3" />
+                                        <circle cx="50" cy="46" r="20" fill="#78350f" stroke="#4A3E3D" stroke-width="4" />
+                                        <path d="M 32,36 C 22,36 20,52 26,58 C 28,52 32,46 32,36 Z" fill="#451a03" stroke="#4A3E3D" stroke-width="4" stroke-linejoin="round" />
+                                        <path d="M 32,36 C 22,36 20,52 26,58 C 28,52 32,46 32,36 Z" fill="#451a03" />
+                                        <path d="M 68,36 C 78,36 80,52 74,58 C 72,52 68,46 68,36 Z" fill="#451a03" stroke="#4A3E3D" stroke-width="4" stroke-linejoin="round" />
+                                        <path d="M 68,36 C 78,36 80,52 74,58 C 72,52 68,46 68,36 Z" fill="#451a03" />
+                                        <circle cx="42" cy="45" r="3" fill="#4A3E3D" />
+                                        <circle cx="58" cy="45" r="3" fill="#4A3E3D" />
+                                        <circle cx="36" cy="51" r="3" fill="#ffa2b6" opacity="0.85" />
+                                        <circle cx="64" cy="51" r="3" fill="#ffa2b6" opacity="0.85" />
+                                        <ellipse cx="50" cy="51" rx="6" ry="4.5" fill="#fef3c7" stroke="#4A3E3D" stroke-width="2.5" />
+                                        <ellipse cx="50" cy="48" rx="3" ry="2" fill="#4A3E3D" />
+                                        <path d="M 50,51 L 50,53" stroke="#4A3E3D" stroke-width="2.5" />
                                     </svg>
                                     <!-- Bird SVG -->
                                     <svg id="pet-bird" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                                        <ellipse cx="50" cy="65" rx="18" ry="20" fill="#3b82f6"/>
-                                        <circle cx="58" cy="42" r="12" fill="#3b82f6"/>
-                                        <!-- Beak -->
-                                        <polygon points="70,40 76,44 70,48" fill="#f59e0b"/>
-                                        <!-- Eye -->
-                                        <circle cx="58" cy="38" r="2" fill="#0f172a"/>
-                                        <!-- Wing -->
-                                        <path d="M38,62 Q45,55 52,70" fill="none" stroke="#2563eb" stroke-width="6" stroke-linecap="round"/>
-                                        <!-- Tail -->
-                                        <path d="M34,75 L20,85 L28,70" fill="#3b82f6"/>
+                                        <path d="M 30,15 C 32,12 36,12 38,15" fill="none" stroke="#4A3E3D" stroke-width="2.5" stroke-linecap="round" />
+                                        <path d="M 62,15 C 64,12 68,12 70,15" fill="none" stroke="#4A3E3D" stroke-width="2.5" stroke-linecap="round" />
+                                        <ellipse cx="50" cy="85" rx="16" ry="4" fill="#4A3E3D" opacity="0.22" />
+                                        <polygon points="30,68 16,74 24,60" fill="#3b82f6" stroke="#4A3E3D" stroke-width="4" stroke-linejoin="round" />
+                                        <polygon points="30,68 16,74 24,60" fill="#3b82f6" />
+                                        <circle cx="50" cy="56" r="22" fill="#3b82f6" stroke="#4A3E3D" stroke-width="4" />
+                                        <path d="M 42,56 C 42,48 54,48 54,58 C 54,64 42,64 42,56 Z" fill="#2563eb" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" />
+                                        <circle cx="54" cy="38" r="16" fill="#3b82f6" stroke="#4A3E3D" stroke-width="4" />
+                                        <polygon points="68,36 78,41 68,46" fill="#f59e0b" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" />
+                                        <polygon points="68,36 78,41 68,46" fill="#f59e0b" />
+                                        <circle cx="56" cy="34" r="2.5" fill="#4A3E3D" />
+                                        <circle cx="50" cy="40" r="2.5" fill="#ffa2b6" opacity="0.85" />
                                     </svg>
                                 </div>
                             </div>
@@ -607,25 +864,21 @@
                         <div class="studio-options-card">
                             <!-- Sub-Navigation Menu -->
                             <div class="customizer-subnav" id="customizer-subnav">
-                                <button class="subnav-item active" data-category="Fashion">
+                                <button class="subnav-item" data-category="Fashion">
                                     <i data-lucide="shirt"></i>
-                                    <span>Fashion</span>
-                                </button>
-                                <button class="subnav-item" data-category="Selfie">
-                                    <i data-lucide="smile"></i>
-                                    <span>Selfie</span>
+                                    <span>👗 Fashion</span>
                                 </button>
                                 <button class="subnav-item" data-category="Pet">
                                     <i data-lucide="dog"></i>
-                                    <span>Pet</span>
+                                    <span>🐾 Pet</span>
+                                </button>
+                                <button class="subnav-item active" data-category="Avatar">
+                                    <i data-lucide="sparkles"></i>
+                                    <span>🎀 Buddy Customizer</span>
                                 </button>
                                 <button class="subnav-item" data-category="Scene">
                                     <i data-lucide="image"></i>
-                                    <span>Scene</span>
-                                </button>
-                                <button class="subnav-item" data-category="Avatar">
-                                    <i data-lucide="user"></i>
-                                    <span>Avatar</span>
+                                    <span>🌈 Scene</span>
                                 </button>
                             </div>
 
@@ -858,88 +1111,164 @@
                 <!-- Calm Hub Panel -->
                 <section class="panel" id="calm-panel">
                     <div class="calm-layout">
-                        <!-- Calm Videos card -->
-                        <div class="video-card" id="calm-video-section">
-                            <!-- 6 Categories Grid View -->
-                            <div id="calmCategoryGrid">
-                                <div class="video-header" style="margin-bottom: 1.5rem;">
-                                    <h3><i data-lucide="video" class="text-rose"></i> Visual Sanctuary</h3>
-                                    <p>Select a category below to explore video resources and calming sessions.</p>
-                                </div>
-                                
-                                <div class="category-list-container">
-                                    <button class="category-row-item" onclick="openCategory('anxiety')">
-                                        <span class="category-icon">😰</span>
-                                        <div class="category-info">
-                                            <span class="category-title">Anxiety Relief</span>
-                                            <span class="category-desc">Breathing & grounding sessions</span>
-                                        </div>
-                                        <span class="category-arrow">&rarr;</span>
-                                    </button>
-                                    <button class="category-row-item" onclick="openCategory('depression')">
-                                        <span class="category-icon">😔</span>
-                                        <div class="category-info">
-                                            <span class="category-title">Depression Support</span>
-                                            <span class="category-desc">Comforting guides & affirmations</span>
-                                        </div>
-                                        <span class="category-arrow">&rarr;</span>
-                                    </button>
-                                    <button class="category-row-item" onclick="openCategory('motivation')">
-                                        <span class="category-icon">🔥</span>
-                                        <div class="category-info">
-                                            <span class="category-title">Motivational Speeches</span>
-                                            <span class="category-desc">Ignite drive and overcome blocks</span>
-                                        </div>
-                                        <span class="category-arrow">&rarr;</span>
-                                    </button>
-                                    <button class="category-row-item" onclick="openCategory('academic')">
-                                        <span class="category-icon">📚</span>
-                                        <div class="category-info">
-                                            <span class="category-title">Academic Stress</span>
-                                            <span class="category-desc">Beat study pressure & exam burnout</span>
-                                        </div>
-                                        <span class="category-arrow">&rarr;</span>
-                                    </button>
-                                    <button class="category-row-item" onclick="openCategory('confidence')">
-                                        <span class="category-icon">💪</span>
-                                        <div class="category-info">
-                                            <span class="category-title">Building Confidence</span>
-                                            <span class="category-desc">Develop healthy self-compassion</span>
-                                        </div>
-                                        <span class="category-arrow">&rarr;</span>
-                                    </button>
-                                    <button class="category-row-item" onclick="openCategory('meditate')">
-                                        <span class="category-icon">🧘</span>
-                                        <div class="category-info">
-                                            <span class="category-title">Guided Meditation</span>
-                                            <span class="category-desc">Calming visualizations & breath</span>
-                                        </div>
-                                        <span class="category-arrow">&rarr;</span>
-                                    </button>
-                                </div>
+                        <!-- Audio Synthesizer mixer panel -->
+                        <div class="mixer-card">
+                            <div class="mixer-header">
+                                <h3>Sound Sanctuary</h3>
+                                <p>Direct browser-synthesized audio tones using the Web Audio API. Perfect for grounding during stress episodes.</p>
                             </div>
 
-                            <!-- Video Player Detail View (Hidden Initially) -->
-                            <div class="category-detail" id="categoryDetail" style="display: none; height: 100%; flex-direction: column;">
-                                <div class="detail-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-                                    <h4 id="currentCategoryTitle" style="font-size: 1.15rem; color: var(--color-text-primary);"></h4>
-                                    <button class="btn-back-link" onclick="closeCategory()" style="background: none; border: none; color: var(--color-rose); cursor: pointer; font-weight: 600; font-size: 0.85rem;">&larr; Back</button>
-                                </div>
-                                <p id="currentCategoryDesc" style="font-size: 0.78rem; color: var(--color-text-muted); margin-bottom: 1.25rem; line-height: 1.4;"></p>
-
-                                <div class="video-player-wrapper" style="position: relative; width: 100%; aspect-ratio: 16/9; border-radius: 12px; overflow: hidden; background: #000; border: 1px solid var(--border-glass); margin-bottom: 1.25rem;">
-                                    <video id="detailVideoPlayer" controls playsinline style="width: 100%; height: 100%; object-fit: cover;">
-                                        <source id="detailVideoSource" src="" type="video/mp4">
-                                        Your browser does not support the video tag.
-                                    </video>
-                                </div>
-                                <h4 id="currentVideoTitle" style="font-size: 0.95rem; font-weight: 600; color: var(--color-text-primary); margin-bottom: 1rem;"></h4>
-                                
-                                <div class="category-playlist" style="flex-grow: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden;">
-                                    <h5 style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); margin-bottom: 0.5rem;">Sessions</h5>
-                                    <div class="playlist-items-list" id="playlistItems" style="overflow-y: auto; display: flex; flex-direction: column; gap: 8px; flex-grow: 1;">
-                                        <!-- Dynamic entries -->
+                            <div class="sound-mixer-list">
+                                <!-- Sound 1: Binaural Beat -->
+                                <div class="mixer-row">
+                                    <div class="mixer-sound-info">
+                                        <i data-lucide="audio-waveform" class="text-purple"></i>
+                                        <div>
+                                            <span class="sound-title">Binaural Calm Beats (432Hz)</span>
+                                            <span class="sound-desc">Encourages theta brainwaves for anxiety relief.</span>
+                                        </div>
                                     </div>
+                                    <div class="mixer-controls">
+                                        <input type="range" class="volume-slider" id="vol-binaural" min="0" max="1" step="0.05" value="0.5">
+                                        <button class="synth-toggle-btn" id="btn-play-binaural">Play</button>
+                                    </div>
+                                </div>
+
+                                <!-- Sound 2: Rain Sound -->
+                                <div class="mixer-row">
+                                    <div class="mixer-sound-info">
+                                        <i data-lucide="cloud-rain" class="text-indigo"></i>
+                                        <div>
+                                            <span class="sound-title">Synthesized Pink Rain</span>
+                                            <span class="sound-desc">Continuous soothing white noise spectrum filter.</span>
+                                        </div>
+                                    </div>
+                                    <div class="mixer-controls">
+                                        <input type="range" class="volume-slider" id="vol-rain" min="0" max="1" step="0.05" value="0.5">
+                                        <button class="synth-toggle-btn" id="btn-play-rain">Play</button>
+                                    </div>
+                                </div>
+
+                                <!-- Sound 3: Zen Drone -->
+                                <div class="mixer-row">
+                                    <div class="mixer-sound-info">
+                                        <i data-lucide="music-4" class="text-mint"></i>
+                                        <div>
+                                            <span class="sound-title">Zen Meditation Drone</span>
+                                            <span class="sound-desc">Deep harmonic chord oscillations for grounding.</span>
+                                        </div>
+                                    </div>
+                                    <div class="mixer-controls">
+                                        <input type="range" class="volume-slider" id="vol-drone" min="0" max="1" step="0.05" value="0.5">
+                                        <button class="synth-toggle-btn" id="btn-play-drone">Play</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Games & Relaxation Panel -->
+                <section class="panel" id="games-panel">
+                    <div class="games-layout">
+
+                        <!-- 开心消消乐 Match-3 Game (full width) -->
+                        <div class="game-card game-card-full" id="card-match3">
+                            <div class="game-card-header">
+                                <div class="game-icon-title">
+                                    <span class="game-title-emoji">🍉</span>
+                                    <div>
+                                        <h3>开心消消乐 Happy Match-3</h3>
+                                        <p class="game-subtitle">Swap cute Malaysian fruits · No timer · No limits · Pure relaxation 🌴</p>
+                                    </div>
+                                </div>
+                                <span class="recommend-tag">KawanKu's Choice ⭐</span>
+                            </div>
+
+                            <!-- Start Screen with Comforting Rules Guide -->
+                            <div class="match3-start-screen" id="match3-start-action">
+                                <!-- Mascot Guide Message -->
+                                <div class="rules-mascot-row">
+                                    <div class="kawanku-robot-mini">
+                                        <div class="robot-antenna"></div>
+                                        <div class="robot-head">
+                                            <div class="robot-ears"></div>
+                                            <div class="robot-eyes">
+                                                <div class="eye"></div>
+                                                <div class="eye"></div>
+                                            </div>
+                                        </div>
+                                        <div class="robot-body">
+                                            <div class="robot-heart pulse-heart"></div>
+                                        </div>
+                                    </div>
+                                    <div class="rules-speech-bubble">
+                                        <p>Hey Kawan! Feel free to play this cozy matching game at your own pace. There is no score, no time limit, and no wrong moves. Let's relax together! 🤍</p>
+                                    </div>
+                                </div>
+
+                                <!-- Fruits Preview -->
+                                <div class="fruit-preview-row">
+                                    <div class="fruit-preview-item" title="Mangosteen 山竹"></div>
+                                    <div class="fruit-preview-item" title="Durian 榴莲"></div>
+                                    <div class="fruit-preview-item" title="Rambutan 红毛丹"></div>
+                                    <div class="fruit-preview-item" title="Banana 香蕉"></div>
+                                    <div class="fruit-preview-item" title="Mango 芒果"></div>
+                                </div>
+
+                                <!-- Visual Easy-to-Understand Rules -->
+                                <div class="simple-rules-card">
+                                    <h4 class="rules-title">🎮 How to Play (游戏规则)</h4>
+                                    <div class="rules-steps-grid">
+                                        <div class="step-item">
+                                            <span class="step-number">1</span>
+                                            <p class="step-text"><strong>选择水果 (Select)</strong><br>Click any cute fruit on the grid.</p>
+                                        </div>
+                                        <div class="step-item">
+                                            <span class="step-number">2</span>
+                                            <p class="step-text"><strong>交换对齐 (Swap)</strong><br>Click an adjacent neighbor fruit to swap.</p>
+                                        </div>
+                                        <div class="step-item">
+                                            <span class="step-number">3</span>
+                                            <p class="step-text"><strong>消除放松 (Match)</strong><br>Line up 3 same fruits to clear them!</p>
+                                        </div>
+                                    </div>
+                                    <div class="rules-features-list">
+                                        <span class="feature-tag">⏳ No Timer (无倒计时)</span>
+                                        <span class="feature-tag">💖 Infinite Turns (无限步数)</span>
+                                        <span class="feature-tag">🌴 100% Calming (纯粹放松)</span>
+                                    </div>
+                                </div>
+
+                                <button class="game-btn-primary" id="btn-start-match3">🎮 Start Playing!</button>
+                            </div>
+
+                            <!-- Active Match-3 Arena -->
+                            <div class="match3-arena hidden" id="match3-game-arena">
+                                <div class="match3-header">
+                                    <div class="progress-lbl">😌 Relaxation Progress</div>
+                                    <div class="match3-progress-bar">
+                                        <div class="progress-fill" id="match3-progress" style="width: 0%;"></div>
+                                    </div>
+                                    <span class="progress-value" id="match3-progress-val">0%</span>
+                                    <button class="game-btn-secondary" id="btn-quit-match3">✕ Quit</button>
+                                </div>
+                                <div class="match3-grid" id="match3-board"></div>
+                                <p class="match3-hint" id="match3-hint-text">Click a fruit, then click an adjacent fruit to swap them!</p>
+                            </div>
+                        </div>
+
+                        <!-- Post-Game Survey (inline, shown after win) -->
+                        <div class="survey-inline hidden" id="survey-inline">
+                            <div class="survey-inline-inner">
+                                <div class="survey-win-banner">🎊 Relaxation Complete! 🎊</div>
+                                <p class="survey-prompt" id="survey-robot-prompt">Hey Kawan, after playing this, how are you feeling now?</p>
+                                <div class="emoji-options-grid">
+                                    <button class="emoji-btn" data-mood="1"><span class="emoji">🌟</span><span class="emoji-label">Much Better</span></button>
+                                    <button class="emoji-btn" data-mood="2"><span class="emoji">😊</span><span class="emoji-label">Calmer</span></button>
+                                    <button class="emoji-btn" data-mood="3"><span class="emoji">😐</span><span class="emoji-label">Neutral</span></button>
+                                    <button class="emoji-btn" data-mood="4"><span class="emoji">😕</span><span class="emoji-label">Still Stressed</span></button>
+                                    <button class="emoji-btn" data-mood="5"><span class="emoji">😢</span><span class="emoji-label">Chat with AI</span></button>
                                 </div>
                             </div>
                         </div>
@@ -950,7 +1279,7 @@
         </main>
     </div>
 
-    <!-- SOS Counselor Confirmation Modal Overlay (Globally accessibility) -->
+    <!-- SOS Counselor Confirmation Modal Overlay -->
     <div class="sos-modal-overlay hidden" id="sos-modal">
         <div class="sos-modal-card">
             <div class="sos-modal-header">
@@ -975,10 +1304,24 @@
                             <span class="val" id="sos-preview-sentiment">Negative / Stressed</span>
                         </div>
                         <div class="report-row">
+                            <span class="lbl">Average Heart Rate:</span>
+                            <span class="val" id="sos-preview-hr">72 bpm</span>
+                        </div>
+                        <div class="report-row">
                             <span class="lbl">Last Rant Duration:</span>
                             <span class="val" id="sos-preview-rant">No recent speech session</span>
                         </div>
                     </div>
+                </div>
+
+                <!-- Emergency Helpline Numbers Section -->
+                <div class="emergency-helpline-box">
+                    <h4>Direct Emergency Lines (Available 24/7)</h4>
+                    <ul>
+                        <li><strong>National Crisis Hotline:</strong> 988 (Call or Text)</li>
+                        <li><strong>The Trevor Project:</strong> 1-866-488-7386</li>
+                        <li><strong>Crisis Text Line:</strong> Text HOME to 741741</li>
+                    </ul>
                 </div>
             </div>
 
@@ -997,6 +1340,6 @@
     <!-- Local Configuration (API Keys, etc.) -->
     <script src="config.js"></script>
     <!-- Main JavaScript App module -->
-    <script src="app.js?v=4"></script>
+    <script src="app.js?v=2"></script>
 </body>
 </html>
