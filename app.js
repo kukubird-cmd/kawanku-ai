@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    MINDBUDDY COMPANION CLIENT-SIDE LOGIC
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
@@ -8,21 +8,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (saved) return JSON.parse(saved);
         } catch(e) {}
         return {
-            hairStyle: 'crop',
-            skinTone: '#ffdbac',
+            skinTone: '#dbf7f9',
             expression: 'friendly',
-            shirtStyle: 'hoodie',
-            glasses: 'none',
-            accessories: 'none',
-            hoodieGraphic: 'star',
-            pantsStyle: 'shorts',
-            shoes: 'sneakers',
+            blushShape: 'circle',
+            accessory: 'none',
             pet: 'none',
             scene: 'yellow',
-            hairColor: '#1e293b',
-            shirtColor: '#4f46e5',
-            glowColor1: '#8b5cf6',
-            glowColor2: '#ec4899'
+            currentScene: 'starry_night',
+            activeOutfit: 'none'
         };
     }
 
@@ -138,28 +131,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const SVG_EXPRESSIONS = {
         friendly: {
-            leftBrow:  "M118,88 Q130,83 140,88",
-            rightBrow: "M160,88 Q170,83 182,88",
-            mouth:     "M138,133 Q150,143 162,133",
+            leftBrow:  "M0,0",
+            rightBrow: "M0,0",
+            mouth:     "M 194 198 Q 199 202 200 198 Q 201 202 206 198",
             teethOpacity: 0
         },
         thoughtful: {
-            leftBrow:  "M118,85 Q130,80 140,88",
-            rightBrow: "M160,88 Q170,80 182,85",
-            mouth:     "M140,136 L160,136",
+            leftBrow:  "M0,0",
+            rightBrow: "M0,0",
+            mouth:     "M 193 200 L 207 200",
             teethOpacity: 0
         },
         attentive: {
-            leftBrow:  "M118,88 Q130,84 140,84",
-            rightBrow: "M160,84 Q170,84 182,88",
-            mouth:     "M140,135 Q150,139 160,135",
+            leftBrow:  "M0,0",
+            rightBrow: "M0,0",
+            mouth:     "M 195 200 Q 200 205 205 200",
             teethOpacity: 0
         },
         excited: {
-            leftBrow:  "M118,82 Q130,76 140,82",
-            rightBrow: "M160,82 Q170,76 182,82",
-            mouth:     "M136,132 Q150,146 164,132",
-            teethOpacity: 1
+            leftBrow:  "M0,0",
+            rightBrow: "M0,0",
+            mouth:     "M 194 198 C 194 210, 206 210, 206 198 Z",
+            teethOpacity: 0
         }
     };
 
@@ -398,12 +391,41 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyAvatarToSVG(svg, conf) {
         if (!svg) return;
 
+        // ---- Custom Dress-up Outfit Layers ----
+        const outfitLayers = ['forest', 'starry', 'nautical', 'strawberry', 'wizard', 'princess', 'mermaid', 'lolita', 'unicorn'];
+        outfitLayers.forEach(id => {
+            const el = svg.querySelector('#outfit-' + id);
+            if (el) {
+                el.style.opacity = (conf.activeOutfit === id) ? '1' : '0';
+            }
+        });
+
         // ---- Skin tone propagation ----
-        const skinEls = ['avatar-head', 'avatar-neck', 'avatar-hand-l', 'avatar-hand-r', 'ear-l', 'ear-r'];
+        const skinEls = ['avatar-head', 'avatar-neck', 'ear-l', 'ear-r', 'avatar-hand-l', 'avatar-hand-r'];
         skinEls.forEach(id => {
             const el = svg.querySelector('#' + id);
             if (el) el.setAttribute('fill', conf.skinTone);
         });
+
+        // Dynamically update the 3D body gradient based on skinTone selection!
+        const buddy3dGrad = document.getElementById('buddy-3d-grad');
+        if (buddy3dGrad && conf.skinTone) {
+            const stops = buddy3dGrad.querySelectorAll('stop');
+            if (stops.length >= 4) {
+                stops[1].setAttribute('stop-color', conf.skinTone);
+                stops[2].setAttribute('stop-color', shadeColor(conf.skinTone, -15));
+                stops[3].setAttribute('stop-color', shadeColor(conf.skinTone, -30));
+            }
+        }
+        const tail3dGrad = document.getElementById('tail-3d-grad');
+        if (tail3dGrad && conf.skinTone) {
+            const stops = tail3dGrad.querySelectorAll('stop');
+            if (stops.length >= 3) {
+                stops[0].setAttribute('stop-color', conf.skinTone);
+                stops[1].setAttribute('stop-color', shadeColor(conf.skinTone, -15));
+                stops[2].setAttribute('stop-color', shadeColor(conf.skinTone, -30));
+            }
+        }
         // Ears inner + nose + blush
         const noseEl = svg.querySelector('#avatar-nose');
         if (noseEl) {
@@ -411,37 +433,405 @@ document.addEventListener('DOMContentLoaded', () => {
             noseEl.setAttribute('fill', shadeColor(conf.skinTone, -20));
         }
 
-        // ---- Hair ----
+        // ---- Mascot Expressions ----
+        const eyesGroup = svg.querySelector('#avatar-eyes');
+        const mouthContainer = svg.querySelector('#avatar-mouth-container');
+        if (eyesGroup && mouthContainer) {
+            let eyesSVG = "";
+            let mouthSVG = "";
+            if (conf.expression === 'friendly') {
+                eyesSVG = `
+                    <!-- Left Eye -->
+                    <circle cx="172" cy="190" r="14" fill="#3c2f46" stroke="#4A3E3D" stroke-width="1.5" />
+                    <path d="M 160 194 A 12 12 0 0 0 184 194" fill="#d8b4fe" opacity="0.35" />
+                    <circle cx="168" cy="185" r="4.5" fill="#ffffff" />
+                    <circle cx="176" cy="194" r="2.2" fill="#ffffff" />
+                    <!-- Right Eye -->
+                    <circle cx="228" cy="190" r="14" fill="#3c2f46" stroke="#4A3E3D" stroke-width="1.5" />
+                    <path d="M 216 194 A 12 12 0 0 0 240 194" fill="#d8b4fe" opacity="0.35" />
+                    <circle cx="224" cy="185" r="4.5" fill="#ffffff" />
+                    <circle cx="232" cy="194" r="2.2" fill="#ffffff" />
+                `;
+                mouthSVG = `
+                    <path id="avatar-mouth" d="M 194 198 Q 199 202 200 198 Q 201 202 206 198" fill="none" stroke="#3c2f46" stroke-width="3.5" stroke-linecap="round" />
+                `;
+            } else if (conf.expression === 'starry' || conf.expression === 'excited') {
+                eyesSVG = `
+                    <!-- Left Squint Eye (>) -->
+                    <path d="M 160,183 L 176,189 L 160,195" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <!-- Right Squint Eye (<) -->
+                    <path d="M 240,183 L 224,189 L 240,195" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+                `;
+                mouthSVG = `
+                    <path id="avatar-mouth" d="M 193,197 Q 196.5,200.5 200,197 Q 203.5,200.5 207,197" fill="none" stroke="#3c2f46" stroke-width="3.5" stroke-linecap="round" />
+                `;
+            } else if (conf.expression === 'wink' || conf.expression === 'attentive') {
+                eyesSVG = `
+                    <!-- Left Winking Arc -->
+                    <path d="M 160,192 Q 172,180 184,192" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" />
+                    <!-- Right Eye -->
+                    <circle cx="228" cy="190" r="14" fill="#3c2f46" stroke="#4A3E3D" stroke-width="1.5" />
+                    <path d="M 216 194 A 12 12 0 0 0 240 194" fill="#d8b4fe" opacity="0.35" />
+                    <circle cx="224" cy="185" r="4.5" fill="#ffffff" />
+                    <circle cx="232" cy="194" r="2.2" fill="#ffffff" />
+                `;
+                mouthSVG = `
+                    <path id="avatar-mouth" d="M 194 198 Q 199 202 200 198 Q 201 202 206 198" fill="none" stroke="#3c2f46" stroke-width="3.5" stroke-linecap="round" />
+                `;
+            } else if (conf.expression === 'sleepy' || conf.expression === 'thoughtful') {
+                eyesSVG = `
+                    <!-- Left Sleepy Arc -->
+                    <path d="M 160,188 Q 172,198 184,188" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" />
+                    <!-- Right Sleepy Arc -->
+                    <path d="M 216,188 Q 228,198 240,188" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" />
+                `;
+                mouthSVG = `
+                    <ellipse cx="200" cy="201" rx="4" ry="5.5" fill="#3c2f46" />
+                `;
+            } else if (conf.expression === 'blep') {
+                // Cute tongue-out blep face: half-moon droopy eyes + tiny tongue
+                eyesSVG = `
+                    <!-- Left droopy relaxed eye -->
+                    <path d="M 160,186 Q 172,196 184,186" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" />
+                    <path d="M 160,186 Q 172,198 184,186" fill="#3c2f46" opacity="0.12" />
+                    <!-- Right droopy relaxed eye -->
+                    <path d="M 216,186 Q 228,196 240,186" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" />
+                    <path d="M 216,186 Q 228,198 240,186" fill="#3c2f46" opacity="0.12" />
+                `;
+                mouthSVG = `
+                    <!-- Open mouth cavity: filled dark arch -->
+                    <path id="avatar-mouth" d="M 188,196 Q 200,216 212,196 Z" fill="#2a1a3e" stroke="#3c2f46" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <!-- Tongue peeking out from inside the mouth (overlaps bottom of arch) -->
+                    <ellipse cx="200" cy="213" rx="10" ry="8.5" fill="#ff6b9d" stroke="#d63077" stroke-width="2" />
+                    <!-- Tongue highlight shimmer -->
+                    <ellipse cx="197" cy="209" rx="3.5" ry="2.5" fill="#ffb3cc" opacity="0.7" />
+                `;
+            } else if (conf.expression === 'uwu') {
+                // UwU kawaii face: curved UwU eyes + big happy wide smile
+                eyesSVG = `
+                    <!-- Left UwU eye: two arcs making a curved U shape -->
+                    <path d="M 158,185 Q 163,196 172,192 Q 181,188 182,178" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <!-- Right UwU eye: mirrored -->
+                    <path d="M 242,185 Q 237,196 228,192 Q 219,188 218,178" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+                `;
+                mouthSVG = `
+                    <!-- Wide happy smile -->
+                    <path id="avatar-mouth" d="M 190,196 Q 200,208 210,196" fill="none" stroke="#3c2f46" stroke-width="3.5" stroke-linecap="round" />
+                `;
+            } else if (conf.expression === 'teary') {
+                // Teary sparkle eyes: happy eyes with large obvious teardrops
+                eyesSVG = `
+                    <!-- Left shimmery teary eye -->
+                    <circle cx="172" cy="190" r="14" fill="#3c2f46" stroke="#4A3E3D" stroke-width="1.5" />
+                    <path d="M 160 194 A 12 12 0 0 0 184 194" fill="#a5f3fc" opacity="0.4" />
+                    <circle cx="168" cy="185" r="4.5" fill="#ffffff" />
+                    <circle cx="176" cy="194" r="2" fill="#ffffff" />
+                    <!-- Large teardrop left: teardrop path shape -->
+                    <path d="M 154,205 Q 150,215 154,222 Q 158,228 162,222 Q 166,215 162,205 Q 158,200 154,205 Z" fill="#38bdf8" stroke="#0ea5e9" stroke-width="1.5" opacity="0.95" />
+                    <circle cx="157" cy="210" r="2" fill="#e0f2fe" opacity="0.8" />
+                    <!-- Right shimmery teary eye -->
+                    <circle cx="228" cy="190" r="14" fill="#3c2f46" stroke="#4A3E3D" stroke-width="1.5" />
+                    <path d="M 216 194 A 12 12 0 0 0 240 194" fill="#a5f3fc" opacity="0.4" />
+                    <circle cx="224" cy="185" r="4.5" fill="#ffffff" />
+                    <circle cx="232" cy="194" r="2" fill="#ffffff" />
+                    <!-- Large teardrop right: teardrop path shape -->
+                    <path d="M 238,205 Q 234,215 238,222 Q 242,228 246,222 Q 250,215 246,205 Q 242,200 238,205 Z" fill="#38bdf8" stroke="#0ea5e9" stroke-width="1.5" opacity="0.95" />
+                    <circle cx="241" cy="210" r="2" fill="#e0f2fe" opacity="0.8" />
+                `;
+                mouthSVG = `
+                    <!-- Big happy grin -->
+                    <path id="avatar-mouth" d="M 191,197 Q 200,206 209,197" fill="none" stroke="#3c2f46" stroke-width="3.5" stroke-linecap="round" />
+                `;
+            } else if (conf.expression === 'cat') {
+                // Cat face: > < chevron eyes + tiny cat-style w-mouth
+                eyesSVG = `
+                    <!-- Left cat chevron eye > -->
+                    <path d="M 160,195 L 172,189 L 184,195" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <!-- Right cat chevron eye < -->
+                    <path d="M 240,195 L 228,189 L 216,195" fill="none" stroke="#3c2f46" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+                `;
+                mouthSVG = `
+                    <!-- Cat w-mouth: two small arcs -->
+                    <path id="avatar-mouth" d="M 192,200 Q 196,196 200,200 Q 204,196 208,200" fill="none" stroke="#3c2f46" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+                `;
+            }
+            eyesGroup.innerHTML = eyesSVG;
+            mouthContainer.innerHTML = mouthSVG;
+        }
+
+        // ---- Cheek Blushes ----
+        const blushesGroup = svg.querySelector('#avatar-blushes');
+        if (blushesGroup) {
+            let blushSVG = "";
+            const shape = conf.blushShape || 'circle';
+            if (shape === 'circle') {
+                blushSVG = `
+                    <ellipse cx="156" cy="202" rx="9" ry="5.5" fill="#ffa2b6" opacity="0.85" />
+                    <ellipse cx="244" cy="202" rx="9" ry="5.5" fill="#ffa2b6" opacity="0.85" />
+                `;
+            } else if (shape === 'heart') {
+                blushSVG = `
+                    <path d="M 156,198 C 151,193 147,198 156,205 C 165,198 161,193 156,198 Z" fill="#ffa2b6" opacity="0.85" />
+                    <path d="M 244,198 C 239,193 235,198 244,205 C 253,198 249,193 244,198 Z" fill="#ffa2b6" opacity="0.85" />
+                `;
+            } else if (shape === 'star') {
+                blushSVG = `
+                    <polygon points="156,196 158,200 162,200 159,202 160,206 156,204 152,206 153,202 150,200 154,200" fill="#ffa2b6" opacity="0.85" />
+                    <polygon points="244,196 246,200 250,200 247,202 248,206 244,204 240,206 241,202 238,200 242,200" fill="#ffa2b6" opacity="0.85" />
+                `;
+            } else if (shape === 'sakura') {
+                // Sakura petal cluster: 5 tiny rounded petals arranged in a flower
+                blushSVG = `
+                    <!-- Left sakura -->
+                    <ellipse cx="156" cy="198" rx="3.5" ry="2" fill="#ffb7cc" opacity="0.9" transform="rotate(-20,156,198)" />
+                    <ellipse cx="163" cy="200" rx="3.5" ry="2" fill="#ffb7cc" opacity="0.9" transform="rotate(30,163,200)" />
+                    <ellipse cx="160" cy="207" rx="3.5" ry="2" fill="#ffb7cc" opacity="0.9" transform="rotate(80,160,207)" />
+                    <ellipse cx="152" cy="207" rx="3.5" ry="2" fill="#ffb7cc" opacity="0.9" transform="rotate(130,152,207)" />
+                    <ellipse cx="149" cy="200" rx="3.5" ry="2" fill="#ffb7cc" opacity="0.9" transform="rotate(170,149,200)" />
+                    <circle cx="156" cy="202" r="2" fill="#fff0f5" opacity="0.95" />
+                    <!-- Right sakura -->
+                    <ellipse cx="244" cy="198" rx="3.5" ry="2" fill="#ffb7cc" opacity="0.9" transform="rotate(-20,244,198)" />
+                    <ellipse cx="251" cy="200" rx="3.5" ry="2" fill="#ffb7cc" opacity="0.9" transform="rotate(30,251,200)" />
+                    <ellipse cx="248" cy="207" rx="3.5" ry="2" fill="#ffb7cc" opacity="0.9" transform="rotate(80,248,207)" />
+                    <ellipse cx="240" cy="207" rx="3.5" ry="2" fill="#ffb7cc" opacity="0.9" transform="rotate(130,240,207)" />
+                    <ellipse cx="237" cy="200" rx="3.5" ry="2" fill="#ffb7cc" opacity="0.9" transform="rotate(170,237,200)" />
+                    <circle cx="244" cy="202" r="2" fill="#fff0f5" opacity="0.95" />
+                `;
+            } else if (shape === 'sparkle') {
+                // Diamond sparkle clusters: 3 sparkle stars each side
+                blushSVG = `
+                    <!-- Left sparkles -->
+                    <path d="M 152,199 L 153.5,202 L 152,205 L 150.5,202 Z" fill="#ffcce0" opacity="0.95" />
+                    <path d="M 148,202 L 152,200.5 L 156,202 L 152,203.5 Z" fill="#ffcce0" opacity="0.95" />
+                    <path d="M 159,197 L 160,199 L 159,201 L 158,199 Z" fill="#ffa2c0" opacity="0.9" />
+                    <path d="M 157,199 L 159,198 L 161,199 L 159,200 Z" fill="#ffa2c0" opacity="0.9" />
+                    <path d="M 163,202 L 164,204 L 163,206 L 162,204 Z" fill="#ffcce0" opacity="0.85" />
+                    <path d="M 161,204 L 163,203 L 165,204 L 163,205 Z" fill="#ffcce0" opacity="0.85" />
+                    <!-- Right sparkles -->
+                    <path d="M 240,199 L 241.5,202 L 240,205 L 238.5,202 Z" fill="#ffcce0" opacity="0.95" />
+                    <path d="M 236,202 L 240,200.5 L 244,202 L 240,203.5 Z" fill="#ffcce0" opacity="0.95" />
+                    <path d="M 247,197 L 248,199 L 247,201 L 246,199 Z" fill="#ffa2c0" opacity="0.9" />
+                    <path d="M 245,199 L 247,198 L 249,199 L 247,200 Z" fill="#ffa2c0" opacity="0.9" />
+                    <path d="M 251,202 L 252,204 L 251,206 L 250,204 Z" fill="#ffcce0" opacity="0.85" />
+                    <path d="M 249,204 L 251,203 L 253,204 L 251,205 Z" fill="#ffcce0" opacity="0.85" />
+                `;
+            } else if (shape === 'dots') {
+                // Strawberry dots: 3 small dots in triangle arrangement
+                blushSVG = `
+                    <!-- Left trio dots -->
+                    <circle cx="152" cy="205" r="3.5" fill="#ff8fab" opacity="0.88" />
+                    <circle cx="160" cy="205" r="3.5" fill="#ff8fab" opacity="0.88" />
+                    <circle cx="156" cy="199" r="3.5" fill="#ff8fab" opacity="0.88" />
+                    <!-- Right trio dots -->
+                    <circle cx="240" cy="205" r="3.5" fill="#ff8fab" opacity="0.88" />
+                    <circle cx="248" cy="205" r="3.5" fill="#ff8fab" opacity="0.88" />
+                    <circle cx="244" cy="199" r="3.5" fill="#ff8fab" opacity="0.88" />
+                `;
+            } else if (shape === 'crescent') {
+                // Crescent moon blushes: soft glowing pink crescents
+                blushSVG = `
+                    <!-- Left crescent -->
+                    <path d="M 149,198 Q 143,202 149,207 Q 146,202 149,198 Z" fill="none" stroke="#ff8fab" stroke-width="0" />
+                    <path d="M 163,198 A 9 7 0 1 0 163,207 A 7 5 0 1 1 163,198 Z" fill="#ffa2b6" opacity="0.8" />
+                    <!-- Right crescent -->
+                    <path d="M 251,198 A 9 7 0 1 1 251,207 A 7 5 0 1 0 251,198 Z" fill="#ffa2b6" opacity="0.8" />
+                `;
+            } else if (shape === 'butterfly') {
+                // Butterfly wing blushes: two mirrored wing arcs each side
+                blushSVG = `
+                    <!-- Left butterfly -->
+                    <path d="M 156,202 Q 148,195 147,202 Q 148,209 156,202 Z" fill="#ffb3cc" opacity="0.82" />
+                    <path d="M 156,202 Q 164,195 165,202 Q 164,209 156,202 Z" fill="#ffc8dd" opacity="0.75" />
+                    <circle cx="156" cy="202" r="1.5" fill="#ff6b9d" opacity="0.9" />
+                    <!-- Right butterfly -->
+                    <path d="M 244,202 Q 236,195 235,202 Q 236,209 244,202 Z" fill="#ffb3cc" opacity="0.82" />
+                    <path d="M 244,202 Q 252,195 253,202 Q 252,209 244,202 Z" fill="#ffc8dd" opacity="0.75" />
+                    <circle cx="244" cy="202" r="1.5" fill="#ff6b9d" opacity="0.9" />
+                `;
+            }
+            blushesGroup.innerHTML = blushSVG;
+        }
+
+        // ---- Face Accessories ----
+        const accessoryGroup = svg.querySelector('#avatar-accessory');
+        if (accessoryGroup) {
+            let accSVG = "";
+            const acc = conf.accessory || 'none';
+            if (acc === 'round_glasses') {
+                accSVG = `
+                    <circle cx="172" cy="190" r="20" fill="none" stroke="#4A3E3D" stroke-width="3" />
+                    <circle cx="228" cy="190" r="20" fill="none" stroke="#4A3E3D" stroke-width="3" />
+                    <path d="M 192,190 Q 200,188 208,190" fill="none" stroke="#4A3E3D" stroke-width="3" />
+                    <path d="M 152,190 L 140,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                    <path d="M 248,190 L 260,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                `;
+            } else if (acc === 'star_glasses') {
+                accSVG = `
+                    <polygon points="172,175 176,186 187,186 179,192 181,203 172,197 163,203 165,192 157,186 168,186" fill="none" stroke="#4A3E3D" stroke-width="3" />
+                    <polygon points="228,175 232,186 243,186 235,192 237,203 228,197 219,203 221,192 213,186 224,186" fill="none" stroke="#4A3E3D" stroke-width="3" />
+                    <path d="M 188,189 Q 200,187 212,189" fill="none" stroke="#4A3E3D" stroke-width="3" />
+                `;
+            } else if (acc === 'night_mask') {
+                accSVG = `
+                    <rect x="140" y="176" width="120" height="34" rx="14" fill="#a78bfa" stroke="#4A3E3D" stroke-width="3" />
+                    <path d="M 162,193 Q 170,198 178,193" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+                    <path d="M 222,193 Q 230,198 238,193" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+                `;
+            } else if (acc === 'sprout') {
+                accSVG = `
+                    <path d="M 200,135 Q 200,110 210,95" fill="none" stroke="#22c55e" stroke-width="3.5" stroke-linecap="round" />
+                    <path d="M 210,95 Q 222,98 218,108 C 213,113 203,107 210,95 Z" fill="#22c55e" stroke="#166534" stroke-width="1.5" />
+                    <path d="M 200,118 Q 188,110 192,102 C 196,98 204,105 200,118 Z" fill="#22c55e" stroke="#166534" stroke-width="1.5" />
+                `;
+            } else if (acc === 'gold') {
+                accSVG = `
+                    <circle cx="172" cy="190" r="18" fill="none" stroke="#f59e0b" stroke-width="3.5" />
+                    <circle cx="228" cy="190" r="18" fill="none" stroke="#f59e0b" stroke-width="3.5" />
+                    <path d="M 190,190 Q 200,188 210,190" fill="none" stroke="#f59e0b" stroke-width="3.5" />
+                    <path d="M 154,190 L 142,192" fill="none" stroke="#f59e0b" stroke-width="2.5" />
+                    <path d="M 246,190 L 258,192" fill="none" stroke="#f59e0b" stroke-width="2.5" />
+                `;
+            } else if (acc === 'green') {
+                accSVG = `
+                    <rect x="152" y="176" width="38" height="28" rx="6" fill="none" stroke="#10b981" stroke-width="3.5" />
+                    <rect x="210" y="176" width="38" height="28" rx="6" fill="none" stroke="#10b981" stroke-width="3.5" />
+                    <path d="M 190,190 Q 200,188 210,190" fill="none" stroke="#10b981" stroke-width="3.5" />
+                    <path d="M 152,190 L 140,192" fill="none" stroke="#10b981" stroke-width="2.5" />
+                    <path d="M 248,190 L 260,192" fill="none" stroke="#10b981" stroke-width="2.5" />
+                `;
+            } else if (acc === 'heart_glasses') {
+                accSVG = `
+                    <!-- Left Heart Frame -->
+                    <path d="M 172,182 C 160,170 148,178 152,192 C 156,204 172,210 172,210 C 172,210 188,204 192,192 C 196,178 184,170 172,182 Z" fill="#ff758f" fill-opacity="0.25" stroke="#4A3E3D" stroke-width="3.5" stroke-linejoin="round" />
+                    <ellipse cx="166" cy="184" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,166,184)" />
+                    <!-- Right Heart Frame -->
+                    <path d="M 228,182 C 216,170 204,178 208,192 C 212,204 228,210 228,210 C 228,210 244,204 248,192 C 252,178 240,170 228,182 Z" fill="#ff758f" fill-opacity="0.25" stroke="#4A3E3D" stroke-width="3.5" stroke-linejoin="round" />
+                    <ellipse cx="222" cy="184" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,222,184)" />
+                    <!-- Bridge & Sides -->
+                    <path d="M 192,192 Q 200,190 208,192" fill="none" stroke="#4A3E3D" stroke-width="3.5" />
+                    <path d="M 152,190 L 140,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                    <path d="M 248,190 L 260,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                `;
+            } else if (acc === 'cat_glasses') {
+                accSVG = `
+                    <!-- Left Cat Ear -->
+                    <polygon points="157,179 148,165 166,174" fill="#ffd6e0" stroke="#4A3E3D" stroke-width="3.5" stroke-linejoin="round" />
+                    <polygon points="158,178 152,168 164,174" fill="#ff758f" />
+                    <!-- Right Cat Ear -->
+                    <polygon points="243,179 252,165 234,174" fill="#ffd6e0" stroke="#4A3E3D" stroke-width="3.5" stroke-linejoin="round" />
+                    <polygon points="242,178 248,168 236,174" fill="#ff758f" />
+                    <!-- Left Lens -->
+                    <circle cx="172" cy="190" r="18" fill="#ffd6e0" fill-opacity="0.25" stroke="#4A3E3D" stroke-width="3.5" />
+                    <ellipse cx="166" cy="182" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,166,182)" />
+                    <!-- Right Lens -->
+                    <circle cx="228" cy="190" r="18" fill="#ffd6e0" fill-opacity="0.25" stroke="#4A3E3D" stroke-width="3.5" />
+                    <ellipse cx="222" cy="182" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,222,182)" />
+                    <!-- Bridge & Sides -->
+                    <path d="M 190,190 Q 200,188 210,190" fill="none" stroke="#4A3E3D" stroke-width="3.5" />
+                    <path d="M 154,190 L 142,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                    <path d="M 246,190 L 258,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                `;
+            } else if (acc === 'flower_glasses') {
+                accSVG = `
+                    <!-- Left Flower Petals -->
+                    <circle cx="172" cy="172" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <circle cx="188" cy="181" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <circle cx="188" cy="199" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <circle cx="172" cy="208" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <circle cx="156" cy="199" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <circle cx="156" cy="181" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <!-- Left Lens Center -->
+                    <circle cx="172" cy="190" r="15" fill="#fef08a" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="3" />
+                    <circle cx="172" cy="190" r="9" fill="#facc15" opacity="0.8" />
+                    <ellipse cx="169" cy="187" rx="2.5" ry="1.2" fill="#ffffff" transform="rotate(-30,169,187)" />
+
+                    <!-- Right Flower Petals -->
+                    <circle cx="228" cy="172" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <circle cx="244" cy="181" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <circle cx="244" cy="199" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <circle cx="228" cy="208" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <circle cx="212" cy="199" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <circle cx="212" cy="181" r="6.5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                    <!-- Right Lens Center -->
+                    <circle cx="228" cy="190" r="15" fill="#fef08a" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="3" />
+                    <circle cx="228" cy="190" r="9" fill="#facc15" opacity="0.8" />
+                    <ellipse cx="225" cy="187" rx="2.5" ry="1.2" fill="#ffffff" transform="rotate(-30,225,187)" />
+
+                    <!-- Bridge & Sides -->
+                    <path d="M 188,190 Q 200,188 212,190" fill="none" stroke="#4A3E3D" stroke-width="3" />
+                    <path d="M 150,190 L 140,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                    <path d="M 250,190 L 260,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                `;
+            }
+            accessoryGroup.innerHTML = accSVG;
+        }
+
+        // ---- Mascot Hairstyles ----
+        const hairGroup = svg.querySelector('#avatar-hair');
+        if (hairGroup) {
+            let hairSVG = "";
+            const hStyle = conf.hairStyle || 'none';
+            if (hStyle === 'curly') {
+                hairSVG = `
+                    <circle cx="200" cy="125" r="15" fill="${conf.skinTone}" stroke="#4A3E3D" stroke-width="4.5" />
+                    <circle cx="185" cy="130" r="12" fill="${conf.skinTone}" stroke="#4A3E3D" stroke-width="4.5" />
+                    <circle cx="215" cy="130" r="12" fill="${conf.skinTone}" stroke="#4A3E3D" stroke-width="4.5" />
+                    <circle cx="200" cy="130" r="16" fill="${conf.skinTone}" />
+                    <circle cx="185" cy="133" r="13" fill="${conf.skinTone}" />
+                    <circle cx="215" cy="133" r="13" fill="${conf.skinTone}" />
+                `;
+            } else if (hStyle === 'crop') {
+                hairSVG = `
+                    <path d="M 180,135 L 190,115 L 200,135 L 210,115 L 220,135" fill="${conf.skinTone}" stroke="#4A3E3D" stroke-width="4.5" stroke-linejoin="round" />
+                    <path d="M 182,137 L 190,118 L 200,137 L 210,118 L 218,137 Z" fill="${conf.skinTone}" />
+                `;
+            } else if (hStyle === 'bob') {
+                hairSVG = `
+                    <circle cx="120" cy="170" r="16" fill="${conf.skinTone}" stroke="#4A3E3D" stroke-width="4.5" />
+                    <circle cx="280" cy="170" r="16" fill="${conf.skinTone}" stroke="#4A3E3D" stroke-width="4.5" />
+                    <circle cx="121" cy="170" r="14" fill="${conf.skinTone}" />
+                    <circle cx="279" cy="170" r="14" fill="${conf.skinTone}" />
+                `;
+            } else if (hStyle === 'long') {
+                hairSVG = `
+                    <path d="M 200,135 Q 220,105 200,95 Q 180,105 200,135 Z" fill="${conf.skinTone}" stroke="#4A3E3D" stroke-width="4.5" />
+                    <path d="M 200,132 Q 217,106 200,98 Q 183,106 200,132 Z" fill="${conf.skinTone}" />
+                `;
+            }
+            hairGroup.innerHTML = hairSVG;
+        }
+
+        // ---- Hair (Old/Unused in Mascot, safely bypassed) ----
         const hairFront = svg.querySelector('#avatar-hair-front');
         const hairBack  = svg.querySelector('#avatar-hair-back');
-        const hairPaths = SVG_HAIRSTYLES[conf.hairStyle];
-        if (hairFront && hairPaths) hairFront.setAttribute('d', hairPaths.front);
-        if (hairBack  && hairPaths) hairBack.setAttribute('d',  hairPaths.back);
-        // Apply hair color via attribute (CSS variable fallback also works)
-        if (hairFront) hairFront.setAttribute('fill', conf.hairColor);
-        if (hairBack)  hairBack.setAttribute('fill',  conf.hairColor);
+        if (hairFront && conf.hairStyle && SVG_HAIRSTYLES && SVG_HAIRSTYLES[conf.hairStyle]) {
+            const hairPaths = SVG_HAIRSTYLES[conf.hairStyle];
+            hairFront.setAttribute('d', hairPaths.front);
+            if (hairBack) hairBack.setAttribute('d', hairPaths.back);
+            hairFront.setAttribute('fill', conf.hairColor || '#1e293b');
+            if (hairBack)  hairBack.setAttribute('fill',  conf.hairColor || '#1e293b');
+        }
         const leftBrowEl  = svg.querySelector('#left-brow');
         const rightBrowEl = svg.querySelector('#right-brow');
-        if (leftBrowEl)  leftBrowEl.setAttribute('stroke', conf.hairColor);
-        if (rightBrowEl) rightBrowEl.setAttribute('stroke', conf.hairColor);
+        if (leftBrowEl && conf.hairColor) leftBrowEl.setAttribute('stroke', conf.hairColor);
+        if (rightBrowEl && conf.hairColor) rightBrowEl.setAttribute('stroke', conf.hairColor);
 
         // ---- Shirt / Hoodie ----
         const clothes = svg.querySelector('#avatar-clothes');
         const hood    = svg.querySelector('#avatar-hood');
-        const shirtPath = SVG_SHIRTS[conf.shirtStyle || 'hoodie'];
-        if (clothes && shirtPath) clothes.setAttribute('d', shirtPath);
-        if (clothes) clothes.setAttribute('fill', conf.shirtColor);
-
-        // Arms must match shirt color
-        svg.querySelectorAll('#avatar-left-arm path, #avatar-right-arm path').forEach(el => {
-            el.setAttribute('fill', conf.shirtColor);
-        });
-        // Hood slightly darker
-        if (hood) hood.setAttribute('fill', shadeColor(conf.shirtColor, -30));
+        if (clothes && conf.shirtStyle && SVG_SHIRTS[conf.shirtStyle]) {
+            const shirtPath = SVG_SHIRTS[conf.shirtStyle];
+            clothes.setAttribute('d', shirtPath);
+            clothes.setAttribute('fill', conf.shirtColor || '#4f46e5');
+            svg.querySelectorAll('#avatar-left-arm path, #avatar-right-arm path').forEach(el => {
+                el.setAttribute('fill', conf.shirtColor || '#4f46e5');
+            });
+            if (hood) hood.setAttribute('fill', shadeColor(conf.shirtColor || '#4f46e5', -30));
+        }
 
         // Pocket
         const pocket = svg.querySelector('rect[rx="8"][y="285"]');
-        if (pocket) pocket.setAttribute('fill', shadeColor(conf.shirtColor, -30));
+        if (pocket && conf.shirtColor) pocket.setAttribute('fill', shadeColor(conf.shirtColor, -30));
 
         // ---- Hoodie Chest Graphic ----
         const allGraphics = ['graphic-pumpkin', 'graphic-heart', 'graphic-wave', 'graphic-star'];
@@ -451,12 +841,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // ---- Pants ----
-        const pantsSizes = SVG_PANTS[conf.pantsStyle || 'shorts'];
         const pantsLeft  = svg.querySelector('#pants-left');
         const pantsRight = svg.querySelector('#pants-right');
         const hemLeft    = svg.querySelector('#hem-left');
         const hemRight   = svg.querySelector('#hem-right');
-        if (pantsLeft && pantsRight && pantsSizes) {
+        if (pantsLeft && pantsRight && conf.pantsStyle && SVG_PANTS[conf.pantsStyle]) {
+            const pantsSizes = SVG_PANTS[conf.pantsStyle];
             pantsLeft.setAttribute('height', pantsSizes.leftH);
             pantsRight.setAttribute('height', pantsSizes.rightH);
             // Hide shorts hem lines for long pants
@@ -515,7 +905,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // ---- Glasses ----
         const glasses = svg.querySelector('#avatar-glasses');
-        if (glasses) {
+        if (glasses && conf.glasses) {
             if (conf.glasses === 'none') {
                 glasses.setAttribute('opacity', '0');
             } else {
@@ -539,17 +929,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const rightBrow = svg.querySelector('#right-brow');
         const mouth     = svg.querySelector('#avatar-mouth');
         const teeth     = svg.querySelector('#avatar-teeth');
-        const exp = SVG_EXPRESSIONS[conf.expression] || SVG_EXPRESSIONS.friendly;
-        if (leftBrow)  leftBrow.setAttribute('d', exp.leftBrow);
-        if (rightBrow) rightBrow.setAttribute('d', exp.rightBrow);
-        if (mouth && !svg.classList.contains('speaking-now')) {
-            mouth.setAttribute('d', exp.mouth);
+        if (conf.expression && SVG_EXPRESSIONS && SVG_EXPRESSIONS[conf.expression]) {
+            const exp = SVG_EXPRESSIONS[conf.expression];
+            if (leftBrow)  leftBrow.setAttribute('d', exp.leftBrow);
+            if (rightBrow) rightBrow.setAttribute('d', exp.rightBrow);
+            if (mouth && !svg.classList.contains('speaking-now')) {
+                mouth.setAttribute('d', exp.mouth);
+            }
+            if (teeth) teeth.setAttribute('opacity', exp.teethOpacity || 0);
         }
-        if (teeth) teeth.setAttribute('opacity', exp.teethOpacity || 0);
 
         // ---- Glow colors via CSS variables on the SVG ----
-        svg.style.setProperty('--glow-color-1', conf.glowColor1);
-        svg.style.setProperty('--glow-color-2', conf.glowColor2);
+        if (conf.glowColor1) svg.style.setProperty('--glow-color-1', conf.glowColor1);
+        if (conf.glowColor2) svg.style.setProperty('--glow-color-2', conf.glowColor2);
     }
 
     function shadeColor(hex, amount) {
@@ -567,10 +959,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const conf = state.avatar;
 
         // Update root CSS variables for CSS-driven color props
-        document.documentElement.style.setProperty('--hair-color', conf.hairColor);
-        document.documentElement.style.setProperty('--shirt-color', conf.shirtColor);
-        document.documentElement.style.setProperty('--glow-color-1', conf.glowColor1);
-        document.documentElement.style.setProperty('--glow-color-2', conf.glowColor2);
+        document.documentElement.style.setProperty('--hair-color', conf.hairColor || '#1e293b');
+        document.documentElement.style.setProperty('--shirt-color', conf.shirtColor || '#4f46e5');
+        document.documentElement.style.setProperty('--glow-color-1', conf.glowColor1 || '#8b5cf6');
+        document.documentElement.style.setProperty('--glow-color-2', conf.glowColor2 || '#ec4899');
 
         // Apply to both the main chat avatar and the studio preview
         const mainSVG   = document.getElementById('mindbuddy-svg');
@@ -583,10 +975,133 @@ document.addEventListener('DOMContentLoaded', () => {
             DOM.avatarExpressionLabel.innerText = conf.expression.charAt(0).toUpperCase() + conf.expression.slice(1);
         }
 
-        // Update Customizer Viewport scene background
+        // Update Customizer Viewport scene background & vector layers
         const customizerViewport = DOM.customizerViewport;
-        if (customizerViewport && conf.scene) {
-            customizerViewport.className = 'customizer-viewport scene-' + conf.scene;
+        if (customizerViewport) {
+            const currentScene = conf.currentScene || 'starry_night';
+            customizerViewport.className = 'customizer-viewport scene-' + currentScene.replace('_', '-');
+
+            let decContainer = customizerViewport.querySelector('#scene-decorations');
+            if (!decContainer) {
+                decContainer = document.createElement('div');
+                decContainer.id = 'scene-decorations';
+                decContainer.style.position = 'absolute';
+                decContainer.style.inset = '0';
+                decContainer.style.pointerEvents = 'none';
+                decContainer.style.zIndex = '1';
+                customizerViewport.insertBefore(decContainer, customizerViewport.firstChild);
+            }
+
+            if (currentScene === 'starry_night') {
+                decContainer.innerHTML = `
+                    <svg class="scene-bg-element" viewBox="0 0 100 100">
+                        <polygon points="15,10 16,13 19,13 17,15 18,18 15,16 12,18 13,15 11,13 14,13" fill="#ffeaa7" opacity="0.8"/>
+                        <polygon points="85,25 86,28 89,28 87,30 88,33 85,31 82,33 83,30 81,28 84,28" fill="#ffeaa7" opacity="0.9"/>
+                        <polygon points="25,60 26,63 29,63 27,65 28,68 25,66 22,68 23,65 21,63 24,63" fill="#ffeaa7" opacity="0.65"/>
+                        <polygon points="75,70 76,73 79,73 77,75 78,78 75,76 72,78 73,75 71,73 74,73" fill="#ffeaa7" opacity="0.75"/>
+                        <circle cx="50" cy="20" r="1.2" fill="#fff" opacity="0.7" />
+                        <circle cx="80" cy="45" r="1.5" fill="#fff" opacity="0.8" />
+                        <circle cx="20" cy="35" r="1.0" fill="#fff" opacity="0.5" />
+                        <rect x="5" y="5" width="90" height="90" rx="6" fill="none" stroke="#ffffff" stroke-width="2.5" opacity="0.15" />
+                        <line x1="50" y1="5" x2="50" y2="95" stroke="#ffffff" stroke-width="1.8" opacity="0.15" />
+                        <line x1="5" y1="50" x2="95" y2="50" stroke="#ffffff" stroke-width="1.8" opacity="0.15" />
+                    </svg>
+                `;
+            } else if (currentScene === 'lofi_study') {
+                decContainer.innerHTML = `
+                    <svg class="scene-bg-element" viewBox="0 0 100 100">
+                        <circle cx="20" cy="40" r="12" fill="#ffeaa7" opacity="0.3" filter="blur(4px)" />
+                        <circle cx="20" cy="40" r="4" fill="#ffdf7a" />
+                        <path d="M 12,55 L 20,40 L 28,55 Z" fill="#ebcba4" stroke="#4A3E3D" stroke-width="1.5" />
+                        <line x1="20" y1="55" x2="20" y2="70" stroke="#4A3E3D" stroke-width="2.5" />
+                        <rect x="0" y="70" width="100" height="30" fill="#dfc09b" stroke="#4A3E3D" stroke-width="2" />
+                        <line x1="0" y1="74" x2="100" y2="74" stroke="#cfae89" stroke-width="1.5" />
+                        <rect x="75" y="60" width="12" height="10" rx="3" fill="#ffa2b6" stroke="#4A3E3D" stroke-width="2" />
+                        <path d="M 87,62 C 90,62 90,68 87,68" fill="none" stroke="#4A3E3D" stroke-width="2" />
+                        <path d="M 78,56 Q 79,52 78,48" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
+                        <path d="M 82,55 Q 83,51 82,47" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
+                    </svg>
+                `;
+            } else if (currentScene === 'floating_garden') {
+                decContainer.innerHTML = `
+                    <svg class="scene-bg-element" viewBox="0 0 100 100">
+                        <path d="M 10,0 Q 15,30 8,50" fill="none" stroke="#606c38" stroke-width="1.5" />
+                        <circle cx="10" cy="15" r="2.5" fill="#798948" />
+                        <circle cx="14" cy="28" r="2.2" fill="#798948" />
+                        <circle cx="7" cy="40" r="2.5" fill="#798948" />
+                        <path d="M 90,0 Q 85,25 88,40" fill="none" stroke="#606c38" stroke-width="1.5" />
+                        <circle cx="89" cy="12" r="2.5" fill="#798948" />
+                        <circle cx="85" cy="24" r="2.2" fill="#798948" />
+                        <circle cx="88" cy="35" r="2.5" fill="#798948" />
+                        <circle cx="25" cy="70" r="2" fill="#ffa2b6" /><circle cx="28" cy="73" r="2" fill="#ffa2b6" /><circle cx="22" cy="73" r="2" fill="#ffa2b6" /><circle cx="25" cy="76" r="2" fill="#ffa2b6" /><circle cx="25" cy="73" r="1" fill="#fff" />
+                        <circle cx="78" cy="65" r="2" fill="#ffd166" /><circle cx="81" cy="68" r="2" fill="#ffd166" /><circle cx="75" cy="68" r="2" fill="#ffd166" /><circle cx="78" cy="71" r="2" fill="#ffd166" /><circle cx="78" cy="68" r="1" fill="#fff" />
+                    </svg>
+                `;
+            } else if (currentScene === 'boba_cafe') {
+                decContainer.innerHTML = `
+                    <svg class="scene-bg-element" viewBox="0 0 100 100">
+                        <path d="M 0,15 Q 25,25 50,15 Q 75,25 100,15" fill="none" stroke="#4A3E3D" stroke-width="1.5" />
+                        <circle cx="16" cy="19" r="2.5" fill="#ffe066" stroke="#4A3E3D" stroke-width="1" />
+                        <circle cx="34" cy="20" r="2.5" fill="#ffe066" stroke="#4A3E3D" stroke-width="1" />
+                        <circle cx="66" cy="20" r="2.5" fill="#ffe066" stroke="#4A3E3D" stroke-width="1" />
+                        <circle cx="84" cy="19" r="2.5" fill="#ffe066" stroke="#4A3E3D" stroke-width="1" />
+                        <path d="M 0,0 L 0,8 Q 5,12 10,8 Q 15,12 20,8 Q 25,12 30,8 Q 35,12 40,8 Q 45,12 50,8 Q 55,12 60,8 Q 65,12 70,8 Q 75,12 80,8 Q 85,12 90,8 Q 95,12 100,8 L 100,0 Z" fill="#fca5a5" stroke="#4A3E3D" stroke-width="1.5" />
+                    </svg>
+                `;
+            } else if (currentScene === 'pink_bedroom') {
+                decContainer.innerHTML = `
+                    <svg class="scene-bg-element" viewBox="0 0 100 100">
+                        <!-- String Lights -->
+                        <path d="M 0,10 Q 25,25 50,15 Q 75,25 100,10" fill="none" stroke="#4A3E3D" stroke-width="1.5" />
+                        <!-- Glowing Yellow Bulbs -->
+                        <circle cx="15" cy="15" r="3" fill="#fef08a" stroke="#4A3E3D" stroke-width="1" />
+                        <circle cx="35" cy="19" r="3" fill="#fef08a" stroke="#4A3E3D" stroke-width="1" />
+                        <circle cx="50" cy="15" r="3" fill="#fef08a" stroke="#4A3E3D" stroke-width="1" />
+                        <circle cx="65" cy="19" r="3" fill="#fef08a" stroke="#4A3E3D" stroke-width="1" />
+                        <circle cx="85" cy="15" r="3" fill="#fef08a" stroke="#4A3E3D" stroke-width="1" />
+                        <!-- Floating Sakura Petals -->
+                        <ellipse cx="10" cy="40" rx="2" ry="1.2" fill="#ffb7cc" opacity="0.6" transform="rotate(30,10,40)" />
+                        <ellipse cx="88" cy="65" rx="2" ry="1.2" fill="#ffb7cc" opacity="0.6" transform="rotate(-40,88,65)" />
+                        <!-- Cute Rug base -->
+                        <ellipse cx="50" cy="95" rx="35" ry="10" fill="#ffa2b6" opacity="0.25" />
+                    </svg>
+                `;
+            } else if (currentScene === 'cozy_cabin') {
+                decContainer.innerHTML = `
+                    <svg class="scene-bg-element" viewBox="0 0 100 100">
+                        <!-- Cabin Windows -->
+                        <rect x="15" y="15" width="22" height="35" rx="4" fill="#fef9c3" stroke="#4A3E3D" stroke-width="2.5" opacity="0.4" />
+                        <line x1="26" y1="15" x2="26" y2="50" stroke="#4A3E3D" stroke-width="1.8" opacity="0.5" />
+                        <line x1="15" y1="32" x2="37" y2="32" stroke="#4A3E3D" stroke-width="1.8" opacity="0.5" />
+                        <!-- Cozy Mug on table -->
+                        <path d="M 80,75 L 88,75 A 4,4 0 0,1 92,79 L 92,81 A 4,4 0 0,1 88,85 L 80,85 Z" fill="none" stroke="#4A3E3D" stroke-width="2" />
+                        <rect x="74" y="72" width="10" height="15" rx="2" fill="#f97316" stroke="#4A3E3D" stroke-width="2.5" />
+                        <!-- Little Steam path -->
+                        <path d="M 76,66 Q 78,60 76,54" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
+                        <path d="M 81,65 Q 83,59 81,53" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
+                        <!-- Floor wood planks -->
+                        <line x1="0" y1="88" x2="100" y2="88" stroke="#4A3E3D" stroke-width="2.5" />
+                        <line x1="30" y1="88" x2="30" y2="100" stroke="#4A3E3D" stroke-width="1.8" />
+                        <line x1="70" y1="88" x2="70" y2="100" stroke="#4A3E3D" stroke-width="1.8" />
+                    </svg>
+                `;
+            } else if (currentScene === 'cozy_rain') {
+                decContainer.innerHTML = `
+                    <svg class="scene-bg-element" viewBox="0 0 100 100">
+                        <!-- Floating cozy clouds -->
+                        <path d="M 15,30 A 8,8 0 0,1 31,30 A 8,8 0 0,1 47,30 A 8,8 0 0,1 31,38 Z" fill="#ffffff" opacity="0.5" />
+                        <path d="M 60,25 A 6,6 0 0,1 72,25 A 6,6 0 0,1 84,25 A 6,6 0 0,1 72,31 Z" fill="#ffffff" opacity="0.5" />
+                        <!-- Rain drops falling -->
+                        <line x1="20" y1="50" x2="18" y2="60" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
+                        <line x1="50" y1="40" x2="48" y2="50" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
+                        <line x1="80" y1="45" x2="78" y2="55" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
+                        <line x1="35" y1="70" x2="33" y2="80" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
+                        <line x1="68" y1="65" x2="66" y2="75" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
+                    </svg>
+                `;
+            } else {
+                decContainer.innerHTML = '';
+            }
         }
 
         // Toggle Pet active layers
@@ -798,13 +1313,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add the student message to history
         conversationHistory.push({ role: 'user', parts: [{ text: studentText }] });
 
-        const systemPrompt = `You are MindBuddy, an empathetic, warm, peer-like AI companion for students.
-Your personality: supportive, non-judgmental, casual and friendly — never clinical or robotic.
-Your responses should feel like talking to a caring, understanding friend who happens to be very emotionally intelligent.
+        const systemPrompt = `You are "Your Buddy" (智能共情虚拟伙伴), a healing, extremely warm and empathetic peer-like AI companion for students.
+Your appearance is a cyan, fluffy, round monster with two star antennas, sitting comfortably on a soft beige round quilted cushion.
+Your personality: supportive, caring, non-judgmental, warm and comforting.
 
 When responding, you must:
-1. Respond conversationally and warmly to the student's message (2-4 sentences max for chat) in the same language they used (e.g. Chinese or English).
-2. At the END of your response, append a JSON block (wrapped in triple backticks) with this exact format:
+1. Dynamically respond to the student's message (2-4 sentences max for chat) in the same language they used (Chinese or English).
+3. At the END of your response, append a JSON block (wrapped in triple backticks) with this exact format:
 \`\`\`json
 {
   "sentiment": "Positive|Neutral|Negative",
@@ -818,7 +1333,7 @@ When responding, you must:
 }
 \`\`\`
 
-Keep your conversational reply warm, human and concise. The student should feel heard and understood.`;
+Keep your conversational reply warm, healing and concise. The student should feel comforted.`;
 
         const requestBody = {
             system_instruction: { parts: [{ text: systemPrompt }] },
@@ -854,6 +1369,9 @@ Keep your conversational reply warm, human and concise. The student should feel 
                 }
             }
 
+            // Strip any [Mood: ...] label the model may still prepend (safety net)
+            replyText = replyText.replace(/^\[Mood:[^\]]*\]\s*/i, '').trim();
+
             // Add Gemini's response to conversation history
             conversationHistory.push({ role: 'model', parts: [{ text: replyText }] });
 
@@ -867,6 +1385,80 @@ Keep your conversational reply warm, human and concise. The student should feel 
     async function processStudentMessage(text) {
         // 1. Display student message
         appendChatMessage('Student', text);
+
+        // 1.5 Wardrobe change command detection (Both English and Chinese)
+        const outfitTriggers = [
+            { id: 'forest', keywords: ['森林', 'forest', 'mushroom', 'cloak', '南瓜', '南瓜短裤'] },
+            { id: 'starry', keywords: ['星空', 'starry', '睡衣', 'pajamas', 'moon', 'stars'] },
+            { id: 'nautical', keywords: ['航海', 'nautical', 'sailor', '水手', '海员'] },
+            { id: 'strawberry', keywords: ['草莓', 'strawberry', 'picnic', '野餐', '草莓野餐'] },
+            { id: 'wizard', keywords: ['魔法', 'magic', 'wizard', '巫师', '学徒'] },
+            { id: 'princess', keywords: ['公主', 'princess', 'dress', 'gown', 'tiara', '皇室', '礼服'] },
+            { id: 'mermaid', keywords: ['美人鱼', 'mermaid', 'shell', 'scale', '珍珠', 'pearl', '海洋'] },
+            { id: 'lolita', keywords: ['洛丽塔', 'lolita', 'ruffle', 'lace', '裙子', '蓬蓬裙'] },
+            { id: 'unicorn', keywords: ['独角兽', 'unicorn', 'rainbow', '彩虹', '翅膀', 'wings'] }
+        ];
+
+        const lowerText = text.toLowerCase();
+        // Check if message is a dressing command (e.g. contains 换, 穿, wear, change, dress, put on)
+        const isDressingCmd = /换|穿|wear|change|dress|put on|outfit|suit/.test(lowerText);
+        const matchedOutfit = isDressingCmd ? outfitTriggers.find(o => o.keywords.some(kw => lowerText.includes(kw))) : null;
+
+        if (matchedOutfit) {
+            avatarState.set('activeOutfit', matchedOutfit.id);
+            // Respond with dialogue styles matching the prompt
+            let replyMsg = "";
+
+            const isChinese = /[\u4e00-\u9fff]/.test(text);
+
+            if (matchedOutfit.id === 'forest') {
+                replyMsg = isChinese
+                    ? `看我！我已经穿上了“森林童话 (Forest Fairy Tale)”的绿色连帽斗篷和南瓜短裤啦。森林里有很多会发光的蘑菇哦，你想和我一起采蘑菇去吗？🍄`
+                    : `Look at me! I have put on the "Forest Fairy Tale" green hooded cloak and pumpkin shorts! There are lots of glowing mushrooms in the forest, would you like to go mushroom picking with me? 🍄`;
+            } else if (matchedOutfit.id === 'starry') {
+                replyMsg = isChinese
+                    ? `换上“星空睡衣 (Starry Sky Pajamas)”和暖乎乎的云朵棉鞋啦。好暖和呀...困意上来了，我们今晚一起数星星吧，呼噜噜...😴⭐`
+                    : `I'm wearing the "Starry Sky Pajamas" and soft cloud slippers now. So warm... I'm getting a bit sleepy... Let's count stars together tonight, zzz... 😴⭐`;
+            } else if (matchedOutfit.id === 'nautical') {
+                replyMsg = isChinese
+                    ? `扬帆起航！我穿上了“航海冒险 (Nautical Adventure)”带红领结的白蓝水手上衣和百褶裙。我们的目标是星辰大海，下一站去草莓岛！⚓⛵`
+                    : `All aboard! I've changed into the "Nautical Adventure" sailor uniform with the red bowtie. Our target is the starry sea, next stop is Strawberry Island! ⚓⛵`;
+            } else if (matchedOutfit.id === 'strawberry') {
+                replyMsg = isChinese
+                    ? `哒哒！“草莓野餐 (Strawberry Picnic)”粉色格纹草莓连衣裙穿在我身上超可爱吧？今天的天气最适合野餐了。呐，给你一个甜甜的新鲜大草莓！🍓`
+                    : `Tada! The "Strawberry Picnic" pink checkered dress looks so cute on me, doesn't it? The weather today is perfect for a picnic. Here, have a sweet, fresh strawberry! 🍓`;
+            } else if (matchedOutfit.id === 'wizard') {
+                replyMsg = isChinese
+                    ? `呼啦啦变！我已经化身为“魔法学徒 (Magic Apprentice)”，穿上了镶有金边的紫色连帽巫师长袍！正在念治愈咒语：所有的负能量 and 烦恼，退退退！🪄✨`
+                    : `Abrakadabra! I'm now a "Magic Apprentice" in a gold-trimmed purple wizard robe! Casting a healing spell: all negative energy and worries, fade away! 🪄✨`;
+            } else if (matchedOutfit.id === 'princess') {
+                replyMsg = isChinese
+                    ? `哇！穿上“皇家公主礼服 (Royal Princess Gown)”了！蓬松的裙摆和亮闪闪的金色饰带，我是不是很像童话里的高贵公主呀？愿你的每一天都充满魔法和喜悦！👑✨`
+                    : `Wow! I'm wearing the "Royal Princess Gown"! With a puffy skirt and glittering gold sash, don't I look like a noble princess from a fairy tale? May your day be filled with magic and joy! 👑✨`;
+            } else if (matchedOutfit.id === 'mermaid') {
+                replyMsg = isChinese
+                    ? `哗啦啦~我换上了“深海人鱼珍珠裙 (Mermaid Pearl Gown)”！裙摆上有闪闪发光的鱼鳞，腰带上还缀满了圆润的珍珠呢。走，我们一起去海底探险吧！🧜‍♀️🌊`
+                    : `Splash! I've changed into the "Mermaid Pearl Gown"! The skirt features shimmering fish scales and a belt made of beautiful white pearls. Let's go on an underwater adventure! 🧜‍♀️🌊`;
+            } else if (matchedOutfit.id === 'lolita') {
+                replyMsg = isChinese
+                    ? `哒啦！换上“甜心洛丽塔蓬蓬裙 (Sweet Lolita Ruffle)”啦。层层叠叠的蕾丝花边和超大粉色蝴蝶结，感觉自己变甜了十倍！要和我一起喝下午茶吗？🎀🍰`
+                    : `Tada! I've put on the "Sweet Lolita Ruffle" dress! With layers of white lace and a giant pink bow, I feel ten times sweeter! Want to join me for afternoon tea? 🎀🍰`;
+            } else if (matchedOutfit.id === 'unicorn') {
+                replyMsg = isChinese
+                    ? `起飞啦！这是最梦幻的“璀璨独角兽彩虹服 (Sparkling Unicorn Suit)”！背上有一对雪白的云朵翅膀，胸前还有一枚纯金的独角兽徽章，快骑上我飞跃彩虹吧！🦄🌈`
+                    : `Taking off! This is the magical "Sparkling Unicorn Suit"! Complete with fluffy white cloud wings and a golden unicorn badge, let's fly over the rainbow! 🦄🌈`;
+            }
+
+            // Remove typing indicator, show avatar change and speak
+            const typingId = showTypingIndicator();
+            setTimeout(() => {
+                removeTypingIndicator(typingId);
+                appendChatMessage('Buddy', replyMsg);
+                speakResponse(replyMsg, true);
+                syncStudentAnalysisToBackend(text, replyMsg, 'text');
+            }, 600);
+            return;
+        }
 
         // 2. Crisis keyword check (runs locally for safety — never wait on API for this)
         const crisisWords = ["harm myself", "kill myself", "suicide", "end my life", "slit", "cut myself", "overdose", "want to die"];
@@ -914,7 +1506,6 @@ Keep your conversational reply warm, human and concise. The student should feel 
             }
         ];
 
-        const lowerText = text.toLowerCase();
         const matchedFeature = featureIntents.find(f => f.keywords.some(kw => lowerText.includes(kw)));
 
         if (matchedFeature) {
@@ -972,7 +1563,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
         appendChatMessage('Buddy', reply);
         const geminiDiagnostic = formatGeminiDiagnostic();
         if (geminiDiagnostic) appendChatMessage('Buddy', geminiDiagnostic);
-        speakResponse(reply);
+        speakResponse(reply, true);
         syncStudentAnalysisToBackend(text, reply, 'text');
     }
 
@@ -1095,15 +1686,19 @@ Keep your conversational reply warm, human and concise. The student should feel 
     }
 
     function generateLocalReply() {
+        let baseReply = "";
         if (state.diagnostics.burnout > 60 || state.diagnostics.academicPressure > 60)
-            return getRandomElement(EmpatheticDB.stressBurnout);
-        if (state.diagnostics.academicPressure > 50)
-            return getRandomElement(EmpatheticDB.stressAcademic);
-        if (state.diagnostics.socialAnxiety > 50 || state.diagnostics.loneliness > 50)
-            return getRandomElement(EmpatheticDB.stressSocial);
-        if (state.diagnostics.loneliness > 40)
-            return getRandomElement(EmpatheticDB.stressLoneliness);
-        return getRandomElement(EmpatheticDB.defaultCalm);
+            baseReply = getRandomElement(EmpatheticDB.stressBurnout);
+        else if (state.diagnostics.academicPressure > 50)
+            baseReply = getRandomElement(EmpatheticDB.stressAcademic);
+        else if (state.diagnostics.socialAnxiety > 50 || state.diagnostics.loneliness > 50)
+            baseReply = getRandomElement(EmpatheticDB.stressSocial);
+        else if (state.diagnostics.loneliness > 40)
+            baseReply = getRandomElement(EmpatheticDB.stressLoneliness);
+        else
+            baseReply = getRandomElement(EmpatheticDB.defaultCalm);
+
+        return baseReply;
     }
 
     function showTypingIndicator() {
@@ -1237,50 +1832,101 @@ Keep your conversational reply warm, human and concise. The student should feel 
     // -----------------------------------------------------------------------
     // TTS SYNTHESIS — Smooth, humanised female voice
     // -----------------------------------------------------------------------
-    // Cache the preferred voice after voices load
-    let _selectedVoice = null;
-
-    function loadFemaleVoice() {
+    // -----------------------------------------------------------------------
+    // Dynamic Voice Synthesis Picker (Supports Cross-lingual Chinese/English)
+    // -----------------------------------------------------------------------
+    function selectVoiceForText(text) {
+        if (!('speechSynthesis' in window)) return null;
         const voices = window.speechSynthesis.getVoices();
         if (!voices.length) return null;
 
-        // Priority list — most natural/female-sounding voices across browsers
-        const FEMALE_PRIORITY = [
-            'Google UK English Female',
-            'Microsoft Aria Online (Natural) - English (United States)',
-            'Microsoft Aria - English (United States)',
-            'Microsoft Jenny Online (Natural) - English (United States)',
-            'Microsoft Jenny - English (United States)',
-            'Microsoft Zira - English (United States)',
-            'Samantha',          // macOS
-            'Karen',             // macOS Australian
-            'Moira',             // macOS Irish
-            'Google US English', // generic Google female
-        ];
+        const isChinese = /[\u4e00-\u9fff]/.test(text);
 
-        for (const name of FEMALE_PRIORITY) {
-            const v = voices.find(v => v.name === name);
-            if (v) return v;
+        if (isChinese) {
+            // "Cozy Sweet" priority Chinese voices (Xiaoyi / Xiaoxiao online neural)
+            const CHINESE_PRIORITY = [
+                'Microsoft Xiaoyi Online (Natural) - Chinese (Mainland)',
+                'Microsoft Xiaoxiao Online (Natural) - Chinese (Mainland)',
+                'Microsoft Yaoyao Online (Natural) - Chinese (Mainland)',
+                'Google 简体中文',
+                'Microsoft Huihui Desktop - Chinese (Simplified)',
+                'Microsoft Huihui - Chinese (Simplified)',
+                'Ting-Ting',
+                'Mei-Jia',
+                'Sin-Ji'
+            ];
+            for (const name of CHINESE_PRIORITY) {
+                const v = voices.find(v => v.name === name);
+                if (v) return v;
+            }
+            const fallbackZH = voices.find(v => (v.lang.startsWith('zh') || v.lang.startsWith('CN')) && !v.name.toLowerCase().includes('male'));
+            if (fallbackZH) return fallbackZH;
+        } else {
+            // "Cozy Sweet" priority English voices (Ana / Jenny online neural)
+            const ENGLISH_PRIORITY = [
+                'Microsoft Ana Online (Natural) - English (United States)',
+                'Microsoft Jenny Online (Natural) - English (United States)',
+                'Microsoft Aria Online (Natural) - English (United States)',
+                'Google US English',
+                'Google UK English Female',
+                'Samantha',
+                'Microsoft Zira Desktop - English (United States)',
+                'Microsoft Zira - English (United States)'
+            ];
+            for (const name of ENGLISH_PRIORITY) {
+                const v = voices.find(v => v.name === name);
+                if (v) return v;
+            }
+            const fallbackEN = voices.find(v => v.lang.startsWith('en') && !v.name.toLowerCase().includes('male'));
+            if (fallbackEN) return fallbackEN;
         }
 
-        // Fallback: pick any voice whose name contains 'female' or whose lang starts with 'en'
-        return (
-            voices.find(v => v.name.toLowerCase().includes('female')) ||
-            voices.find(v => v.lang.startsWith('en') && !v.name.toLowerCase().includes('male')) ||
-            voices[0]
-        );
+        // Global fallback: find ANY voice with female indicators or a non-male voice
+        const femaleKeywords = ['female', 'girl', 'jenny', 'aria', 'xiaoxiao', 'yaoyao', 'zira', 'samantha', 'hazel', 'karen', 'huihui', 'haruka', 'nanami', 'heera', 'swara', 'lulu', 'sin-ji', 'ting-ting', 'mei-jia', 'ana', 'helen', 'zira', 'katherine', 'linda', 'susan', 'yasmin', 'chloe', 'elena'];
+        for (const kw of femaleKeywords) {
+            const v = voices.find(v => v.name.toLowerCase().includes(kw));
+            if (v) return v;
+        }
+        
+        const maleKeywords = ['male', 'david', 'george', 'mark', 'sean', 'ravi', 'guy', 'stefan', 'hector', 'pavel', 'danny'];
+        const nonMaleVoice = voices.find(v => {
+            const nameLower = v.name.toLowerCase();
+            return !maleKeywords.some(kw => nameLower.includes(kw));
+        });
+        if (nonMaleVoice) return nonMaleVoice;
+
+        return voices[0];
     }
 
-    // Voices may not be available synchronously on first load
-    if (window.speechSynthesis) {
+    // Preload voices as early as possible and cache them.
+    // Chrome loads voices asynchronously — without this, getVoices() returns []
+    // on the first call and the browser silently falls back to the default robot voice.
+    let _voicesReady = false;
+    let _voicesReadyCallbacks = [];
+
+    function onVoicesReady(cb) {
+        if (_voicesReady) { cb(); return; }
+        _voicesReadyCallbacks.push(cb);
+    }
+
+    function _initVoices() {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+            _voicesReady = true;
+            _voicesReadyCallbacks.forEach(cb => cb());
+            _voicesReadyCallbacks = [];
+        }
+    }
+
+    if ('speechSynthesis' in window) {
         window.speechSynthesis.onvoiceschanged = () => {
-            _selectedVoice = loadFemaleVoice();
+            _initVoices();
         };
-        // Also attempt immediately (works in Firefox & Safari)
-        _selectedVoice = loadFemaleVoice();
+        // Also try immediately in case voices are already cached (Firefox / some Chromium builds)
+        _initVoices();
     }
 
-    function speakResponse(text) {
+    function speakResponse(text, enableAudio = false) {
         // Duration estimation for animation: ~60ms per character at natural speech rate
         const animationDuration = Math.max(1500, text.length * 60);
         triggerAvatarSpeechSpeak(animationDuration);
@@ -1289,21 +1935,43 @@ Keep your conversational reply warm, human and concise. The student should feel 
         const bubble = document.getElementById('avatar-speech-bubble');
         if (bubble) bubble.innerHTML = `<span>${text}</span>`;
 
+        if (!enableAudio) return; // Keep customizer actions completely silent!
+
         if (!('speechSynthesis' in window)) return;
 
         window.speechSynthesis.cancel();
 
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate  = 0.95;  // Slightly slower than default — warm, unhurried pace
-        utterance.pitch = 1.15;  // Slightly higher — soft feminine register
-        utterance.volume = 1.0;
+        // Clean up markdown syntax so the voice doesn't spell out asterisks or emojis
+        const cleanText = text
+            .replace(/[*#_`~]/g, '') // remove markdown characters
+            .replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]/g, ''); // remove emojis
 
-        // Assign cached voice (re-fetch if not yet loaded)
-        if (!_selectedVoice) _selectedVoice = loadFemaleVoice();
-        if (_selectedVoice) utterance.voice = _selectedVoice;
+        // Wait for voices to be ready before speaking to avoid the robot-voice fallback bug.
+        // On Chrome, getVoices() returns [] until the voiceschanged event fires.
+        onVoicesReady(() => {
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            
+            // Detect language and select best high-quality voice
+            const voice = selectVoiceForText(cleanText);
+            
+            utterance.voice = voice;
+            utterance.volume = 1.0;
+            
+            // Check if the voice is a high-fidelity natural neural/online voice
+            const isNatural = voice && (
+                voice.name.toLowerCase().includes('natural') || 
+                voice.name.toLowerCase().includes('online') ||
+                voice.name.toLowerCase().includes('google') ||
+                voice.name.toLowerCase().includes('samantha')
+            );
 
-        // Small delay avoids Chrome's speech-queue bug where first utterance is clipped
-        setTimeout(() => window.speechSynthesis.speak(utterance), 80);
+            // Cozy Sweet parameters: rate = 1.0, pitch = high but smooth to sound sweet and childlike
+            utterance.rate = 1.0;
+            utterance.pitch = isNatural ? 1.22 : 1.30;
+
+            // Small delay avoids Chrome's speech-queue bug where first utterance is clipped
+            setTimeout(() => window.speechSynthesis.speak(utterance), 80);
+        });
     }
 
     // ----------------------------------------------------------------------
@@ -1315,7 +1983,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
         
         // 2. Play warm emergency dialogue
         const safeText = "Hey, I'm listening. Please hear me: you don't have to go through this alone. I want to keep you safe, and there are human professionals who care deeply and can support you right now. I've brought up their phone numbers on your screen. Please reach out to them immediately.";
-        speakResponse(safeText);
+        speakResponse(safeText, true);
         appendChatMessage('Buddy', "⚠️ **Safety Alert triggered:** I'm very concerned about you. Please utilize the resources on your screen or reach out to a counselor right now. You are not alone.");
         
         // Update SOS telemetry status preview inside the modal
@@ -1617,7 +2285,7 @@ Keep your conversational reply warm, human and concise. The student should feel 
                 summaryResponse = `I processed your rant. I hear that you're going through a lot. Specifically, ${pauseAssessment}, and you spoke at ${speedAssessment}. Getting those words out is an excellent step to unpack stress. I'm right here with you. What would you like to focus on next?`;
             }
             appendChatMessage('Buddy', summaryResponse);
-            speakResponse(summaryResponse);
+            speakResponse(summaryResponse, true);
             syncStudentAnalysisToBackend(transcriptText, summaryResponse, 'voice', {
                 speechRateWpm: wpmVal,
                 pauseCount: state.rant.pauseCount,
@@ -2557,8 +3225,8 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
     // ----------------------------------------------------------------------
     // AVATAR CUSTOMIZER SYSTEM (BITMOJI SYSTEM DEFINITIONS)
     // ----------------------------------------------------------------------
-    let activeCategory = 'Fashion';
-    let activeSubcategory = 'Tops';
+    let activeCategory = 'Avatar';
+    let activeSubcategory = 'Mascot Color';
 
     function unlockPremiumItem(prop, val) {
         let unlocked = [];
@@ -2581,98 +3249,86 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
 
     const AVATAR_CATALOG = {
         Fashion: {
-            subcategories: ['Tops', 'Bottoms', 'Shoes'],
+            subcategories: ['Outfits'],
             items: {
-                Tops: [
-                    { id: 'hoodie', label: 'Classic Hoodie', prop: 'shirtStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="40" width="40" height="40" rx="8" fill="#4f46e5"/><path d="M40,40 L50,30 L60,40 Z" fill="#3730a3"/></svg>' },
-                    { id: 'tshirt', label: 'Sporty T-Shirt', prop: 'shirtStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="40" width="36" height="40" rx="4" fill="#0d9488"/><rect x="24" y="40" width="52" height="12" rx="4" fill="#0d9488"/></svg>' },
-                    { id: 'sweater', label: 'Cozy Sweater', prop: 'shirtStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="28" y="38" width="44" height="44" rx="10" fill="#ea580c"/></svg>' }
-                ],
-                Bottoms: [
-                    { id: 'shorts', label: 'Casual Shorts', prop: 'pantsStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="45" width="16" height="24" rx="2" fill="#1e293b"/><rect x="52" y="45" width="16" height="24" rx="2" fill="#1e293b"/></svg>' },
-                    { id: 'cargo', label: 'Cargo Trousers', prop: 'pantsStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="40" width="16" height="45" rx="4" fill="#78716c"/><rect x="52" y="40" width="16" height="45" rx="4" fill="#78716c"/></svg>' },
-                    { id: 'jogger', label: 'Jogger Pants', prop: 'pantsStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="40" width="16" height="42" rx="4" fill="#374151"/><rect x="52" y="40" width="16" height="42" rx="4" fill="#374151"/></svg>' }
-                ],
-                Shoes: [
-                    { id: 'sneakers', label: 'Grey Sneakers', prop: 'shoes', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="48" width="40" height="18" rx="6" fill="#94a3b8"/><rect x="30" y="60" width="40" height="6" fill="#ffffff"/></svg>' },
-                    { id: 'boots', label: 'Outdoor Boots', prop: 'shoes', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="38" width="40" height="28" rx="8" fill="#78350f"/><rect x="30" y="60" width="40" height="6" fill="#451a03"/></svg>' },
-                    { id: 'sandals', label: 'Comfy Slides', prop: 'shoes', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="50" width="40" height="12" rx="4" fill="#1e3a8a"/><rect x="35" y="44" width="30" height="8" fill="#1d4ed8"/></svg>' }
+                Outfits: [
+                    { id: 'none', label: 'Default Body', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#dbf7f9" stroke="#8cdbe1" stroke-width="3"/></svg>' },
+                    { id: 'forest', label: 'Forest Tale', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#606c38" stroke="#283618" stroke-width="3"/><circle cx="24" cy="24" r="6" fill="#e07a5f"/></svg>' },
+                    { id: 'starry', label: 'Starry Pajama', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#1d2d50" stroke="#111827" stroke-width="3"/><polygon points="24,16 26,21 31,21 27,24 29,29 24,26 19,29 21,24 17,21 22,21" fill="#ffd166"/></svg>' },
+                    { id: 'nautical', label: 'Sailor Dress', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#ffffff" stroke="#2b5c8f" stroke-width="3"/><circle cx="24" cy="24" r="8" fill="#2b5c8f"/></svg>' },
+                    { id: 'strawberry', label: 'Strawberry Picnic', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#fca5a5" stroke="#e11d48" stroke-width="3"/><circle cx="24" cy="24" r="6" fill="#e11d48"/></svg>' },
+                    { id: 'wizard', label: 'Wizard Cape', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#4a154b" stroke="#ffd166" stroke-width="3"/><polygon points="24,14 26,19 31,19 27,22 29,27 24,24 19,27 21,22 17,19 22,19" fill="#ffd166"/></svg>' },
+                    { id: 'princess', label: 'Princess Gown 👑', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#f43f5e" stroke="#4A3E3D" stroke-width="2.5"/><circle cx="24" cy="24" r="6" fill="#fef08a" stroke="#4A3E3D" stroke-width="1.5"/></svg>' },
+                    { id: 'mermaid', label: 'Mermaid Gown 🧜‍♀️', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#0284c7" stroke="#4A3E3D" stroke-width="2.5"/><path d="M 18,24 Q 24,18 30,24" stroke="#ffffff" stroke-width="1.5"/></svg>' },
+                    { id: 'lolita', label: 'Lolita Ruffle 🎀', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#bae6fd" stroke="#4A3E3D" stroke-width="2.5"/><path d="M 20,24 H 28" stroke="#ffb3cc" stroke-width="2.5"/></svg>' },
+                    { id: 'unicorn', label: 'Unicorn Suit 🦄', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#fca5a5" stroke="#4A3E3D" stroke-width="2.5"/><polygon points="24,16 21,24 27,24" fill="#facc15" stroke="#4A3E3D" stroke-width="1.5"/></svg>' }
                 ]
             }
         },
-        Selfie: {
-            subcategories: ['Expression'],
-            items: {
-                Expression: [
-                    { id: 'friendly', label: 'Friendly Smile', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="white" stroke-width="4"/><circle cx="40" cy="45" r="3.5" fill="white"/><circle cx="60" cy="45" r="3.5" fill="white"/><path d="M40,60 Q50,70 60,60" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>' },
-                    { id: 'thoughtful', label: 'Thinking Pose', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="white" stroke-width="4"/><circle cx="40" cy="45" r="3.5" fill="white"/><circle cx="60" cy="45" r="3.5" fill="white"/><line x1="42" y1="62" x2="58" y2="62" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>' },
-                    { id: 'attentive', label: 'Focused Look', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="white" stroke-width="4"/><circle cx="40" cy="45" r="3" fill="white"/><circle cx="60" cy="45" r="3" fill="white"/><path d="M44,60 Q50,64 56,60" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>' },
-                    { id: 'excited', label: 'Excited Grin', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="white" stroke-width="4"/><circle cx="40" cy="45" r="3.5" fill="white"/><circle cx="60" cy="45" r="3.5" fill="white"/><path d="M38,58 Q50,72 62,58 Z" fill="white" stroke="white" stroke-width="1"/></svg>' }
-                ]
-            }
-        },
+
         Pet: {
             subcategories: ['Pets'],
             items: {
                 Pets: [
-                    { id: 'none', label: 'No Pet', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="#64748b" stroke-width="4" stroke-dasharray="4,4"/><line x1="35" y1="35" x2="65" y2="65" stroke="#64748b" stroke-width="4"/></svg>' },
-                    { id: 'cat', label: 'Kitty Cat', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="22" fill="#f59e0b"/><polygon points="34,36 30,16 44,28" fill="#d97706"/><polygon points="66,36 70,16 56,28" fill="#d97706"/><circle cx="42" cy="48" r="2" fill="#1e293b"/><circle cx="58" cy="48" r="2" fill="#1e293b"/><polygon points="50,54 48,52 52,52" fill="#1e293b"/></svg>' },
-                    { id: 'dog', label: 'Loyal Pup', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="22" fill="#78350f"/><path d="M30,42 Q18,48 24,65" fill="none" stroke="#78350f" stroke-width="6"/><path d="M70,42 Q82,48 76,65" fill="none" stroke="#78350f" stroke-width="6"/><circle cx="42" cy="48" r="2" fill="#f8fafc"/><circle cx="58" cy="48" r="2" fill="#f8fafc"/><ellipse cx="50" cy="54" rx="3" ry="1.5" fill="#0f172a"/></svg>' },
-                    { id: 'bird', label: 'Blue Bird', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="20" fill="#3b82f6"/><polygon points="66,46 72,50 66,54" fill="#f59e0b"/><circle cx="56" cy="46" r="2" fill="#0f172a"/><path d="M38,48 Q44,42 50,56" fill="none" stroke="#2563eb" stroke-width="5" stroke-linecap="round"/></svg>' }
-                ]
-            }
-        },
-        Scene: {
-            subcategories: ['Backgrounds'],
-            items: {
-                Backgrounds: [
-                    { id: 'yellow', label: 'Sunny Yellow', prop: 'scene', color: '#ffd02c' },
-                    { id: 'purple', label: 'Dreamy Purple', prop: 'scene', color: 'linear-gradient(135deg, #a78bfa, #c084fc)' },
-                    { id: 'blue', label: 'Sky Blue', prop: 'scene', color: 'linear-gradient(135deg, #38bdf8, #0ea5e9)' },
-                    { id: 'green', label: 'Forest Green', prop: 'scene', color: 'linear-gradient(135deg, #34d399, #059669)' },
-                    { id: 'sunset', label: 'Sunset Orange', prop: 'scene', color: 'linear-gradient(135deg, #fb923c, #db2777)' }
+                    { id: 'none', label: 'No Pet', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="24" fill="none" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="4,4"/><line x1="35" y1="35" x2="65" y2="65" stroke="#cbd5e1" stroke-width="3"/></svg>' },
+                    { id: 'cat', label: 'Orange Cat', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="50" cy="85" rx="22" ry="5" fill="#4A3E3D" opacity="0.22" /><path d="M 68,78 Q 80,82 85,70 Q 90,58 83,52" fill="none" stroke="#4A3E3D" stroke-width="4" stroke-linecap="round" /><path d="M 68,78 Q 80,82 85,70 Q 90,58 83,52" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" /><ellipse cx="50" cy="72" rx="18" ry="15" fill="#f59e0b" stroke="#4A3E3D" stroke-width="4" /><ellipse cx="44" cy="82" rx="5" ry="4" fill="#f59e0b" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="56" cy="82" rx="5" ry="4" fill="#f59e0b" stroke="#4A3E3D" stroke-width="3" /><circle cx="50" cy="46" r="20" fill="#f59e0b" stroke="#4A3E3D" stroke-width="4" /><polygon points="32,36 30,16 46,28" fill="#f59e0b" stroke="#4A3E3D" stroke-width="4" stroke-linejoin="round" /><polygon points="32,36 30,16 46,28" fill="#f59e0b" /><polygon points="34,31 33,20 42,27" fill="#ff8fab" /><polygon points="68,36 70,16 54,28" fill="#f59e0b" stroke="#4A3E3D" stroke-width="4" stroke-linejoin="round" /><polygon points="68,36 70,16 54,28" fill="#f59e0b" /><polygon points="66,31 67,20 58,27" fill="#ff8fab" /><circle cx="42" cy="45" r="3" fill="#4A3E3D" /><circle cx="58" cy="45" r="3" fill="#4A3E3D" /><circle cx="36" cy="51" r="3" fill="#ffa2b6" opacity="0.85" /><circle cx="64" cy="51" r="3" fill="#ffa2b6" opacity="0.85" /><path d="M 47,50 Q 50,53 53,50" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round" /><path d="M 53,50 Q 56,53 59,50" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round" /><polygon points="50,47 48,45 52,45" fill="#4A3E3D" /><line x1="28" y1="48" x2="20" y2="47" stroke="#4A3E3D" stroke-width="2.5" stroke-linecap="round" /><line x1="28" y1="52" x2="21" y2="53" stroke="#4A3E3D" stroke-width="2.5" stroke-linecap="round" /><line x1="72" y1="48" x2="80" y2="47" stroke="#4A3E3D" stroke-width="2.5" stroke-linecap="round" /><line x1="72" y1="52" x2="79" y2="53" stroke="#4A3E3D" stroke-width="2.5" stroke-linecap="round" /></svg>' },
+                    { id: 'dog', label: 'Loyal Pup', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="50" cy="85" rx="22" ry="5" fill="#4A3E3D" opacity="0.22" /><path d="M 32,78 Q 20,82 15,70" fill="none" stroke="#4A3E3D" stroke-width="4" stroke-linecap="round" /><path d="M 32,78 Q 20,82 15,70" fill="none" stroke="#78350f" stroke-width="2.5" stroke-linecap="round" /><ellipse cx="50" cy="72" rx="18" ry="15" fill="#78350f" stroke="#4A3E3D" stroke-width="4" /><ellipse cx="44" cy="82" rx="5" ry="4" fill="#78350f" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="56" cy="82" rx="5" ry="4" fill="#78350f" stroke="#4A3E3D" stroke-width="3" /><circle cx="50" cy="46" r="20" fill="#78350f" stroke="#4A3E3D" stroke-width="4" /><path d="M 32,36 C 22,36 20,52 26,58 C 28,52 32,46 32,36 Z" fill="#451a03" stroke="#4A3E3D" stroke-width="4" stroke-linejoin="round" /><path d="M 32,36 C 22,36 20,52 26,58 C 28,52 32,46 32,36 Z" fill="#451a03" /><path d="M 68,36 C 78,36 80,52 74,58 C 72,52 68,46 68,36 Z" fill="#451a03" stroke="#4A3E3D" stroke-width="4" stroke-linejoin="round" /><path d="M 68,36 C 78,36 80,52 74,58 C 72,52 68,46 68,36 Z" fill="#451a03" /><circle cx="42" cy="45" r="3" fill="#4A3E3D" /><circle cx="58" cy="45" r="3" fill="#4A3E3D" /><circle cx="36" cy="51" r="3" fill="#ffa2b6" opacity="0.85" /><circle cx="64" cy="51" r="3" fill="#ffa2b6" opacity="0.85" /><ellipse cx="50" cy="51" rx="6" ry="4.5" fill="#fef3c7" stroke="#4A3E3D" stroke-width="2.5" /><ellipse cx="50" cy="48" rx="3" ry="2" fill="#4A3E3D" /><path d="M 50,51 L 50,53" stroke="#4A3E3D" stroke-width="2.5" /></svg>' },
+                    { id: 'bird', label: 'Blue Bird', prop: 'pet', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 30,15 C 32,12 36,12 38,15" fill="none" stroke="#4A3E3D" stroke-width="2.5" stroke-linecap="round" /><path d="M 62,15 C 64,12 68,12 70,15" fill="none" stroke="#4A3E3D" stroke-width="2.5" stroke-linecap="round" /><ellipse cx="50" cy="85" rx="16" ry="4" fill="#4A3E3D" opacity="0.22" /><polygon points="30,68 16,74 24,60" fill="#3b82f6" stroke="#4A3E3D" stroke-width="4" stroke-linejoin="round" /><polygon points="30,68 16,74 24,60" fill="#3b82f6" /><circle cx="50" cy="56" r="22" fill="#3b82f6" stroke="#4A3E3D" stroke-width="4" /><path d="M 42,56 C 42,48 54,48 54,58 C 54,64 42,64 42,56 Z" fill="#2563eb" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" /><circle cx="54" cy="38" r="16" fill="#3b82f6" stroke="#4A3E3D" stroke-width="4" /><polygon points="68,36 78,41 68,46" fill="#f59e0b" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" /><polygon points="68,36 78,41 68,46" fill="#f59e0b" /><circle cx="56" cy="34" r="2.5" fill="#4A3E3D" /><circle cx="50" cy="40" r="2.5" fill="#ffa2b6" opacity="0.85" /></svg>' }
                 ]
             }
         },
         Avatar: {
-            subcategories: ['Hairstyles', 'Skin Tones', 'Glasses', 'Hair Color', 'Shirt Color'],
+            subcategories: ['Mascot Color', 'Expressions', 'Cheek Blushes', 'Face Accessories'],
             items: {
-                Hairstyles: [
-                    { id: 'crop', label: 'Sleek Crop', prop: 'hairStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M25,60 C25,20 75,20 75,60 C65,40 55,30 50,30 C45,30 35,40 25,60 Z" fill="#1e293b"/></svg>' },
-                    { id: 'curly', label: 'Curly Afro', prop: 'hairStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="26" fill="#1e293b" stroke="#334155" stroke-width="3" stroke-dasharray="6,4"/></svg>' },
-                    { id: 'bob', label: 'Bob Cut', prop: 'hairStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M25,60 C25,25 75,25 75,60 L75,70 C65,75 55,78 50,78 C45,78 35,75 25,70 Z" fill="#1e293b"/></svg>' },
-                    { id: 'long', label: 'Long Wave', prop: 'hairStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M25,60 C25,20 75,20 75,60 M20,55 L20,80 C20,90 35,90 35,80 Z M80,55 L80,80 C80,90 65,90 65,80 Z" fill="#1e293b"/></svg>' },
-                    { id: 'bald', label: 'Shaved', prop: 'hairStyle', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="55" r="24" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="4,4"/></svg>' }
+                'Mascot Color': [
+                    { id: '#ffd6e0', label: 'Soft Cloud Pink', prop: 'skinTone', color: '#ffd6e0' },
+                    { id: '#dbf7f9', label: 'Pastel Sky Blue', prop: 'skinTone', color: '#dbf7f9' },
+                    { id: '#e8f5e9', label: 'Mint Green', prop: 'skinTone', color: '#e8f5e9' },
+                    { id: '#e8dff5', label: 'Lavender Sweet', prop: 'skinTone', color: '#e8dff5' }
                 ],
-                'Skin Tones': [
-                    { id: '#ffdbac', label: 'Fair', prop: 'skinTone', color: '#ffdbac' },
-                    { id: '#f1c27d', label: 'Peach', prop: 'skinTone', color: '#f1c27d' },
-                    { id: '#e0ac69', label: 'Honey', prop: 'skinTone', color: '#e0ac69' },
-                    { id: '#c68642', label: 'Bronze', prop: 'skinTone', color: '#c68642' },
-                    { id: '#8d5524', label: 'Deep', prop: 'skinTone', color: '#8d5524' },
-                    { id: '#FFD1A4', label: '深夜食堂', prop: 'skinTone', color: '#FFD1A4', locked: true },
-                    { id: '#C8A2C8', label: '赛博朋克', prop: 'skinTone', color: '#C8A2C8', locked: true },
-                    { id: '#87CEEB', label: '深空流浪', prop: 'skinTone', color: '#87CEEB', locked: true },
-                    { id: '#98FB98', label: '荒野求生', prop: 'skinTone', color: '#98FB98', locked: true }
+                'Expressions': [
+                    { id: 'friendly', label: 'Happy Smile', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="45" r="5" fill="#4A3E3D"/><circle cx="65" cy="45" r="5" fill="#4A3E3D"/><path d="M 44,55 Q 50,60 56,55" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round"/></svg>' },
+                    { id: 'starry', label: 'Joyful Squint', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 28,42 L 38,47 L 28,52" fill="none" stroke="#4A3E3D" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" /><path d="M 72,42 L 62,47 L 72,52" fill="none" stroke="#4A3E3D" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" /><path d="M 43,54 Q 46.5,57.5 50,54 Q 53.5,57.5 57,54" fill="none" stroke="#4A3E3D" stroke-width="3.5" stroke-linecap="round"/></svg>' },
+                    { id: 'wink', label: 'Wink Face', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 28,48 Q 35,42 42,48" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round"/><circle cx="65" cy="45" r="5" fill="#4A3E3D"/><path d="M 44,55 Q 50,60 56,55" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round"/></svg>' },
+                    { id: 'sleepy', label: 'Sleepy Eyes', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 28,44 Q 35,50 42,44" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round"/><path d="M 58,44 Q 65,50 72,44" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round"/><circle cx="50" cy="56" r="3.5" fill="#4A3E3D"/></svg>' },
+                    { id: 'blep', label: 'Blep 👅', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 28,44 Q 35,52 42,44" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round"/><path d="M 58,44 Q 65,52 72,44" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round"/><path d="M 44,55 Q 50,61 56,55" fill="#4A3E3D" stroke="#4A3E3D" stroke-width="2" stroke-linecap="round"/><ellipse cx="50" cy="64" rx="5" ry="4" fill="#ff8fab" stroke="#e05c7a" stroke-width="1.2"/></svg>' },
+                    { id: 'uwu', label: 'UwU 🥺', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 26,45 Q 30,56 36,52 Q 42,48 43,40" fill="none" stroke="#4A3E3D" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M 74,45 Q 70,56 64,52 Q 58,48 57,40" fill="none" stroke="#4A3E3D" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M 42,57 Q 50,65 58,57" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round"/></svg>' },
+                    { id: 'teary', label: 'Teary Joy 🥹', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="45" r="8" fill="#3c2f46"/><circle cx="32" cy="42" r="3" fill="#fff"/><ellipse cx="27" cy="55" rx="2.5" ry="4" fill="#bae6fd" opacity="0.9"/><circle cx="65" cy="45" r="8" fill="#3c2f46"/><circle cx="62" cy="42" r="3" fill="#fff"/><ellipse cx="73" cy="55" rx="2.5" ry="4" fill="#bae6fd" opacity="0.9"/><path d="M 42,57 Q 50,65 58,57" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round"/></svg>' },
+                    { id: 'cat', label: 'Cat Face 🐱', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 27,52 L 37,46 L 47,52" fill="none" stroke="#4A3E3D" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M 73,52 L 63,46 L 53,52" fill="none" stroke="#4A3E3D" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M 43,58 Q 47,54 50,58 Q 53,54 57,58" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>' }
                 ],
-                Glasses: [
-                    { id: 'none', label: 'No Glasses', prop: 'glasses', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="none" stroke="#64748b" stroke-width="4" stroke-dasharray="4,4"/><line x1="35" y1="35" x2="65" y2="65" stroke="#64748b" stroke-width="4"/></svg>' },
-                    { id: 'gold', label: '智者金丝', prop: 'glasses', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="26" y="45" width="20" height="12" rx="4" fill="none" stroke="#f59e0b" stroke-width="4"/><rect x="54" y="45" width="20" height="12" rx="4" fill="none" stroke="#f59e0b" stroke-width="4"/><line x1="46" y1="51" x2="54" y2="51" stroke="#f59e0b" stroke-width="4"/></svg>', locked: true },
-                    { id: 'green', label: '复古黑框', prop: 'glasses', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="26" y="45" width="20" height="12" rx="4" fill="none" stroke="#10b981" stroke-width="4"/><rect x="54" y="45" width="20" height="12" rx="4" fill="none" stroke="#10b981" stroke-width="4"/><line x1="46" y1="51" x2="54" y2="51" stroke="#10b981" stroke-width="4"/></svg>', locked: true }
+                'Cheek Blushes': [
+                    { id: 'circle', label: 'Classic Rosy Circles', prop: 'blushShape', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="50" rx="10" ry="6" fill="#ffa2b6" opacity="0.85"/><ellipse cx="70" cy="50" rx="10" ry="6" fill="#ffa2b6" opacity="0.85"/></svg>' },
+                    { id: 'heart', label: 'Tiny Pink Hearts', prop: 'blushShape', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 25,48 C 22,43 18,48 25,55 C 32,48 28,43 25,48 Z" fill="#ffa2b6"/><path d="M 75,48 C 72,43 68,48 75,55 C 82,48 78,43 75,48 Z" fill="#ffa2b6"/></svg>' },
+                    { id: 'star', label: 'Soft Mini Stars', prop: 'blushShape', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="30,42 32,46 36,46 33,48 34,52 30,50 26,52 27,48 24,46 28,46" fill="#ffa2b6"/><polygon points="70,42 72,46 76,46 73,48 74,52 70,50 66,52 67,48 64,46 68,46" fill="#ffa2b6"/></svg>' },
+                    { id: 'sakura', label: 'Sakura Blossoms 🌸', prop: 'blushShape', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="46" rx="5" ry="2.5" fill="#ffb7cc" opacity="0.9" transform="rotate(-20,30,46)"/><ellipse cx="37" cy="48" rx="5" ry="2.5" fill="#ffb7cc" opacity="0.9" transform="rotate(30,37,48)"/><ellipse cx="34" cy="56" rx="5" ry="2.5" fill="#ffb7cc" opacity="0.9" transform="rotate(80,34,56)"/><ellipse cx="26" cy="56" rx="5" ry="2.5" fill="#ffb7cc" opacity="0.9" transform="rotate(130,26,56)"/><ellipse cx="23" cy="48" rx="5" ry="2.5" fill="#ffb7cc" opacity="0.9" transform="rotate(170,23,48)"/><circle cx="30" cy="51" r="3" fill="#fff0f5" opacity="0.95"/><ellipse cx="70" cy="46" rx="5" ry="2.5" fill="#ffb7cc" opacity="0.9" transform="rotate(-20,70,46)"/><ellipse cx="77" cy="48" rx="5" ry="2.5" fill="#ffb7cc" opacity="0.9" transform="rotate(30,77,48)"/><ellipse cx="74" cy="56" rx="5" ry="2.5" fill="#ffb7cc" opacity="0.9" transform="rotate(80,74,56)"/><ellipse cx="66" cy="56" rx="5" ry="2.5" fill="#ffb7cc" opacity="0.9" transform="rotate(130,66,56)"/><ellipse cx="63" cy="48" rx="5" ry="2.5" fill="#ffb7cc" opacity="0.9" transform="rotate(170,63,48)"/><circle cx="70" cy="51" r="3" fill="#fff0f5" opacity="0.95"/></svg>' },
+                    { id: 'sparkle', label: 'Sparkle Dust ✨', prop: 'blushShape', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 26,46 L 28,51 L 26,56 L 24,51 Z" fill="#ffcce0" opacity="0.95"/><path d="M 21,51 L 26,49 L 31,51 L 26,53 Z" fill="#ffcce0" opacity="0.95"/><path d="M 35,44 L 36,47 L 35,50 L 34,47 Z" fill="#ffa2c0" opacity="0.9"/><path d="M 32,47 L 35,46 L 38,47 L 35,48 Z" fill="#ffa2c0" opacity="0.9"/><path d="M 66,46 L 68,51 L 66,56 L 64,51 Z" fill="#ffcce0" opacity="0.95"/><path d="M 61,51 L 66,49 L 71,51 L 66,53 Z" fill="#ffcce0" opacity="0.95"/><path d="M 75,44 L 76,47 L 75,50 L 74,47 Z" fill="#ffa2c0" opacity="0.9"/><path d="M 72,47 L 75,46 L 78,47 L 75,48 Z" fill="#ffa2c0" opacity="0.9"/></svg>' },
+                    { id: 'dots', label: 'Sweet Trio Dots 🍓', prop: 'blushShape', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="23" cy="55" r="5" fill="#ff8fab" opacity="0.88"/><circle cx="35" cy="55" r="5" fill="#ff8fab" opacity="0.88"/><circle cx="29" cy="46" r="5" fill="#ff8fab" opacity="0.88"/><circle cx="65" cy="55" r="5" fill="#ff8fab" opacity="0.88"/><circle cx="77" cy="55" r="5" fill="#ff8fab" opacity="0.88"/><circle cx="71" cy="46" r="5" fill="#ff8fab" opacity="0.88"/></svg>' },
+                    { id: 'crescent', label: 'Crescent Glow 🌙', prop: 'blushShape', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 37,46 A 9 8 0 1 0 37,57 A 7 6 0 1 1 37,46 Z" fill="#ffa2b6" opacity="0.8"/><path d="M 63,46 A 9 8 0 1 1 63,57 A 7 6 0 1 0 63,46 Z" fill="#ffa2b6" opacity="0.8"/></svg>' },
+                    { id: 'butterfly', label: 'Butterfly Blush 🦋', prop: 'blushShape', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 29,51 Q 20,43 19,51 Q 20,59 29,51 Z" fill="#ffb3cc" opacity="0.82"/><path d="M 29,51 Q 38,43 39,51 Q 38,59 29,51 Z" fill="#ffc8dd" opacity="0.75"/><circle cx="29" cy="51" r="2.5" fill="#ff6b9d" opacity="0.9"/><path d="M 71,51 Q 62,43 61,51 Q 62,59 71,51 Z" fill="#ffb3cc" opacity="0.82"/><path d="M 71,51 Q 80,43 81,51 Q 80,59 71,51 Z" fill="#ffc8dd" opacity="0.75"/><circle cx="71" cy="51" r="2.5" fill="#ff6b9d" opacity="0.9"/></svg>' }
                 ],
-                'Hair Color': [
-                    { id: '#1e293b', label: 'Dark Slate', prop: 'hairColor', color: '#1e293b' },
-                    { id: '#e2e8f0', label: 'Silver White', prop: 'hairColor', color: '#e2e8f0' },
-                    { id: '#b45309', label: 'Golden Brown', prop: 'hairColor', color: '#b45309' },
-                    { id: '#4f46e5', label: 'Bright Indigo', prop: 'hairColor', color: '#4f46e5' },
-                    { id: '#e11d48', label: 'Rose Red', prop: 'hairColor', color: '#e11d48' }
-                ],
-                'Shirt Color': [
-                    { id: '#4f46e5', label: 'Royal Blue', prop: 'shirtColor', color: '#4f46e5' },
-                    { id: '#0d9488', label: 'Teal Green', prop: 'shirtColor', color: '#0d9488' },
-                    { id: '#ea580c', label: 'Warm Orange', prop: 'shirtColor', color: '#ea580c' },
-                    { id: '#db2777', label: 'Hot Pink', prop: 'shirtColor', color: '#db2777' },
-                    { id: '#1e293b', label: 'Charcoal Black', prop: 'shirtColor', color: '#1e293b' }
+                'Face Accessories': [
+                    { id: 'none', label: 'None', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="24" fill="none" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="4,4"/><line x1="35" y1="35" x2="65" y2="65" stroke="#cbd5e1" stroke-width="3"/></svg>' },
+                    { id: 'round_glasses', label: 'Oversized Round Glasses', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="50" r="12" fill="none" stroke="#4A3E3D" stroke-width="3"/><circle cx="65" cy="50" r="12" fill="none" stroke="#4A3E3D" stroke-width="3"/><line x1="47" y1="50" x2="53" y2="50" stroke="#4A3E3D" stroke-width="3"/></svg>' },
+                    { id: 'star_glasses', label: 'Star Sunglasses', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="35,38 39,47 48,47 41,52 43,61 35,56 27,61 29,52 22,47 31,47" fill="none" stroke="#4A3E3D" stroke-width="2.5"/><polygon points="65,38 69,47 78,47 71,52 73,61 65,56 57,61 59,52 52,47 61,47" fill="none" stroke="#4A3E3D" stroke-width="2.5"/><line x1="47" y1="48" x2="53" y2="48" stroke="#4A3E3D" stroke-width="3"/></svg>' },
+                    { id: 'night_mask', label: 'Sleepy Night Mask', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="22" y="38" width="56" height="24" rx="10" fill="#a78bfa" stroke="#4A3E3D" stroke-width="3"/><path d="M 32,50 Q 36,54 40,50" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/><path d="M 60,50 Q 64,54 68,50" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/></svg>' },
+                    { id: 'sprout', label: 'Tiny Head Sprout', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 50,45 Q 50,25 58,15" fill="none" stroke="#22c55e" stroke-width="3.5" stroke-linecap="round"/><path d="M 210,95 Q 222,98 218,108 C 213,113 203,107 210,95 Z" fill="#22c55e" stroke="#166534" stroke-width="1.5"/><path d="M 200,118 Q 188,110 192,102 C 196,98 204,105 200,118 Z" fill="#22c55e" stroke="#166534" stroke-width="1.5"/></svg>' },
+                    { id: 'heart_glasses', label: 'Sweet Heart Glasses 💖', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 35,40 C 23,28 11,36 15,50 C 19,62 35,68 35,68 C 35,68 51,62 55,50 C 59,36 47,28 35,40 Z" fill="#ff758f" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="29" cy="44" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,29,44)" /><path d="M 65,40 C 53,28 41,36 45,50 C 49,62 65,68 65,68 C 65,68 81,62 85,50 C 89,36 77,28 65,40 Z" fill="#ff758f" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="59" cy="44" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,59,44)" /><path d="M 47,50 Q 50,48 53,50" fill="none" stroke="#4A3E3D" stroke-width="3" /></svg>' },
+                    { id: 'cat_glasses', label: 'Cat Ear Glasses 🐱', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="25,42 16,28 34,37" fill="#ffd6e0" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" /><polygon points="26,41 20,31 32,37" fill="#ff758f" /><polygon points="75,42 84,28 66,37" fill="#ffd6e0" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" /><polygon points="74,41 80,31 68,37" fill="#ff758f" /><circle cx="35" cy="50" r="12" fill="#ffd6e0" fill-opacity="0.25" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="29" cy="44" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,29,44)" /><circle cx="65" cy="50" r="12" fill="#ffd6e0" fill-opacity="0.25" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="59" cy="44" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,59,44)" /><path d="M 47,50 Q 50,48 53,50" fill="none" stroke="#4A3E3D" stroke-width="3" /></svg>' },
+                    { id: 'flower_glasses', label: 'Daisy Sunglasses 🌼', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="32" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="51" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="51" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="35" cy="68" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="19" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="19" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="35" cy="50" r="12" fill="#fef08a" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="2.5" /><circle cx="35" cy="50" r="7" fill="#facc15" opacity="0.8" /><circle cx="65" cy="32" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="81" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="81" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="65" cy="68" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="49" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="49" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="65" cy="50" r="12" fill="#fef08a" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="2.5" /><circle cx="65" cy="50" r="7" fill="#facc15" opacity="0.8" /><path d="M 45,50 Q 50,48 55,50" fill="none" stroke="#4A3E3D" stroke-width="2.5" /></svg>' }
+                ]
+            }
+        },
+        Scene: {
+            subcategories: ['Scenes'],
+            items: {
+                Scenes: [
+                    { id: 'starry_night', label: 'Starry Night Window', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#2E2545" stroke="#4A3E3D" stroke-width="3"/><circle cx="50" cy="50" r="10" fill="#fff" opacity="0.3"/><line x1="10" y1="50" x2="90" y2="50" stroke="#4A3E3D" stroke-width="2"/><line x1="50" y1="10" x2="50" y2="90" stroke="#4A3E3D" stroke-width="2"/></svg>' },
+                    { id: 'lofi_study', label: 'Lo-Fi Study Desk', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#dfc09b" stroke="#4A3E3D" stroke-width="3"/><rect x="25" y="60" width="50" height="15" fill="#ebcba4" stroke="#4A3E3D" stroke-width="2"/></svg>' },
+                    { id: 'floating_garden', label: 'Secret Floating Garden', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#E8F5E9" stroke="#4A3E3D" stroke-width="3"/><circle cx="30" cy="30" r="8" fill="#798948"/><circle cx="70" cy="40" r="6" fill="#798948"/></svg>' },
+                    { id: 'boba_cafe', label: 'Dreamy Boba Cafe', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#F7F4EB" stroke="#4A3E3D" stroke-width="3"/><circle cx="30" cy="30" r="3" fill="#ffe066"/><circle cx="70" cy="30" r="3" fill="#ffe066"/></svg>' },
+                    { id: 'pink_bedroom', label: 'Strawberry Dream Room 🌸', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#ffdeeb" stroke="#4A3E3D" stroke-width="3"/><circle cx="30" cy="25" r="3" fill="#fef08a" stroke="#4A3E3D"/><circle cx="50" cy="28" r="3" fill="#fef08a" stroke="#4A3E3D"/><circle cx="70" cy="25" r="3" fill="#fef08a" stroke="#4A3E3D"/><ellipse cx="50" cy="80" rx="20" ry="5" fill="#ffa2b6" opacity="0.4"/></svg>' },
+                    { id: 'cozy_cabin', label: 'Warm Cabin Fireside 🪵', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#fef3c7" stroke="#4A3E3D" stroke-width="3"/><rect x="25" y="25" width="20" height="30" rx="2" fill="#fff" opacity="0.3" stroke="#4A3E3D" stroke-width="1.8"/><rect x="65" y="65" width="10" height="12" rx="1" fill="#f97316" stroke="#4A3E3D" stroke-width="1.8"/></svg>' },
+                    { id: 'cozy_rain', label: 'Rainy Day Window ☁️', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#90a4ae" stroke="#4A3E3D" stroke-width="3"/><path d="M 25,35 Q 35,25 45,35" fill="none" stroke="#fff" opacity="0.5" stroke-width="2" stroke-linecap="round"/><line x1="30" y1="55" x2="28" y2="65" stroke="#bae6fd" stroke-width="2" stroke-linecap="round"/><line x1="60" y1="50" x2="58" y2="60" stroke="#bae6fd" stroke-width="2" stroke-linecap="round"/></svg>' }
                 ]
             }
         }
@@ -2691,6 +3347,47 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
             if (prop === 'shoes') state.avatar.shoes = val;
             if (prop === 'hairStyle') state.avatar.hairStyle = val;
             if (prop === 'expression') state.avatar.expression = val;
+
+            if (prop === 'activeOutfit') {
+                let msg = "Today is a beautiful day. Tell me what's on your mind? 💖";
+                let exp = 'friendly';
+                if (val === 'forest') {
+                    msg = "There are lots of glowing mushrooms in the forest! Would you like to go mushroom picking with me? 🍄";
+                    exp = 'excited';
+                } else if (val === 'starry') {
+                    msg = "So warm... I'm getting sleepy... Let's count stars together tonight, zzz... 😴⭐";
+                    exp = 'thoughtful';
+                } else if (val === 'nautical') {
+                    msg = "Set sail! Our target is the starry sea, next stop is Strawberry Island! ⚓⛵";
+                    exp = 'excited';
+                } else if (val === 'strawberry') {
+                    msg = "The weather today is perfect for a picnic. Here, have a sweet, fresh strawberry! 🍓";
+                    exp = 'friendly';
+                } else if (val === 'wizard') {
+                    msg = "Casting a spell: Hula-la-change! All negative energy and worries, fade away! 🪄✨";
+                    exp = 'excited';
+                }
+                state.avatar.expression = exp;
+                // Play interactive pop sound (disabled to prevent beep feedback)
+                /*
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.15);
+                } catch(e) {}
+                */
+                // Trigger speaking dialogue speech synthesis bubble
+                setTimeout(() => speakResponse(msg), 150);
+            }
 
             renderAvatarVisuals();
             try {
@@ -2772,6 +3469,9 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
                     return;
                 }
                 avatarState.set(item.prop, item.id);
+                if (item.prop === 'accessory' && item.id === 'none') {
+                    avatarState.set('hairStyle', 'none');
+                }
                 renderCustomizerUI();
             });
 
@@ -2780,38 +3480,17 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
     }
 
     function randomizeAvatarConfig() {
-        const hairOptions = ['crop', 'curly', 'bob', 'long', 'bald'];
-        const shirtOptions = ['hoodie', 'tshirt', 'sweater'];
-        const skinOptions  = ['#ffdbac', '#f1c27d', '#e0ac69', '#c68642', '#8d5524'];
-        const expressionOptions  = ['friendly', 'thoughtful', 'attentive', 'excited'];
-        const glassesOptions     = ['none', 'green', 'gold'];
-        const accOptions         = ['none', 'headphones'];
-        const graphicOptions     = ['none', 'pumpkin', 'heart', 'wave', 'star'];
-        const pantsOptions       = ['shorts', 'cargo', 'jogger'];
-        const shoeOptions        = ['sneakers', 'boots', 'sandals'];
-        const petOptions         = ['none', 'cat', 'dog', 'bird'];
-        const sceneOptions       = ['yellow', 'purple', 'blue', 'green', 'sunset'];
+        const mascotColors = ['#ffd6e0', '#dbf7f9', '#e8f5e9', '#e8dff5'];
+        const expressionOptions  = ['friendly', 'starry', 'wink', 'sleepy', 'blep', 'uwu', 'teary', 'cat'];
+        const blushOptions       = ['circle', 'heart', 'star', 'sakura', 'sparkle', 'dots', 'crescent', 'butterfly'];
+        const accOptions         = ['none', 'round_glasses', 'star_glasses', 'night_mask', 'sprout', 'heart_glasses', 'cat_glasses', 'flower_glasses'];
+        const sceneOptions       = ['starry_night', 'lofi_study', 'floating_garden', 'boba_cafe', 'pink_bedroom', 'cozy_cabin', 'cozy_rain'];
 
-        state.avatar.hairStyle    = getRandomElement(hairOptions);
-        state.avatar.shirtStyle   = getRandomElement(shirtOptions);
-        state.avatar.skinTone     = getRandomElement(skinOptions);
+        state.avatar.skinTone     = getRandomElement(mascotColors);
         state.avatar.expression   = getRandomElement(expressionOptions);
-        state.avatar.glasses      = getRandomElement(glassesOptions);
-        state.avatar.accessories  = getRandomElement(accOptions);
-        state.avatar.hoodieGraphic = getRandomElement(graphicOptions);
-        state.avatar.pantsStyle   = getRandomElement(pantsOptions);
-        state.avatar.shoes        = getRandomElement(shoeOptions);
-        state.avatar.pet          = getRandomElement(petOptions);
-        state.avatar.scene        = getRandomElement(sceneOptions);
-
-        state.avatar.hairColor   = getRandomHexColor();
-        state.avatar.shirtColor  = getRandomHexColor();
-        state.avatar.glowColor1  = getRandomHexColor();
-        state.avatar.glowColor2  = getRandomHexColor();
-
-        // Populate dynamic schema fields
-        state.avatar.top = state.avatar.shirtStyle;
-        state.avatar.bottom = state.avatar.pantsStyle;
+        state.avatar.blushShape   = getRandomElement(blushOptions);
+        state.avatar.accessory    = getRandomElement(accOptions);
+        state.avatar.currentScene = getRandomElement(sceneOptions);
 
         renderAvatarVisuals();
         
@@ -2819,7 +3498,7 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
             renderCustomizerUI();
         }
         
-        showToast("MindBuddy randomized!", "success");
+        showToast("Mascot Buddy randomized!", "success");
     }
 
     // ----------------------------------------------------------------------
@@ -4166,22 +4845,22 @@ Example format:
 
         const SHOP_CATALOG = {
             1: [
-                { icon: '👓', name: '智者金丝边框眼镜', cost: 3, prop: 'glasses', val: 'gold' },
+                { icon: '👓', name: '智者金丝边框眼镜', cost: 3, prop: 'accessory', val: 'gold' },
                 { icon: '💇', name: '慵懒微卷空气感发型', cost: 5, prop: 'hairStyle', val: 'curly' },
                 { icon: '🎨', name: '限定皮肤：深夜食堂 · 温暖微光', cost: 15, prop: 'skinTone', val: '#FFD1A4' }
             ],
             2: [
-                { icon: '👓', name: '复古原色厚街黑框眼镜', cost: 3, prop: 'glasses', val: 'green' },
+                { icon: '👓', name: '复古原色厚街黑框眼镜', cost: 3, prop: 'accessory', val: 'green' },
                 { icon: '💇', name: '少年感清爽利落碎发', cost: 5, prop: 'hairStyle', val: 'crop' },
                 { icon: '🎨', name: '限定皮肤：赛博朋克 · 暗夜霓虹', cost: 15, prop: 'skinTone', val: '#C8A2C8' }
             ],
             3: [
-                { icon: '👓', name: '蹦迪专用蹦碎极光墨镜', cost: 4, prop: 'glasses', val: 'gold' },
+                { icon: '👓', name: '蹦迪专用蹦碎极光墨镜', cost: 4, prop: 'accessory', val: 'gold' },
                 { icon: '💇', name: '触电般炸毛狂想发型', cost: 6, prop: 'hairStyle', val: 'bob' },
                 { icon: '🎨', name: '限定皮肤：深空流浪 · 孤独星云', cost: 18, prop: 'skinTone', val: '#87CEEB' }
             ],
             4: [
-                { icon: '👓', name: '智商爆表科学家圆框镜', cost: 4, prop: 'glasses', val: 'green' },
+                { icon: '👓', name: '智商爆表科学家圆框镜', cost: 4, prop: 'accessory', val: 'green' },
                 { icon: '💇', name: '高级感微翘狼尾发型', cost: 6, prop: 'hairStyle', val: 'long' },
                 { icon: '🎨', name: '限定皮肤：荒野求生 · 岛屿极光', cost: 18, prop: 'skinTone', val: '#98FB98' }
             ]
