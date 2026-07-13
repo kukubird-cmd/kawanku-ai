@@ -258,7 +258,7 @@ def counselor_login():
 
 import requests
 
-GEMINI_MODELS = {'gemini-2.5-flash'}
+GEMINI_MODELS = {'gemini-1.5-flash'}
 GEMINI_QUOTA_COOLDOWN = timedelta(seconds=60)
 GEMINI_REPORT_SUMMARY_COOLDOWN = timedelta(minutes=10)
 GEMINI_DISABLED_UNTIL = None
@@ -306,7 +306,7 @@ def proxy_gemini_request():
         }, 503
 
     data = request.get_json(silent=True) or {}
-    model = data.get('model', 'gemini-2.5-flash')
+    model = data.get('model', 'gemini-1.5-flash')
     payload = data.get('payload')
 
     if model not in GEMINI_MODELS:
@@ -582,7 +582,7 @@ def generate_masked_report_summary_with_ai(report: dict):
         f"{json.dumps(masked_payload)}"
     )
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
     try:
         response = requests.post(
             url,
@@ -611,7 +611,7 @@ def call_gemini_api(student_message, history=None):
     api_key = get_gemini_api_key()
     if not api_key:
         return None
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
     
     system_prompt = (
         "You are MindBuddy, an empathetic, warm, peer-like AI companion for students. "
