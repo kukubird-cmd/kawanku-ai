@@ -54,7 +54,7 @@ if __name__ == '__main__':
     |                                                            |
     |  Starting Flask server...                                  |
     |                                                            |
-    |  API:     http://localhost:5000/api                        |
+    |  API:     http://localhost:5005/api                        |
     |                                                            |
     |  Docs:    See KAWANKU_PLATFORM_GUIDE.md                    |
     |                                                            |
@@ -69,7 +69,7 @@ if __name__ == '__main__':
     # Run Flask
     app.run(
         host='0.0.0.0',
-        port=5000,
+        port=5005,
         debug=True,
         use_reloader=True
     )

@@ -160,169 +160,221 @@
                             
                             <div class="avatar-viewport-container">
                                 <!-- Customizable SVG Avatar Container -->
-                                <div class="avatar-viewport" id="avatar-container">
-                                    <!-- Level 1 (z-index: 10) -> Backgrounds / Purchased Scenes -->
-                                    <svg class="avatar-layer" style="z-index: 10;" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
+                                <div class="avatar-svg-container" id="avatar-container">
+                                    <svg id="mindbuddy-svg" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
                                         <defs>
                                             <radialGradient id="floor-shadow" cx="50%" cy="50%" r="50%">
-                                                <stop offset="0%" stop-color="#000" stop-opacity="0.25"/>
+                                                <stop offset="0%" stop-color="#000" stop-opacity="0.3"/>
                                                 <stop offset="100%" stop-color="#000" stop-opacity="0"/>
                                             </radialGradient>
                                             <linearGradient id="avatar-glow" x1="0%" y1="0%" x2="100%" y2="100%">
                                                 <stop offset="0%" stop-color="var(--glow-color-1,#8b5cf6)"/>
                                                 <stop offset="100%" stop-color="var(--glow-color-2,#ec4899)"/>
                                             </linearGradient>
-                                        </defs>
-                                        <ellipse cx="150" cy="510" rx="100" ry="12" fill="url(#floor-shadow)"/>
-                                        <circle cx="150" cy="200" r="120" fill="url(#avatar-glow)" opacity="0.1" class="glow-pulse"/>
-                                    </svg>
-
-                                    <!-- Level 2 (z-index: 20) -> Back Hair / Back Equipment -->
-                                    <svg class="avatar-layer" style="z-index: 20;" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
-                                        <path id="avatar-hair-back" d="" fill="var(--hair-color, #1e293b)"/>
-                                    </svg>
-
-                                    <!-- Level 3 (z-index: 30) -> Base Body (Torso, Arms, Legs) -->
-                                    <svg class="avatar-layer" style="z-index: 30;" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
-                                        <!-- Left arm (folded across chest) -->
-                                        <g id="avatar-left-arm">
-                                            <path d="M85,210 C68,220 62,245 68,265 L90,265 C88,248 90,228 105,215 Z" fill="#4f46e5"/>
-                                            <path d="M68,255 C68,248 72,244 80,244 L170,244 C178,244 180,250 178,256 L80,258 C72,260 68,262 68,255 Z" fill="#4f46e5"/>
-                                            <ellipse cx="175" cy="251" rx="14" ry="10" fill="#ffdbac" id="avatar-hand-l"/>
-                                            <line x1="167" y1="244" x2="167" y2="258" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
-                                            <line x1="173" y1="243" x2="173" y2="259" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
-                                            <line x1="179" y1="244" x2="179" y2="258" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
-                                        </g>
-                                        <!-- Right arm (elbow up, hand touching chin) -->
-                                        <g id="avatar-right-arm">
-                                            <path d="M215,210 C230,222 234,245 228,268 L208,265 C212,248 210,228 195,215 Z" fill="#4f46e5"/>
-                                            <path d="M218,262 C222,258 224,248 220,235 L210,220 C205,212 200,210 196,214 L200,226 C204,238 208,252 208,265 Z" fill="#4f46e5"/>
-                                            <ellipse cx="207" cy="185" rx="13" ry="10" fill="#ffdbac" id="avatar-hand-r"/>
-                                            <line x1="200" y1="179" x2="200" y2="191" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
-                                            <line x1="206" y1="178" x2="206" y2="192" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
-                                            <line x1="212" y1="179" x2="212" y2="191" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
-                                        </g>
-                                        <!-- Neck -->
-                                        <rect id="avatar-neck" x="138" y="152" width="24" height="28" rx="8" fill="#ffdbac"/>
-                                    </svg>
-
-                                    <!-- Level 4 (z-index: 40) -> Head & Neck Profile (Face shape, ears, eyes, mouth) -->
-                                    <svg class="avatar-layer" style="z-index: 40;" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
-                                        <ellipse cx="93" cy="112" rx="10" ry="13" fill="#ffdbac" id="ear-l"/>
-                                        <ellipse cx="93" cy="112" rx="5" ry="8" fill="#e0a96d" opacity="0.5"/>
-                                        <ellipse cx="207" cy="112" rx="10" ry="13" fill="#ffdbac" id="ear-r"/>
-                                        <ellipse cx="207" cy="112" rx="5" ry="8" fill="#e0a96d" opacity="0.5"/>
-                                        <ellipse id="avatar-head" cx="150" cy="110" rx="58" ry="62" fill="#ffdbac"/>
-                                        <g id="avatar-face-features">
-                                            <path id="left-brow" d="M118,88 Q130,83 140,88" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-                                            <path id="right-brow" d="M160,88 Q170,83 182,88" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-                                            <g id="left-eye-group">
-                                                <ellipse cx="130" cy="103" rx="10" ry="11" fill="#1e293b" class="avatar-eye"/>
-                                                <circle cx="127" cy="99" r="3.5" fill="#ffffff"/>
-                                                <circle cx="132" cy="107" r="2" fill="#ffffff" opacity="0.3"/>
-                                            </g>
-                                            <g id="right-eye-group">
-                                                <ellipse cx="170" cy="103" rx="10" ry="11" fill="#1e293b" class="avatar-eye"/>
-                                                <circle cx="167" cy="99" r="3.5" fill="#ffffff"/>
-                                                <circle cx="172" cy="107" r="2" fill="#ffffff" opacity="0.3"/>
-                                            </g>
-                                            <ellipse cx="112" cy="122" rx="10" ry="7" fill="#f43f5e" opacity="0.25"/>
-                                            <ellipse cx="188" cy="122" rx="10" ry="7" fill="#f43f5e" opacity="0.25"/>
-                                            <path id="avatar-nose" d="M150,108 C148,116 145,120 143,122 C146,124 154,124 157,122 C155,120 152,116 150,108 Z" fill="#e0a96d" opacity="0.7"/>
-                                            <path id="avatar-mouth" d="M138,133 Q150,143 162,133" stroke="#1e293b" stroke-width="3" stroke-linecap="round" fill="none"/>
-                                            <path id="avatar-teeth" d="M140,134 Q150,140 160,134 L160,138 Q150,144 140,138 Z" fill="white" opacity="0"/>
-                                        </g>
-                                    </svg>
-
-                                    <!-- Level 5 (z-index: 50) -> Purchased Clothes (Tops, Bottoms, Shoes) -->
-                                    <svg class="avatar-layer" style="z-index: 50;" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
-                                        <defs>
-                                            <linearGradient id="shoe-grad-l" x1="0%" y1="0%" x2="0%" y2="100%">
-                                                <stop offset="0%" stop-color="#e2e8f0"/>
-                                                <stop offset="100%" stop-color="#94a3b8"/>
-                                            </linearGradient>
-                                            <linearGradient id="shoe-grad-r" x1="0%" y1="0%" x2="0%" y2="100%">
-                                                <stop offset="0%" stop-color="#e2e8f0"/>
-                                                <stop offset="100%" stop-color="#94a3b8"/>
+                                            <linearGradient id="light-ray-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25"/>
+                                                <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
                                             </linearGradient>
                                         </defs>
-                                        <path id="avatar-clothes" d="M85,200 C72,215 68,240 70,280 L70,340 L230,340 L230,280 C232,240 228,215 215,200 L195,192 L150,192 L105,200 Z" fill="#4f46e5"/>
-                                        <path id="avatar-hood" d="M105,200 C110,185 130,178 150,178 C170,178 190,185 195,200 L188,195 L150,195 L112,195 Z" fill="#3730a3"/>
-                                        <rect x="118" y="285" width="64" height="35" rx="8" fill="#3730a3" opacity="0.7"/>
-                                        <line x1="138" y1="205" x2="132" y2="240" stroke="#c7d2fe" stroke-width="2" stroke-linecap="round"/>
-                                        <line x1="162" y1="205" x2="168" y2="240" stroke="#c7d2fe" stroke-width="2" stroke-linecap="round"/>
-                                        <circle cx="132" cy="243" r="4" fill="#c7d2fe"/>
-                                        <circle cx="168" cy="243" r="4" fill="#c7d2fe"/>
-                                        <g id="graphic-pumpkin" opacity="0">
-                                            <ellipse cx="150" cy="263" rx="18" ry="16" fill="#f97316"/>
-                                            <path d="M137,258 Q150,248 163,258" fill="none" stroke="#ea580c" stroke-width="1.5"/>
-                                            <polygon points="141,261 144,256 147,261" fill="#fef08a"/>
-                                            <polygon points="153,261 156,256 159,261" fill="#fef08a"/>
-                                            <path d="M140,267 Q145,273 150,270 Q155,273 160,267" fill="#fef08a" stroke="none"/>
-                                            <rect x="148" y="247" width="4" height="8" rx="2" fill="#16a34a"/>
-                                        </g>
-                                        <g id="graphic-heart" opacity="0">
-                                            <path d="M150,278 C150,278 130,264 130,253 C130,246 136,242 143,245 C146,246 148,248 150,251 C152,248 154,246 157,245 C164,242 170,246 170,253 C170,264 150,278 150,278 Z" fill="#f43f5e"/>
-                                        </g>
-                                        <g id="graphic-wave" opacity="0">
-                                            <path d="M130,260 Q138,252 146,260 Q154,268 162,260 Q170,252 178,260" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
-                                            <path d="M130,270 Q138,262 146,270 Q154,278 162,270 Q170,262 178,270" fill="none" stroke="#7dd3fc" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
-                                        </g>
-                                        <g id="graphic-star" opacity="1">
-                                            <polygon points="150,248 153,258 163,258 155,264 158,274 150,268 142,274 145,264 137,258 147,258" fill="#fbbf24"/>
-                                        </g>
-                                        <g id="avatar-pants">
-                                            <rect id="pants-left" x="103" y="330" width="38" height="72" rx="6" fill="#1e293b"/>
-                                            <rect id="pants-right" x="159" y="330" width="38" height="72" rx="6" fill="#1e293b"/>
-                                            <line x1="103" y1="400" x2="141" y2="400" stroke="#0f172a" stroke-width="2" id="hem-left"/>
-                                            <line x1="159" y1="400" x2="197" y2="400" stroke="#0f172a" stroke-width="2" id="hem-right"/>
-                                        </g>
-                                        <g id="avatar-socks">
-                                            <rect x="106" y="398" width="32" height="28" rx="4" fill="#f8fafc"/>
-                                            <rect x="162" y="398" width="32" height="28" rx="4" fill="#f8fafc"/>
-                                            <rect x="106" y="405" width="32" height="4" rx="1" fill="#6366f1" opacity="0.7"/>
-                                            <rect x="162" y="405" width="32" height="4" rx="1" fill="#6366f1" opacity="0.7"/>
-                                        </g>
-                                        <g id="avatar-shoes">
-                                            <ellipse cx="122" cy="432" rx="22" ry="10" fill="url(#shoe-grad-l)"/>
-                                            <rect x="100" y="422" width="44" height="12" rx="6" fill="url(#shoe-grad-l)"/>
-                                            <rect x="100" y="420" width="44" height="6" rx="3" fill="#ffffff" opacity="0.6"/>
-                                            <rect x="99" y="430" width="46" height="5" rx="2" fill="#64748b"/>
-                                            <line x1="110" y1="424" x2="110" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                            <line x1="118" y1="422" x2="118" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                            <line x1="126" y1="422" x2="126" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                            <line x1="134" y1="424" x2="134" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                            <ellipse cx="178" cy="432" rx="22" ry="10" fill="url(#shoe-grad-r)"/>
-                                            <rect x="156" y="422" width="44" height="12" rx="6" fill="url(#shoe-grad-r)"/>
-                                            <rect x="156" y="420" width="44" height="6" rx="3" fill="#ffffff" opacity="0.6"/>
-                                            <rect x="155" y="430" width="46" height="5" rx="2" fill="#64748b"/>
-                                            <line x1="166" y1="424" x2="166" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                            <line x1="174" y1="422" x2="174" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                            <line x1="182" y1="422" x2="182" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                            <line x1="190" y1="424" x2="190" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                        </g>
-                                    </svg>
 
-                                    <!-- Level 6 (z-index: 60) -> Front Hair / Bangs -->
-                                    <svg class="avatar-layer" style="z-index: 60;" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
-                                        <path id="avatar-hair-front" d="M93,108 C93,50 207,50 207,108 C195,72 175,60 150,60 C125,60 105,72 93,108 Z" fill="var(--hair-color, #1e293b)"/>
-                                    </svg>
+                                        <!-- Pedestal Shadow -->
+                                        <ellipse cx="150" cy="495" rx="100" ry="15" fill="url(#floor-shadow)"/>
+                                        
+                                        <!-- Ambient Glow -->
+                                        <circle cx="150" cy="230" r="130" fill="url(#avatar-glow)" opacity="0.08" class="glow-pulse"/>
 
-                                    <!-- Level 7 (z-index: 70) -> Purchased Accessories (Glasses/Specs, Hats, Masks) -->
-                                    <svg class="avatar-layer" style="z-index: 70;" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
-                                        <g id="avatar-glasses" opacity="0">
-                                            <rect x="112" y="95" width="28" height="20" rx="6" stroke="#10b981" stroke-width="2.5" fill="rgba(16,185,129,0.08)"/>
-                                            <rect x="160" y="95" width="28" height="20" rx="6" stroke="#10b981" stroke-width="2.5" fill="rgba(16,185,129,0.08)"/>
-                                            <line x1="140" y1="105" x2="160" y2="105" stroke="#10b981" stroke-width="2"/>
-                                            <line x1="93" y1="105" x2="112" y2="105" stroke="#10b981" stroke-width="2"/>
-                                            <line x1="188" y1="105" x2="207" y2="105" stroke="#10b981" stroke-width="2"/>
-                                        </g>
-                                        <g id="avatar-accessories" opacity="0">
-                                            <path d="M93,110 A57,57 0 0,1 207,110" stroke="#f59e0b" stroke-width="7" fill="none" stroke-linecap="round"/>
-                                            <rect x="80" y="102" width="16" height="28" rx="8" fill="#f59e0b"/>
-                                            <rect x="204" y="102" width="16" height="28" rx="8" fill="#f59e0b"/>
-                                            <ellipse cx="88" cy="116" rx="4" ry="6" fill="#d97706"/>
-                                            <ellipse cx="212" cy="116" rx="4" ry="6" fill="#d97706"/>
+                                        <!-- Vertical Spotlight Ray from Top -->
+                                        <polygon points="60,0 240,0 220,460 80,460" fill="url(#light-ray-grad)" opacity="0.2"/>
+
+                                        <!-- Black Pedestal Stand -->
+                                        <!-- Cylinder Body -->
+                                        <path d="M70,450 L70,490 C70,505 230,505 230,490 L230,450 Z" fill="#0b0f19" />
+                                        <!-- Cylinder Top -->
+                                        <ellipse cx="150" cy="450" rx="80" ry="20" fill="#161b22" stroke="#30363d" stroke-width="2" />
+                                        <!-- Inner Cylinder Ring -->
+                                        <ellipse cx="150" cy="450" rx="68" ry="15" fill="#0d1117" />
+                                        <!-- Pedestal Logo -->
+                                        <text x="150" y="482" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="900" fill="#8b949e" text-anchor="middle" letter-spacing="3.5">WAYGROUND</text>
+
+                                        <!-- Full-body character group with float animation -->
+                                        <g class="character-group">
+
+                                            <!-- Backpack / Oxygen Tank on the Back -->
+                                            <g id="avatar-backpack">
+                                                <rect x="202" y="210" width="22" height="75" rx="11" fill="#4b5563" />
+                                                <rect x="210" y="222" width="14" height="42" rx="7" fill="#1f2937" />
+                                                <circle cx="213" cy="216" r="4" fill="#9ca3af" />
+                                            </g>
+
+                                            <!-- Hijab Back Layer -->
+                                            <path id="avatar-hair-back" d="M92,110 C92,48 208,48 208,110 C208,142 188,175 150,175 C112,175 92,142 92,110 Z" fill="#1f2937"/>
+
+                                            <!-- SOCKS -->
+                                            <g id="avatar-socks">
+                                                <rect x="110" y="380" width="28" height="25" rx="4" fill="#f43f5e"/>
+                                                <rect x="162" y="380" width="28" height="25" rx="4" fill="#f43f5e"/>
+                                                <!-- Sock stripes -->
+                                                <rect x="110" y="386" width="28" height="4" rx="1" fill="#ffffff" opacity="0.8"/>
+                                                <rect x="162" y="386" width="28" height="4" rx="1" fill="#ffffff" opacity="0.8"/>
+                                            </g>
+
+                                            <!-- SNEAKERS / SHOES -->
+                                            <g id="avatar-shoes">
+                                                <!-- Left shoe -->
+                                                <rect x="104" y="398" width="40" height="15" rx="7" fill="#e2e8f0"/>
+                                                <rect x="104" y="407" width="40" height="5" rx="2" fill="#0f172a"/>
+                                                <line x1="112" y1="402" x2="136" y2="402" stroke="#64748b" stroke-width="2" stroke-dasharray="3,3"/>
+                                                <!-- Right shoe -->
+                                                <rect x="156" y="398" width="40" height="15" rx="7" fill="#e2e8f0"/>
+                                                <rect x="156" y="407" width="40" height="5" rx="2" fill="#0f172a"/>
+                                                <line x1="164" y1="402" x2="188" y2="402" stroke="#64748b" stroke-width="2" stroke-dasharray="3,3"/>
+                                            </g>
+
+                                            <!-- PANTS / TROUSERS -->
+                                            <g id="avatar-pants">
+                                                <rect id="pants-left" x="108" y="325" width="32" height="60" rx="8" fill="#10b981"/>
+                                                <rect id="pants-right" x="160" y="325" width="32" height="60" rx="8" fill="#10b981"/>
+                                                <line x1="108" y1="375" x2="140" y2="375" stroke="#047857" stroke-width="2" id="hem-left"/>
+                                                <line x1="160" y1="375" x2="192" y2="375" stroke="#047857" stroke-width="2" id="hem-right"/>
+                                            </g>
+
+                                            <!-- CLOTHES / DRESS -->
+                                            <g>
+                                                <!-- Main dress body -->
+                                                <path id="avatar-clothes" d="M90,200 C80,210 75,230 75,270 L75,340 C75,342 77,344 80,344 L220,344 C223,344 225,342 225,340 L225,270 C225,230 220,210 210,200 Z" fill="#fbbf24" />
+                                                <path id="avatar-hood" d="M95,200 L205,200 L195,205 L105,205 Z" fill="#d97706" opacity="0.3" />
+                                                
+                                                <!-- Chest graphic (reused for swappable designs or default daisy patterns) -->
+                                                <!-- Daisy pattern 1 (Center) -->
+                                                <g class="flower-pattern">
+                                                    <circle cx="150" cy="270" r="4.5" fill="#ffffff" />
+                                                    <circle cx="143" cy="270" r="4.5" fill="#ffffff" />
+                                                    <circle cx="157" cy="270" r="4.5" fill="#ffffff" />
+                                                    <circle cx="150" cy="263" r="4.5" fill="#ffffff" />
+                                                    <circle cx="150" cy="277" r="4.5" fill="#ffffff" />
+                                                    <circle cx="150" cy="270" r="3.5" fill="#d97706" />
+                                                </g>
+                                                <!-- Daisy pattern 2 (Left Bottom) -->
+                                                <g class="flower-pattern">
+                                                    <circle cx="120" cy="305" r="4.5" fill="#ffffff" />
+                                                    <circle cx="113" cy="305" r="4.5" fill="#ffffff" />
+                                                    <circle cx="127" cy="305" r="4.5" fill="#ffffff" />
+                                                    <circle cx="120" cy="298" r="4.5" fill="#ffffff" />
+                                                    <circle cx="120" cy="312" r="4.5" fill="#ffffff" />
+                                                    <circle cx="120" cy="305" r="3.5" fill="#d97706" />
+                                                </g>
+                                                <!-- Daisy pattern 3 (Right Bottom) -->
+                                                <g class="flower-pattern">
+                                                    <circle cx="180" cy="305" r="4.5" fill="#ffffff" />
+                                                    <circle cx="173" cy="305" r="4.5" fill="#ffffff" />
+                                                    <circle cx="187" cy="305" r="4.5" fill="#ffffff" />
+                                                    <circle cx="180" cy="298" r="4.5" fill="#ffffff" />
+                                                    <circle cx="180" cy="312" r="4.5" fill="#ffffff" />
+                                                    <circle cx="180" cy="305" r="3.5" fill="#d97706" />
+                                                </g>
+                                                <!-- Daisy pattern 4 (Left Upper) -->
+                                                <g class="flower-pattern">
+                                                    <circle cx="125" cy="235" r="4.5" fill="#ffffff" />
+                                                    <circle cx="118" cy="235" r="4.5" fill="#ffffff" />
+                                                    <circle cx="132" cy="235" r="4.5" fill="#ffffff" />
+                                                    <circle cx="125" cy="228" r="4.5" fill="#ffffff" />
+                                                    <circle cx="125" cy="242" r="4.5" fill="#ffffff" />
+                                                    <circle cx="125" cy="235" r="3.5" fill="#d97706" />
+                                                </g>
+                                                <!-- Daisy pattern 5 (Right Upper) -->
+                                                <g class="flower-pattern">
+                                                    <circle cx="175" cy="235" r="4.5" fill="#ffffff" />
+                                                    <circle cx="168" cy="235" r="4.5" fill="#ffffff" />
+                                                    <circle cx="182" cy="235" r="4.5" fill="#ffffff" />
+                                                    <circle cx="175" cy="228" r="4.5" fill="#ffffff" />
+                                                    <circle cx="175" cy="242" r="4.5" fill="#ffffff" />
+                                                    <circle cx="175" cy="235" r="3.5" fill="#d97706" />
+                                                </g>
+
+                                                <!-- Chest swappable graphic layer (retained to prevent JavaScript errors) -->
+                                                <g id="graphic-pumpkin" opacity="0"><circle cx="150" cy="270" r="10" fill="none"/></g>
+                                                <g id="graphic-heart" opacity="0"><circle cx="150" cy="270" r="10" fill="none"/></g>
+                                                <g id="graphic-wave" opacity="0"><circle cx="150" cy="270" r="10" fill="none"/></g>
+                                                <g id="graphic-star" opacity="0"><circle cx="150" cy="270" r="10" fill="none"/></g>
+                                            </g>
+
+                                            <!-- ARMS (Rendered on Top of Clothes) -->
+                                            <g id="avatar-left-arm">
+                                                <path d="M72,210 C62,225 62,250 74,285 L88,285 C82,255 82,225 86,210 Z" fill="#ffffff" />
+                                                <ellipse cx="81" cy="283" rx="7" ry="5" fill="#ffdbac" id="avatar-hand-l" />
+                                            </g>
+                                            <g id="avatar-right-arm">
+                                                <path d="M228,210 C238,225 238,250 226,285 L212,285 C218,255 218,225 214,210 Z" fill="#ffffff" />
+                                                <ellipse cx="219" cy="283" rx="7" ry="5" fill="#ffdbac" id="avatar-hand-r" />
+                                            </g>
+
+                                            <!-- NECK -->
+                                            <rect id="avatar-neck" x="135" y="145" width="30" height="60" rx="8" fill="#ffffff"/>
+
+                                            <!-- HEAD -->
+                                            <g>
+                                                <!-- White Head Base -->
+                                                <ellipse id="avatar-head" cx="150" cy="112" rx="46" ry="46" fill="#ffffff"/>
+                                                
+                                                <!-- Ear cover nodes (ears are hidden, keep to prevent JS errors) -->
+                                                <ellipse cx="93" cy="112" rx="10" ry="13" fill="#ffffff" id="ear-l" opacity="0"/>
+                                                <ellipse cx="207" cy="112" rx="10" ry="13" fill="#ffffff" id="ear-r" opacity="0"/>
+                                            </g>
+
+                                            <!-- Hair Back Layer (Long Yellow/Golden Hair) -->
+                                            <path id="avatar-hair-back" d="M104,112 C104,40 196,40 196,112 C196,180 205,260 190,270 C175,280 180,210 150,210 C120,210 125,280 110,270 C95,260 104,180 104,112 Z" fill="#fbbf24"/>
+
+                                            <!-- FACE FEATURES -->
+                                            <g id="avatar-face-features">
+                                                <!-- Eyebrows -->
+                                                <path id="left-brow" d="M118,92 Q126,89 134,92" stroke="#1f2937" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="1"/>
+                                                <path id="right-brow" d="M166,92 Q174,89 182,92" stroke="#1f2937" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="1"/>
+
+                                                <!-- Eyes (Big simple oval eyes) -->
+                                                <g id="left-eye-group">
+                                                    <ellipse cx="124" cy="116" rx="7" ry="12" fill="#000000" class="avatar-eye"/>
+                                                </g>
+                                                <g id="right-eye-group">
+                                                    <ellipse cx="176" cy="116" rx="7" ry="12" fill="#000000" class="avatar-eye"/>
+                                                </g>
+
+                                                <!-- Blush Cheeks -->
+                                                <ellipse cx="114" cy="126" rx="9" ry="6" fill="#f43f5e" opacity="0.35"/>
+                                                <ellipse cx="186" cy="126" rx="9" ry="6" fill="#f43f5e" opacity="0.35"/>
+
+                                                <!-- Nose (keep opacity 0) -->
+                                                <path id="avatar-nose" d="M150,118 C149,121 147,121 145,122 C146,122 154,122 155,122 C153,121 151,121 150,118 Z" fill="#e0a96d" opacity="0"/>
+
+                                                <!-- Mouth (Happy Smile) -->
+                                                <path id="avatar-mouth" d="M140,128 Q150,138 160,128" stroke="#1f2937" stroke-width="3.5" stroke-linecap="round" fill="none" opacity="1"/>
+                                                <path id="avatar-teeth" d="M140,128 Q150,138 160,128 Z" fill="white" opacity="0"/>
+                                            </g>
+
+                                            <!-- Hair Front Layer (Bangs framing face) -->
+                                            <path id="avatar-hair-front" d="M104,112 C104,56 196,56 196,112 C185,90 170,82 150,88 C130,82 115,90 104,112 Z" fill="#fbbf24"/>
+
+                                            <!-- Glasses overlay (retained to prevent JS errors) -->
+                                            <g id="avatar-glasses" opacity="0">
+                                                <rect x="110" y="105" width="24" height="18" rx="5" stroke="#10b981" stroke-width="2" fill="none"/>
+                                                <rect x="166" y="105" width="24" height="18" rx="5" stroke="#10b981" stroke-width="2" fill="none"/>
+                                                <line x1="134" y1="114" x2="166" y2="114" stroke="#10b981" stroke-width="2"/>
+                                            </g>
+
+                                            <!-- Headphone Accessories (Drawn on the Head/Ears) -->
+                                            <g id="avatar-accessories" opacity="1">
+                                                <!-- Left Ear Cup -->
+                                                <circle cx="98" cy="112" r="14" fill="#2d3748"/>
+                                                <circle cx="98" cy="112" r="9" fill="#1a202c"/>
+                                                <circle cx="98" cy="112" r="5" fill="#4a5568"/>
+                                                <!-- Right Ear Cup -->
+                                                <circle cx="202" cy="112" r="14" fill="#2d3748"/>
+                                                <circle cx="202" cy="112" r="9" fill="#1a202c"/>
+                                                <circle cx="202" cy="112" r="5" fill="#4a5568"/>
+                                                <!-- Connecting headband -->
+                                                <path d="M98,112 A52,52 0 0,1 202,112" fill="none" stroke="#2d3748" stroke-width="7" stroke-linecap="round"/>
+                                                <path d="M98,112 A52,52 0 0,1 202,112" fill="none" stroke="#4a5568" stroke-width="3" stroke-linecap="round"/>
+                                            </g>
+
                                         </g>
                                     </svg>
                                 </div>
@@ -499,171 +551,8 @@
                             
                             <!-- Customizer Live Viewport -->
                             <div class="customizer-viewport scene-yellow" id="customizer-viewport">
-                                <div class="avatar-viewport" id="studio-avatar-container">
-                                    <!-- Level 1 (z-index: 10) -> Backgrounds / Purchased Scenes -->
-                                    <svg class="avatar-layer" style="z-index: 10;" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
-                                        <defs>
-                                            <radialGradient id="floor-shadow-studio" cx="50%" cy="50%" r="50%">
-                                                <stop offset="0%" stop-color="#000" stop-opacity="0.25"/>
-                                                <stop offset="100%" stop-color="#000" stop-opacity="0"/>
-                                            </radialGradient>
-                                            <linearGradient id="avatar-glow-studio" x1="0%" y1="0%" x2="100%" y2="100%">
-                                                <stop offset="0%" stop-color="var(--glow-color-1,#8b5cf6)"/>
-                                                <stop offset="100%" stop-color="var(--glow-color-2,#ec4899)"/>
-                                            </linearGradient>
-                                        </defs>
-                                        <ellipse cx="150" cy="510" rx="100" ry="12" fill="url(#floor-shadow-studio)"/>
-                                        <circle cx="150" cy="200" r="120" fill="url(#avatar-glow-studio)" opacity="0.1" class="glow-pulse"/>
-                                    </svg>
-
-                                    <!-- Level 2 (z-index: 20) -> Back Hair / Back Equipment -->
-                                    <svg class="avatar-layer" style="z-index: 20;" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
-                                        <path id="avatar-hair-back" d="" fill="var(--hair-color, #1e293b)"/>
-                                    </svg>
-
-                                    <!-- Level 3 (z-index: 30) -> Base Body (Torso, Arms, Legs) -->
-                                    <svg class="avatar-layer" style="z-index: 30;" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
-                                        <!-- Left arm (folded across chest) -->
-                                        <g id="avatar-left-arm">
-                                            <path d="M85,210 C68,220 62,245 68,265 L90,265 C88,248 90,228 105,215 Z" fill="#4f46e5"/>
-                                            <path d="M68,255 C68,248 72,244 80,244 L170,244 C178,244 180,250 178,256 L80,258 C72,260 68,262 68,255 Z" fill="#4f46e5"/>
-                                            <ellipse cx="175" cy="251" rx="14" ry="10" fill="#ffdbac" id="avatar-hand-l"/>
-                                            <line x1="167" y1="244" x2="167" y2="258" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
-                                            <line x1="173" y1="243" x2="173" y2="259" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
-                                            <line x1="179" y1="244" x2="179" y2="258" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
-                                        </g>
-                                        <!-- Right arm (elbow up, hand touching chin) -->
-                                        <g id="avatar-right-arm">
-                                            <path d="M215,210 C230,222 234,245 228,268 L208,265 C212,248 210,228 195,215 Z" fill="#4f46e5"/>
-                                            <path d="M218,262 C222,258 224,248 220,235 L210,220 C205,212 200,210 196,214 L200,226 C204,238 208,252 208,265 Z" fill="#4f46e5"/>
-                                            <ellipse cx="207" cy="185" rx="13" ry="10" fill="#ffdbac" id="avatar-hand-r"/>
-                                            <line x1="200" y1="179" x2="200" y2="191" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
-                                            <line x1="206" y1="178" x2="206" y2="192" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
-                                            <line x1="212" y1="179" x2="212" y2="191" stroke="#e0a96d" stroke-width="1" opacity="0.5"/>
-                                        </g>
-                                        <!-- Neck -->
-                                        <rect id="avatar-neck" x="138" y="152" width="24" height="28" rx="8" fill="#ffdbac"/>
-                                    </svg>
-
-                                    <!-- Level 4 (z-index: 40) -> Head & Neck Profile (Face shape, ears, eyes, mouth) -->
-                                    <svg class="avatar-layer" style="z-index: 40;" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
-                                        <ellipse cx="93" cy="112" rx="10" ry="13" fill="#ffdbac" id="ear-l"/>
-                                        <ellipse cx="93" cy="112" rx="5" ry="8" fill="#e0a96d" opacity="0.5"/>
-                                        <ellipse cx="207" cy="112" rx="10" ry="13" fill="#ffdbac" id="ear-r"/>
-                                        <ellipse cx="207" cy="112" rx="5" ry="8" fill="#e0a96d" opacity="0.5"/>
-                                        <ellipse id="avatar-head" cx="150" cy="110" rx="58" ry="62" fill="#ffdbac"/>
-                                        <g id="avatar-face-features">
-                                            <path id="left-brow" d="M118,88 Q130,83 140,88" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-                                            <path id="right-brow" d="M160,88 Q170,83 182,88" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-                                            <g id="left-eye-group">
-                                                <ellipse cx="130" cy="103" rx="10" ry="11" fill="#1e293b" class="avatar-eye"/>
-                                                <circle cx="127" cy="99" r="3.5" fill="#ffffff"/>
-                                                <circle cx="132" cy="107" r="2" fill="#ffffff" opacity="0.3"/>
-                                            </g>
-                                            <g id="right-eye-group">
-                                                <ellipse cx="170" cy="103" rx="10" ry="11" fill="#1e293b" class="avatar-eye"/>
-                                                <circle cx="167" cy="99" r="3.5" fill="#ffffff"/>
-                                                <circle cx="172" cy="107" r="2" fill="#ffffff" opacity="0.3"/>
-                                            </g>
-                                            <ellipse cx="112" cy="122" rx="10" ry="7" fill="#f43f5e" opacity="0.25"/>
-                                            <ellipse cx="188" cy="122" rx="10" ry="7" fill="#f43f5e" opacity="0.25"/>
-                                            <path id="avatar-nose" d="M150,108 C148,116 145,120 143,122 C146,124 154,124 157,122 C155,120 152,116 150,108 Z" fill="#e0a96d" opacity="0.7"/>
-                                            <path id="avatar-mouth" d="M138,133 Q150,143 162,133" stroke="#1e293b" stroke-width="3" stroke-linecap="round" fill="none"/>
-                                            <path id="avatar-teeth" d="M140,134 Q150,140 160,134 L160,138 Q150,144 140,138 Z" fill="white" opacity="0"/>
-                                        </g>
-                                    </svg>
-
-                                    <!-- Level 5 (z-index: 50) -> Purchased Clothes (Tops, Bottoms, Shoes) -->
-                                    <svg class="avatar-layer" style="z-index: 50;" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
-                                        <defs>
-                                            <linearGradient id="shoe-grad-l-studio" x1="0%" y1="0%" x2="0%" y2="100%">
-                                                <stop offset="0%" stop-color="#e2e8f0"/>
-                                                <stop offset="100%" stop-color="#94a3b8"/>
-                                            </linearGradient>
-                                            <linearGradient id="shoe-grad-r-studio" x1="0%" y1="0%" x2="0%" y2="100%">
-                                                <stop offset="0%" stop-color="#e2e8f0"/>
-                                                <stop offset="100%" stop-color="#94a3b8"/>
-                                            </linearGradient>
-                                        </defs>
-                                        <path id="avatar-clothes" d="M85,200 C72,215 68,240 70,280 L70,340 L230,340 L230,280 C232,240 228,215 215,200 L195,192 L150,192 L105,200 Z" fill="#4f46e5"/>
-                                        <path id="avatar-hood" d="M105,200 C110,185 130,178 150,178 C170,178 190,185 195,200 L188,195 L150,195 L112,195 Z" fill="#3730a3"/>
-                                        <rect x="118" y="285" width="64" height="35" rx="8" fill="#3730a3" opacity="0.7"/>
-                                        <line x1="138" y1="205" x2="132" y2="240" stroke="#c7d2fe" stroke-width="2" stroke-linecap="round"/>
-                                        <line x1="162" y1="205" x2="168" y2="240" stroke="#c7d2fe" stroke-width="2" stroke-linecap="round"/>
-                                        <circle cx="132" cy="243" r="4" fill="#c7d2fe"/>
-                                        <circle cx="168" cy="243" r="4" fill="#c7d2fe"/>
-                                        <g id="graphic-pumpkin" opacity="0">
-                                            <ellipse cx="150" cy="263" rx="18" ry="16" fill="#f97316"/>
-                                            <path d="M137,258 Q150,248 163,258" fill="none" stroke="#ea580c" stroke-width="1.5"/>
-                                            <polygon points="141,261 144,256 147,261" fill="#fef08a"/>
-                                            <polygon points="153,261 156,256 159,261" fill="#fef08a"/>
-                                            <path d="M140,267 Q145,273 150,270 Q155,273 160,267" fill="#fef08a" stroke="none"/>
-                                            <rect x="148" y="247" width="4" height="8" rx="2" fill="#16a34a"/>
-                                        </g>
-                                        <g id="graphic-heart" opacity="0">
-                                            <path d="M150,278 C150,278 130,264 130,253 C130,246 136,242 143,245 C146,246 148,248 150,251 C152,248 154,246 157,245 C164,242 170,246 170,253 C170,264 150,278 150,278 Z" fill="#f43f5e"/>
-                                        </g>
-                                        <g id="graphic-wave" opacity="0">
-                                            <path d="M130,260 Q138,252 146,260 Q154,268 162,260 Q170,252 178,260" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
-                                            <path d="M130,270 Q138,262 146,270 Q154,278 162,270 Q170,262 178,270" fill="none" stroke="#7dd3fc" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
-                                        </g>
-                                        <g id="graphic-star" opacity="1">
-                                            <polygon points="150,248 153,258 163,258 155,264 158,274 150,268 142,274 145,264 137,258 147,258" fill="#fbbf24"/>
-                                        </g>
-                                        <g id="avatar-pants">
-                                            <rect id="pants-left" x="103" y="330" width="38" height="72" rx="6" fill="#1e293b"/>
-                                            <rect id="pants-right" x="159" y="330" width="38" height="72" rx="6" fill="#1e293b"/>
-                                            <line x1="103" y1="400" x2="141" y2="400" stroke="#0f172a" stroke-width="2" id="hem-left"/>
-                                            <line x1="159" y1="400" x2="197" y2="400" stroke="#0f172a" stroke-width="2" id="hem-right"/>
-                                        </g>
-                                        <g id="avatar-socks">
-                                            <rect x="106" y="398" width="32" height="28" rx="4" fill="#f8fafc"/>
-                                            <rect x="162" y="398" width="32" height="28" rx="4" fill="#f8fafc"/>
-                                            <rect x="106" y="405" width="32" height="4" rx="1" fill="#6366f1" opacity="0.7"/>
-                                            <rect x="162" y="405" width="32" height="4" rx="1" fill="#6366f1" opacity="0.7"/>
-                                        </g>
-                                        <g id="avatar-shoes">
-                                            <ellipse cx="122" cy="432" rx="22" ry="10" fill="url(#shoe-grad-l-studio)"/>
-                                            <rect x="100" y="422" width="44" height="12" rx="6" fill="url(#shoe-grad-l-studio)"/>
-                                            <rect x="100" y="420" width="44" height="6" rx="3" fill="#ffffff" opacity="0.6"/>
-                                            <rect x="99" y="430" width="46" height="5" rx="2" fill="#64748b"/>
-                                            <line x1="110" y1="424" x2="110" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                            <line x1="118" y1="422" x2="118" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                            <line x1="126" y1="422" x2="126" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                            <line x1="134" y1="424" x2="134" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                            <ellipse cx="178" cy="432" rx="22" ry="10" fill="url(#shoe-grad-r-studio)"/>
-                                            <rect x="156" y="422" width="44" height="12" rx="6" fill="url(#shoe-grad-r-studio)"/>
-                                            <rect x="156" y="420" width="44" height="6" rx="3" fill="#ffffff" opacity="0.6"/>
-                                            <rect x="155" y="430" width="46" height="5" rx="2" fill="#64748b"/>
-                                            <line x1="166" y1="424" x2="166" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                            <line x1="174" y1="422" x2="174" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                            <line x1="182" y1="422" x2="182" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                            <line x1="190" y1="424" x2="190" y2="430" stroke="#64748b" stroke-width="1.5"/>
-                                        </g>
-                                    </svg>
-
-                                    <!-- Level 6 (z-index: 60) -> Front Hair / Bangs -->
-                                    <svg class="avatar-layer" style="z-index: 60;" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
-                                        <path id="avatar-hair-front" d="M93,108 C93,50 207,50 207,108 C195,72 175,60 150,60 C125,60 105,72 93,108 Z" fill="var(--hair-color, #1e293b)"/>
-                                    </svg>
-
-                                    <!-- Level 7 (z-index: 70) -> Purchased Accessories (Glasses/Specs, Hats, Masks) -->
-                                    <svg class="avatar-layer" style="z-index: 70;" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
-                                        <g id="avatar-glasses" opacity="0">
-                                            <rect x="112" y="95" width="28" height="20" rx="6" stroke="#10b981" stroke-width="2.5" fill="rgba(16,185,129,0.08)"/>
-                                            <rect x="160" y="95" width="28" height="20" rx="6" stroke="#10b981" stroke-width="2.5" fill="rgba(16,185,129,0.08)"/>
-                                            <line x1="140" y1="105" x2="160" y2="105" stroke="#10b981" stroke-width="2"/>
-                                            <line x1="93" y1="105" x2="112" y2="105" stroke="#10b981" stroke-width="2"/>
-                                            <line x1="188" y1="105" x2="207" y2="105" stroke="#10b981" stroke-width="2"/>
-                                        </g>
-                                        <g id="avatar-accessories" opacity="0">
-                                            <path d="M93,110 A57,57 0 0,1 207,110" stroke="#f59e0b" stroke-width="7" fill="none" stroke-linecap="round"/>
-                                            <rect x="80" y="102" width="16" height="28" rx="8" fill="#f59e0b"/>
-                                            <rect x="204" y="102" width="16" height="28" rx="8" fill="#f59e0b"/>
-                                            <ellipse cx="88" cy="116" rx="4" ry="6" fill="#d97706"/>
-                                            <ellipse cx="212" cy="116" rx="4" ry="6" fill="#d97706"/>
-                                        </g>
-                                    </svg>
+                                <div id="studio-avatar-container">
+                                    <!-- Rendered dynamically by script -->
                                 </div>
                                 <!-- Pet Layer System -->
                                 <div class="pet-overlay-container" id="studio-pet-container">
@@ -926,7 +815,7 @@
                         <!-- Left: Product Shelf -->
                         <div class="shop-shelf-card">
                             <div class="shop-shelf-header">
-                                <h3>🛍️ Kawan Spark Shop</h3>
+                                <h3>🛒 Kawan Spark Shop</h3>
                                 <div class="shop-week-tabs">
                                     <button class="shop-week-tab active" data-week="1">Week 1</button>
                                     <button class="shop-week-tab" data-week="2">Week 2</button>
@@ -969,502 +858,87 @@
                 <!-- Calm Hub Panel -->
                 <section class="panel" id="calm-panel">
                     <div class="calm-layout">
-                        <!-- Audio Synthesizer mixer panel -->
-                        <div class="mixer-card">
-                            <div class="mixer-header">
-                                <h3>Sound Sanctuary</h3>
-                                <p>Direct browser-synthesized audio tones using the Web Audio API. Perfect for grounding during stress episodes.</p>
-                            </div>
-
-                            <div class="sound-mixer-list">
-                                <!-- Sound 1: Binaural Beat -->
-                                <div class="mixer-row">
-                                    <div class="mixer-sound-info">
-                                        <i data-lucide="audio-waveform" class="text-purple"></i>
-                                        <div>
-                                            <span class="sound-title">Binaural Calm Beats (432Hz)</span>
-                                            <span class="sound-desc">Encourages theta brainwaves for anxiety relief.</span>
-                                        </div>
-                                    </div>
-                                    <div class="mixer-controls">
-                                        <input type="range" class="volume-slider" id="vol-binaural" min="0" max="1" step="0.05" value="0.5">
-                                        <button class="synth-toggle-btn" id="btn-play-binaural">Play</button>
-                                    </div>
-                                </div>
-
-                                <!-- Sound 2: Rain Sound -->
-                                <div class="mixer-row">
-                                    <div class="mixer-sound-info">
-                                        <i data-lucide="cloud-rain" class="text-indigo"></i>
-                                        <div>
-                                            <span class="sound-title">Synthesized Pink Rain</span>
-                                            <span class="sound-desc">Continuous soothing white noise spectrum filter.</span>
-                                        </div>
-                                    </div>
-                                    <div class="mixer-controls">
-                                        <input type="range" class="volume-slider" id="vol-rain" min="0" max="1" step="0.05" value="0.5">
-                                        <button class="synth-toggle-btn" id="btn-play-rain">Play</button>
-                                    </div>
-                                </div>
-
-                                <!-- Sound 3: Zen Drone -->
-                                <div class="mixer-row">
-                                    <div class="mixer-sound-info">
-                                        <i data-lucide="music-4" class="text-mint"></i>
-                                        <div>
-                                            <span class="sound-title">Zen Meditation Drone</span>
-                                            <span class="sound-desc">Deep harmonic chord oscillations for grounding.</span>
-                                        </div>
-                                    </div>
-                                    <div class="mixer-controls">
-                                        <input type="range" class="volume-slider" id="vol-drone" min="0" max="1" step="0.05" value="0.5">
-                                        <button class="synth-toggle-btn" id="btn-play-drone">Play</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Video Sanctuary Card -->
-                        <div class="mixer-card video-sanctuary-card">
-                            <div class="mixer-header">
-                                <h3>🎬 Video Sanctuary</h3>
-                                <p>Upload your own calming video — nature walks, lo-fi visuals, or anything peaceful. Just for you. 🌿</p>
-                            </div>
-
-                            <!-- Upload Drop Zone (shown when no video) -->
-                            <div class="video-upload-zone" id="video-upload-zone">
-                                <input type="file" id="calm-video-input" accept="video/*" class="video-file-input" />
-                                <div class="video-upload-inner" id="video-drop-target">
-                                    <div class="video-upload-icon">🎥</div>
-                                    <p class="video-upload-title">Drop your video here</p>
-                                    <p class="video-upload-hint">or click to browse your files</p>
-                                    <p class="video-upload-formats">Supports MP4, WebM, MOV, AVI</p>
-                                    <button class="video-browse-btn" id="video-browse-btn">
-                                        <i data-lucide="upload"></i> Choose Video
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Video Player (shown after upload) -->
-                            <div class="video-player-wrapper hidden" id="video-player-wrapper">
-                                <video id="calm-video-player" class="calm-video-player" loop>
-                                    Your browser does not support the video tag.
-                                </video>
-                                <!-- Custom Controls -->
-                                <div class="video-custom-controls">
-                                    <button class="video-ctrl-btn" id="calm-vid-playpause" title="Play / Pause">
-                                        <i data-lucide="play" id="calm-vid-play-icon"></i>
-                                    </button>
-                                    <input type="range" class="volume-slider video-progress-bar" id="calm-vid-progress" min="0" max="100" step="0.1" value="0">
-                                    <span class="video-time-label" id="calm-vid-time">0:00 / 0:00</span>
-                                    <input type="range" class="volume-slider video-vol-slider" id="calm-vid-volume" min="0" max="1" step="0.05" value="0.7">
-                                    <button class="video-ctrl-btn" id="calm-vid-mute" title="Mute">
-                                        <i data-lucide="volume-2" id="calm-vid-vol-icon"></i>
-                                    </button>
-                                    <button class="video-ctrl-btn" id="calm-vid-loop-btn" title="Loop">
-                                        <i data-lucide="repeat"></i>
-                                    </button>
-                                    <button class="video-ctrl-btn" id="calm-vid-fullscreen" title="Fullscreen">
-                                        <i data-lucide="maximize"></i>
-                                    </button>
-                                    <button class="video-ctrl-btn video-remove-btn" id="calm-vid-remove" title="Remove video">
-                                        <i data-lucide="trash-2"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                <!-- Games & Relaxation Panel -->
-                <section class="panel" id="games-panel">
-                    <!-- Ambient Decorative Floating Bubbles -->
-                    <div class="games-ambient-bg">
-                        <div class="ambient-bubble ab-1"></div>
-                        <div class="ambient-bubble ab-2"></div>
-                        <div class="ambient-bubble ab-3"></div>
-                        <div class="ambient-bubble ab-4"></div>
-                    </div>
-
-                    <div class="games-layout">
-                        <!-- Canvas for Chief Designer Ambient Floating Particles -->
-                        <canvas id="games-ambient-canvas" style="position: absolute; inset: 0; pointer-events: none; z-index: 1;"></canvas>
-
-                        <!-- Game Menu Selector (Default View) -->
-                        <div class="games-menu-container" id="games-menu-container">
-
-                            <div class="games-portal-layout">
-                                
-                                <!-- Left Column: Stats Dashboard and Games Selection Grid -->
-                                <div class="games-portal-main">
-                                    <div class="games-menu-header">
-                                        <h3 class="menu-title">🎮 KawanKu Arcade Sanctuary</h3>
-                                        <p class="menu-desc">Choose a cozy playground to calm your mind. Zero pressure, no timers, pure relaxation. 🤍</p>
-                                    </div>
-
-                                    <!-- Sanctuary Stats Dashboard -->
-                                    <div class="sanctuary-dashboard">
-                                        <div class="dashboard-title">
-                                            <span class="pulse-indicator"></span>
-                                            <span>REAL-TIME COZY STATS TRACKER</span>
-                                        </div>
-                                        <div class="dashboard-stats-grid">
-                                            <div class="dash-stat-card">
-                                                <div class="stat-icon">😌</div>
-                                                <div class="stat-info">
-                                                    <span class="stat-label">Zen State</span>
-                                                    <span class="stat-value" id="dash-val-zen">Calm</span>
-                                                </div>
-                                            </div>
-                                            <div class="dash-stat-card">
-                                                <div class="stat-icon">🧩</div>
-                                                <div class="stat-info">
-                                                    <span class="stat-label">Fruits Matched</span>
-                                                    <span class="stat-value" id="dash-val-matches">0</span>
-                                                </div>
-                                            </div>
-                                            <div class="dash-stat-card">
-                                                <div class="stat-icon">⚔️</div>
-                                                <div class="stat-info">
-                                                    <span class="stat-label">Fruits Sliced</span>
-                                                    <span class="stat-value" id="dash-val-slices">0</span>
-                                                </div>
-                                            </div>
-                                            <div class="dash-stat-card">
-                                                <div class="stat-icon">🕒</div>
-                                                <div class="stat-info">
-                                                    <span class="stat-label">Relax Time</span>
-                                                    <span class="stat-value" id="dash-val-time">0m</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="games-selection-grid">
-                                        <!-- Game Card 1: Match-3 -->
-                                        <div class="menu-game-card" id="btn-select-match3">
-                                            <div class="menu-game-badge">Puzzler</div>
-                                            <div class="menu-game-icon">🍉</div>
-                                            <div class="menu-game-info">
-                                                <h4>开心消消乐 Happy Match-3</h4>
-                                                <p>Match cute local Malaysian fruits at your own pace. Perfect for slow breathing focus.</p>
-                                            </div>
-                                            <span class="menu-play-action">Play Game ➔</span>
-                                        </div>
-
-                                        <!-- Game Card 2: Fruit Zen -->
-                                        <div class="menu-game-card" id="btn-select-fruit-zen">
-                                            <div class="menu-game-badge zen">Zen Splash</div>
-                                            <div class="menu-game-icon">🍉✨</div>
-                                            <div class="menu-game-info">
-                                                <h4>KawanKu Fruit Zen</h4>
-                                                <p>Slice spiky durians, rambutans, coconuts, and mangosteens. Satisfying, juicy sensory feedback.</p>
-                                            </div>
-                                            <span class="menu-play-action">Play Game ➔</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Right Column: KawanKu Comfort Lounge Sidebar Card (Fills space, adds interactivity & daily checklist) -->
-                                <div class="games-portal-sidebar">
-                                    <div class="comfort-lounge-card" id="lounge-mascot-card">
-                                        <!-- Mascot Robot & Dynamic Bubble -->
-                                        <div class="lounge-mascot-row">
-                                            <div class="lounge-robot-avatar" id="lounge-robot-trigger" title="Click me for cozy wisdom!">
-                                                <div class="robot-antenna"></div>
-                                                <div class="robot-head">
-                                                    <div class="robot-ears"></div>
-                                                    <div class="robot-eyes">
-                                                        <div class="eye"></div>
-                                                        <div class="eye"></div>
-                                                    </div>
-                                                </div>
-                                                <div class="robot-body">
-                                                    <div class="robot-heart pulse-heart"></div>
-                                                </div>
-                                            </div>
-                                            <div class="comfort-speech-bubble" id="lounge-speech-text">
-                                                Let's take a deep breath together, Kawan! 🌸 Click me for cozy wisdom.
-                                            </div>
-                                        </div>
-
-                                        <!-- Daily Zen Focus checklist -->
-                                        <div class="daily-zen-focus-box">
-                                            <h4 class="lounge-section-title">🌱 DAILY ZEN FOCUS</h4>
-                                            <div class="zen-task-list">
-                                                <div class="zen-task-item" id="task-cozy-start">
-                                                    <span class="checkbox-indicator"></span>
-                                                    <span class="task-label-text">Cozy Start (Play any game once)</span>
-                                                </div>
-                                                <div class="zen-task-item" id="task-cozy-matches">
-                                                    <span class="checkbox-indicator"></span>
-                                                    <span class="task-label-text">Match Master (Match 30 fruits)</span>
-                                                </div>
-                                                <div class="zen-task-item" id="task-cozy-slices">
-                                                    <span class="checkbox-indicator"></span>
-                                                    <span class="task-label-text">Zen Slicer (Slice 20 fruits)</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-
-                            </div>
-                        </div>
-
-
-
-                        <!-- 开心消消乐 Match-3 Game (Hidden by default) -->
-                        <div class="game-card game-card-full hidden" id="card-match3">
-                            <div class="game-card-header">
-                                <div class="game-icon-title">
-                                    <span class="game-title-emoji">🍉</span>
-                                    <div>
-                                        <h3>开心消消乐 Happy Match-3</h3>
-                                        <p class="game-subtitle">Swap cute Malaysian fruits · No timer · No limits · Pure relaxation 🌴</p>
-                                    </div>
-                                </div>
-                                <button class="game-btn-secondary back-to-menu-btn" id="btn-match3-back-menu">✕ Back to Menu</button>
-                            </div>
-
-                            <!-- Start Screen with Comforting Rules Guide -->
-                            <div class="match3-start-screen" id="match3-start-action">
-                                <!-- Mascot Guide Message -->
-                                <div class="rules-mascot-row">
-                                    <div class="kawanku-robot-mini">
-                                        <div class="robot-antenna"></div>
-                                        <div class="robot-head">
-                                            <div class="robot-ears"></div>
-                                            <div class="robot-eyes">
-                                                <div class="eye"></div>
-                                                <div class="eye"></div>
-                                            </div>
-                                        </div>
-                                        <div class="robot-body">
-                                            <div class="robot-heart pulse-heart"></div>
-                                        </div>
-                                    </div>
-                                    <div class="rules-speech-bubble">
-                                        <p>Hey Kawan! Feel free to play this cozy matching game at your own pace. There is no score, no time limit, and no wrong moves. Let's relax together! 🤍</p>
-                                    </div>
-                                </div>
-
-                                <!-- Fruits Preview -->
-                                <div class="fruit-preview-row">
-                                    <div class="fruit-preview-item" title="Mangosteen 山竹"></div>
-                                    <div class="fruit-preview-item" title="Durian 榴莲"></div>
-                                    <div class="fruit-preview-item" title="Rambutan 红毛丹"></div>
-                                    <div class="fruit-preview-item" title="Banana 香蕉"></div>
-                                    <div class="fruit-preview-item" title="Mango 芒果"></div>
-                                </div>
-
-                                <!-- Visual Easy-to-Understand Rules -->
-                                <div class="simple-rules-card">
-                                    <h4 class="rules-title">🎮 How to Play (游戏规则)</h4>
-                                    <div class="rules-steps-grid">
-                                        <div class="step-item">
-                                            <span class="step-number">1</span>
-                                            <p class="step-text"><strong>选择水果 (Select)</strong><br>Click any cute fruit on the grid.</p>
-                                        </div>
-                                        <div class="step-item">
-                                            <span class="step-number">2</span>
-                                            <p class="step-text"><strong>交换对齐 (Swap)</strong><br>Click an adjacent neighbor fruit to swap.</p>
-                                        </div>
-                                        <div class="step-item">
-                                            <span class="step-number">3</span>
-                                            <p class="step-text"><strong>消除放松 (Match)</strong><br>Line up 3 same fruits to clear them!</p>
-                                        </div>
-                                    </div>
-                                    <div class="rules-features-list">
-                                        <span class="feature-tag">⏳ No Timer (无倒计时)</span>
-                                        <span class="feature-tag">💖 Infinite Turns (无限步数)</span>
-                                        <span class="feature-tag">🌴 100% Calming (纯粹放松)</span>
-                                    </div>
-
-                                    <button class="game-btn-primary" id="btn-start-match3">🎮 Start Playing!</button>
-                                </div>
-                            </div>
-
-                            <!-- Active Match-3 Arena -->
-                            <div class="match3-arena hidden" id="match3-game-arena">
-                                <div class="match3-header">
-                                    <div class="progress-lbl">😌 Relaxation Progress</div>
-                                    <div class="match3-progress-bar">
-                                        <div class="progress-fill" id="match3-progress" style="width: 0%;"></div>
-                                    </div>
-                                    <span class="progress-value" id="match3-progress-val">0%</span>
-                                    <button class="game-btn-secondary" id="btn-quit-match3">✕ Quit Game</button>
+                        <!-- Calm Videos card -->
+                        <div class="video-card" id="calm-video-section">
+                            <!-- 6 Categories Grid View -->
+                            <div id="calmCategoryGrid">
+                                <div class="video-header" style="margin-bottom: 1.5rem;">
+                                    <h3><i data-lucide="video" class="text-rose"></i> Visual Sanctuary</h3>
+                                    <p>Select a category below to explore video resources and calming sessions.</p>
                                 </div>
                                 
-                                <div class="match3-game-layout">
-                                    <div class="match3-board-wrapper" style="position: relative;">
-                                        <div class="match3-grid" id="match3-board"></div>
-                                        <div class="match3-combo-overlay" id="match3-combo-overlay" style="position: absolute; inset: 0; pointer-events: none; z-index: 100;"></div>
-                                    </div>
-
-                                    
-                                    <!-- Sidebar with Cute Tips Button -->
-                                    <div class="match3-sidebar">
-                                        <button class="match3-tip-btn" id="btn-match3-tip" title="Get a hint!">
-                                            <span class="tip-icon">💡</span>
-                                            <span class="tip-text">Kawan's Tip</span>
-                                        </button>
-                                        <div class="tip-box">
-                                            <p class="tip-box-title">💡 Relaxation Tip:</p>
-                                            <p class="tip-box-desc" id="match3-tip-box-text">Take deep breaths while matching. Let the stress melt away.</p>
+                                <div class="category-list-container">
+                                    <button class="category-row-item" onclick="openCategory('anxiety')">
+                                        <span class="category-icon">😰</span>
+                                        <div class="category-info">
+                                            <span class="category-title">Anxiety Relief</span>
+                                            <span class="category-desc">Breathing & grounding sessions</span>
                                         </div>
-                                    </div>
-                                </div>
-                                <p class="match3-hint" id="match3-hint-text">Click a fruit, then click an adjacent fruit to swap them!</p>
-                            </div>
-                        </div>
-
-                        <!-- KawanKu Fruit Zen Game (Hidden by default) -->
-                        <div class="game-card game-card-full hidden" id="card-fruit-zen">
-                            <div class="game-card-header">
-                                <div class="game-icon-title">
-                                    <span class="game-title-emoji">⚔️</span>
-                                    <div>
-                                        <h3>KawanKu Fruit Zen</h3>
-                                        <p class="game-subtitle">Slice local Malaysian fruits · No bombs · Infinite calm · Sensory satisfaction 🌴</p>
-                                    </div>
-                                </div>
-                                <button class="game-btn-secondary back-to-menu-btn" id="btn-fruit-zen-back-menu">✕ Back to Menu</button>
-                            </div>
-
-                            <!-- Start Screen with Comforting Rules Guide -->
-                            <div class="zen-start-screen" id="zen-start-action">
-                                <!-- Mascot Guide Message -->
-                                <div class="rules-mascot-row">
-                                    <div class="kawanku-robot-mini">
-                                        <div class="robot-antenna"></div>
-                                        <div class="robot-head">
-                                            <div class="robot-ears"></div>
-                                            <div class="robot-eyes">
-                                                <div class="eye"></div>
-                                                <div class="eye"></div>
-                                            </div>
+                                        <span class="category-arrow">&rarr;</span>
+                                    </button>
+                                    <button class="category-row-item" onclick="openCategory('depression')">
+                                        <span class="category-icon">😔</span>
+                                        <div class="category-info">
+                                            <span class="category-title">Depression Support</span>
+                                            <span class="category-desc">Comforting guides & affirmations</span>
                                         </div>
-                                        <div class="robot-body">
-                                            <div class="robot-heart pulse-heart"></div>
+                                        <span class="category-arrow">&rarr;</span>
+                                    </button>
+                                    <button class="category-row-item" onclick="openCategory('motivation')">
+                                        <span class="category-icon">🔥</span>
+                                        <div class="category-info">
+                                            <span class="category-title">Motivational Speeches</span>
+                                            <span class="category-desc">Ignite drive and overcome blocks</span>
                                         </div>
-                                    </div>
-                                    <div class="rules-speech-bubble">
-                                        <p>Selamat datang! Swipe or drag your mouse to slice flying local fruits. There are no bombs, no lives, and no limits. Let's experience the flow! 🍍✨</p>
-                                    </div>
-                                </div>
-
-                                <!-- Fruits Preview -->
-                                <div class="fruit-preview-row">
-                                    <div class="fruit-preview-card" style="--fc: #FFD700" title="Durian 榴莲">
-                                        <span class="preview-emoji">🍈</span>
-                                        <span class="preview-name">Durian</span>
-                                    </div>
-                                    <div class="fruit-preview-card" style="--fc: #8A2BE2" title="Mangosteen 山竹">
-                                        <span class="preview-emoji">🍇</span>
-                                        <span class="preview-name">Mangosteen</span>
-                                    </div>
-                                    <div class="fruit-preview-card" style="--fc: #FF4500" title="Rambutan 红毛丹">
-                                        <span class="preview-emoji">🍓</span>
-                                        <span class="preview-name">Rambutan</span>
-                                    </div>
-                                    <div class="fruit-preview-card" style="--fc: #E0FFFF" title="Coconut 椰子">
-                                        <span class="preview-emoji">🥥</span>
-                                        <span class="preview-name">Coconut</span>
-                                    </div>
-                                </div>
-
-                                <!-- Visual Easy-to-Understand Rules -->
-                                <div class="simple-rules-card">
-                                    <h4 class="rules-title">🎮 How to Play (游戏规则)</h4>
-                                    <div class="rules-steps-grid">
-                                        <div class="step-item">
-                                            <span class="step-number">1</span>
-                                            <p class="step-text"><strong>划动切开 (Swipe to Slice)</strong><br>Click and drag your mouse or swipe across fruits to slice them.</p>
+                                        <span class="category-arrow">&rarr;</span>
+                                    </button>
+                                    <button class="category-row-item" onclick="openCategory('academic')">
+                                        <span class="category-icon">📚</span>
+                                        <div class="category-info">
+                                            <span class="category-title">Academic Stress</span>
+                                            <span class="category-desc">Beat study pressure & exam burnout</span>
                                         </div>
-                                        <div class="step-item">
-                                            <span class="step-number">2</span>
-                                            <p class="step-text"><strong>果汁飞溅 (Splash Effects)</strong><br>Splitting a fruit triggers beautiful sensory splashes and visual sparks.</p>
+                                        <span class="category-arrow">&rarr;</span>
+                                    </button>
+                                    <button class="category-row-item" onclick="openCategory('confidence')">
+                                        <span class="category-icon">💪</span>
+                                        <div class="category-info">
+                                            <span class="category-title">Building Confidence</span>
+                                            <span class="category-desc">Develop healthy self-compassion</span>
                                         </div>
-                                        <div class="step-item">
-                                            <span class="step-number">3</span>
-                                            <p class="step-text"><strong>填满能量 (Fill Relaxation Bar)</strong><br>Slice 20 fruits to fill the Zen Bar and complete your session!</p>
+                                        <span class="category-arrow">&rarr;</span>
+                                    </button>
+                                    <button class="category-row-item" onclick="openCategory('meditate')">
+                                        <span class="category-icon">🧘</span>
+                                        <div class="category-info">
+                                            <span class="category-title">Guided Meditation</span>
+                                            <span class="category-desc">Calming visualizations & breath</span>
                                         </div>
-                                    </div>
-                                    <!-- Select Game Mode (Speed Settings) -->
-                                    <div class="pregame-settings-box">
-                                        <h4 class="pregame-settings-title">⚙️ Select Speed Mode (选择速度模式)</h4>
-                                        <div class="mode-select-buttons horizontal">
-                                            <button class="mode-btn" data-speed-mode="slow">😌 Zen (慢速)</button>
-                                            <button class="mode-btn active" data-speed-mode="normal">⚡ Normal (常速)</button>
-                                            <button class="mode-btn" data-speed-mode="fast">🔥 Arcade (快速)</button>
-                                        </div>
-                                    </div>
-
-                                    <div class="rules-features-list">
-                                        <span class="feature-tag">💥 No Bombs (无炸弹)</span>
-                                        <span class="feature-tag">❤️ No Penalties (无惩罚)</span>
-                                        <span class="feature-tag">🔊 Soothing Audio (解压音效)</span>
-                                    </div>
-
-                                    <button class="game-btn-primary" id="btn-start-fruit-zen">🎮 Start Playing!</button>
+                                        <span class="category-arrow">&rarr;</span>
+                                    </button>
                                 </div>
                             </div>
 
-                            <!-- Active Fruit Zen Arena -->
-                            <div class="zen-arena hidden" id="zen-game-arena">
-                                <div class="zen-header">
-                                    <div class="progress-lbl">😌 Zen Relaxation Bar</div>
-                                    <div class="match3-progress-bar">
-                                        <div class="progress-fill" id="zen-progress" style="width: 0%;"></div>
-                                    </div>
-                                    <span class="progress-value" id="zen-progress-val">0/20</span>
-                                    <button class="game-btn-secondary" id="btn-quit-fruit-zen">✕ Quit Game</button>
+                            <!-- Video Player Detail View (Hidden Initially) -->
+                            <div class="category-detail" id="categoryDetail" style="display: none; height: 100%; flex-direction: column;">
+                                <div class="detail-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                                    <h4 id="currentCategoryTitle" style="font-size: 1.15rem; color: var(--color-text-primary);"></h4>
+                                    <button class="btn-back-link" onclick="closeCategory()" style="background: none; border: none; color: var(--color-rose); cursor: pointer; font-weight: 600; font-size: 0.85rem;">&larr; Back</button>
                                 </div>
+                                <p id="currentCategoryDesc" style="font-size: 0.78rem; color: var(--color-text-muted); margin-bottom: 1.25rem; line-height: 1.4;"></p>
 
-                                <div class="zen-canvas-container">
-                                    <canvas id="zen-canvas"></canvas>
-                                    <div class="zen-canvas-hint">Drag your cursor or swipe to slice the fruits!</div>
+                                <div class="video-player-wrapper" style="position: relative; width: 100%; aspect-ratio: 16/9; border-radius: 12px; overflow: hidden; background: #000; border: 1px solid var(--border-glass); margin-bottom: 1.25rem;">
+                                    <video id="detailVideoPlayer" controls playsinline style="width: 100%; height: 100%; object-fit: cover;">
+                                        <source id="detailVideoSource" src="" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Post-Game Survey (inline, shared/integrated after win) -->
-                        <div class="survey-inline hidden" id="survey-inline">
-                            <div class="survey-inline-inner">
-                                <div class="survey-win-banner">🎊 Relaxation Complete! 🎊</div>
-                                <p class="survey-prompt" id="survey-win-prompt">You've successfully filled your relaxation bar! What would you like to do next?</p>
-                                <div class="win-choices-row" id="win-choices-row">
-                                    <button class="game-btn-primary" id="btn-win-replay">🎮 Play Again (继续玩)</button>
-                                    <button class="game-btn-secondary" id="btn-win-survey">📝 Log Mood & Exit (退出并记录心情)</button>
-                                </div>
+                                <h4 id="currentVideoTitle" style="font-size: 0.95rem; font-weight: 600; color: var(--color-text-primary); margin-bottom: 1rem;"></h4>
                                 
-                                <div class="survey-mood-section hidden" id="survey-mood-section">
-                                    <!-- Mascot SVG beside prompt -->
-                                    <div class="rules-mascot-row" style="margin-bottom: 20px;">
-                                        <div class="kawanku-robot-mini">
-                                            <div class="robot-antenna"></div>
-                                            <div class="robot-head">
-                                                <div class="robot-ears"></div>
-                                                <div class="robot-eyes">
-                                                    <div class="eye"></div>
-                                                    <div class="eye"></div>
-                                                </div>
-                                            </div>
-                                            <div class="robot-body">
-                                                <div class="robot-heart pulse-heart"></div>
-                                            </div>
-                                        </div>
-                                        <div class="rules-speech-bubble" style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1);">
-                                            <p id="survey-robot-prompt">Hey Kawan, after playing this, how are you feeling now?</p>
-                                        </div>
-                                    </div>
-                                    <div class="emoji-options-grid">
-                                        <button class="emoji-btn" data-mood="1"><span class="emoji">🌟</span><span class="emoji-label">Much Better</span></button>
-                                        <button class="emoji-btn" data-mood="2"><span class="emoji">😊</span><span class="emoji-label">Calmer</span></button>
-                                        <button class="emoji-btn" data-mood="3"><span class="emoji">😐</span><span class="emoji-label">Neutral</span></button>
-                                        <button class="emoji-btn" data-mood="4"><span class="emoji">😕</span><span class="emoji-label">Still Stressed</span></button>
-                                        <button class="emoji-btn" data-mood="5"><span class="emoji">😢</span><span class="emoji-label">Chat with AI</span></button>
+                                <div class="category-playlist" style="flex-grow: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden;">
+                                    <h5 style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); margin-bottom: 0.5rem;">Sessions</h5>
+                                    <div class="playlist-items-list" id="playlistItems" style="overflow-y: auto; display: flex; flex-direction: column; gap: 8px; flex-grow: 1;">
+                                        <!-- Dynamic entries -->
                                     </div>
                                 </div>
                             </div>
@@ -1476,7 +950,7 @@
         </main>
     </div>
 
-    <!-- SOS Counselor Confirmation Modal Overlay -->
+    <!-- SOS Counselor Confirmation Modal Overlay (Globally accessibility) -->
     <div class="sos-modal-overlay hidden" id="sos-modal">
         <div class="sos-modal-card">
             <div class="sos-modal-header">

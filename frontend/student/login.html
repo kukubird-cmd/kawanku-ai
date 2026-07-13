@@ -237,7 +237,7 @@
     </div>
 
     <script>
-        const API_BASE = window.API_BASE || 'http://localhost:5000/api';
+        const API_BASE = window.API_BASE || 'http://localhost:5005/api';
 
         async function handleLogin(event) {
             event.preventDefault();
@@ -270,7 +270,7 @@
                     }));
 
                     // Redirect to the main MindBuddy experience served by Flask.
-                    window.location.href = 'http://127.0.0.1:5000/';
+                    window.location.href = 'http://127.0.0.1:5005/';
                 } else {
                     showError(data.error || 'Login failed');
                 }
