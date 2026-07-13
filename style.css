@@ -503,6 +503,11 @@ body {
     width: 100%;
     position: relative;
     min-height: 200px;
+    border-radius: 20px !important;
+    overflow: hidden !important;
+    transition: background 0.5s ease;
+    border: 2px solid rgba(74, 55, 40, 0.12) !important;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1) !important;
 }
 
 .avatar-svg-container {
@@ -1555,7 +1560,9 @@ body {
 
 /* Background Scene Overlay SVGs */
 .customizer-viewport svg.scene-bg-element,
-.customizer-viewport #scene-decorations svg {
+.customizer-viewport #scene-decorations svg,
+.avatar-card svg.scene-bg-element,
+.avatar-card #chat-scene-decorations svg {
     position: absolute !important;
     inset: 0 !important;
     width: 100% !important;
@@ -1776,12 +1783,13 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     gap: 8px;
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     user-select: none;
+    aspect-ratio: 1 / 1.25;
 }
 
 .catalog-card:hover {
@@ -1799,15 +1807,16 @@ body {
 }
 
 .catalog-card-preview {
-    width: 72px;
-    height: 72px;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    max-width: 110px;
     background-color: #FFFFFF;
-    border-radius: 12px;
+    border-radius: 14px;
     border: 2px solid #4A3E3D;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 6px;
+    padding: 8px;
     box-sizing: border-box;
 }
 
@@ -1830,7 +1839,7 @@ body {
 }
 
 .catalog-card.active .catalog-card-label {
-    color: white;
+    color: #4A3E3D !important;
 }
 
 .color-swatch-circle {
@@ -2151,9 +2160,8 @@ body {
    ========================================== */
 
 .calm-layout {
-    display: grid;
-    grid-template-columns: 1fr 400px;
-    gap: 32px;
+    display: flex;
+    flex-direction: column;
     height: 100%;
 }
 
@@ -2271,6 +2279,139 @@ body {
 
 .synth-toggle-btn:hover {
     background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Video Sanctuary ──────────────────────── */
+.video-sanctuary-card {
+    flex-shrink: 0;
+}
+
+/* ==========================================
+   CALM HUB VIDEOS
+   ========================================== */
+
+.video-card {
+    background-color: var(--bg-glass);
+    border: 1px solid var(--border-glass);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.category-list-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.category-row-item {
+    background-color: rgba(255, 255, 255, 0.01);
+    border: 1px solid var(--border-glass);
+    border-radius: 14px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: left;
+    color: var(--color-text-primary);
+    position: relative;
+}
+
+.category-row-item:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+    border-color: var(--color-rose);
+    transform: translateY(-4px);
+    box-shadow: 0 4px 20px var(--color-rose-glow);
+}
+
+.category-row-item .category-icon {
+    font-size: 2.2rem;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+}
+
+.category-info {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-width: 0;
+    width: 100%;
+}
+
+.category-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.category-desc {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-top: 4px;
+    line-height: 1.4;
+    white-space: normal;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Video Sanctuary responsive ────────────────── */
+@media (max-width: 900px) {
+    .calm-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.category-arrow {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    transition: transform 0.25s ease;
+}
+
+.category-row-item:hover .category-arrow {
+    transform: translateX(4px);
+    color: var(--color-rose);
+}
+
+.playlist-video-item {
+    background-color: rgba(255, 255, 255, 0.01);
+    border: 1px solid var(--border-glass);
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    color: var(--color-text-primary);
+    width: 100%;
+    font-size: 0.82rem;
+}
+
+.playlist-video-item:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+    border-color: var(--border-glass-hover);
+}
+
+.playlist-video-item.active {
+    background-color: var(--color-rose-glow);
+    border-color: var(--color-rose);
+    color: var(--color-rose);
+    font-weight: 600;
+}
+
+.playlist-video-icon {
+    font-size: 0.85rem;
 }
 
 /* Mindfulness Quizzes */
@@ -2704,7 +2845,7 @@ body {
 }
 
 /* ============================================================
-   MENTAL STREAK ENGINE — Quiz System Styles
+   MENTAL STREAK ENGINE â€” Quiz System Styles
    ============================================================ */
 
 /* Card wrapper */
@@ -3698,10 +3839,316 @@ body {
     flex-direction: column;
     gap: 24px;
     padding-bottom: 40px;
-    max-width: 800px;
+    max-width: 1080px;
     margin: 0 auto;
     width: 100%;
 }
+
+/* --- Games Menu Selector --- */
+.games-menu-container {
+    background: rgba(30, 27, 75, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 24px;
+    padding: 32px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+    animation: fadeIn 0.4s ease-out;
+}
+
+.games-menu-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.menu-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin: 0 0 6px 0;
+    background: linear-gradient(135deg, #a78bfa, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.menu-desc {
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+.games-selection-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.menu-game-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    overflow: hidden;
+}
+
+.menu-game-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(244, 114, 182, 0.1));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+}
+
+.menu-game-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(167, 139, 250, 0.4);
+    box-shadow: 0 12px 30px rgba(139, 92, 246, 0.15);
+}
+
+.menu-game-card:hover::before {
+    opacity: 1;
+}
+
+.menu-game-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    padding: 3px 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    z-index: 1;
+}
+
+.menu-game-badge.zen {
+    background: rgba(139, 92, 246, 0.15);
+    color: #c4b5fd;
+    border-color: rgba(139, 92, 246, 0.25);
+}
+
+.menu-game-icon {
+    font-size: 3rem;
+    margin-bottom: 18px;
+    z-index: 1;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.15));
+    animation: gentleBounce 2.5s infinite ease-in-out;
+}
+
+.menu-game-info {
+    z-index: 1;
+    margin-bottom: 20px;
+    flex-grow: 1;
+}
+
+.menu-game-info h4 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 8px 0;
+}
+
+.menu-game-info p {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.menu-play-action {
+    z-index: 1;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #a78bfa;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.menu-game-card:hover .menu-play-action {
+    color: white;
+    transform: translateX(4px);
+}
+
+/* --- KawanKu Fruit Zen Canvas & Game Arena --- */
+.zen-start-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    padding: 24px 0;
+    text-align: center;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.fruit-preview-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 16px;
+    border-radius: 16px;
+    width: 90px;
+    transition: all 0.25s ease;
+}
+
+.fruit-preview-card:hover {
+    transform: scale(1.1) translateY(-4px);
+    border-color: var(--fc);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 6px 15px rgba(255, 255, 255, 0.05);
+}
+
+.fruit-preview-card .preview-emoji {
+    font-size: 2rem;
+    filter: drop-shadow(0 3px 6px rgba(0,0,0,0.15));
+}
+
+.fruit-preview-card .preview-name {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+
+.zen-arena {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.zen-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.zen-canvas-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 11.5;
+    background: linear-gradient(135deg, rgba(30, 27, 75, 0.6), rgba(15, 23, 42, 0.85));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    overflow: hidden;
+    touch-action: none;
+    box-shadow: inset 0 4px 30px rgba(0,0,0,0.5);
+}
+
+#zen-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+}
+
+.zen-canvas-hint {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.45);
+    background: rgba(0, 0, 0, 0.4);
+    padding: 4px 12px;
+    border-radius: 20px;
+    pointer-events: none;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* --- Fruit Zen Game Pregame Settings --- */
+.pregame-settings-box {
+    margin: 20px 0;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    text-align: center;
+}
+
+.pregame-settings-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+    color: white;
+}
+
+.mode-select-buttons.horizontal {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 12px;
+}
+
+@media (max-width: 600px) {
+    .mode-select-buttons.horizontal {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+.mode-btn {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.85);
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex: 1;
+}
+
+.mode-btn:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(167, 139, 250, 0.3);
+}
+
+.mode-btn.active {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(236, 72, 153, 0.25));
+    border-color: rgba(167, 139, 250, 0.6);
+    color: white;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
+}
+
+.back-to-menu-btn {
+    padding: 6px 12px !important;
+    font-size: 0.78rem !important;
+    height: auto !important;
+}
+
+@keyframes gentleBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 640px) {
+    .games-selection-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}
+
 
 .game-card-full {
     background: radial-gradient(circle at top right, rgba(30, 27, 75, 0.4), rgba(15, 23, 42, 0.7));
@@ -4326,5 +4773,2093 @@ body {
     border-radius: 8px;
 }
 
+/* --- Match-3 Side Column & Tips styling --- */
+.match3-game-layout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+}
+
+.match3-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 160px;
+    align-items: center;
+}
+
+.match3-tip-btn {
+    background: radial-gradient(circle at top left, #fbbf24, #d97706);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 16px;
+    width: 100%;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.match3-tip-btn:hover {
+    transform: scale(1.06) translateY(-2px);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45);
+}
+
+.match3-tip-btn:active {
+    transform: scale(0.96);
+}
+
+.match3-tip-btn .tip-icon {
+    font-size: 2rem;
+    animation: bulbGlow 1.5s infinite alternate;
+}
+
+@keyframes bulbGlow {
+    from { filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.8)); }
+    to { filter: drop-shadow(0 0 12px #fef08a); }
+}
+
+.match3-tip-btn .tip-text {
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tip-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: var(--color-text-muted);
+    width: 100%;
+    text-align: left;
+}
+
+.tip-box-title {
+    font-weight: 700;
+    color: #fbd38d;
+    margin: 0 0 6px 0;
+}
+
+.tip-box-desc {
+    margin: 0;
+}
+
+/* Glow animation for highlighted hint tiles */
+@keyframes hintPulse {
+    0%, 100% { border-color: rgba(251, 191, 36, 0.4); box-shadow: 0 0 8px rgba(251, 191, 36, 0.3); }
+    50% { border-color: #fbbf24; box-shadow: 0 0 20px #fbbf24, inset 0 0 10px rgba(251, 191, 36, 0.2); transform: scale(1.04); }
+}
+
+.match3-tile.hint-glow {
+    animation: hintPulse 1s infinite ease-in-out;
+    z-index: 5;
+}
+
+/* Win Choices screen styling */
+.win-choices-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    margin-top: 12px;
+}
+
+.win-choices-row button {
+    flex: 1;
+    max-width: 220px;
+}
+
+.survey-mood-section {
+    width: 100%;
+    animation: surveySlideUp 0.4s ease-out;
+}
+
 .hidden { display: none !important; pointer-events: none !important; }
 
+/* ==========================================================================
+   MINDBUDDY COZY PASTEL AESTHETIC OVERRIDES (CUSTOM THEME)
+   ========================================================================== */
+
+/* Global variable adjustments */
+:root {
+    --bg-dark: #FAF4E8;
+    --bg-sidebar: #C8B8E8;
+    --bg-glass: #ffffff;
+    --bg-glass-active: #ffffff;
+    --border-glass: #4a3728;
+    --border-glass-hover: #4a3728;
+    --color-text-primary: #4a3728;
+    --color-text-muted: #8c7b70;
+    --color-mint: #22c55e;
+    --color-mint-glow: rgba(34, 197, 94, 0.15);
+    --color-violet: #8b5cf6;
+    --color-violet-glow: rgba(139, 92, 246, 0.2);
+    --color-rose: #ea580c;
+    --color-rose-glow: rgba(234, 88, 12, 0.15);
+    --color-amber: #eab308;
+    --color-amber-glow: rgba(234, 179, 8, 0.15);
+    --font-heading: 'Plus Jakarta Sans', sans-serif;
+    --font-body: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Base resets for light theme */
+body {
+    background-color: var(--bg-dark) !important;
+    background-image: none !important;
+    color: var(--color-text-primary) !important;
+    font-family: var(--font-body) !important;
+}
+
+/* App container border colors and scrollbars */
+.app-container {
+    background-color: var(--bg-dark) !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(74, 55, 40, 0.2) !important;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(74, 55, 40, 0.4) !important;
+}
+
+/* Sidebar Custom Styling */
+.sidebar {
+    background-color: var(--bg-sidebar) !important;
+    border-right: 1.5px solid var(--border-glass) !important;
+    padding: 24px 20px !important;
+    box-shadow: none !important;
+}
+
+/* Logo inline brain styling */
+.logo-icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.logo-brain-svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.logo-text h1 {
+    font-family: var(--font-heading) !important;
+    font-weight: 800 !important;
+    color: #4a3728 !important;
+    font-size: 1.4rem !important;
+    margin: 0 !important;
+}
+.status-indicator.online {
+    color: #5c4d3c !important;
+    font-weight: 600 !important;
+}
+.status-indicator.online::before {
+    background-color: #22c55e !important;
+    box-shadow: 0 0 6px #22c55e !important;
+}
+
+/* Navigation buttons */
+.nav-btn-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.nav-badge-right {
+    font-size: 1.1rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+.nav-btn {
+    background-color: transparent !important;
+    border: 1.5px solid transparent !important;
+    color: #4a3728 !important;
+    border-radius: 16px !important;
+    font-weight: 700 !important;
+    transition: all 0.2s ease !important;
+    box-shadow: none !important;
+}
+.nav-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+    color: #4a3728 !important;
+}
+.nav-btn.active {
+    background-color: #ffffff !important;
+    border-color: #4a3728 !important;
+    color: #4a3728 !important;
+    box-shadow: 0 4px 10px rgba(74, 55, 40, 0.1) !important;
+}
+.nav-btn i {
+    color: #4a3728 !important;
+    stroke-width: 2.5px !important;
+}
+
+/* Sidebar footer profile */
+.sidebar-footer {
+    border-top: 1.5px dashed rgba(74, 55, 40, 0.25) !important;
+    padding-top: 20px !important;
+}
+.profile-card {
+    background-color: #ffffff !important;
+    border: 1.5px solid #4a3728 !important;
+    border-radius: 16px !important;
+    padding: 12px !important;
+    box-shadow: 0 4px 8px rgba(74, 55, 40, 0.05) !important;
+}
+.profile-avatar {
+    background-color: #FAF4E8 !important;
+    border: 1.5px solid #4a3728 !important;
+    color: #4a3728 !important;
+}
+.profile-name {
+    color: #4a3728 !important;
+    font-weight: 700 !important;
+}
+.profile-role {
+    color: #8c7b70 !important;
+}
+
+/* SOS Counselor Button */
+.sos-trigger-btn {
+    background: linear-gradient(135deg, #e56763, #e05a56) !important;
+    border: 1.5px solid #4a3728 !important;
+    color: #ffffff !important;
+    border-radius: 16px !important;
+    font-weight: 800 !important;
+    padding: 14px !important;
+    text-transform: uppercase;
+    font-size: 0.9rem !important;
+    box-shadow: 0 4px 0px #4a3728 !important;
+    transform: translateY(0);
+    transition: all 0.1s ease !important;
+}
+.sos-trigger-btn:hover {
+    transform: translateY(2px) !important;
+    box-shadow: 0 2px 0px #4a3728 !important;
+}
+.sos-trigger-btn:active {
+    transform: translateY(4px) !important;
+    box-shadow: none !important;
+}
+.sos-trigger-btn i {
+    color: #ffffff !important;
+    stroke-width: 2.5px !important;
+}
+
+/* Main Area Header */
+.main-content {
+    background-color: var(--bg-dark) !important;
+}
+.content-header {
+    background-color: transparent !important;
+    border-bottom: 1.5px dashed rgba(74, 55, 40, 0.2) !important;
+    padding: 24px 32px !important;
+}
+.welcome-section h2 {
+    color: #4a3728 !important;
+    font-weight: 800 !important;
+    font-size: 2rem !important;
+}
+.welcome-section p {
+    color: #8c7b70 !important;
+    font-weight: 500 !important;
+}
+
+/* Header status badges */
+.status-metric {
+    background-color: #ffffff !important;
+    border: 1.5px solid #4a3728 !important;
+    border-radius: 14px !important;
+    padding: 10px 16px !important;
+    box-shadow: 0 3px 0px #4a3728 !important;
+}
+.metric-label {
+    color: #8c7b70 !important;
+    font-weight: 700 !important;
+    font-size: 0.68rem !important;
+}
+.metric-value {
+    color: #4a3728 !important;
+    font-weight: 800 !important;
+    font-size: 0.95rem !important;
+}
+.metric-value.positive {
+    color: #4a3728 !important;
+}
+.metric-value.low {
+    color: #22c55e !important;
+}
+
+/* Cards layout overrides */
+.panel-container {
+    padding: 32px !important;
+}
+.avatar-card, .chat-window-card {
+    background-color: #ffffff !important;
+    border: 1.5px solid #4a3728 !important;
+    border-radius: 24px !important;
+    box-shadow: 0 6px 0px rgba(74, 55, 40, 0.08) !important;
+    padding: 24px !important;
+}
+.avatar-card-header h3, .chat-window-card h3 {
+    color: #4a3728 !important;
+    font-weight: 800 !important;
+    font-size: 1.25rem !important;
+}
+
+/* Expression badge */
+.expression-badge {
+    background-color: #fef08a !important;
+    border: 1.5px solid #4a3728 !important;
+    color: #4a3728 !important;
+    font-weight: 700 !important;
+    border-radius: 10px !important;
+    font-size: 0.72rem !important;
+    text-transform: uppercase !important;
+}
+
+/* Circular avatar viewport background */
+.avatar-viewport-container {
+    background: radial-gradient(circle, #FAF4E8 0%, #FAF4E8 100%) !important;
+    border: 1.5px solid #4a3728 !important;
+    border-radius: 50% !important;
+    width: 220px !important;
+    height: 220px !important;
+    margin: 20px auto !important;
+    overflow: hidden !important;
+    aspect-ratio: 1/1 !important;
+}
+.avatar-viewport {
+    background: transparent !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Speech bubble next to avatar */
+.avatar-bubble {
+    background-color: #ffffff !important;
+    border: 1.5px solid #4a3728 !important;
+    color: #4a3728 !important;
+    font-weight: 600 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 8px rgba(74, 55, 40, 0.06) !important;
+}
+
+/* Avatar quick stats */
+.avatar-quick-stats {
+    border-top: 1.5px dashed rgba(74, 55, 40, 0.2) !important;
+}
+.mini-label {
+    color: #8c7b70 !important;
+    font-weight: 700 !important;
+}
+.mini-val {
+    color: #4a3728 !important;
+    font-weight: 800 !important;
+}
+
+/* Right Panel: Chat stream frame */
+.chat-window-card {
+    background-color: #E3DAF8 !important; /* soft lavender outer frame */
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.chat-messages-container {
+    background-color: #ffffff !important;
+    border: 1.5px solid #4a3728 !important;
+    border-radius: 20px !important;
+    padding: 20px !important;
+    height: 380px !important;
+    overflow-y: auto !important;
+}
+
+/* Chat bubble styling */
+.message {
+    margin-bottom: 16px !important;
+}
+.message .msg-avatar-icon {
+    width: 36px !important;
+    height: 36px !important;
+    background-color: #fef08a !important; /* yellow star/MB badge background */
+    border: 1.5px solid #4a3728 !important;
+    color: #4a3728 !important;
+    font-weight: 800 !important;
+    border-radius: 10px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.message.buddy-msg .msg-body {
+    background-color: #FAF4E8 !important; /* cream chat bubble */
+    border: 1.5px solid #4a3728 !important;
+    color: #4a3728 !important;
+    border-radius: 0 16px 16px 16px !important;
+    padding: 12px 16px !important;
+    font-weight: 500 !important;
+    box-shadow: 0 3px 0px rgba(74, 55, 40, 0.05) !important;
+}
+.message.user-msg .msg-body {
+    background-color: #FAF4E8 !important; /* cream user bubble */
+    border: 1.5px solid #4a3728 !important;
+    color: #4a3728 !important;
+    border-radius: 16px 0 16px 16px !important;
+    padding: 12px 16px !important;
+    font-weight: 500 !important;
+    box-shadow: 0 3px 0px rgba(74, 55, 40, 0.05) !important;
+}
+.msg-time {
+    color: #8c7b70 !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+}
+
+/* Chat input bar */
+.chat-input-bar {
+    background-color: #ffffff !important;
+    border: 1.5px solid #4a3728 !important;
+    border-radius: 18px !important;
+    padding: 8px 12px !important;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.chat-input {
+    background-color: transparent !important;
+    color: #4a3728 !important;
+    font-weight: 500 !important;
+    border: none !important;
+}
+.chat-input::placeholder {
+    color: #8c7b70 !important;
+    font-weight: 500 !important;
+}
+.input-action-btn, .chat-send-btn {
+    background-color: transparent !important;
+    border: none !important;
+    color: #4a3728 !important;
+    cursor: pointer;
+    transition: transform 0.2s ease !important;
+}
+.chat-send-btn i {
+    color: #8b5cf6 !important; /* purple send plane */
+}
+.input-action-btn:hover, .chat-send-btn:hover {
+    transform: scale(1.1) !important;
+}
+
+/* Rant Toggle Button */
+.rant-mode-bar {
+    display: flex;
+    justify-content: center;
+    width: 100% !important;
+}
+.rant-toggle-btn {
+    background: linear-gradient(135deg, #e56763, #e05a56) !important;
+    border: 1.5px solid #4a3728 !important;
+    color: #ffffff !important;
+    border-radius: 24px !important; /* pill-shaped */
+    font-weight: 800 !important;
+    padding: 12px 28px !important;
+    box-shadow: 0 4px 0px #4a3728 !important;
+    transition: all 0.1s ease !important;
+    transform: translateY(0);
+}
+.rant-toggle-btn:hover {
+    transform: translateY(2px) !important;
+    box-shadow: 0 2px 0px #4a3728 !important;
+}
+.rant-toggle-btn:active {
+    transform: translateY(4px) !important;
+    box-shadow: none !important;
+}
+
+/* ==========================================================================
+   AVATAR STUDIO PANEL COZY THEME
+   ========================================================================= */
+.studio-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr !important;
+    gap: 32px !important;
+}
+.studio-preview-card, .studio-customizer-card {
+    background-color: #ffffff !important;
+    border: 1.5px solid #4a3728 !important;
+    border-radius: 24px !important;
+    padding: 24px !important;
+}
+.preview-header h3, .customizer-header h3 {
+    color: #4a3728 !important;
+    font-weight: 800 !important;
+}
+.random-avatar-btn {
+    background-color: #FAF4E8 !important;
+    border: 1.5px solid #4a3728 !important;
+    color: #4a3728 !important;
+    font-weight: 700 !important;
+    border-radius: 12px !important;
+}
+
+/* Customizer Viewport */
+.customizer-viewport {
+    border: 1.5px solid #4a3728 !important;
+    border-radius: 20px !important;
+    overflow: hidden !important;
+}
+
+/* Customize Options Tabs & Lists */
+.studio-tabs {
+    border-bottom: 1.5px solid #4a3728 !important;
+}
+.studio-tab-btn {
+    color: #8c7b70 !important;
+    font-weight: 700 !important;
+    border: none !important;
+    background: transparent !important;
+}
+.studio-tab-btn.active {
+    color: #4a3728 !important;
+    border-bottom: 3px solid #4a3728 !important;
+}
+.customizer-option-card {
+    background-color: #FAF4E8 !important;
+    border: 1.5px solid #4a3728 !important;
+    border-radius: 16px !important;
+}
+.customizer-option-card.active {
+    border-color: #8b5cf6 !important;
+    box-shadow: 0 0 0 2px #8b5cf6 !important;
+}
+
+/* ==========================================================================
+   OTHER COZY LIGHT PANEL OVERRIDES
+   ========================================================================== */
+.mixer-card, .simple-rules-card, .games-menu-container, .menu-game-card, .survey-inline {
+    background-color: #ffffff !important;
+    border: 1.5px solid #4a3728 !important;
+    border-radius: 24px !important;
+    color: #4a3728 !important;
+    box-shadow: none !important;
+}
+.menu-game-card h4, .mixer-header h3, .rules-title, .survey-win-banner {
+    color: #4a3728 !important;
+    font-weight: 800 !important;
+}
+.menu-game-badge {
+    border: 1.5px solid #4a3728 !important;
+    border-radius: 10px !important;
+    color: #4a3728 !important;
+}
+.panel {
+    background-color: transparent !important;
+}
+.panel-container {
+    background-color: var(--bg-dark) !important;
+}
+
+/* ==========================================================================
+   MINDBUDDY NEW DESIGN SYSTEM OVERRIDES (CUTE CLOUD & PASTEL PINK)
+   ========================================================================== */
+
+/* Color Palette Adjustments */
+:root {
+    --bg-dark: linear-gradient(135deg, #e0f2fe, #f3e8ff); /* soft wavy blue-lavender gradient */
+    --bg-sidebar: #FCE4EC;           /* Soft pastel pink */
+    --bg-glass: #ffffff;
+    --bg-glass-active: #ffffff;
+    
+    --color-text-primary: #4a3728;
+    --color-text-muted: #8c7b70;
+    --font-heading: 'Fredoka', 'Quicksand', sans-serif;
+    --font-body: 'Fredoka', 'Quicksand', sans-serif;
+}
+
+/* Base font family and background override */
+body, html, input, button, textarea, span, h1, h2, h3, h4, h5, h6, p, div {
+    font-family: var(--font-body) !important;
+}
+
+body {
+    background: var(--bg-dark) !important;
+    color: var(--color-text-primary) !important;
+}
+
+.app-container {
+    background: transparent !important;
+}
+
+/* Cloud SVG Divider Styling */
+.cloud-divider-container {
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+    margin-top: -1px;
+}
+.cloud-divider-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Sidebar Styling Updates */
+.sidebar {
+    background-color: var(--bg-sidebar) !important;
+    border-right: none !important; /* lose thick borders */
+    padding: 24px 20px !important;
+    box-shadow: 4px 0 24px rgba(252, 228, 236, 0.5) !important;
+}
+
+.logo-text h1 {
+    font-family: var(--font-heading) !important;
+    font-weight: 700 !important;
+    font-size: 1.5rem !important;
+}
+
+/* Navigation Buttons: Soft, rounded pill shapes with NO borders */
+.nav-btn {
+    border-radius: 9999px !important; /* soft rounded pill shapes */
+    border: none !important;           /* lose thick borders */
+    padding: 12px 24px !important;
+    font-weight: 600 !important;
+    color: #8c7b70 !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+.nav-btn:hover {
+    background-color: rgba(255, 255, 255, 0.4) !important;
+    color: #4a3728 !important;
+}
+.nav-btn.active {
+    background-color: #ffffff !important; /* clean white active button */
+    color: #4a3728 !important;
+    box-shadow: 0 8px 20px rgba(74, 55, 40, 0.08) !important; /* subtle shadow */
+}
+.nav-btn i, .nav-btn-icon {
+    font-size: 1.2rem !important;
+    margin-right: 4px !important;
+}
+
+/* Profile bear pill card */
+.profile-card {
+    background-color: #ffffff !important;
+    border: 1.5px solid rgba(74, 55, 40, 0.1) !important;
+    border-radius: 9999px !important; /* round-bordered pill card */
+    padding: 8px 16px !important;
+    box-shadow: 0 4px 10px rgba(74, 55, 40, 0.04) !important;
+}
+.profile-avatar {
+    background-color: #FCE4EC !important;
+    border: none !important;
+    border-radius: 50% !important;
+    width: 38px !important;
+    height: 38px !important;
+}
+
+/* Emergency button */
+.sos-trigger-btn {
+    background: linear-gradient(135deg, #f472b6, #c084fc) !important; /* soft rounded pink/purple pill button */
+    border: none !important; /* lose border */
+    border-radius: 9999px !important;
+    box-shadow: 0 4px 15px rgba(244, 114, 182, 0.25) !important;
+    color: white !important;
+    font-weight: 700 !important;
+    padding: 12px 20px !important;
+    font-size: 0.88rem !important;
+}
+.sos-trigger-btn:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(244, 114, 182, 0.35) !important;
+}
+
+/* Main content workspace */
+.panel-container {
+    background: transparent !important;
+}
+
+/* Main Cards - Highly rounded, floating cloud effect, no borders */
+.avatar-card, .chat-window-card, .studio-preview-card, .studio-customizer-card, .mixer-card, .simple-rules-card, .games-menu-container, .menu-game-card, .survey-inline {
+    border: none !important; /* remove harsh outlines */
+    border-radius: 32px !important; /* highly rounded corners */
+    box-shadow: 0 20px 40px rgba(74, 55, 40, 0.04) !important; /* soft drop shadow floating cloud effect */
+    background-color: #ffffff !important;
+}
+
+/* Cloud-shaped container for status indicators */
+.quick-status-bar {
+    display: flex;
+    gap: 16px;
+}
+.status-metric {
+    background-color: #ffffff !important;
+    border: none !important;
+    border-radius: 24px 24px 24px 8px !important; /* playful cloud-like shape */
+    box-shadow: 0 8px 24px rgba(74, 55, 40, 0.04) !important;
+    padding: 12px 20px !important;
+    position: relative;
+}
+.status-metric::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 20px;
+    width: 12px;
+    height: 12px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    opacity: 0.8;
+}
+
+/* Chat Log Container */
+.chat-messages-container {
+    border: none !important;
+    background-color: #fcf8ff !important;
+    border-radius: 24px !important;
+}
+
+/* Scalloped, cloud-like message bubbles */
+.message.buddy-msg .msg-body {
+    background-color: #ffffff !important; /* soft cream/pink */
+    border: 1.5px solid rgba(252, 228, 236, 0.8) !important;
+    color: #4a3728 !important;
+    border-radius: 28px 28px 28px 6px !important; /* scalloped cloud-like border */
+    box-shadow: 0 4px 15px rgba(252, 228, 236, 0.25) !important;
+}
+.message.user-msg .msg-body {
+    background-color: #bae6fd !important; /* soft pastel blue */
+    border: none !important;
+    color: #0369a1 !important;
+    border-radius: 28px 28px 6px 28px !important; /* scalloped cloud-like border */
+    box-shadow: 0 4px 15px rgba(186, 230, 253, 0.3) !important;
+}
+
+.message .msg-avatar-icon {
+    background-color: #fbcfe8 !important; /* soft pink badge */
+    border: none !important;
+    border-radius: 50% !important;
+}
+
+/* Text Input Bar */
+.chat-input-bar {
+    border: none !important;
+    border-radius: 9999px !important; /* pill container */
+    box-shadow: 0 8px 30px rgba(74, 55, 40, 0.04) !important;
+    background-color: #ffffff !important;
+    padding: 10px 24px !important;
+}
+
+/* Active Rant Button */
+.rant-toggle-btn {
+    background: linear-gradient(135deg, #f472b6, #c084fc) !important;
+    border: none !important;
+    border-radius: 9999px !important;
+    box-shadow: 0 8px 20px rgba(244, 114, 182, 0.3) !important;
+}
+
+/* Customizer Viewport scene backgrounds adjustment */
+.customizer-viewport {
+    border: none !important;
+    border-radius: 24px !important;
+    box-shadow: inset 0 4px 12px rgba(0,0,0,0.05) !important;
+}
+.avatar-viewport-container {
+    border: none !important;
+    background: radial-gradient(circle, #fdf2f8 0%, #FAF4E8 100%) !important;
+    box-shadow: 0 10px 30px rgba(252, 228, 236, 0.4) !important;
+}
+.customizer-option-card {
+    border: none !important;
+    background-color: #fdf2f8 !important;
+    border-radius: 20px !important;
+    box-shadow: 0 4px 12px rgba(74, 55, 40, 0.02) !important;
+}
+.customizer-option-card.active {
+    box-shadow: 0 0 0 2.5px #f472b6 !important;
+}
+.studio-tabs {
+    border-bottom: 2px solid rgba(74, 55, 40, 0.05) !important;
+}
+.studio-tab-btn.active {
+    border-bottom: 3.5px solid #f472b6 !important;
+}
+
+/* Responsive & Layout Width Fixes */
+.chat-layout {
+    display: grid !important;
+    grid-template-columns: minmax(280px, 340px) 1.8fr !important;
+    gap: 24px !important;
+    width: 100% !important;
+}
+
+.chat-window-card {
+    min-width: 0 !important;
+    flex-grow: 1 !important;
+}
+/* Sidebar Styling Updates */
+.sidebar {
+    background-color: var(--bg-sidebar) !important;
+    border-right: none !important; /* lose thick borders */
+    padding: 24px 20px !important;
+    box-shadow: 4px 0 24px rgba(252, 228, 236, 0.5) !important;
+}
+
+.logo-text h1 {
+    font-family: var(--font-heading) !important;
+    font-weight: 700 !important;
+    font-size: 1.5rem !important;
+}
+
+/* Navigation Buttons: Soft, rounded pill shapes with NO borders */
+.nav-btn {
+    border-radius: 9999px !important; /* soft rounded pill shapes */
+    border: none !important;           /* lose thick borders */
+    padding: 12px 24px !important;
+    font-weight: 600 !important;
+    color: #8c7b70 !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+.nav-btn:hover {
+    background-color: rgba(255, 255, 255, 0.4) !important;
+    color: #4a3728 !important;
+}
+.nav-btn.active {
+    background-color: #ffffff !important; /* clean white active button */
+    color: #4a3728 !important;
+    box-shadow: 0 8px 20px rgba(74, 55, 40, 0.08) !important; /* subtle shadow */
+}
+.nav-btn i, .nav-btn-icon {
+    font-size: 1.2rem !important;
+    margin-right: 4px !important;
+}
+
+/* Profile bear pill card */
+.profile-card {
+    background-color: #ffffff !important;
+    border: 1.5px solid rgba(74, 55, 40, 0.1) !important;
+    border-radius: 9999px !important; /* round-bordered pill card */
+    padding: 8px 16px !important;
+    box-shadow: 0 4px 10px rgba(74, 55, 40, 0.04) !important;
+}
+.profile-avatar {
+    background-color: #FCE4EC !important;
+    border: none !important;
+    border-radius: 50% !important;
+    width: 38px !important;
+    height: 38px !important;
+}
+
+/* Emergency button */
+.sos-trigger-btn {
+    background: linear-gradient(135deg, #f472b6, #c084fc) !important; /* soft rounded pink/purple pill button */
+    border: none !important; /* lose border */
+    border-radius: 9999px !important;
+    box-shadow: 0 4px 15px rgba(244, 114, 182, 0.25) !important;
+    color: white !important;
+    font-weight: 700 !important;
+    padding: 12px 20px !important;
+    font-size: 0.88rem !important;
+}
+.sos-trigger-btn:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(244, 114, 182, 0.35) !important;
+}
+
+/* Main content workspace */
+.panel-container {
+    background: transparent !important;
+}
+
+/* Main Cards - Highly rounded, floating cloud effect, no borders */
+.avatar-card, .chat-window-card, .studio-preview-card, .studio-customizer-card, .mixer-card, .simple-rules-card, .games-menu-container, .menu-game-card, .survey-inline {
+    border: none !important; /* remove harsh outlines */
+    border-radius: 32px !important; /* highly rounded corners */
+    box-shadow: 0 20px 40px rgba(74, 55, 40, 0.04) !important; /* soft drop shadow floating cloud effect */
+    background-color: #ffffff !important;
+}
+
+/* Cloud-shaped container for status indicators */
+.quick-status-bar {
+    display: flex;
+    gap: 16px;
+}
+.status-metric {
+    background-color: #ffffff !important;
+    border: none !important;
+    border-radius: 24px 24px 24px 8px !important; /* playful cloud-like shape */
+    box-shadow: 0 8px 24px rgba(74, 55, 40, 0.04) !important;
+    padding: 12px 20px !important;
+    position: relative;
+}
+.status-metric::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 20px;
+    width: 12px;
+    height: 12px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    opacity: 0.8;
+}
+
+/* Chat Log Container */
+.chat-messages-container {
+    border: none !important;
+    background-color: #fcf8ff !important;
+    border-radius: 24px !important;
+}
+
+/* Scalloped, cloud-like message bubbles */
+.message.buddy-msg .msg-body {
+    background-color: #ffffff !important; /* soft cream/pink */
+    border: 1.5px solid rgba(252, 228, 236, 0.8) !important;
+    color: #4a3728 !important;
+    border-radius: 28px 28px 28px 6px !important; /* scalloped cloud-like border */
+    box-shadow: 0 4px 15px rgba(252, 228, 236, 0.25) !important;
+}
+.message.user-msg .msg-body {
+    background-color: #bae6fd !important; /* soft pastel blue */
+    border: none !important;
+    color: #0369a1 !important;
+    border-radius: 28px 28px 6px 28px !important; /* scalloped cloud-like border */
+    box-shadow: 0 4px 15px rgba(186, 230, 253, 0.3) !important;
+}
+
+.message .msg-avatar-icon {
+    background-color: #fbcfe8 !important; /* soft pink badge */
+    border: none !important;
+    border-radius: 50% !important;
+}
+
+/* Text Input Bar */
+.chat-input-bar {
+    border: none !important;
+    border-radius: 9999px !important; /* pill container */
+    box-shadow: 0 8px 30px rgba(74, 55, 40, 0.04) !important;
+    background-color: #ffffff !important;
+    padding: 10px 24px !important;
+}
+
+/* Active Rant Button */
+.rant-toggle-btn {
+    background: linear-gradient(135deg, #f472b6, #c084fc) !important;
+    border: none !important;
+    border-radius: 9999px !important;
+    box-shadow: 0 8px 20px rgba(244, 114, 182, 0.3) !important;
+}
+
+/* Customizer Viewport scene backgrounds adjustment */
+.customizer-viewport {
+    border: none !important;
+    border-radius: 24px !important;
+    box-shadow: inset 0 4px 12px rgba(0,0,0,0.05) !important;
+}
+.avatar-viewport-container {
+    border: none !important;
+    background: radial-gradient(circle, #fdf2f8 0%, #FAF4E8 100%) !important;
+    box-shadow: 0 10px 30px rgba(252, 228, 236, 0.4) !important;
+}
+.customizer-option-card {
+    border: none !important;
+    background-color: #fdf2f8 !important;
+    border-radius: 20px !important;
+    box-shadow: 0 4px 12px rgba(74, 55, 40, 0.02) !important;
+}
+.customizer-option-card.active {
+    box-shadow: 0 0 0 2.5px #f472b6 !important;
+}
+.studio-tabs {
+    border-bottom: 2px solid rgba(74, 55, 40, 0.05) !important;
+}
+.studio-tab-btn.active {
+    border-bottom: 3.5px solid #f472b6 !important;
+}
+
+/* Responsive & Layout Width Fixes */
+.chat-layout {
+    display: grid !important;
+    grid-template-columns: minmax(280px, 340px) 1.8fr !important;
+    gap: 24px !important;
+    width: 100% !important;
+}
+
+.chat-window-card {
+    min-width: 0 !important;
+    flex-grow: 1 !important;
+}
+
+.message {
+    max-width: 90% !important;
+}
+
+.msg-body {
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: normal !important;
+}
+
+/* =========================================================================
+   HIGH-FIDELITY EXQUISITE ARCADE SANCTUARY SELECTION SCREEN
+   ========================================================================= */
+.games-menu-container {
+    background: rgba(255, 255, 255, 0.7) !important;
+    border: 2px solid rgba(255, 255, 255, 0.8) !important;
+    border-radius: 32px !important;
+    padding: 40px 32px !important;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 30px 60px rgba(139, 92, 246, 0.1) !important;
+}
+
+.games-selection-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px !important;
+}
+
+.menu-game-card {
+    position: relative;
+    border: 2px solid rgba(255, 255, 255, 0.7) !important;
+    border-radius: 28px !important;
+    padding: 36px 28px !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.03) !important;
+}
+
+#btn-select-match3 {
+    background: linear-gradient(135deg, rgba(254, 243, 199, 0.7), rgba(255, 237, 213, 0.8)) !important;
+}
+
+#btn-select-fruit-zen {
+    background: linear-gradient(135deg, rgba(243, 232, 255, 0.7), rgba(252, 231, 243, 0.8)) !important;
+}
+
+#btn-select-match3:hover {
+    transform: translateY(-8px) scale(1.02) !important;
+    border-color: rgba(245, 158, 11, 0.5) !important;
+    box-shadow: 0 20px 40px rgba(245, 158, 11, 0.2) !important;
+}
+
+#btn-select-fruit-zen:hover {
+    transform: translateY(-8px) scale(1.02) !important;
+    border-color: rgba(167, 139, 250, 0.5) !important;
+    box-shadow: 0 20px 40px rgba(167, 139, 250, 0.22) !important;
+}
+
+.menu-game-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0) 100%);
+    transform: skewX(-25deg);
+    transition: 0.75s;
+}
+
+.menu-game-card:hover::after {
+    left: 150%;
+}
+
+.menu-game-badge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: rgba(245, 158, 11, 0.1) !important;
+    color: #d97706 !important;
+    padding: 4px 12px !important;
+    border-radius: 9999px !important;
+    border: 1px solid rgba(245, 158, 11, 0.2) !important;
+    z-index: 2;
+}
+
+.menu-game-badge.zen {
+    background: rgba(139, 92, 246, 0.1) !important;
+    color: #7c3aed !important;
+    border-color: rgba(139, 92, 246, 0.2) !important;
+}
+
+.menu-game-icon {
+    font-size: 3.5rem !important;
+    margin-bottom: 20px !important;
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.08));
+}
+
+#btn-select-match3:hover .menu-game-icon {
+    animation: gentleBounce 1.2s infinite ease-in-out;
+}
+
+#btn-select-fruit-zen:hover .menu-game-icon {
+    animation: popScale 0.8s infinite ease-in-out;
+}
+
+@keyframes popScale {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15) rotate(5deg); }
+}
+
+.menu-game-info h4 {
+    font-size: 1.3rem !important;
+    font-weight: 800 !important;
+    margin-bottom: 10px !important;
+}
+
+#btn-select-match3 h4 {
+    background: linear-gradient(to right, #d97706, #db2777);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+#btn-select-fruit-zen h4 {
+    background: linear-gradient(to right, #7c3aed, #db2777);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.menu-game-info p {
+    font-size: 0.88rem !important;
+    color: #64748b !important;
+    line-height: 1.6 !important;
+}
+
+.menu-play-action {
+    font-size: 0.9rem !important;
+    font-weight: 800 !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 20px !important;
+    border-radius: 9999px !important;
+    transition: all 0.3s ease !important;
+    margin-top: 8px;
+}
+
+#btn-select-match3 .menu-play-action {
+    background: rgba(245, 158, 11, 0.1) !important;
+    color: #d97706 !important;
+}
+
+#btn-select-fruit-zen .menu-play-action {
+    background: rgba(139, 92, 246, 0.1) !important;
+    color: #7c3aed !important;
+}
+
+#btn-select-match3:hover .menu-play-action {
+    background: #d97706 !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25) !important;
+    transform: none !important;
+}
+
+#btn-select-fruit-zen:hover .menu-play-action {
+    background: #7c3aed !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25) !important;
+    transform: none !important;
+}
+
+/* =========================================================================
+   HIGH-FIDELITY COZY RULES EXPLANATION SCREENS Refinement
+   ========================================================================= */
+.rules-mascot-row {
+    background: rgba(255, 255, 255, 0.75) !important;
+    border: 1.5px solid rgba(139, 92, 246, 0.15) !important;
+    border-radius: 28px !important;
+    padding: 20px 24px !important;
+    max-width: 620px !important;
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.03) !important;
+}
+
+.rules-speech-bubble {
+    color: #4b5563 !important;
+    font-size: 0.92rem !important;
+    font-weight: 500 !important;
+    font-style: normal !important;
+}
+
+.rules-speech-bubble p {
+    margin: 0;
+}
+
+/* Fruit Previews */
+.fruit-preview-item {
+    background: rgba(255, 255, 255, 0.75) !important;
+    border: 2px solid rgba(255, 255, 255, 0.9) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 8px 20px rgba(139, 92, 246, 0.04) !important;
+}
+
+.fruit-preview-card {
+    background: rgba(255, 255, 255, 0.75) !important;
+    border: 2px solid rgba(255, 255, 255, 0.9) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 8px 20px rgba(139, 92, 246, 0.04) !important;
+}
+
+.fruit-preview-card .preview-name {
+    color: #475569 !important;
+    font-weight: 700 !important;
+}
+
+.fruit-preview-card:hover {
+    background: #ffffff !important;
+    border-color: var(--fc) !important;
+    box-shadow: 0 8px 20px rgba(139, 92, 246, 0.08) !important;
+}
+
+/* Main Rules Cards */
+.simple-rules-card {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border: 2.5px solid rgba(255, 255, 255, 0.9) !important;
+    border-radius: 32px !important;
+    padding: 32px !important;
+    max-width: 620px !important;
+    box-shadow: 0 30px 60px rgba(139, 92, 246, 0.06) !important;
+}
+
+.rules-title {
+    font-size: 1.15rem !important;
+    font-weight: 800 !important;
+    color: #6d28d9 !important;
+    margin-bottom: 20px !important;
+    border-bottom: 1.5px dashed rgba(139, 92, 246, 0.15);
+    padding-bottom: 12px;
+}
+
+.step-item {
+    background: rgba(255, 255, 255, 0.6) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.9) !important;
+    border-radius: 20px !important;
+    padding: 16px !important;
+    box-shadow: 0 4px 10px rgba(139, 92, 246, 0.01) !important;
+    transition: all 0.3s ease !important;
+}
+
+.step-item:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 16px rgba(139, 92, 246, 0.05) !important;
+    background: #ffffff !important;
+}
+
+.step-number {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 0.85rem !important;
+    box-shadow: 0 4px 10px rgba(139, 92, 246, 0.2) !important;
+}
+
+/* Color-coded Step Circles and Headers */
+#card-match3 .step-number {
+    background: linear-gradient(135deg, #f59e0b, #ec4899) !important;
+}
+
+#card-fruit-zen .step-number {
+    background: linear-gradient(135deg, #8b5cf6, #ec4899) !important;
+}
+
+#card-match3 .step-text strong {
+    color: #d97706 !important;
+}
+
+#card-fruit-zen .step-text strong {
+    color: #7c3aed !important;
+}
+
+.step-text {
+    font-size: 0.82rem !important;
+    color: #475569 !important;
+    line-height: 1.55 !important;
+}
+
+/* Pre-game settings & mode selectors */
+.pregame-settings-box {
+    margin-top: 24px;
+    background: rgba(139, 92, 246, 0.02);
+    border: 1.5px solid rgba(139, 92, 246, 0.08);
+    border-radius: 20px;
+    padding: 20px;
+}
+
+.pregame-settings-title {
+    color: #475569 !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 14px !important;
+}
+
+.mode-btn {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border: 1.5px solid rgba(139, 92, 246, 0.1) !important;
+    color: #64748b !important;
+    border-radius: 9999px !important;
+    padding: 10px 24px !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+.mode-btn:hover {
+    background: #ffffff !important;
+    border-color: rgba(139, 92, 246, 0.3) !important;
+    color: #475569 !important;
+}
+
+.mode-btn.active {
+    background: linear-gradient(135deg, #8b5cf6, #ec4899) !important;
+    border: none !important;
+    color: white !important;
+    box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3) !important;
+}
+
+/* Feature pill tags */
+.rules-features-list {
+    border-top: 1.5px dashed rgba(139, 92, 246, 0.15) !important;
+    margin-top: 20px !important;
+    padding-top: 16px !important;
+}
+
+.feature-tag {
+    background: rgba(52, 211, 153, 0.1) !important;
+    color: #059669 !important;
+    border: 1.5px solid rgba(52, 211, 153, 0.25) !important;
+    border-radius: 9999px !important;
+    padding: 4px 14px !important;
+    font-size: 0.76rem !important;
+}
+
+/* Primaries Start Playing buttons */
+.game-btn-primary {
+    background: linear-gradient(135deg, #8b5cf6, #ec4899) !important;
+    border-radius: 9999px !important;
+    padding: 16px 40px !important;
+    font-size: 1rem !important;
+    font-weight: 800 !important;
+    box-shadow: 0 8px 24px rgba(139, 92, 246, 0.25) !important;
+    margin-top: 20px;
+}
+
+.game-btn-primary:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 12px 30px rgba(139, 92, 246, 0.4) !important;
+}
+
+/* =========================================================================
+   LIGHT MINT GREEN THEME FOR THE TWO GAME PANELS & RULES (Balanced Cozy/Healing Colors)
+   ========================================================================= */
+#card-match3, #card-fruit-zen {
+    background: linear-gradient(135deg, #e6fcf5, #f0fdf4) !important;
+    border: 2px solid rgba(167, 243, 208, 0.45) !important;
+    box-shadow: 0 30px 60px rgba(52, 211, 153, 0.08) !important;
+    color: #475569 !important;
+}
+
+/* Titles and labels - Soothing deep indigo and muted teal */
+#card-match3 .game-icon-title h3,
+#card-fruit-zen .game-icon-title h3 {
+    background: linear-gradient(to right, #4338ca, #db2777) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
+
+#card-match3 .game-subtitle,
+#card-fruit-zen .game-subtitle {
+    color: #4b5563 !important;
+    opacity: 0.95;
+}
+
+/* Back button - Soft gray-indigo style */
+#card-match3 .back-to-menu-btn,
+#card-fruit-zen .back-to-menu-btn {
+    background: rgba(255, 255, 255, 0.7) !important;
+    border: 1.5px solid rgba(74, 55, 40, 0.1) !important;
+    color: #4b5563 !important;
+    transition: all 0.3s ease !important;
+}
+
+#card-match3 .back-to-menu-btn:hover,
+#card-fruit-zen .back-to-menu-btn:hover {
+    background: #ffffff !important;
+    color: #1e1b4b !important;
+    box-shadow: 0 4px 12px rgba(74, 55, 40, 0.05) !important;
+}
+
+/* Speech bubbles and cards details - Pure White Frosted glass */
+.rules-mascot-row {
+    background: rgba(255, 255, 255, 0.85) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.03) !important;
+}
+
+.rules-speech-bubble {
+    color: #475569 !important;
+    font-weight: 500 !important;
+}
+
+.simple-rules-card {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 2.5px solid rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 25px 50px rgba(139, 92, 246, 0.04) !important;
+}
+
+.rules-title {
+    color: #4338ca !important;
+    border-bottom: 1.5px dashed rgba(139, 92, 246, 0.15) !important;
+}
+
+.step-item {
+    background: rgba(255, 255, 255, 0.65) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.8) !important;
+}
+
+.step-item:hover {
+    border-color: rgba(139, 92, 246, 0.25) !important;
+    box-shadow: 0 8px 16px rgba(139, 92, 246, 0.04) !important;
+    background: #ffffff !important;
+}
+
+/* Color-coded Soft Pastel Step Circles and Headers */
+#card-match3 .step-number {
+    background: linear-gradient(135deg, #fed7aa, #fbcfe8) !important;
+    color: #ea580c !important;
+    box-shadow: 0 4px 10px rgba(245, 158, 11, 0.1) !important;
+}
+
+#card-fruit-zen .step-number {
+    background: linear-gradient(135deg, #e9d5ff, #fbcfe8) !important;
+    color: #7c3aed !important;
+    box-shadow: 0 4px 10px rgba(139, 92, 246, 0.1) !important;
+}
+
+#card-match3 .step-text strong {
+    color: #ea580c !important;
+}
+
+#card-fruit-zen .step-text strong {
+    color: #7c3aed !important;
+}
+
+.step-text {
+    font-size: 0.82rem !important;
+    color: #475569 !important;
+    line-height: 1.55 !important;
+}
+
+/* Feature tags - Soft Lavender Mint pill */
+.feature-tag {
+    background: rgba(139, 92, 246, 0.06) !important;
+    color: #7c3aed !important;
+    border: 1.5px solid rgba(139, 92, 246, 0.12) !important;
+}
+
+/* Speed Settings */
+.pregame-settings-box {
+    background: rgba(139, 92, 246, 0.02) !important;
+    border: 1.5px solid rgba(139, 92, 246, 0.06) !important;
+}
+
+.pregame-settings-title {
+    color: #475569 !important;
+}
+
+.mode-btn {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border: 1.5px solid rgba(139, 92, 246, 0.08) !important;
+    color: #64748b !important;
+}
+
+.mode-btn:hover {
+    border-color: rgba(139, 92, 246, 0.2) !important;
+    color: #475569 !important;
+    background: #ffffff !important;
+}
+
+.mode-btn.active {
+    background: linear-gradient(135deg, #a78bfa, #f472b6) !important;
+    box-shadow: 0 8px 20px rgba(167, 139, 250, 0.2) !important;
+    border: none !important;
+    color: white !important;
+}
+
+/* Soothing Lavender-Rose Primary buttons */
+.game-btn-primary {
+    background: linear-gradient(135deg, #a78bfa, #f472b6) !important;
+    box-shadow: 0 8px 24px rgba(167, 139, 250, 0.2) !important;
+}
+
+.game-btn-primary:hover {
+    box-shadow: 0 12px 30px rgba(167, 139, 250, 0.35) !important;
+}
+
+/* === Remove wavy bridge divider globally across all pages === */
+.cloud-divider-container {
+    display: none !important;
+}
+
+/* =========================================================================
+   DELUXE AMBIENT GAME ARCADE & COZY SANCTUARY STATS DASHBOARD
+   ========================================================================= */
+
+/* Ambient Floating Decorative Background */
+.games-ambient-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+}
+.ambient-bubble {
+    position: absolute;
+    background: radial-gradient(circle, rgba(167, 139, 250, 0.08), transparent 70%);
+    border-radius: 50%;
+    animation: floatAmbient 12s infinite ease-in-out;
+}
+.ambient-bubble.ab-1 { width: 140px; height: 140px; top: 15%; left: 8%; animation-delay: 0s; }
+.ambient-bubble.ab-2 { width: 180px; height: 180px; bottom: 10%; right: 5%; animation-delay: 2s; }
+.ambient-bubble.ab-3 { width: 110px; height: 110px; top: 60%; left: 45%; animation-delay: 4s; }
+.ambient-bubble.ab-4 { width: 90px; height: 90px; top: 5%; right: 35%; animation-delay: 1s; }
+
+@keyframes floatAmbient {
+    0%, 100% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0.6; }
+    50% { transform: translateY(-20px) scale(1.1) rotate(180deg); opacity: 0.9; }
+}
+
+/* Cozy Stats Dashboard inside games selection screen */
+.sanctuary-dashboard {
+    background: rgba(255, 255, 255, 0.45) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.6) !important;
+    border-radius: 20px !important;
+    padding: 14px 20px !important;
+    margin-bottom: 20px !important;
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.03) !important;
+    backdrop-filter: blur(12px) !important;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 10;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.dashboard-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #a78bfa;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.pulse-indicator {
+    width: 6px;
+    height: 6px;
+    background-color: #34d399;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 8px #34d399;
+    animation: dashPulse 1.5s infinite;
+}
+
+@keyframes dashPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.5; }
+}
+
+.dashboard-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+@media (max-width: 640px) {
+    .dashboard-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.dash-stat-card {
+    background: rgba(255, 255, 255, 0.55) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.7) !important;
+    border-radius: 12px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.25s ease;
+}
+
+.dash-stat-card:hover {
+    background: #ffffff !important;
+    border-color: rgba(167, 139, 250, 0.3) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.05);
+}
+
+.stat-icon {
+    font-size: 1.4rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.06));
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #8b5cf6;
+    text-transform: uppercase;
+}
+
+.stat-value {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #4c1d95;
+    line-height: 1.2;
+}
+
+/* Deluxe Game Cards Perspective styling */
+.games-selection-grid {
+    z-index: 10;
+    position: relative;
+}
+
+#btn-select-match3:hover {
+    border-color: rgba(245, 158, 11, 0.35) !important;
+    box-shadow: 0 20px 40px rgba(245, 158, 11, 0.08), 0 0 15px rgba(245, 158, 11, 0.15) !important;
+}
+
+#btn-select-fruit-zen:hover {
+    border-color: rgba(167, 139, 250, 0.45) !important;
+    box-shadow: 0 20px 40px rgba(167, 139, 250, 0.08), 0 0 15px rgba(167, 139, 250, 0.18) !important;
+}
+
+/* =========================================================================
+   COZY FLOATING MATCH-3 COMBO TEXT OVERLAY
+   ========================================================================= */
+.match3-combo-text {
+    position: absolute;
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 900;
+    color: #ffffff;
+    pointer-events: none;
+    text-shadow: 0 0 8px rgba(167, 139, 250, 0.8), 0 2px 4px rgba(0,0,0,0.3);
+    z-index: 999;
+    animation: matchComboFloat 1.2s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+    white-space: nowrap;
+    padding: 4px 8px;
+    border-radius: 8px;
+}
+
+@keyframes matchComboFloat {
+    0% {
+        transform: translate(-50%, -50%) scale(0.6);
+        opacity: 0;
+    }
+    15% {
+        transform: translate(-50%, -80%) scale(1.1);
+        opacity: 1;
+    }
+    30% {
+        transform: translate(-50%, -85%) scale(1);
+    }
+    100% {
+        transform: translate(-50%, -160%) scale(0.8);
+        opacity: 0;
+    }
+}
+
+/* =========================================================================
+   CHIEF DESIGNER: 2-COLUMN GAMES PORTAL GRID & COZY COMFORT LOUNGE CARD
+   ========================================================================= */
+
+/* Shifting Twilight Gradient Backdrop on games container - Brighter, more vibrant pastel transitions */
+.games-layout {
+    position: relative;
+    background: linear-gradient(135deg, #ffd1d5, #fed7aa, #c7beff, #a7f3d0) !important;
+    background-size: 400% 400% !important;
+    animation: cozyGradientShift 18s infinite ease-in-out !important;
+    box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.45) !important;
+    z-index: 1;
+}
+
+@keyframes cozyGradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* The 2-column Portal Layout Grid */
+.games-portal-layout {
+    display: grid;
+    grid-template-columns: 1.75fr 1.25fr;
+    gap: 24px;
+    align-items: stretch;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.games-portal-main {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.games-portal-sidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+}
+
+/* Frosted glass Cozy Companion Card - Brighter emerald-mint green tint */
+.comfort-lounge-card {
+    background: linear-gradient(135deg, rgba(167, 243, 208, 0.82), rgba(110, 231, 183, 0.58)) !important;
+    border: 2px solid rgba(16, 185, 129, 0.8) !important;
+    border-radius: 28px !important;
+    padding: 24px !important;
+    box-shadow: 0 15px 40px rgba(16, 185, 129, 0.12), inset 0 4px 12px rgba(255, 255, 255, 0.3) !important;
+    backdrop-filter: blur(16px) !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    box-sizing: border-box;
+    gap: 20px;
+    transition: all 0.3s ease;
+}
+
+.comfort-lounge-card:hover {
+    border-color: rgba(16, 185, 129, 1) !important;
+    box-shadow: 0 18px 45px rgba(16, 185, 129, 0.18), inset 0 4px 12px rgba(255, 255, 255, 0.4) !important;
+}
+
+
+/* Lounge Mascot Section */
+.lounge-mascot-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(255, 255, 255, 0.65) !important;
+    border: 1.5px solid rgba(52, 211, 153, 0.2) !important;
+    border-radius: 20px !important;
+    padding: 16px !important;
+    box-shadow: 0 8px 24px rgba(52, 211, 153, 0.03) !important;
+}
+
+/* CSS Animated Mascot Avatar */
+.lounge-robot-avatar {
+    width: 48px;
+    height: 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    flex-shrink: 0;
+    cursor: pointer;
+    animation: floatMascot 4s infinite ease-in-out;
+    transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.lounge-robot-avatar:hover {
+    transform: scale(1.12) rotate(6deg);
+}
+
+.lounge-robot-avatar .robot-antenna {
+    width: 3px;
+    height: 8px;
+    background: #94a3b8;
+    border-radius: 2px;
+    position: relative;
+}
+
+.lounge-robot-avatar .robot-antenna::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #10b981;
+    border-radius: 50%;
+    position: absolute;
+    top: -4px;
+    left: -1.5px;
+    box-shadow: 0 0 6px #10b981;
+}
+
+.lounge-robot-avatar .robot-head {
+    width: 40px;
+    height: 32px;
+    background: #ffffff;
+    border: 2.5px solid #cbd5e1;
+    border-radius: 12px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.lounge-robot-avatar .robot-ears {
+    position: absolute;
+    width: 46px;
+    height: 8px;
+    background: #cbd5e1;
+    border-radius: 4px;
+    z-index: -1;
+}
+
+.lounge-robot-avatar .robot-eyes {
+    display: flex;
+    gap: 8px;
+}
+
+.lounge-robot-avatar .eye {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 6px #10b981;
+    animation: blinkEyes 5s infinite ease-in-out;
+    transform-origin: center;
+}
+
+.lounge-robot-avatar .robot-body {
+    width: 32px;
+    height: 24px;
+    background: #f8fafc;
+    border: 2.5px solid #cbd5e1;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes floatMascot {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-6px) rotate(1.5deg); }
+}
+
+@keyframes blinkEyes {
+    0%, 90%, 100% { transform: scaleY(1); }
+    95% { transform: scaleY(0.15); }
+}
+
+/* Lounge speech bubble dialog */
+.comfort-speech-bubble {
+    font-size: 0.82rem !important;
+    line-height: 1.45 !important;
+    color: #374151 !important;
+    font-weight: 700 !important;
+    position: relative;
+}
+
+/* Daily Zen Focus Section */
+.daily-zen-focus-box {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.lounge-section-title {
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: #059669;
+    letter-spacing: 0.06em;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.zen-task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.zen-task-item {
+    background: rgba(255, 255, 255, 0.55);
+    border: 1.5px solid rgba(255, 255, 255, 0.8);
+    border-radius: 14px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.zen-task-item .checkbox-indicator {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #a7f3d0;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.25s ease;
+    background: #ffffff;
+}
+
+.zen-task-item .task-label-text {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #4b5563;
+    transition: all 0.25s ease;
+}
+
+/* Checked State for dynamic completion list with satisfy bounce */
+.zen-task-item.completed {
+    background: rgba(16, 185, 129, 0.08) !important;
+    border-color: rgba(16, 185, 129, 0.3) !important;
+    animation: itemBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes itemBounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+
+.zen-task-item.completed .checkbox-indicator {
+    background-color: #10b981 !important;
+    border-color: #10b981 !important;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+}
+
+.zen-task-item.completed .checkbox-indicator::after {
+    content: '✓';
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 900;
+}
+
+.zen-task-item.completed .task-label-text {
+    color: #047857;
+    text-decoration: line-through;
+    opacity: 0.75;
+}
+
+/* Restyle Game cards into organic warm pastel glass gradients - Brighter, more saturated, rich colors */
+#btn-select-match3 {
+    background: linear-gradient(135deg, rgba(254, 215, 170, 0.88), rgba(253, 186, 116, 0.65)) !important; /* warm peach */
+    border: 2.5px solid rgba(249, 115, 22, 0.8) !important;
+    box-shadow: 0 10px 30px rgba(249, 115, 22, 0.04) !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+#btn-select-match3:hover {
+    background: linear-gradient(135deg, rgba(254, 215, 170, 0.95), rgba(253, 186, 116, 0.75)) !important;
+    border-color: rgba(234, 88, 12, 1) !important;
+    transform: translateY(-3px) scale(1.015) !important;
+    box-shadow: 0 20px 40px rgba(249, 115, 22, 0.12), 0 0 18px rgba(249, 115, 22, 0.28) !important;
+}
+
+#btn-select-fruit-zen {
+    background: linear-gradient(135deg, rgba(233, 213, 255, 0.88), rgba(196, 181, 253, 0.65)) !important; /* warm lavender */
+    border: 2.5px solid rgba(168, 85, 247, 0.8) !important;
+    box-shadow: 0 10px 30px rgba(168, 85, 247, 0.04) !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+#btn-select-fruit-zen:hover {
+    background: linear-gradient(135deg, rgba(233, 213, 255, 0.95), rgba(196, 181, 253, 0.75)) !important;
+    border-color: rgba(147, 51, 234, 1) !important;
+    transform: translateY(-3px) scale(1.015) !important;
+    box-shadow: 0 20px 40px rgba(168, 85, 247, 0.12), 0 0 18px rgba(168, 85, 247, 0.3) !important;
+}
+
+/* =========================================================================
+   RESPONSIVENESS ADAPTATION FOR PORTAL SIDEBAR
+   ========================================================================= */
+@media (max-width: 960px) {
+    .games-portal-layout {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .games-portal-sidebar {
+        margin-top: 10px;
+    }
+}
+
+
+
+
+.hidden { display: none !important; pointer-events: none !important; }
+
+/* Make avatar viewport container transparent and remove circular/oval border shape */
+.avatar-viewport-container {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Layer children of Your Buddy card above the background decorations */
+.avatar-card > *:not(#chat-scene-decorations) {
+    position: relative;
+    z-index: 2;
+}
+.avatar-card #chat-scene-decorations {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    border-radius: 32px; /* match the card corners */
+    overflow: hidden; /* clip the decorations inside the card */
+}
+
+/* Card scene background overrides to make them win over theme files */
+.avatar-card.scene-starry-night {
+    background: linear-gradient(135deg, #2E2545 0%, #4A3B6B 100%) !important;
+}
+.avatar-card.scene-lofi-study {
+    background: #fcf8f2 !important;
+}
+.avatar-card.scene-floating-garden {
+    background: #E8F5E9 !important;
+}
+.avatar-card.scene-boba-cafe {
+    background: #F7F4EB !important;
+}
+.avatar-card.scene-pink-bedroom {
+    background: linear-gradient(135deg, #fff0f6 0%, #ffdeeb 100%) !important;
+}
+.avatar-card.scene-cozy-cabin {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde047 100%) !important;
+}
+.avatar-card.scene-cozy-rain {
+    background: linear-gradient(180deg, #cfd8dc 0%, #90a4ae 100%) !important;
+}
+
+/* Dark scene typography adjustments for readability */
+.avatar-card.scene-starry-night h3 {
+    color: #ffffff !important;
+}
+.avatar-card.scene-starry-night .mini-label {
+    color: #e2e8f0 !important;
+}
+.avatar-card.scene-starry-night .mini-val {
+    color: #fef08a !important;
+}

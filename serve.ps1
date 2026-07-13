@@ -33,7 +33,10 @@ while ($listener.IsListening) {
         if (-not $resolvedPath.StartsWith($resolvedDir)) {
             $response.StatusCode = 403
             $msg = [System.Text.Encoding]::UTF8.GetBytes("Forbidden")
-            $response.OutputStream.Write($msg, 0, $msg.Length)
+            $response.ContentLength64 = $msg.Length
+            if ($request.HttpMethod -ne "HEAD") {
+                $response.OutputStream.Write($msg, 0, $msg.Length)
+            }
             $response.OutputStream.Close()
             continue
         }
@@ -44,29 +47,37 @@ while ($listener.IsListening) {
             $ext = [System.IO.Path]::GetExtension($resolvedPath).ToLower()
             $contentType = switch ($ext) {
                 ".html" { "text/html; charset=utf-8" }
-                ".css" { "text/css; charset=utf-8" }
-                ".js" { "application/javascript; charset=utf-8" }
-                ".svg" { "image/svg+xml; charset=utf-8" }
-                ".png" { "image/png" }
-                ".jpg" { "image/jpeg" }
+                ".css"  { "text/css; charset=utf-8" }
+                ".js"   { "application/javascript; charset=utf-8" }
+                ".svg"  { "image/svg+xml; charset=utf-8" }
+                ".png"  { "image/png" }
+                ".jpg"  { "image/jpeg" }
                 ".jpeg" { "image/jpeg" }
-                ".gif" { "image/gif" }
-                ".ico" { "image/x-icon" }
+                ".gif"  { "image/gif" }
+                ".ico"  { "image/x-icon" }
                 ".json" { "application/json; charset=utf-8" }
+                ".mp4"  { "video/mp4" }
+                ".webm" { "video/webm" }
+                ".ogg"  { "video/ogg" }
                 default { "application/octet-stream" }
             }
             
             $response.ContentType = $contentType
             $response.ContentLength64 = $content.Length
-            # Force no-cache headers to prevent browser caching
+            # Force no-cache to prevent browser caching stale JS/CSS
             $response.Headers.Add("Cache-Control", "no-cache, no-store, must-revalidate")
             $response.Headers.Add("Pragma", "no-cache")
             $response.Headers.Add("Expires", "0")
-            $response.OutputStream.Write($content, 0, $content.Length)
+            if ($request.HttpMethod -ne "HEAD") {
+                $response.OutputStream.Write($content, 0, $content.Length)
+            }
         } else {
             $response.StatusCode = 404
             $msg = [System.Text.Encoding]::UTF8.GetBytes("File Not Found: $urlPath")
-            $response.OutputStream.Write($msg, 0, $msg.Length)
+            $response.ContentLength64 = $msg.Length  # Fix: must set before writing body
+            if ($request.HttpMethod -ne "HEAD") {
+                $response.OutputStream.Write($msg, 0, $msg.Length)
+            }
         }
         $response.OutputStream.Close()
     } catch {
@@ -74,3 +85,4 @@ while ($listener.IsListening) {
         Write-Warning "Error handling request: $_"
     }
 }
+

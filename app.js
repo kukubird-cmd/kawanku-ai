@@ -975,134 +975,143 @@ document.addEventListener('DOMContentLoaded', () => {
             DOM.avatarExpressionLabel.innerText = conf.expression.charAt(0).toUpperCase() + conf.expression.slice(1);
         }
 
-        // Update Customizer Viewport scene background & vector layers
-        const customizerViewport = DOM.customizerViewport;
-        if (customizerViewport) {
-            const currentScene = conf.currentScene || 'starry_night';
-            customizerViewport.className = 'customizer-viewport scene-' + currentScene.replace('_', '-');
+        // Update Viewports (both Studio Customizer and Chat Companion) scene background & vector layers
+        const currentScene = conf.currentScene || 'starry_night';
+        const sceneClass = 'scene-' + currentScene.replace('_', '-');
 
-            let decContainer = customizerViewport.querySelector('#scene-decorations');
+        const viewports = [];
+        if (DOM.customizerViewport) {
+            viewports.push({ el: DOM.customizerViewport, id: 'scene-decorations', cls: 'customizer-viewport' });
+        }
+        const companionViewport = document.querySelector('.avatar-card');
+        if (companionViewport) {
+            viewports.push({ el: companionViewport, id: 'chat-scene-decorations', cls: 'avatar-card cloud-companion-frame' });
+        }
+
+        let svgHtml = '';
+        if (currentScene === 'starry_night') {
+            svgHtml = `
+                <svg class="scene-bg-element" viewBox="0 0 100 100">
+                    <polygon points="15,10 16,13 19,13 17,15 18,18 15,16 12,18 13,15 11,13 14,13" fill="#ffeaa7" opacity="0.8"/>
+                    <polygon points="85,25 86,28 89,28 87,30 88,33 85,31 82,33 83,30 81,28 84,28" fill="#ffeaa7" opacity="0.9"/>
+                    <polygon points="25,60 26,63 29,63 27,65 28,68 25,66 22,68 23,65 21,63 24,63" fill="#ffeaa7" opacity="0.65"/>
+                    <polygon points="75,70 76,73 79,73 77,75 78,78 75,76 72,78 73,75 71,73 74,73" fill="#ffeaa7" opacity="0.75"/>
+                    <circle cx="50" cy="20" r="1.2" fill="#fff" opacity="0.7" />
+                    <circle cx="80" cy="45" r="1.5" fill="#fff" opacity="0.8" />
+                    <circle cx="20" cy="35" r="1.0" fill="#fff" opacity="0.5" />
+                    <rect x="5" y="5" width="90" height="90" rx="6" fill="none" stroke="#ffffff" stroke-width="2.5" opacity="0.15" />
+                    <line x1="50" y1="5" x2="50" y2="95" stroke="#ffffff" stroke-width="1.8" opacity="0.15" />
+                    <line x1="5" y1="50" x2="95" y2="50" stroke="#ffffff" stroke-width="1.8" opacity="0.15" />
+                </svg>
+            `;
+        } else if (currentScene === 'lofi_study') {
+            svgHtml = `
+                <svg class="scene-bg-element" viewBox="0 0 100 100">
+                    <circle cx="20" cy="40" r="12" fill="#ffeaa7" opacity="0.3" filter="blur(4px)" />
+                    <circle cx="20" cy="40" r="4" fill="#ffdf7a" />
+                    <path d="M 12,55 L 20,40 L 28,55 Z" fill="#ebcba4" stroke="#4A3E3D" stroke-width="1.5" />
+                    <line x1="20" y1="55" x2="20" y2="70" stroke="#4A3E3D" stroke-width="2.5" />
+                    <rect x="0" y="70" width="100" height="30" fill="#dfc09b" stroke="#4A3E3D" stroke-width="2" />
+                    <line x1="0" y1="74" x2="100" y2="74" stroke="#cfae89" stroke-width="1.5" />
+                    <rect x="75" y="60" width="12" height="10" rx="3" fill="#ffa2b6" stroke="#4A3E3D" stroke-width="2" />
+                    <path d="M 87,62 C 90,62 90,68 87,68" fill="none" stroke="#4A3E3D" stroke-width="2" />
+                    <path d="M 78,56 Q 79,52 78,48" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
+                    <path d="M 82,55 Q 83,51 82,47" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
+                </svg>
+            `;
+        } else if (currentScene === 'floating_garden') {
+            svgHtml = `
+                <svg class="scene-bg-element" viewBox="0 0 100 100">
+                    <path d="M 10,0 Q 15,30 8,50" fill="none" stroke="#606c38" stroke-width="1.5" />
+                    <circle cx="10" cy="15" r="2.5" fill="#798948" />
+                    <circle cx="14" cy="28" r="2.2" fill="#798948" />
+                    <circle cx="7" cy="40" r="2.5" fill="#798948" />
+                    <path d="M 90,0 Q 85,25 88,40" fill="none" stroke="#606c38" stroke-width="1.5" />
+                    <circle cx="89" cy="12" r="2.5" fill="#798948" />
+                    <circle cx="85" cy="24" r="2.2" fill="#798948" />
+                    <circle cx="88" cy="35" r="2.5" fill="#798948" />
+                    <circle cx="25" cy="70" r="2" fill="#ffa2b6" /><circle cx="28" cy="73" r="2" fill="#ffa2b6" /><circle cx="22" cy="73" r="2" fill="#ffa2b6" /><circle cx="25" cy="76" r="2" fill="#ffa2b6" /><circle cx="25" cy="73" r="1" fill="#fff" />
+                    <circle cx="78" cy="65" r="2" fill="#ffd166" /><circle cx="81" cy="68" r="2" fill="#ffd166" /><circle cx="75" cy="68" r="2" fill="#ffd166" /><circle cx="78" cy="71" r="2" fill="#ffd166" /><circle cx="78" cy="68" r="1" fill="#fff" />
+                </svg>
+            `;
+        } else if (currentScene === 'boba_cafe') {
+            svgHtml = `
+                <svg class="scene-bg-element" viewBox="0 0 100 100">
+                    <path d="M 0,15 Q 25,25 50,15 Q 75,25 100,15" fill="none" stroke="#4A3E3D" stroke-width="1.5" />
+                    <circle cx="16" cy="19" r="2.5" fill="#ffe066" stroke="#4A3E3D" stroke-width="1" />
+                    <circle cx="34" cy="20" r="2.5" fill="#ffe066" stroke="#4A3E3D" stroke-width="1" />
+                    <circle cx="66" cy="20" r="2.5" fill="#ffe066" stroke="#4A3E3D" stroke-width="1" />
+                    <circle cx="84" cy="19" r="2.5" fill="#ffe066" stroke="#4A3E3D" stroke-width="1" />
+                    <path d="M 0,0 L 0,8 Q 5,12 10,8 Q 15,12 20,8 Q 25,12 30,8 Q 35,12 40,8 Q 45,12 50,8 Q 55,12 60,8 Q 65,12 70,8 Q 75,12 80,8 Q 85,12 90,8 Q 95,12 100,8 L 100,0 Z" fill="#fca5a5" stroke="#4A3E3D" stroke-width="1.5" />
+                </svg>
+            `;
+        } else if (currentScene === 'pink_bedroom') {
+            svgHtml = `
+                <svg class="scene-bg-element" viewBox="0 0 100 100">
+                    <!-- String Lights -->
+                    <path d="M 0,10 Q 25,25 50,15 Q 75,25 100,10" fill="none" stroke="#4A3E3D" stroke-width="1.5" />
+                    <!-- Glowing Yellow Bulbs -->
+                    <circle cx="15" cy="15" r="3" fill="#fef08a" stroke="#4A3E3D" stroke-width="1" />
+                    <circle cx="35" cy="19" r="3" fill="#fef08a" stroke="#4A3E3D" stroke-width="1" />
+                    <circle cx="50" cy="15" r="3" fill="#fef08a" stroke="#4A3E3D" stroke-width="1" />
+                    <circle cx="65" cy="19" r="3" fill="#fef08a" stroke="#4A3E3D" stroke-width="1" />
+                    <circle cx="85" cy="15" r="3" fill="#fef08a" stroke="#4A3E3D" stroke-width="1" />
+                    <!-- Floating Sakura Petals -->
+                    <ellipse cx="10" cy="40" rx="2" ry="1.2" fill="#ffb7cc" opacity="0.6" transform="rotate(30,10,40)" />
+                    <ellipse cx="88" cy="65" rx="2" ry="1.2" fill="#ffb7cc" opacity="0.6" transform="rotate(-40,88,65)" />
+                    <!-- Cute Rug base -->
+                    <ellipse cx="50" cy="95" rx="35" ry="10" fill="#ffa2b6" opacity="0.25" />
+                </svg>
+            `;
+        } else if (currentScene === 'cozy_cabin') {
+            svgHtml = `
+                <svg class="scene-bg-element" viewBox="0 0 100 100">
+                    <!-- Cabin Windows -->
+                    <rect x="15" y="15" width="22" height="35" rx="4" fill="#fef9c3" stroke="#4A3E3D" stroke-width="2.5" opacity="0.4" />
+                    <line x1="26" y1="15" x2="26" y2="50" stroke="#4A3E3D" stroke-width="1.8" opacity="0.5" />
+                    <line x1="15" y1="32" x2="37" y2="32" stroke="#4A3E3D" stroke-width="1.8" opacity="0.5" />
+                    <!-- Cozy Mug on table -->
+                    <path d="M 80,75 L 88,75 A 4,4 0 0,1 92,79 L 92,81 A 4,4 0 0,1 88,85 L 80,85 Z" fill="none" stroke="#4A3E3D" stroke-width="2" />
+                    <rect x="74" y="72" width="10" height="15" rx="2" fill="#f97316" stroke="#4A3E3D" stroke-width="2.5" />
+                    <!-- Little Steam path -->
+                    <path d="M 76,66 Q 78,60 76,54" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
+                    <path d="M 81,65 Q 83,59 81,53" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
+                    <!-- Floor wood planks -->
+                    <line x1="0" y1="88" x2="100" y2="88" stroke="#4A3E3D" stroke-width="2.5" />
+                    <line x1="30" y1="88" x2="30" y2="100" stroke="#4A3E3D" stroke-width="1.8" />
+                    <line x1="70" y1="88" x2="70" y2="100" stroke="#4A3E3D" stroke-width="1.8" />
+                </svg>
+            `;
+        } else if (currentScene === 'cozy_rain') {
+            svgHtml = `
+                <svg class="scene-bg-element" viewBox="0 0 100 100">
+                    <!-- Floating cozy clouds -->
+                    <path d="M 15,30 A 8,8 0 0,1 31,30 A 8,8 0 0,1 47,30 A 8,8 0 0,1 31,38 Z" fill="#ffffff" opacity="0.5" />
+                    <path d="M 60,25 A 6,6 0 0,1 72,25 A 6,6 0 0,1 84,25 A 6,6 0 0,1 72,31 Z" fill="#ffffff" opacity="0.5" />
+                    <!-- Rain drops falling -->
+                    <line x1="20" y1="50" x2="18" y2="60" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
+                    <line x1="50" y1="40" x2="48" y2="50" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
+                    <line x1="80" y1="45" x2="78" y2="55" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
+                    <line x1="35" y1="70" x2="33" y2="80" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
+                    <line x1="68" y1="65" x2="66" y2="75" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
+                </svg>
+            `;
+        }
+
+        viewports.forEach(vp => {
+            vp.el.className = vp.cls + ' ' + sceneClass;
+            let decContainer = vp.el.querySelector('#' + vp.id);
             if (!decContainer) {
                 decContainer = document.createElement('div');
-                decContainer.id = 'scene-decorations';
+                decContainer.id = vp.id;
                 decContainer.style.position = 'absolute';
                 decContainer.style.inset = '0';
                 decContainer.style.pointerEvents = 'none';
                 decContainer.style.zIndex = '1';
-                customizerViewport.insertBefore(decContainer, customizerViewport.firstChild);
+                vp.el.insertBefore(decContainer, vp.el.firstChild);
             }
-
-            if (currentScene === 'starry_night') {
-                decContainer.innerHTML = `
-                    <svg class="scene-bg-element" viewBox="0 0 100 100">
-                        <polygon points="15,10 16,13 19,13 17,15 18,18 15,16 12,18 13,15 11,13 14,13" fill="#ffeaa7" opacity="0.8"/>
-                        <polygon points="85,25 86,28 89,28 87,30 88,33 85,31 82,33 83,30 81,28 84,28" fill="#ffeaa7" opacity="0.9"/>
-                        <polygon points="25,60 26,63 29,63 27,65 28,68 25,66 22,68 23,65 21,63 24,63" fill="#ffeaa7" opacity="0.65"/>
-                        <polygon points="75,70 76,73 79,73 77,75 78,78 75,76 72,78 73,75 71,73 74,73" fill="#ffeaa7" opacity="0.75"/>
-                        <circle cx="50" cy="20" r="1.2" fill="#fff" opacity="0.7" />
-                        <circle cx="80" cy="45" r="1.5" fill="#fff" opacity="0.8" />
-                        <circle cx="20" cy="35" r="1.0" fill="#fff" opacity="0.5" />
-                        <rect x="5" y="5" width="90" height="90" rx="6" fill="none" stroke="#ffffff" stroke-width="2.5" opacity="0.15" />
-                        <line x1="50" y1="5" x2="50" y2="95" stroke="#ffffff" stroke-width="1.8" opacity="0.15" />
-                        <line x1="5" y1="50" x2="95" y2="50" stroke="#ffffff" stroke-width="1.8" opacity="0.15" />
-                    </svg>
-                `;
-            } else if (currentScene === 'lofi_study') {
-                decContainer.innerHTML = `
-                    <svg class="scene-bg-element" viewBox="0 0 100 100">
-                        <circle cx="20" cy="40" r="12" fill="#ffeaa7" opacity="0.3" filter="blur(4px)" />
-                        <circle cx="20" cy="40" r="4" fill="#ffdf7a" />
-                        <path d="M 12,55 L 20,40 L 28,55 Z" fill="#ebcba4" stroke="#4A3E3D" stroke-width="1.5" />
-                        <line x1="20" y1="55" x2="20" y2="70" stroke="#4A3E3D" stroke-width="2.5" />
-                        <rect x="0" y="70" width="100" height="30" fill="#dfc09b" stroke="#4A3E3D" stroke-width="2" />
-                        <line x1="0" y1="74" x2="100" y2="74" stroke="#cfae89" stroke-width="1.5" />
-                        <rect x="75" y="60" width="12" height="10" rx="3" fill="#ffa2b6" stroke="#4A3E3D" stroke-width="2" />
-                        <path d="M 87,62 C 90,62 90,68 87,68" fill="none" stroke="#4A3E3D" stroke-width="2" />
-                        <path d="M 78,56 Q 79,52 78,48" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
-                        <path d="M 82,55 Q 83,51 82,47" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
-                    </svg>
-                `;
-            } else if (currentScene === 'floating_garden') {
-                decContainer.innerHTML = `
-                    <svg class="scene-bg-element" viewBox="0 0 100 100">
-                        <path d="M 10,0 Q 15,30 8,50" fill="none" stroke="#606c38" stroke-width="1.5" />
-                        <circle cx="10" cy="15" r="2.5" fill="#798948" />
-                        <circle cx="14" cy="28" r="2.2" fill="#798948" />
-                        <circle cx="7" cy="40" r="2.5" fill="#798948" />
-                        <path d="M 90,0 Q 85,25 88,40" fill="none" stroke="#606c38" stroke-width="1.5" />
-                        <circle cx="89" cy="12" r="2.5" fill="#798948" />
-                        <circle cx="85" cy="24" r="2.2" fill="#798948" />
-                        <circle cx="88" cy="35" r="2.5" fill="#798948" />
-                        <circle cx="25" cy="70" r="2" fill="#ffa2b6" /><circle cx="28" cy="73" r="2" fill="#ffa2b6" /><circle cx="22" cy="73" r="2" fill="#ffa2b6" /><circle cx="25" cy="76" r="2" fill="#ffa2b6" /><circle cx="25" cy="73" r="1" fill="#fff" />
-                        <circle cx="78" cy="65" r="2" fill="#ffd166" /><circle cx="81" cy="68" r="2" fill="#ffd166" /><circle cx="75" cy="68" r="2" fill="#ffd166" /><circle cx="78" cy="71" r="2" fill="#ffd166" /><circle cx="78" cy="68" r="1" fill="#fff" />
-                    </svg>
-                `;
-            } else if (currentScene === 'boba_cafe') {
-                decContainer.innerHTML = `
-                    <svg class="scene-bg-element" viewBox="0 0 100 100">
-                        <path d="M 0,15 Q 25,25 50,15 Q 75,25 100,15" fill="none" stroke="#4A3E3D" stroke-width="1.5" />
-                        <circle cx="16" cy="19" r="2.5" fill="#ffe066" stroke="#4A3E3D" stroke-width="1" />
-                        <circle cx="34" cy="20" r="2.5" fill="#ffe066" stroke="#4A3E3D" stroke-width="1" />
-                        <circle cx="66" cy="20" r="2.5" fill="#ffe066" stroke="#4A3E3D" stroke-width="1" />
-                        <circle cx="84" cy="19" r="2.5" fill="#ffe066" stroke="#4A3E3D" stroke-width="1" />
-                        <path d="M 0,0 L 0,8 Q 5,12 10,8 Q 15,12 20,8 Q 25,12 30,8 Q 35,12 40,8 Q 45,12 50,8 Q 55,12 60,8 Q 65,12 70,8 Q 75,12 80,8 Q 85,12 90,8 Q 95,12 100,8 L 100,0 Z" fill="#fca5a5" stroke="#4A3E3D" stroke-width="1.5" />
-                    </svg>
-                `;
-            } else if (currentScene === 'pink_bedroom') {
-                decContainer.innerHTML = `
-                    <svg class="scene-bg-element" viewBox="0 0 100 100">
-                        <!-- String Lights -->
-                        <path d="M 0,10 Q 25,25 50,15 Q 75,25 100,10" fill="none" stroke="#4A3E3D" stroke-width="1.5" />
-                        <!-- Glowing Yellow Bulbs -->
-                        <circle cx="15" cy="15" r="3" fill="#fef08a" stroke="#4A3E3D" stroke-width="1" />
-                        <circle cx="35" cy="19" r="3" fill="#fef08a" stroke="#4A3E3D" stroke-width="1" />
-                        <circle cx="50" cy="15" r="3" fill="#fef08a" stroke="#4A3E3D" stroke-width="1" />
-                        <circle cx="65" cy="19" r="3" fill="#fef08a" stroke="#4A3E3D" stroke-width="1" />
-                        <circle cx="85" cy="15" r="3" fill="#fef08a" stroke="#4A3E3D" stroke-width="1" />
-                        <!-- Floating Sakura Petals -->
-                        <ellipse cx="10" cy="40" rx="2" ry="1.2" fill="#ffb7cc" opacity="0.6" transform="rotate(30,10,40)" />
-                        <ellipse cx="88" cy="65" rx="2" ry="1.2" fill="#ffb7cc" opacity="0.6" transform="rotate(-40,88,65)" />
-                        <!-- Cute Rug base -->
-                        <ellipse cx="50" cy="95" rx="35" ry="10" fill="#ffa2b6" opacity="0.25" />
-                    </svg>
-                `;
-            } else if (currentScene === 'cozy_cabin') {
-                decContainer.innerHTML = `
-                    <svg class="scene-bg-element" viewBox="0 0 100 100">
-                        <!-- Cabin Windows -->
-                        <rect x="15" y="15" width="22" height="35" rx="4" fill="#fef9c3" stroke="#4A3E3D" stroke-width="2.5" opacity="0.4" />
-                        <line x1="26" y1="15" x2="26" y2="50" stroke="#4A3E3D" stroke-width="1.8" opacity="0.5" />
-                        <line x1="15" y1="32" x2="37" y2="32" stroke="#4A3E3D" stroke-width="1.8" opacity="0.5" />
-                        <!-- Cozy Mug on table -->
-                        <path d="M 80,75 L 88,75 A 4,4 0 0,1 92,79 L 92,81 A 4,4 0 0,1 88,85 L 80,85 Z" fill="none" stroke="#4A3E3D" stroke-width="2" />
-                        <rect x="74" y="72" width="10" height="15" rx="2" fill="#f97316" stroke="#4A3E3D" stroke-width="2.5" />
-                        <!-- Little Steam path -->
-                        <path d="M 76,66 Q 78,60 76,54" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
-                        <path d="M 81,65 Q 83,59 81,53" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
-                        <!-- Floor wood planks -->
-                        <line x1="0" y1="88" x2="100" y2="88" stroke="#4A3E3D" stroke-width="2.5" />
-                        <line x1="30" y1="88" x2="30" y2="100" stroke="#4A3E3D" stroke-width="1.8" />
-                        <line x1="70" y1="88" x2="70" y2="100" stroke="#4A3E3D" stroke-width="1.8" />
-                    </svg>
-                `;
-            } else if (currentScene === 'cozy_rain') {
-                decContainer.innerHTML = `
-                    <svg class="scene-bg-element" viewBox="0 0 100 100">
-                        <!-- Floating cozy clouds -->
-                        <path d="M 15,30 A 8,8 0 0,1 31,30 A 8,8 0 0,1 47,30 A 8,8 0 0,1 31,38 Z" fill="#ffffff" opacity="0.5" />
-                        <path d="M 60,25 A 6,6 0 0,1 72,25 A 6,6 0 0,1 84,25 A 6,6 0 0,1 72,31 Z" fill="#ffffff" opacity="0.5" />
-                        <!-- Rain drops falling -->
-                        <line x1="20" y1="50" x2="18" y2="60" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
-                        <line x1="50" y1="40" x2="48" y2="50" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
-                        <line x1="80" y1="45" x2="78" y2="55" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
-                        <line x1="35" y1="70" x2="33" y2="80" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
-                        <line x1="68" y1="65" x2="66" y2="75" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
-                    </svg>
-                `;
-            } else {
-                decContainer.innerHTML = '';
-            }
-        }
+            decContainer.innerHTML = svgHtml;
+        });
 
         // Toggle Pet active layers
         const petCat = document.getElementById('pet-cat');
@@ -4987,7 +4996,12 @@ Example format:
     // 开心消消乐 HAPPY MATCH-3 ENGINE — STEMGINEERS Innovation Project
     // =========================================================================
     (function RelaxationGamesEngine() {
-        // ── DOM refs ──────────────────────────────────────────────────────────
+        // ── DOM refs ────────────────------------------------------------------
+        const menuContainer     = document.getElementById('games-menu-container');
+        const cardMatch3        = document.getElementById('card-match3');
+        const btnSelectMatch3   = document.getElementById('btn-select-match3');
+        const btnMatch3Back     = document.getElementById('btn-match3-back-menu');
+        
         const match3StartAction = document.getElementById('match3-start-action');
         const match3GameArena   = document.getElementById('match3-game-arena');
         const match3Board       = document.getElementById('match3-board');
@@ -4995,9 +5009,15 @@ Example format:
         const match3ProgressVal = document.getElementById('match3-progress-val');
         const btnStartMatch3    = document.getElementById('btn-start-match3');
         const btnQuitMatch3     = document.getElementById('btn-quit-match3');
+        const btnMatch3Tip      = document.getElementById('btn-match3-tip');
+        const tipBoxText        = document.getElementById('match3-tip-box-text');
         const surveyInline      = document.getElementById('survey-inline');
         const surveyPrompt      = document.getElementById('survey-robot-prompt');
         const hintText          = document.getElementById('match3-hint-text');
+        const btnWinReplay      = document.getElementById('btn-win-replay');
+        const btnWinSurvey      = document.getElementById('btn-win-survey');
+        const surveyMoodSection = document.getElementById('survey-mood-section');
+        const winChoicesRow     = document.getElementById('win-choices-row');
 
         // ── Fruit SVG tiles (cute, colourful, recognisable) ───────────────────
         const TILE_TYPES = [
@@ -5120,7 +5140,7 @@ Example format:
 
         // ── Game state ────────────────────────────────────────────────────────
         const ROWS = 6, COLS = 6;
-        const WIN_MATCHES = 10;
+        const WIN_MATCHES = 15;
         let board       = [];   // 2-D array of tile objects
         let selected    = null;
         let busy        = false;
@@ -5171,6 +5191,8 @@ Example format:
                     div.innerHTML = makeTileHTML(t);
                     div.dataset.row = r;
                     div.dataset.col = c;
+                    div.style.gridRowStart = r + 1;
+                    div.style.gridColumnStart = c + 1;
                     div.addEventListener('click', () => onTileClick(t));
                     t.el = div;
                     match3Board.appendChild(div);
@@ -5277,14 +5299,45 @@ Example format:
             return out;
         }
 
-        // ── Clear matches + gravity + refill ──────────────────────────────────
         async function processMatches(matches) {
             score++;
             updateProgress();
 
+            // Increment matches and update dashboard
+            state.gameStats.matches += matches.length;
+            if (window.updateSanctuaryDashboard) window.updateSanctuaryDashboard();
+
+            // Spawn floating combo text on matches
+            try {
+                let sumX = 0, sumY = 0;
+                matches.forEach(t => {
+                    if (t.el) {
+                        sumX += t.el.offsetLeft + t.el.offsetWidth / 2;
+                        sumY += t.el.offsetTop + t.el.offsetHeight / 2;
+                    }
+                });
+                const avgX = sumX / matches.length;
+                const avgY = sumY / matches.length;
+
+                const phrases = ["+3 Cozy! ✨", "Sweet! 🌸", "Flow State 🍃", "Calm Match 🌊", "Breathe... 💨", "Mindful Moment 💫", "Nice Swapping! 💖", "Inner Peace 🧘"];
+                const phrase = phrases[Math.floor(Math.random() * phrases.length)];
+
+                const overlay = document.getElementById('match3-combo-overlay');
+                if (overlay) {
+                    const span = document.createElement('span');
+                    span.className = 'match3-combo-text';
+                    span.textContent = phrase;
+                    span.style.left = avgX + 'px';
+                    span.style.top = avgY + 'px';
+                    overlay.appendChild(span);
+                    setTimeout(() => span.remove(), 1200);
+                }
+            } catch(e) {}
+
             // pop animation
             matches.forEach(t => t.el.classList.add('pop-clear'));
             await sleep(320);
+
 
             // remove from DOM + board
             matches.forEach(t => {
@@ -5302,7 +5355,7 @@ Example format:
                         board[r+empty][c] = t;
                         board[r][c]       = null;
                         t.row             = r + empty;
-                        t.el.style.gridRowStart = t.row + 1;
+                        refreshTileEl(t); // Updates position and dataset properly
                     }
                 }
                 // fill empty from top
@@ -5335,6 +5388,98 @@ Example format:
             }
         }
 
+        // ── Hint Solver ──────────────────────────────────────────────────────
+        function findPossibleMoves() {
+            // Check if position (r,c) is part of a 3+ match (reads current board state)
+            function hasMatchAt(r, c) {
+                const tile = board[r][c];
+                if (!tile) return false;
+                const typeId = tile.id;
+
+                // Horizontal count
+                let horiz = 1;
+                let col = c - 1;
+                while (col >= 0 && board[r][col] && board[r][col].id === typeId) { horiz++; col--; }
+                col = c + 1;
+                while (col < COLS && board[r][col] && board[r][col].id === typeId) { horiz++; col++; }
+                if (horiz >= 3) return true;
+
+                // Vertical count
+                let vert = 1;
+                let row = r - 1;
+                while (row >= 0 && board[row][c] && board[row][c].id === typeId) { vert++; row--; }
+                row = r + 1;
+                while (row < ROWS && board[row][c] && board[row][c].id === typeId) { vert++; row++; }
+                if (vert >= 3) return true;
+
+                return false;
+            }
+
+            // Simulate swap, check, then swap back
+            function trySwap(r1, c1, r2, c2) {
+                const a = board[r1][c1];
+                const b = board[r2][c2];
+                if (!a || !b || a.id === b.id) return false;
+
+                // Perform the swap in the board array
+                board[r1][c1] = b;
+                board[r2][c2] = a;
+
+                // Check if either swapped position now forms a match
+                const matched = hasMatchAt(r1, c1) || hasMatchAt(r2, c2);
+
+                // Swap back to restore original state
+                board[r1][c1] = a;
+                board[r2][c2] = b;
+
+                return matched;
+            }
+
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    // Try right swap
+                    if (c + 1 < COLS && trySwap(r, c, r, c + 1)) {
+                        return { t1: board[r][c], t2: board[r][c + 1] };
+                    }
+                    // Try down swap
+                    if (r + 1 < ROWS && trySwap(r, c, r + 1, c)) {
+                        return { t1: board[r][c], t2: board[r + 1][c] };
+                    }
+                }
+            }
+            return null;
+        }
+
+        let hintActive = false;
+        async function showHint() {
+            if (busy || hintActive) return;
+            hintActive = true;
+            
+            const move = findPossibleMoves();
+            if (move) {
+                move.t1.el.classList.add('hint-glow');
+                move.t2.el.classList.add('hint-glow');
+                
+                if (tipBoxText) {
+                    tipBoxText.innerHTML = `Swap the <strong>${move.t1.name.split(' ')[0]}</strong> and <strong>${move.t2.name.split(' ')[0]}</strong>! ✨`;
+                }
+                
+                await sleep(2000);
+                if (move.t1 && move.t1.el) move.t1.el.classList.remove('hint-glow');
+                if (move.t2 && move.t2.el) move.t2.el.classList.remove('hint-glow');
+            } else {
+                if (tipBoxText) tipBoxText.textContent = "No matches left! Reshuffling board...";
+                showToast("No moves possible! Reshuffling board...", "info");
+                let tries = 0;
+                do {
+                    buildBoard();
+                    tries++;
+                } while (!findPossibleMoves() && tries < 10);
+                renderBoard();
+            }
+            hintActive = false;
+        }
+
         // ── Progress bar ──────────────────────────────────────────────────────
         function updateProgress() {
             const pct = Math.min(100, Math.round(score / WIN_MATCHES * 100));
@@ -5347,6 +5492,8 @@ Example format:
             match3GameArena.classList.add('hidden');
             match3StartAction.classList.add('hidden');
             surveyInline.classList.remove('hidden');
+            if (winChoicesRow) winChoicesRow.classList.remove('hidden');
+            if (surveyMoodSection) surveyMoodSection.classList.add('hidden');
             surveyInline.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
@@ -5363,6 +5510,11 @@ Example format:
             score = 0;
             selected = null;
             busy = false;
+            
+            // Set start flag & update lounge checklist
+            localStorage.setItem('relax_game_started', 'true');
+            if (window.updateSanctuaryDashboard) window.updateSanctuaryDashboard();
+
             updateProgress();
             buildBoard();
             renderBoard();
@@ -5370,7 +5522,9 @@ Example format:
             surveyInline.classList.add('hidden');
             match3GameArena.classList.remove('hidden');
             if (hintText) hintText.textContent = 'Click a fruit, then click an adjacent fruit to swap them!';
+            if (tipBoxText) tipBoxText.textContent = 'Take deep breaths while matching. Let the stress melt away.';
         }
+
 
         function quitGame() {
             match3GameArena.classList.add('hidden');
@@ -5396,14 +5550,1714 @@ Example format:
             populateFruitPreview();
             if (btnStartMatch3) btnStartMatch3.addEventListener('click', startGame);
             if (btnQuitMatch3)  btnQuitMatch3.addEventListener('click', quitGame);
+            if (btnMatch3Tip)   btnMatch3Tip.addEventListener('click', showHint);
+            
+            if (btnWinReplay) {
+                btnWinReplay.addEventListener('click', () => {
+                    if (cardMatch3 && !cardMatch3.classList.contains('hidden')) {
+                        startGame();
+                    }
+                });
+            }
+            if (btnWinSurvey) {
+                btnWinSurvey.addEventListener('click', () => {
+                    if (winChoicesRow) winChoicesRow.classList.add('hidden');
+                    if (surveyMoodSection) surveyMoodSection.classList.remove('hidden');
+                });
+            }
+
             document.querySelectorAll('#survey-inline .emoji-btn').forEach(btn => {
                 btn.addEventListener('click', () => handleMood(btn.dataset.mood));
             });
+            
+            // Menu navigation select click bindings
+            if (btnSelectMatch3 && cardMatch3 && menuContainer) {
+                btnSelectMatch3.addEventListener('click', () => {
+                    menuContainer.classList.add('hidden');
+                    cardMatch3.classList.remove('hidden');
+                });
+            }
+            if (btnMatch3Back && cardMatch3 && menuContainer) {
+                btnMatch3Back.addEventListener('click', () => {
+                    quitGame();
+                    cardMatch3.classList.add('hidden');
+                    menuContainer.classList.remove('hidden');
+                });
+            }
         }
 
         init();
     })();
 
+    // =========================================================================
+    // KAWANKU FRUIT ZEN ENGINE — HIGH-FIDELITY CANVASES SLICING GAME
+    // =========================================================================
+    (function FruitZenEngine() {
+        // ── DOM refs ──────────────────────────────────────────────────────────
+        const menuContainer     = document.getElementById('games-menu-container');
+        const cardFruitZen      = document.getElementById('card-fruit-zen');
+        const btnSelectFruitZen = document.getElementById('btn-select-fruit-zen');
+        const btnFruitZenBack   = document.getElementById('btn-fruit-zen-back-menu');
+        
+        const zenStartScreen    = document.getElementById('zen-start-action');
+        const zenGameArena      = document.getElementById('zen-game-arena');
+        const btnStartZen       = document.getElementById('btn-start-fruit-zen');
+        const btnQuitZen        = document.getElementById('btn-quit-fruit-zen');
+        
+        const canvas            = document.getElementById('zen-canvas');
+        const progressFill      = document.getElementById('zen-progress');
+        const progressVal       = document.getElementById('zen-progress-val');
+        
+        const surveyInline      = document.getElementById('survey-inline');
+        const winChoicesRow     = document.getElementById('win-choices-row');
+        const surveyMoodSection = document.getElementById('survey-mood-section');
+        const btnWinReplay      = document.getElementById('btn-win-replay');
+        const btnWinSurvey      = document.getElementById('btn-win-survey');
+
+        let ctx = null;
+        let animationFrameId = null;
+        let isPlaying = false;
+        let score = 0;
+        const targetScore = 20;
+        let speedMode = 'normal';
+        
+        let fruits = [];
+        let splats = [];
+        let sparks = [];
+        let juiceParticles = [];
+        let trailPoints = [];
+        let isMouseDown = false;
+        let lastMousePos = null;
+        
+        let currentCombo = 0;
+        let lastSliceTime = 0;
+        let comboTexts = [];
+        
+        let audioCtx = null;
+
+        
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        
+        function playWhooshSound() {
+            if (!audioCtx) return;
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.12);
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.12);
+            } catch(e) {}
+        }
+        
+        function playSplashSound() {
+            if (!audioCtx) return;
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(60, audioCtx.currentTime + 0.18);
+                gain.gain.setValueAtTime(0.20, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.18);
+            } catch(e) {}
+        }
+        
+        let woodPatternCanvas = null;
+        function createWoodPattern() {
+            if (woodPatternCanvas) return;
+            woodPatternCanvas = document.createElement('canvas');
+            woodPatternCanvas.width = 600;
+            woodPatternCanvas.height = 400;
+            const wctx = woodPatternCanvas.getContext('2d');
+            
+            const plankHeight = 80;
+            const plankColors = ['#8B5A2B', '#805326', '#946130', '#784D23', '#855629'];
+            
+            for (let y = 0; y < woodPatternCanvas.height; y += plankHeight) {
+                const color = plankColors[(y / plankHeight) % plankColors.length];
+                wctx.fillStyle = color;
+                wctx.fillRect(0, y, woodPatternCanvas.width, plankHeight);
+                
+                wctx.strokeStyle = 'rgba(0,0,0,0.04)';
+                wctx.lineWidth = 1.5;
+                for (let i = 0; i < 5; i++) {
+                    const gy = y + 10 + i * 15;
+                    wctx.beginPath();
+                    wctx.moveTo(0, gy);
+                    wctx.quadraticCurveTo(150, gy - 6 + Math.random()*12, 300, gy + Math.random()*8);
+                    wctx.quadraticCurveTo(450, gy - 8 + Math.random()*16, 600, gy);
+                    wctx.stroke();
+                }
+                
+                wctx.strokeStyle = 'rgba(0,0,0,0.22)';
+                wctx.lineWidth = 2.5;
+                wctx.beginPath();
+                wctx.moveTo(0, y);
+                wctx.lineTo(woodPatternCanvas.width, y);
+                wctx.stroke();
+                
+                wctx.strokeStyle = 'rgba(255,255,255,0.05)';
+                wctx.lineWidth = 1;
+                wctx.beginPath();
+                wctx.moveTo(0, y + 1.5);
+                wctx.lineTo(woodPatternCanvas.width, y + 1.5);
+                wctx.stroke();
+            }
+        }
+        
+        function drawBackground() {
+            ctx.fillStyle = '#4e331c';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            createWoodPattern();
+            if (woodPatternCanvas) {
+                const pat = ctx.createPattern(woodPatternCanvas, 'repeat');
+                ctx.fillStyle = pat;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            
+            const vignette = ctx.createRadialGradient(
+                canvas.width / 2, canvas.height / 2, canvas.width * 0.25,
+                canvas.width / 2, canvas.height / 2, canvas.width * 0.75
+            );
+            vignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
+            vignette.addColorStop(1, 'rgba(0, 0, 0, 0.45)');
+            ctx.fillStyle = vignette;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        class ZenSplat {
+            constructor(x, y, fruitName) {
+                this.x = x;
+                this.y = y;
+                this.time = Date.now();
+                this.duration = 6000;
+                
+                const colorMap = {
+                    watermelon: 'rgba(239, 68, 68, 0.65)',
+                    apple: 'rgba(254, 243, 199, 0.65)',
+                    orange: 'rgba(249, 115, 22, 0.68)',
+                    coconut: 'rgba(240, 249, 255, 0.55)',
+                    pineapple: 'rgba(250, 204, 21, 0.65)'
+                };
+                this.color = colorMap[fruitName] || 'rgba(255, 255, 255, 0.5)';
+                
+                // Ring ripple effect
+                this.ringR = 8;
+                this.maxRingR = 40 + Math.random() * 20;
+                
+                this.blobs = [];
+                const blobCount = 5 + Math.floor(Math.random() * 5);
+                for (let i = 0; i < blobCount; i++) {
+                    this.blobs.push({
+                        dx: (Math.random() - 0.5) * 28,
+                        dy: (Math.random() - 0.5) * 28,
+                        r: 6 + Math.random() * 15,
+                        dripSpeed: 0.05 + Math.random() * 0.08
+                    });
+                }
+                
+                this.drops = [];
+                const dropCount = 6 + Math.floor(Math.random() * 7);
+                for (let i = 0; i < dropCount; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = 15 + Math.random() * 45;
+                    this.drops.push({
+                        dx: Math.cos(angle) * dist,
+                        dy: Math.sin(angle) * dist,
+                        r: 2 + Math.random() * 3.5,
+                        dripSpeed: 0.12 + Math.random() * 0.15
+                    });
+                }
+            }
+            
+            draw(ctx) {
+                const elapsed = Date.now() - this.time;
+                if (elapsed >= this.duration) return false;
+                
+                ctx.save();
+                const opacity = 1 - (elapsed / this.duration);
+                ctx.globalAlpha = opacity;
+                
+                // Draw expanding watercolor juice ring
+                if (this.ringR < this.maxRingR) {
+                    this.ringR += 1.8;
+                    ctx.strokeStyle = this.color;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.ringR, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+                
+                ctx.fillStyle = this.color;
+                
+                // Dripping blobs
+                this.blobs.forEach(b => {
+                    b.dy += b.dripSpeed; // slide down slowly
+                    
+                    ctx.beginPath();
+                    ctx.arc(this.x + b.dx, this.y + b.dy, b.r, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Draw smear trail upwards as it slides down
+                    ctx.beginPath();
+                    ctx.rect(this.x + b.dx - b.r * 0.35, this.y + b.dy - b.r, b.r * 0.7, b.r);
+                    ctx.fill();
+                });
+                
+                // Running drops
+                this.drops.forEach(d => {
+                    d.dy += d.dripSpeed; // run down faster
+                    
+                    ctx.beginPath();
+                    ctx.arc(this.x + d.dx, this.y + d.dy, d.r, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.beginPath();
+                    ctx.rect(this.x + d.dx - d.r * 0.25, this.y + d.dy - d.r * 1.5, d.r * 0.5, d.r * 1.5);
+                    ctx.fill();
+                });
+                
+                ctx.restore();
+                return true;
+            }
+        }
+
+        
+        class ZenJuiceParticle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                const angle = Math.random() * Math.PI * 2;
+                const force = 5 + Math.random() * 11;
+                this.vx = Math.cos(angle) * force;
+                this.vy = Math.sin(angle) * force - 4;
+                this.color = color;
+                this.size = 2.5 + Math.random() * 5.5;
+                this.life = 1.0;
+                this.decay = 0.015 + Math.random() * 0.02;
+                this.gravity = 0.22;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += this.gravity;
+                this.vx *= 0.97;
+                this.life -= this.decay;
+                return this.life > 0;
+            }
+            
+            draw(ctx) {
+                ctx.save();
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = this.color;
+                
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 4;
+                
+                const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                const angle = Math.atan2(this.vy, this.vx);
+                
+                ctx.translate(this.x, this.y);
+                ctx.rotate(angle);
+                
+                ctx.beginPath();
+                const length = this.size * (1.2 + speed * 0.12);
+                const width = this.size * 0.75;
+                
+                ctx.ellipse(0, 0, length, width, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+                ctx.beginPath();
+                ctx.ellipse(length * 0.2, 0, length * 0.3, width * 0.3, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+
+        class ZenSpark {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 5;
+                this.vy = (Math.random() - 0.5) * 5 - 2;
+                this.size = 11 + Math.random() * 7;
+                this.color = color || '#fef08a';
+                this.life = 1.0;
+                this.decay = 0.015 + Math.random() * 0.015;
+                
+                const types = ['cat', 'bunny', 'puppy', 'heart', 'star'];
+                const weights = [0.35, 0.70, 0.90, 0.95, 1.0];
+                const rand = Math.random();
+                if (rand < weights[0]) this.type = 'cat';
+                else if (rand < weights[1]) this.type = 'bunny';
+                else if (rand < weights[2]) this.type = 'puppy';
+                else if (rand < weights[3]) this.type = 'heart';
+                else this.type = 'star';
+                
+                this.rotation = (Math.random() - 0.5) * 0.3;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.02;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += 0.02;
+                this.vx *= 0.97;
+                this.rotation += this.rotationSpeed;
+                this.life -= this.decay;
+                return this.life > 0;
+            }
+            
+            draw(ctx) {
+                ctx.save();
+                ctx.globalAlpha = this.life;
+                
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 8;
+                
+                if (this.type === 'cat') {
+                    const catColors = ['#ffedd5', '#fee2e2', '#fef3c7', '#fafaf9'];
+                    const col = catColors[Math.floor(this.size * 10) % catColors.length];
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.rotation);
+                    
+                    ctx.fillStyle = col;
+                    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+                    ctx.lineWidth = 1;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(-this.size * 0.8, -this.size * 0.2);
+                    ctx.lineTo(-this.size * 0.9, -this.size * 0.9);
+                    ctx.lineTo(-this.size * 0.3, -this.size * 0.6);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(this.size * 0.8, -this.size * 0.2);
+                    ctx.lineTo(this.size * 0.9, -this.size * 0.9);
+                    ctx.lineTo(this.size * 0.3, -this.size * 0.6);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = '#fbcfe8';
+                    ctx.beginPath();
+                    ctx.moveTo(-this.size * 0.75, -this.size * 0.3);
+                    ctx.lineTo(-this.size * 0.82, -this.size * 0.8);
+                    ctx.lineTo(-this.size * 0.4, -this.size * 0.55);
+                    ctx.fill();
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(this.size * 0.75, -this.size * 0.3);
+                    ctx.lineTo(this.size * 0.82, -this.size * 0.8);
+                    ctx.lineTo(this.size * 0.4, -this.size * 0.55);
+                    ctx.fill();
+
+                    ctx.fillStyle = col;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = 'rgba(244, 114, 182, 0.65)';
+                    ctx.beginPath();
+                    ctx.arc(-this.size * 0.5, this.size * 0.2, this.size * 0.25, 0, Math.PI * 2);
+                    ctx.arc(this.size * 0.5, this.size * 0.2, this.size * 0.25, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = '#475569';
+                    ctx.lineWidth = 1.8;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.arc(-this.size * 0.4, -this.size * 0.1, this.size * 0.2, Math.PI, 0);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(this.size * 0.4, -this.size * 0.1, this.size * 0.2, Math.PI, 0);
+                    ctx.stroke();
+                    
+                    ctx.strokeStyle = '#475569';
+                    ctx.lineWidth = 1.2;
+                    ctx.beginPath();
+                    ctx.arc(-this.size * 0.1, this.size * 0.2, this.size * 0.12, 0, Math.PI);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(this.size * 0.1, this.size * 0.2, this.size * 0.12, 0, Math.PI);
+                    ctx.stroke();
+                    
+                } else if (this.type === 'bunny') {
+                    const bunnyColors = ['#fafaf9', '#fdf2f8', '#fee2e2'];
+                    const col = bunnyColors[Math.floor(this.size * 10) % bunnyColors.length];
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.rotation);
+                    
+                    ctx.fillStyle = col;
+                    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+                    ctx.lineWidth = 1;
+                    
+                    ctx.beginPath();
+                    ctx.ellipse(-this.size * 0.35, -this.size * 0.9, this.size * 0.25, this.size * 0.7, -0.1, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.ellipse(this.size * 0.35, -this.size * 0.9, this.size * 0.25, this.size * 0.7, 0.1, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = '#fbcfe8';
+                    ctx.beginPath();
+                    ctx.ellipse(-this.size * 0.35, -this.size * 0.9, this.size * 0.12, this.size * 0.5, -0.1, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.ellipse(this.size * 0.35, -this.size * 0.9, this.size * 0.12, this.size * 0.5, 0.1, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = col;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = 'rgba(244, 114, 182, 0.65)';
+                    ctx.beginPath();
+                    ctx.arc(-this.size * 0.5, this.size * 0.2, this.size * 0.25, 0, Math.PI * 2);
+                    ctx.arc(this.size * 0.5, this.size * 0.2, this.size * 0.25, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = '#475569';
+                    ctx.beginPath();
+                    ctx.arc(-this.size * 0.35, -this.size * 0.1, this.size * 0.15, 0, Math.PI * 2);
+                    ctx.arc(this.size * 0.35, -this.size * 0.1, this.size * 0.15, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = '#475569';
+                    ctx.lineWidth = 1.2;
+                    ctx.beginPath();
+                    ctx.arc(0, this.size * 0.15, this.size * 0.15, 0, Math.PI);
+                    ctx.stroke();
+                    
+                } else if (this.type === 'puppy') {
+                    const puppyColors = ['#fef3c7', '#ffedd5', '#fafaf9', '#f5f5f4'];
+                    const col = puppyColors[Math.floor(this.size * 10) % puppyColors.length];
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.rotation);
+                    
+                    ctx.fillStyle = '#d97706';
+                    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.ellipse(-this.size * 0.9, 0, this.size * 0.3, this.size * 0.6, 0.2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.ellipse(this.size * 0.9, 0, this.size * 0.3, this.size * 0.6, -0.2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = col;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = 'rgba(244, 114, 182, 0.65)';
+                    ctx.beginPath();
+                    ctx.arc(-this.size * 0.5, this.size * 0.2, this.size * 0.25, 0, Math.PI * 2);
+                    ctx.arc(this.size * 0.5, this.size * 0.2, this.size * 0.25, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = '#475569';
+                    ctx.beginPath();
+                    ctx.arc(-this.size * 0.35, -this.size * 0.1, this.size * 0.15, 0, Math.PI * 2);
+                    ctx.arc(this.size * 0.35, -this.size * 0.1, this.size * 0.15, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(-this.size * 0.12, this.size * 0.1);
+                    ctx.lineTo(this.size * 0.12, this.size * 0.1);
+                    ctx.lineTo(0, this.size * 0.2);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                } else if (this.type === 'heart') {
+                    ctx.fillStyle = '#ec4899';
+                    ctx.beginPath();
+                    const d = this.size * 1.1;
+                    ctx.moveTo(this.x, this.y - d * 0.15);
+                    ctx.bezierCurveTo(this.x, this.y - d * 0.65, this.x - d * 0.7, this.y - d * 0.65, this.x - d * 0.7, this.y - d * 0.1);
+                    ctx.bezierCurveTo(this.x - d * 0.7, this.y + d * 0.45, this.x, this.y + d * 0.8, this.x, this.y + d * 1.0);
+                    ctx.bezierCurveTo(this.x, this.y + d * 0.8, this.x + d * 0.7, this.y + d * 0.45, this.x + d * 0.7, this.y - d * 0.1);
+                    ctx.bezierCurveTo(this.x + d * 0.7, this.y - d * 0.65, this.x, this.y - d * 0.65, this.x, this.y - d * 0.15);
+                    ctx.fill();
+                    
+                } else {
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.rotation);
+                    
+                    let rot = Math.PI / 2 * 3;
+                    let spikes = 5;
+                    let outerRadius = this.size;
+                    let innerRadius = this.size * 0.4;
+                    const step = Math.PI / spikes;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(0, -outerRadius);
+                    for (let i = 0; i < spikes; i++) {
+                        let x = Math.cos(rot) * outerRadius;
+                        let y = Math.sin(rot) * outerRadius;
+                        ctx.lineTo(x, y);
+                        rot += step;
+                        
+                        x = Math.cos(rot) * innerRadius;
+                        y = Math.sin(rot) * innerRadius;
+                        ctx.lineTo(x, y);
+                        rot += step;
+                    }
+                    ctx.lineTo(0, -outerRadius);
+                    ctx.closePath();
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                }
+                
+                ctx.restore();
+            }
+        }
+        
+        class ZenComboText {
+            constructor(x, y, count) {
+                this.x = x;
+                this.y = y - 40;
+                this.count = count;
+                this.time = Date.now();
+                this.duration = count === 1 ? 750 : 950; // shorter display for single words
+                
+                if (count === 1) {
+                    const singleWords = ["Sweet! 🍉", "Nice! 🌸", "Zen! 🌿", "Fresh! 💫", "Lovely! 💕", "Calm! 🍃"];
+                    this.text = singleWords[Math.floor(Math.random() * singleWords.length)];
+                    this.color = "#a78bfa"; // soft lavender-violet
+                } else {
+                    const phrases = {
+                        2: "2x Combo! 🍉",
+                        3: "3x Combo! 🌟",
+                        4: "4x Combo! 🔥",
+                        5: "5x Mega Slice! ⚡"
+                    };
+                    this.text = phrases[count] || `${count}x Combo! 🚀`;
+                    
+                    const colors = {
+                        2: "#f472b6", // pink
+                        3: "#fbbf24", // gold
+                        4: "#f97316", // orange
+                        5: "#ef4444"  // red
+                    };
+                    this.color = colors[count] || "#10b981";
+                }
+                
+                this.vy = count === 1 ? -1.0 : -1.6; // rise slower for single words
+                this.scale = 0.5;
+                this.opacity = 1.0;
+            }
+
+            update() {
+                const elapsed = Date.now() - this.time;
+                if (elapsed >= this.duration) return false;
+                
+                this.y += this.vy;
+                this.opacity = 1.0 - (elapsed / this.duration);
+                
+                // Pop scale animation
+                if (elapsed < 120) {
+                    this.scale = 0.5 + (elapsed / 120) * 0.7; // pop to 1.2x
+                } else if (elapsed < 240) {
+                    this.scale = 1.2 - ((elapsed - 120) / 120) * 0.2; // settle at 1.0x
+                } else {
+                    this.scale = 1.0;
+                }
+                
+                return true;
+            }
+            draw(ctx) {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.translate(this.x, this.y);
+                ctx.scale(this.scale, this.scale);
+                
+                ctx.font = "italic 900 24px 'Outfit', var(--font-heading), sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                
+                // Draw outline for clear contrast on wood background
+                ctx.strokeStyle = "#ffffff";
+                ctx.lineWidth = 6;
+                ctx.strokeText(this.text, 0, 0);
+                
+                // Draw drop shadow glow
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 10;
+                
+                // Fill text
+                ctx.fillStyle = this.color;
+                ctx.fillText(this.text, 0, 0);
+                
+                ctx.restore();
+            }
+        }
+        
+        class ZenFruit {
+
+            constructor(canvasWidth, speedMode) {
+                this.radius = 35 + Math.random() * 8;
+                this.x = this.radius + Math.random() * (canvasWidth - this.radius * 2);
+                this.y = canvas.height + 40;
+                
+                const speedConfig = {
+                    slow: { vy: -4.8, vxRange: 1.2, gravity: 0.038 },   // slow-motion bubble float
+                    normal: { vy: -7.5, vxRange: 2.8, gravity: 0.082 },  // calm and steady launch
+                    fast: { vy: -10.5, vxRange: 4.8, gravity: 0.13 }     // moderate arcade speed
+                };
+                const config = speedConfig[speedMode] || speedConfig.normal;
+                
+                const varianceY = speedMode === 'slow' ? 1.0 : 3.0;
+                this.vy = config.vy - Math.random() * varianceY;
+                this.vx = (Math.random() - 0.5) * config.vxRange;
+                this.gravity = config.gravity;
+
+                
+                const names = ['watermelon', 'apple', 'orange', 'coconut', 'pineapple'];
+                this.name = names[Math.floor(Math.random() * names.length)];
+                
+                this.angle = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.05;
+                
+                this.isSliced = false;
+                this.sliceAngle = 0;
+                this.halfLeft = null;
+                this.halfRight = null;
+                
+                const particleColors = {
+                    watermelon: '#ef4444',
+                    apple: '#fef3c7',
+                    orange: '#fb923c',
+                    coconut: '#ffffff',
+                    pineapple: '#facc15'
+                };
+                this.juiceColor = particleColors[this.name];
+            }
+            
+            update() {
+                if (!this.isSliced) {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.vy += this.gravity;
+                    this.angle += this.rotationSpeed;
+                } else {
+                    const l = this.halfLeft;
+                    const r = this.halfRight;
+                    l.x += l.vx; l.y += l.vy; l.vy += this.gravity; l.angle += l.rotationSpeed;
+                    r.x += r.vx; r.y += r.vy; r.vy += this.gravity; r.angle += r.rotationSpeed;
+                }
+                
+                const limit = canvas.height + 60;
+                if (!this.isSliced) {
+                    return this.y < limit;
+                } else {
+                    return this.halfLeft.y < limit || this.halfRight.y < limit;
+                }
+            }
+            
+            slice(cutAngle) {
+                this.isSliced = true;
+                this.sliceAngle = cutAngle;
+                
+                this.halfLeft = {
+                    x: this.x, y: this.y,
+                    vx: this.vx - 3 - Math.random()*2,
+                    vy: this.vy - 1.5,
+                    angle: 0,
+                    rotationSpeed: -0.12 - Math.random()*0.05
+                };
+                this.halfRight = {
+                    x: this.x, y: this.y,
+                    vx: this.vx + 3 + Math.random()*2,
+                    vy: this.vy - 1.5,
+                    angle: 0,
+                    rotationSpeed: 0.12 + Math.random()*0.05
+                };
+            }
+            
+            drawWhole(ctx) {
+                ctx.save();
+                ctx.shadowColor = 'rgba(0,0,0,0.2)';
+                ctx.shadowBlur = 6;
+                ctx.shadowOffsetY = 4;
+                
+                if (this.name === 'watermelon') {
+                    const grad = ctx.createRadialGradient(-this.radius*0.3, -this.radius*0.3, 2, 0, 0, this.radius);
+                    grad.addColorStop(0, '#86efac');
+                    grad.addColorStop(0.7, '#22c55e');
+                    grad.addColorStop(1, '#15803d');
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.shadowColor = 'transparent';
+                    ctx.strokeStyle = '#14532d';
+                    ctx.lineWidth = 3.5;
+                    for (let ao = -1.2; ao <= 1.2; ao += 0.6) {
+                        ctx.beginPath();
+                        let first = true;
+                        for (let y = -this.radius; y <= this.radius; y += 4) {
+                            const x = Math.sin(y * 0.14) * 5 + Math.sin(ao) * (this.radius - Math.abs(y)*0.2);
+                            if (x*x + y*y < this.radius*this.radius - 2) {
+                                if (first) { ctx.moveTo(x, y); first = false; }
+                                else ctx.lineTo(x, y);
+                            }
+                        }
+                        ctx.stroke();
+                    }
+                } 
+                else if (this.name === 'apple') {
+                    const grad = ctx.createRadialGradient(-this.radius*0.2, -this.radius*0.4, 2, 0, 0, this.radius);
+                    grad.addColorStop(0, '#f87171');
+                    grad.addColorStop(0.7, '#dc2626');
+                    grad.addColorStop(1, '#7f1d1d');
+                    ctx.fillStyle = grad;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(0, -this.radius * 0.45);
+                    ctx.bezierCurveTo(this.radius * 0.5, -this.radius * 1.1, this.radius * 1.2, -this.radius * 0.6, this.radius, 0);
+                    ctx.bezierCurveTo(this.radius * 0.8, this.radius * 0.8, this.radius * 0.35, this.radius, 0, this.radius * 0.85);
+                    ctx.bezierCurveTo(-this.radius * 0.35, this.radius, -this.radius * 0.8, this.radius * 0.8, -this.radius, 0);
+                    ctx.bezierCurveTo(-this.radius * 1.2, -this.radius * 0.6, -this.radius * 0.5, -this.radius * 1.1, 0, -this.radius * 0.45);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    ctx.shadowColor = 'transparent';
+                    ctx.strokeStyle = '#78350f';
+                    ctx.lineWidth = 3.2;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(0, -this.radius*0.4);
+                    ctx.quadraticCurveTo(4, -this.radius*0.8, 8, -this.radius*1.0);
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = '#22c55e';
+                    ctx.beginPath();
+                    ctx.ellipse(8, -this.radius*0.9, 7, 3.5, -Math.PI/6, 0, Math.PI*2);
+                    ctx.fill();
+                } 
+                else if (this.name === 'orange') {
+                    const grad = ctx.createRadialGradient(-this.radius*0.2, -this.radius*0.3, 2, 0, 0, this.radius);
+                    grad.addColorStop(0, '#fdba74');
+                    grad.addColorStop(0.7, '#f97316');
+                    grad.addColorStop(1, '#c2410c');
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.shadowColor = 'transparent';
+                    ctx.fillStyle = '#15803d';
+                    ctx.beginPath();
+                    ctx.arc(0, -this.radius + 3, 2.2, 0, Math.PI*2);
+                    ctx.fill();
+                } 
+                else if (this.name === 'coconut') {
+                    const grad = ctx.createRadialGradient(-this.radius*0.2, -this.radius*0.2, 2, 0, 0, this.radius);
+                    grad.addColorStop(0, '#a16207');
+                    grad.addColorStop(0.7, '#78350f');
+                    grad.addColorStop(1, '#451a03');
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = '#1c1917';
+                    ctx.beginPath();
+                    ctx.arc(-6, -this.radius*0.4, 3.5, 0, Math.PI*2);
+                    ctx.arc(6, -this.radius*0.4, 3.5, 0, Math.PI*2);
+                    ctx.arc(0, -this.radius*0.1, 4, 0, Math.PI*2);
+                    ctx.fill();
+                } 
+                else if (this.name === 'pineapple') {
+                    const grad = ctx.createRadialGradient(0, 0, 5, 0, 0, this.radius * 1.1);
+                    grad.addColorStop(0, '#fde047');
+                    grad.addColorStop(0.6, '#eab308');
+                    grad.addColorStop(1, '#a16207');
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, this.radius * 0.9, this.radius * 1.1, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.shadowColor = 'transparent';
+                    ctx.strokeStyle = '#78350f';
+                    ctx.lineWidth = 1.5;
+                    const r = this.radius;
+                    for (let offset = -r; offset <= r; offset += 18) {
+                        ctx.beginPath();
+                        ctx.moveTo(offset - r, -r);
+                        ctx.lineTo(offset + r, r);
+                        ctx.moveTo(offset + r, -r);
+                        ctx.lineTo(offset - r, r);
+                        ctx.stroke();
+                    }
+                    
+                    ctx.fillStyle = '#15803d';
+                    ctx.beginPath();
+                    ctx.moveTo(-10, -this.radius * 0.9);
+                    ctx.quadraticCurveTo(-18, -this.radius * 1.6, -12, -this.radius * 1.8);
+                    ctx.quadraticCurveTo(-6, -this.radius * 1.3, -3, -this.radius * 1.0);
+                    ctx.lineTo(3, -this.radius * 1.0);
+                    ctx.quadraticCurveTo(6, -this.radius * 1.3, 12, -this.radius * 1.8);
+                    ctx.quadraticCurveTo(18, -this.radius * 1.6, 10, -this.radius * 0.9);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                
+                ctx.restore();
+            }
+            
+            drawInnerCut(ctx, side) {
+                if (this.name === 'watermelon') {
+                    ctx.fillStyle = '#f0fdf4';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius - 2.5, 0, Math.PI*2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = '#ef4444';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius - 4.5, 0, Math.PI*2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = '#000000';
+                    const seedRadius = this.radius * 0.55;
+                    for (let a = 0.1; a < Math.PI * 2; a += Math.PI / 4) {
+                        const sx = Math.cos(a) * seedRadius;
+                        const sy = Math.sin(a) * seedRadius;
+                        ctx.beginPath();
+                        ctx.arc(sx, sy, 1.8, 0, Math.PI*2);
+                        ctx.fill();
+                    }
+                } 
+                else if (this.name === 'apple') {
+                    ctx.fillStyle = '#fef3c7';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius - 2, 0, Math.PI*2);
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = '#ca8a04';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, 7, 10, 0, 0, Math.PI*2);
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = '#78350f';
+                    ctx.beginPath();
+                    ctx.ellipse(-3, 0, 1.8, 3.2, Math.PI/6, 0, Math.PI*2);
+                    ctx.ellipse(3, 0, 1.8, 3.2, -Math.PI/6, 0, Math.PI*2);
+                    ctx.fill();
+                } 
+                else if (this.name === 'orange') {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius - 1, 0, Math.PI*2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = '#fb923c';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius - 3.5, 0, Math.PI*2);
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1.6;
+                    const wedgeCount = 8;
+                    for (let i = 0; i < wedgeCount; i++) {
+                        const a = (i / wedgeCount) * Math.PI * 2;
+                        ctx.beginPath();
+                        ctx.moveTo(0, 0);
+                        ctx.lineTo(Math.cos(a) * (this.radius - 3), Math.sin(a) * (this.radius - 3));
+                        ctx.stroke();
+                    }
+                    
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 3.2, 0, Math.PI*2);
+                    ctx.fill();
+                } 
+                else if (this.name === 'coconut') {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius - 3, 0, Math.PI*2);
+                    ctx.fill();
+                    
+                    const waterGrad = ctx.createRadialGradient(-3, -3, 2, 0, 0, this.radius - 9);
+                    waterGrad.addColorStop(0, '#e0f2fe');
+                    waterGrad.addColorStop(0.6, '#7dd3fc');
+                    waterGrad.addColorStop(1, '#0284c7');
+                    ctx.fillStyle = waterGrad;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.radius - 9, 0, Math.PI*2);
+                    ctx.fill();
+                } 
+                else if (this.name === 'pineapple') {
+                    ctx.fillStyle = '#fef9c3';
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, this.radius - 1, this.radius - 1, 0, 0, Math.PI*2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = '#eab308';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 7.5, 0, Math.PI*2);
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = '#fde047';
+                    ctx.lineWidth = 1.2;
+                    const lines = 12;
+                    for (let i = 0; i < lines; i++) {
+                        const a = (i / lines) * Math.PI * 2;
+                        ctx.beginPath();
+                        ctx.moveTo(Math.cos(a) * 8, Math.sin(a) * 8);
+                        ctx.lineTo(Math.cos(a) * (this.radius - 4), Math.sin(a) * (this.radius - 4));
+                        ctx.stroke();
+                    }
+                }
+            }
+            
+            draw(ctx) {
+                if (!this.isSliced) {
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.angle);
+                    this.drawWhole(ctx);
+                    ctx.restore();
+                } else {
+                    // Left half
+                    ctx.save();
+                    ctx.translate(this.halfLeft.x, this.halfLeft.y);
+                    ctx.rotate(this.halfLeft.angle);
+                    ctx.rotate(this.sliceAngle);
+                    
+                    // Draw highlight cut edge
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 3.5;
+                    ctx.shadowColor = '#fde047'; // bright golden energy glow
+                    ctx.shadowBlur = 10;
+                    ctx.beginPath();
+                    ctx.moveTo(-this.radius, 0);
+                    ctx.lineTo(this.radius, 0);
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.rect(-150, -150, 300, 150);
+                    ctx.clip();
+                    ctx.rotate(-this.sliceAngle);
+                    this.drawWhole(ctx);
+                    ctx.rotate(this.sliceAngle);
+                    this.drawInnerCut(ctx, 'left');
+                    ctx.restore();
+                    
+                    // Right half
+                    ctx.save();
+                    ctx.translate(this.halfRight.x, this.halfRight.y);
+                    ctx.rotate(this.halfRight.angle);
+                    ctx.rotate(this.sliceAngle);
+                    
+                    // Draw highlight cut edge
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 3.5;
+                    ctx.shadowColor = '#fde047';
+                    ctx.shadowBlur = 10;
+                    ctx.beginPath();
+                    ctx.moveTo(-this.radius, 0);
+                    ctx.lineTo(this.radius, 0);
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.rect(-150, 0, 300, 150);
+                    ctx.clip();
+                    ctx.rotate(-this.sliceAngle);
+                    this.drawWhole(ctx);
+                    ctx.rotate(this.sliceAngle);
+                    this.drawInnerCut(ctx, 'right');
+                    ctx.restore();
+                }
+            }
+        }
+        
+        function drawPaw(ctx, x, y, size, color, alpha) {
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = color;
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 6;
+            
+            ctx.beginPath();
+            ctx.ellipse(x, y + size * 0.15, size * 0.75, size * 0.55, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            const toes = [
+                { dx: -size * 0.55, dy: -size * 0.35, r: size * 0.22 },
+                { dx: -size * 0.2, dy: -size * 0.65, r: size * 0.25 },
+                { dx: size * 0.2, dy: -size * 0.65, r: size * 0.25 },
+                { dx: size * 0.55, dy: -size * 0.35, r: size * 0.22 }
+            ];
+            toes.forEach(t => {
+                ctx.beginPath();
+                ctx.arc(x + t.dx, y + t.dy, t.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            ctx.restore();
+        }
+
+        function drawCuteTrail() {
+            if (trailPoints.length === 0) return;
+            const now = Date.now();
+            
+            ctx.save();
+            
+            // 1. Draw glowing neon blade slash line connecting the swipe coordinates
+            if (trailPoints.length >= 2) {
+                ctx.beginPath();
+                ctx.moveTo(trailPoints[0].x, trailPoints[0].y);
+                for (let i = 1; i < trailPoints.length; i++) {
+                    ctx.lineTo(trailPoints[i].x, trailPoints[i].y);
+                }
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                
+                // Outer neon glow stroke
+                ctx.lineWidth = 8;
+                ctx.strokeStyle = 'rgba(167, 139, 250, 0.4)'; // lavender glow
+                ctx.shadowColor = '#8b5cf6';
+                ctx.shadowBlur = 12;
+                ctx.stroke();
+                
+                // Inner bright hot core line
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#ffffff';
+                ctx.shadowColor = 'transparent';
+                ctx.stroke();
+            }
+            
+            // 2. Draw cute mascot paw prints along the trail
+            const colors = ['#fbcfe8', '#bae6fd', '#fef08a', '#c084fc', '#a7f3d0'];
+            let lastDrawnX = null;
+            let lastDrawnY = null;
+            
+            for (let i = 0; i < trailPoints.length; i++) {
+                const pt = trailPoints[i];
+                const age = now - pt.time;
+                const alpha = Math.max(0, 1 - age / 150);
+                if (alpha <= 0) continue;
+                
+                if (lastDrawnX !== null && i < trailPoints.length - 1) {
+                    const dx = pt.x - lastDrawnX;
+                    const dy = pt.y - lastDrawnY;
+                    if (dx*dx + dy*dy < 400) {
+                        continue;
+                    }
+                }
+                
+                const color = colors[i % colors.length];
+                const size = 11 + alpha * 5;
+                
+                drawPaw(ctx, pt.x, pt.y, size, color, alpha * 0.85);
+                
+                lastDrawnX = pt.x;
+                lastDrawnY = pt.y;
+            }
+            ctx.restore();
+        }
+        
+        function checkSlices(p1, p2) {
+            fruits.forEach(f => {
+                if (f.isSliced) return;
+                
+                const dx = p2.x - p1.x;
+                const dy = p2.y - p1.y;
+                const lenSq = dx*dx + dy*dy;
+                if (lenSq === 0) return;
+                
+                let t = ((f.x - p1.x) * dx + (f.y - p1.y) * dy) / lenSq;
+                t = Math.max(0, Math.min(1, t));
+                
+                const closestX = p1.x + t * dx;
+                const closestY = p1.y + t * dy;
+                
+                const distSq = (f.x - closestX) * (f.x - closestX) + (f.y - closestY) * (f.y - closestY);
+                if (distSq < f.radius * f.radius) {
+                    const cutAngle = Math.atan2(dy, dx);
+                    f.slice(cutAngle);
+                    
+                    score = Math.min(targetScore, score + 1);
+                    updateProgress();
+                    
+                    // Increment slices and update dashboard
+                    state.gameStats.slices++;
+                    if (window.updateSanctuaryDashboard) window.updateSanctuaryDashboard();
+                    
+                    // Check Combo Slicing sliding window
+                    const now = Date.now();
+                    if (now - lastSliceTime < 450) {
+                        currentCombo++;
+                    } else {
+                        currentCombo = 1;
+                    }
+                    lastSliceTime = now;
+                    
+                    if (currentCombo === 1) {
+                        // Spawn a single-slice encouraging word
+                        comboTexts.push(new ZenComboText(f.x, f.y, 1));
+                    } else {
+                        // Remove the preceding text bubble spawned within 400ms to show the new multiplier combo instead
+                        const nowMs = Date.now();
+                        comboTexts = comboTexts.filter(t => nowMs - t.time > 400);
+                        comboTexts.push(new ZenComboText(f.x, f.y, currentCombo));
+                    }
+
+                    
+                    splats.push(new ZenSplat(f.x, f.y, f.name));
+                    playSplashSound();
+
+                    
+                    for (let i = 0; i < 25; i++) {
+                        sparks.push(new ZenSpark(f.x, f.y, f.juiceColor));
+                    }
+                    for (let i = 0; i < 36; i++) {
+                        juiceParticles.push(new ZenJuiceParticle(f.x, f.y, f.juiceColor));
+                    }
+                    
+                    if (score >= targetScore) {
+                        endGameWithWin();
+                    }
+                }
+
+            });
+        }
+        
+        let lastSpawnTime = 0;
+        function gameLoop(timestamp) {
+            if (!isPlaying) return;
+            
+            drawBackground();
+            
+            splats = splats.filter(s => s.draw(ctx));
+            
+            const spawnIntervals = { slow: 2800, normal: 1600, fast: 1000 };
+            const limit = spawnIntervals[speedMode] || 1600;
+
+            if (timestamp - lastSpawnTime > limit) {
+                const spawnCount = speedMode === 'fast' ? (Math.random() < 0.5 ? 2 : 3) : (speedMode === 'normal' ? (Math.random() < 0.45 ? 2 : 1) : (Math.random() < 0.35 ? 2 : 1));
+
+                for (let c = 0; c < spawnCount; c++) {
+                    fruits.push(new ZenFruit(canvas.width, speedMode));
+                }
+                lastSpawnTime = timestamp;
+            }
+            
+            fruits = fruits.filter(f => {
+                const keep = f.update();
+                f.draw(ctx);
+                return keep;
+            });
+            
+            sparks = sparks.filter(s => {
+                const keep = s.update();
+                s.draw(ctx);
+                return keep;
+            });
+            
+            juiceParticles = juiceParticles.filter(p => {
+                const keep = p.update();
+                p.draw(ctx);
+                return keep;
+            });
+            
+            comboTexts = comboTexts.filter(t => {
+                const keep = t.update();
+                if (keep) t.draw(ctx);
+                return keep;
+            });
+            
+            const now = Date.now();
+
+            trailPoints = trailPoints.filter(p => now - p.time < 150);
+            
+            drawCuteTrail();
+            
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+        
+        function updateProgress() {
+            if (progressFill) {
+                const pct = (score / targetScore) * 100;
+                progressFill.style.width = pct + '%';
+            }
+            if (progressVal) {
+                progressVal.textContent = `${score}/${targetScore}`;
+            }
+        }
+        
+        function endGameWithWin() {
+            isPlaying = false;
+            cancelAnimationFrame(animationFrameId);
+            
+            if (zenGameArena) zenGameArena.classList.add('hidden');
+            if (surveyInline) {
+                surveyInline.classList.remove('hidden');
+                if (winChoicesRow) winChoicesRow.classList.remove('hidden');
+                if (surveyMoodSection) surveyMoodSection.classList.add('hidden');
+                surveyInline.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        
+        function startZenGame() {
+            initAudio();
+            score = 0;
+            updateProgress();
+            
+            // Set start flag & update lounge checklist
+            localStorage.setItem('relax_game_started', 'true');
+            if (window.updateSanctuaryDashboard) window.updateSanctuaryDashboard();
+
+            fruits = [];
+            splats = [];
+            sparks = [];
+            juiceParticles = [];
+            trailPoints = [];
+            comboTexts = [];
+            currentCombo = 0;
+            lastSliceTime = 0;
+            isPlaying = true;
+
+            
+            if (zenStartScreen) zenStartScreen.classList.add('hidden');
+            if (zenGameArena) zenGameArena.classList.remove('hidden');
+            if (surveyInline) surveyInline.classList.add('hidden');
+            
+            resizeCanvas();
+            
+            lastSpawnTime = performance.now();
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        
+        function quitZenGame() {
+            isPlaying = false;
+            cancelAnimationFrame(animationFrameId);
+            if (zenGameArena) zenGameArena.classList.add('hidden');
+            if (zenStartScreen) zenStartScreen.classList.remove('hidden');
+            if (surveyInline) surveyInline.classList.add('hidden');
+        }
+        
+        function resizeCanvas() {
+            if (!canvas) return;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width || 600;
+            canvas.height = rect.height || 420;
+        }
+        
+        function handleStart(x, y) {
+            isMouseDown = true;
+            initAudio();
+            const p = { x, y, time: Date.now() };
+            trailPoints = [p];
+            lastMousePos = p;
+        }
+        
+        function handleMove(x, y) {
+            if (!isMouseDown) return;
+            const p = { x, y, time: Date.now() };
+            trailPoints.push(p);
+            
+            if (lastMousePos) {
+                checkSlices(lastMousePos, p);
+                
+                // Spawn glowing cute pastel sparks along swipe trail
+                if (Math.random() < 0.5) {
+                    const pastelColors = ['#f472b6', '#c084fc', '#fef08a', '#bae6fd', '#fbcfe8', '#a7f3d0'];
+                    const col = pastelColors[Math.floor(Math.random() * pastelColors.length)];
+                    sparks.push(new ZenSpark(x, y, col));
+                }
+                
+                const distSq = (x - lastMousePos.x)*(x - lastMousePos.x) + (y - lastMousePos.y)*(y - lastMousePos.y);
+                if (distSq > 900 && Math.random() < 0.15) {
+                    playWhooshSound();
+                }
+            }
+            lastMousePos = p;
+        }
+        
+        function handleEnd() {
+            isMouseDown = false;
+            lastMousePos = null;
+        }
+        
+        function bindEvents() {
+            if (btnStartZen) btnStartZen.addEventListener('click', startZenGame);
+            if (btnQuitZen) btnQuitZen.addEventListener('click', quitZenGame);
+            
+            if (btnSelectFruitZen && cardFruitZen && menuContainer) {
+                btnSelectFruitZen.addEventListener('click', () => {
+                    menuContainer.classList.add('hidden');
+                    cardFruitZen.classList.remove('hidden');
+                    if (zenStartScreen) zenStartScreen.classList.remove('hidden');
+                    if (zenGameArena) zenGameArena.classList.add('hidden');
+                    if (surveyInline) surveyInline.classList.add('hidden');
+                });
+            }
+            
+            if (btnFruitZenBack && cardFruitZen && menuContainer) {
+                btnFruitZenBack.addEventListener('click', () => {
+                    quitZenGame();
+                    cardFruitZen.classList.add('hidden');
+                    menuContainer.classList.remove('hidden');
+                });
+            }
+            
+            const speedBtns = document.querySelectorAll('[data-speed-mode]');
+            speedBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    speedBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    speedMode = btn.dataset.speedMode || 'normal';
+                });
+            });
+            
+            if (canvas) {
+                ctx = canvas.getContext('2d');
+                
+                canvas.addEventListener('mousedown', (e) => {
+                    const rect = canvas.getBoundingClientRect();
+                    handleStart(e.clientX - rect.left, e.clientY - rect.top);
+                });
+                
+                canvas.addEventListener('mousemove', (e) => {
+                    const rect = canvas.getBoundingClientRect();
+                    handleMove(e.clientX - rect.left, e.clientY - rect.top);
+                });
+                
+                window.addEventListener('mouseup', handleEnd);
+                
+                canvas.addEventListener('touchstart', (e) => {
+                    if (e.touches[0]) {
+                        const rect = canvas.getBoundingClientRect();
+                        handleStart(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+                    }
+                    e.preventDefault();
+                }, { passive: false });
+                
+                canvas.addEventListener('touchmove', (e) => {
+                    if (e.touches[0]) {
+                        const rect = canvas.getBoundingClientRect();
+                        handleMove(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+                    }
+                    e.preventDefault();
+                }, { passive: false });
+                
+                canvas.addEventListener('touchend', handleEnd);
+            }
+            
+            if (btnWinReplay) {
+                btnWinReplay.addEventListener('click', () => {
+                    if (cardFruitZen && !cardFruitZen.classList.contains('hidden')) {
+                        startZenGame();
+                    }
+                });
+            }
+        }
+        bindEvents();
+        window.addEventListener('resize', resizeCanvas);
+    })();
+
+    // --- CHIEF DESIGNER: COZY AMBIENT PARTICLE ENGINE ---
+    (function GamesAmbientParticleEngine() {
+        const canvas = document.getElementById('games-ambient-canvas');
+
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let animId = null;
+
+        function resize() {
+            if (!canvas) return;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width || 800;
+            canvas.height = rect.height || 500;
+        }
+
+        class FloatingParticle {
+            constructor() {
+                this.reset(true);
+            }
+            reset(initY = false) {
+                this.x = Math.random() * canvas.width;
+                this.y = initY ? (Math.random() * canvas.height) : (canvas.height + 20);
+                this.size = 3 + Math.random() * 8;
+                this.speedY = 0.35 + Math.random() * 0.6; // float upwards slowly
+                this.swaySpeed = 0.005 + Math.random() * 0.01;
+                this.time = Math.random() * 100;
+                
+                // Brighter, more vibrant therapeutic colors
+                const colors = [
+                    'rgba(244, 63, 94, 0.55)',   // rose
+                    'rgba(139, 92, 246, 0.48)',  // lavender/violet
+                    'rgba(245, 158, 11, 0.52)',  // gold/orange
+                    'rgba(16, 185, 129, 0.55)'   // mint green
+                ];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+
+                this.isLeaf = Math.random() < 0.35; // 35% are floating tea leaves
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.015;
+            }
+            update() {
+                this.y -= this.speedY;
+                this.time += this.swaySpeed;
+                this.x += Math.sin(this.time) * 0.3;
+                this.rotation += this.rotationSpeed;
+                
+                if (this.y < -20 || this.x < -20 || this.x > canvas.width + 20) {
+                    this.reset(false);
+                }
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                ctx.fillStyle = this.color;
+                
+                if (this.isLeaf) {
+                    // Draw organic leaf shape
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, this.size * 1.6, this.size * 0.7, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+                    ctx.lineWidth = 0.8;
+                    ctx.beginPath();
+                    ctx.moveTo(-this.size * 1.6, 0);
+                    ctx.lineTo(this.size * 1.6, 0);
+                    ctx.stroke();
+                } else {
+                    // Draw glowing circle
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < 22; i++) {
+                particles.push(new FloatingParticle());
+            }
+        }
+
+        function loop() {
+            if (!ctx || !canvas) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            animId = requestAnimationFrame(loop);
+        }
+
+        window.addEventListener('resize', resize);
+        
+        // Listen to tab activation changes to start/stop loop
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class') {
+                    const gamesPanel = document.getElementById('games-panel');
+                    if (gamesPanel && gamesPanel.classList.contains('active')) {
+                        if (!animId) {
+                            resize();
+                            initParticles();
+                            loop();
+                        }
+                    } else {
+                        if (animId) {
+                            cancelAnimationFrame(animId);
+                            animId = null;
+                        }
+                    }
+                }
+            });
+        });
+        
+        const gamesPanel = document.getElementById('games-panel');
+        if (gamesPanel) {
+            observer.observe(gamesPanel, { attributes: true });
+            // Initial check
+            if (gamesPanel.classList.contains('active')) {
+                resize();
+                initParticles();
+                loop();
+            }
+        }
+    })();
+
     // Run launcher
     init();
 });
+
+// Calm Videos Integration (Exposed Globally for inline HTML onclick handlers)
+window.CalmVideoData = {
+    anxiety: {
+        title: "Anxiety Relief Support",
+        desc: "Soothing guides, deep breathing, and grounding exercises to help you manage anxiety and panic states.",
+        videos: [
+            { title: "5-Min Quick Calm Breathwork", src: "frontend/student/videos/anxiety_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" },
+            { title: "Grounding Exercise for Panic Relief", src: "frontend/student/videos/anxiety_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-with-stars-moving-14022-large.mp4" }
+        ]
+    },
+    depression: {
+        title: "Depression Support & Affirmations",
+        desc: "Gentle reminders, companion voices, and comforting visual soundscapes for heavy days.",
+        videos: [
+            { title: "Overcoming Fatigue & Heavy Days", src: "frontend/student/videos/depression_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-with-stars-moving-14022-large.mp4" },
+            { title: "Daily Comfort Affirmations", src: "frontend/student/videos/depression_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" }
+        ]
+    },
+    motivation: {
+        title: "Motivational Speeches",
+        desc: "Ignite your drive, build confidence, and get back on track with powerful mindset sessions.",
+        videos: [
+            { title: "Unshakable Willpower & Drive", src: "frontend/student/videos/motivation_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-ocean-near-a-cliff-34280-large.mp4" },
+            { title: "Rising Above Failure", src: "frontend/student/videos/motivation_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-with-stars-moving-14022-large.mp4" }
+        ]
+    },
+    academic: {
+        title: "Academic Stress Management",
+        desc: "Learn to navigate exam pressure, manage task burnout, and optimize your study focus.",
+        videos: [
+            { title: "Coping with Exam Anxiety & Stress", src: "frontend/student/videos/academic_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" },
+            { title: "Recovering from Academic Burnout", src: "frontend/student/videos/academic_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-ocean-near-a-cliff-34280-large.mp4" }
+        ]
+    },
+    confidence: {
+        title: "Building Unshakable Confidence",
+        desc: "Overcome self-doubt, silence your inner critic, and build lasting self-compassion.",
+        videos: [
+            { title: "Silencing Your Inner Critic", src: "frontend/student/videos/confidence_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-ocean-near-a-cliff-34280-large.mp4" },
+            { title: "Embracing Your Unique Journey", src: "frontend/student/videos/confidence_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" }
+        ]
+    },
+    meditate: {
+        title: "Guided Meditation & Grounding",
+        desc: "Find peace and centering through deep breathing techniques, mindfulness, and audio-visual meditation.",
+        videos: [
+            { title: "Deep Breathing Focus Session", src: "frontend/student/videos/meditate_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" },
+            { title: "Sleep Soundscape & Evening Rest", src: "frontend/student/videos/meditate_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-with-stars-moving-14022-large.mp4" }
+        ]
+    }
+};
+
+window.openCategory = function(catId) {
+    const cat = window.CalmVideoData[catId];
+    if (!cat) return;
+
+    const grid = document.getElementById('calmCategoryGrid');
+    const detail = document.getElementById('categoryDetail');
+    if (grid && detail) {
+        grid.style.display = 'none';
+        detail.style.display = 'flex';
+    }
+
+    const title = document.getElementById('currentCategoryTitle');
+    const desc = document.getElementById('currentCategoryDesc');
+    if (title) title.textContent = cat.title;
+    if (desc) desc.textContent = cat.desc;
+
+    const playlist = document.getElementById('playlistItems');
+    if (playlist) {
+        playlist.innerHTML = '';
+        cat.videos.forEach((video, index) => {
+            const btn = document.createElement('button');
+            btn.className = `playlist-video-item ${index === 0 ? 'active' : ''}`;
+            btn.onclick = () => {
+                document.querySelectorAll('.playlist-video-item').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                window.playVideo(video);
+            };
+            btn.innerHTML = `
+                <span class="playlist-video-icon">▶</span>
+                <span>${video.title}</span>
+            `;
+            playlist.appendChild(btn);
+        });
+    }
+
+    if (cat.videos.length > 0) {
+        window.playVideo(cat.videos[0]);
+    }
+};
+
+window.playVideo = function(videoObj) {
+    const player = document.getElementById('detailVideoPlayer');
+    const title  = document.getElementById('currentVideoTitle');
+
+    if (title) title.textContent = videoObj.title;
+    if (!player) return;
+
+    const loadSrc = (src) => {
+        player.src = src;
+        player.load();
+        player.play().catch(e => console.warn('Autoplay blocked (click play manually):', e));
+    };
+
+    // HEAD-check the local file first.
+    // If the server returns 404 (file not there yet), use the public fallback URL.
+    fetch(videoObj.src, { method: 'HEAD' })
+        .then(res => {
+            if (res.ok) {
+                console.log('Local video found:', videoObj.src);
+                loadSrc(videoObj.src);
+            } else {
+                console.log('Local video not available (HTTP ' + res.status + '), loading fallback.');
+                loadSrc(videoObj.fallback);
+            }
+        })
+        .catch(() => {
+            console.log('Local video unreachable, loading fallback.');
+            loadSrc(videoObj.fallback);
+        });
+};
+
+window.closeCategory = function() {
+    const player = document.getElementById('detailVideoPlayer');
+    if (player) {
+        player.pause();
+    }
+    const grid = document.getElementById('calmCategoryGrid');
+    const detail = document.getElementById('categoryDetail');
+    if (grid && detail) {
+        detail.style.display = 'none';
+        grid.style.display = 'block';
+    }
+};

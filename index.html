@@ -56,11 +56,6 @@
                     <!-- smiling brain -->
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="order: 2;"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.9 1M14.5 2a2.5 2.5 0 0 0-2.5 2.5v15a2.5 2.5 0 0 0 4.9 1M12 4a5 5 0 0 0-5 5v2a5 5 0 0 0 10 0V9a5 5 0 0 0-5-5Z"/><path d="M9 13h.01M15 13h.01"/><path d="M10 16q2 2 4 0"/></svg>
                 </button>
-                <button class="nav-btn" data-target="bio-panel" id="nav-bio">
-                    <span>Biometric Link</span>
-                    <!-- link chain -->
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="order: 2;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                </button>
                 <button class="nav-btn" data-target="calm-panel" id="nav-calm">
                     <span>Calm Hub</span>
                     <!-- music / steam cup -->
@@ -271,7 +266,7 @@
                             
                             <div class="avatar-viewport-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
                                 <!-- Big Pink Fluffy Cloud Mascot Framing a Text Box inside -->
-                                <div class="mascot-frame-wrapper" style="position: relative; width: 100%; max-width: 250px; display: flex; justify-content: center; align-items: center; filter: drop-shadow(0 4px 10px rgba(74, 62, 61, 0.1));">
+                                <div class="mascot-frame-wrapper" style="position: relative; z-index: 2; width: 100%; max-width: 250px; display: flex; justify-content: center; align-items: center; filter: drop-shadow(0 4px 10px rgba(74, 62, 61, 0.1));">
                                     <svg id="mindbuddy-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto;">
 
 
@@ -900,101 +895,6 @@
                     </div>
                 </section>
 
-                <!-- Biometrics Link (IoT Mock Dashboard) -->
-                <section class="panel" id="bio-panel">
-                    <div class="biometrics-layout">
-                        <!-- Left Panel: Biometrics Graph Stream -->
-                        <div class="biometrics-card">
-                            <div class="card-header-with-badge">
-                                <div>
-                                    <h3>Simulated Smart Wearable Stream</h3>
-                                    <p>Live health sync reporting physiological anomalies associated with anxiety or insomnia.</p>
-                                </div>
-                                <span class="sync-badge status-connected" id="iot-sync-status"><i data-lucide="check-circle"></i> Linked</span>
-                            </div>
-
-                            <!-- Live Heart Rate Area -->
-                            <div class="chart-section">
-                                <div class="chart-info-header">
-                                    <h4>Heart Rate Monitor</h4>
-                                    <span class="value-display text-rose" id="bio-live-hr">72 bpm</span>
-                                </div>
-                                <div class="biometric-chart-container">
-                                    <svg class="biometric-svg-chart" id="hr-chart-svg" viewBox="0 0 500 150">
-                                        <!-- Chart path will be updated by JS -->
-                                        <path d="M 0 75" fill="none" stroke="#f43f5e" stroke-width="3" id="hr-chart-path"/>
-                                        <path d="M 0 75 L 500 75" fill="none" stroke="#f43f5e" stroke-width="1" stroke-dasharray="4,4" opacity="0.3" id="hr-high-threshold"/>
-                                    </svg>
-                                </div>
-                            </div>
-
-                            <!-- Sleep Rate Monitor -->
-                            <div class="sleep-metrics-summary">
-                                <h4>Sleep Quality Summary (Past 24 Hours)</h4>
-                                <div class="sleep-grid">
-                                    <div class="sleep-metric-box">
-                                        <span class="lbl">Total Rest</span>
-                                        <span class="val text-indigo" id="bio-sleep-duration">7.8 hrs</span>
-                                    </div>
-                                    <div class="sleep-metric-box">
-                                        <span class="lbl">Deep Sleep</span>
-                                        <span class="val text-purple" id="bio-sleep-deep">2.1 hrs</span>
-                                    </div>
-                                    <div class="sleep-metric-box">
-                                        <span class="lbl">Sleep Efficiency</span>
-                                        <span class="val text-mint" id="bio-sleep-efficiency">92%</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Right Panel: IoT Sandbox Controls -->
-                        <div class="iot-controls-card">
-                            <div class="controls-header">
-                                <h3>IoT device sandbox</h3>
-                                <p>Simulate abnormal physiological data to see how MindBuddy reacts behind the scenes.</p>
-                            </div>
-
-                            <div class="slider-control-group">
-                                <div class="slider-header">
-                                    <span class="slider-title">Resting Heart Rate</span>
-                                    <span class="slider-val-bubble" id="slider-val-hr">72 BPM</span>
-                                </div>
-                                <input type="range" class="iot-range-slider" id="control-hr" min="50" max="150" value="72">
-                                <div class="slider-labels">
-                                    <span>Bradycardia (50)</span>
-                                    <span>Normal (70)</span>
-                                    <span>Tachycardia/Panic (150)</span>
-                                </div>
-                            </div>
-
-                            <div class="slider-control-group">
-                                <div class="slider-header">
-                                    <span class="slider-title">Sleep Duration</span>
-                                    <span class="slider-val-bubble" id="slider-val-sleep">7.8 Hrs</span>
-                                </div>
-                                <input type="range" class="iot-range-slider" id="control-sleep" min="2" max="12" step="0.1" value="7.8">
-                                <div class="slider-labels">
-                                    <span>Insomnia (2)</span>
-                                    <span>Target (8)</span>
-                                    <span>Oversleeping (12)</span>
-                                </div>
-                            </div>
-
-                            <!-- Warning notification alert box -->
-                            <div class="biometric-alert-banner alert-normal" id="biometric-anomaly-banner">
-                                <div class="alert-icon">
-                                    <i data-lucide="info" id="anomaly-banner-icon"></i>
-                                </div>
-                                <div class="alert-details">
-                                    <h4 id="anomaly-banner-title">Biometrics Stabilized</h4>
-                                    <p id="anomaly-banner-desc">Physiological metrics indicate normal autonomic responses. No insomnia or panic states triggered.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
                 <!-- ============================================
                      EMOTION QUIZ PANEL (Gemini-Powered)
                      ============================================ -->
@@ -1111,69 +1011,235 @@
                 <!-- Calm Hub Panel -->
                 <section class="panel" id="calm-panel">
                     <div class="calm-layout">
-                        <!-- Audio Synthesizer mixer panel -->
-                        <div class="mixer-card">
-                            <div class="mixer-header">
-                                <h3>Sound Sanctuary</h3>
-                                <p>Direct browser-synthesized audio tones using the Web Audio API. Perfect for grounding during stress episodes.</p>
+                        <!-- Video Sanctuary (Jianxu 22ae8d3) -->
+
+                        <div class="video-card">
+                <div id="calmCategoryGrid">
+                    <h2 style="margin-bottom: 0.5rem;">🧘 Calm Hub & Mindfulness</h2>
+                    <p style="color: var(--text-light); margin-bottom: 2rem;">Select a category below to access resources, speeches, and meditations designed to support your wellbeing.</p>
+                    
+                    <div class="category-grid">
+                        <!-- Category 1: Anxiety -->
+                        <div class="category-card" onclick="openCategory('anxiety')">
+                            <div class="category-icon">😰</div>
+                            <h3>Anxiety Relief</h3>
+                            <p>Relaxing guides and slow breathing sessions to quiet anxiety, worry, and panic.</p>
+                            <span class="view-btn">Explore Videos &rarr;</span>
+                        </div>
+
+                        <!-- Category 2: Depression -->
+                        <div class="category-card" onclick="openCategory('depression')">
+                            <div class="category-icon">😔</div>
+                            <h3>Depression Support</h3>
+                            <p>Comforting messages, gentle check-ins, and light-filled landscapes for darker days.</p>
+                            <span class="view-btn">Explore Videos &rarr;</span>
+                        </div>
+
+                        <!-- Category 3: Motivation Speech -->
+                        <div class="category-card" onclick="openCategory('motivation')">
+                            <div class="category-icon">🔥</div>
+                            <h3>Motivational Speeches</h3>
+                            <p>Ignite your inner spark, build study momentum, and overcome mental blocks.</p>
+                            <span class="view-btn">Explore Videos &rarr;</span>
+                        </div>
+
+                        <!-- Category 4: Academic Stress -->
+                        <div class="category-card" onclick="openCategory('academic')">
+                            <div class="category-icon">📚</div>
+                            <h3>Academic Stress</h3>
+                            <p>Manage test pressure, deal with heavy study loads, and beat exam burnout.</p>
+                            <span class="view-btn">Explore Videos &rarr;</span>
+                        </div>
+
+                        <!-- Category 5: Lack of Confidence -->
+                        <div class="category-card" onclick="openCategory('confidence')">
+                            <div class="category-icon">💪</div>
+                            <h3>Building Confidence</h3>
+                            <p>Develop healthy self-compassion, silence self-doubt, and find your voice.</p>
+                            <span class="view-btn">Explore Videos &rarr;</span>
+                        </div>
+
+                        <!-- Category 6: Meditate -->
+                        <div class="category-card" onclick="openCategory('meditate')">
+                            <div class="category-icon">🧘</div>
+                            <h3>Guided Meditation</h3>
+                            <p>Calming breath check-ins, visualization, and Zen meditation sessions.</p>
+                            <span class="view-btn">Explore Videos &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="category-detail" id="categoryDetail" style="display: none;">
+                    <button class="btn-back" onclick="closeCategory()">&larr; Back to Calm Hub</button>
+                    <h3 id="currentCategoryTitle" style="margin: 1.5rem 0 0.5rem 0; font-size: 1.8rem; color: var(--primary);"></h3>
+                    <p id="currentCategoryDesc" style="color: var(--text-light); margin-bottom: 2rem;"></p>
+
+                    <div class="video-container-layout">
+                        <div class="main-video-player">
+                            <div class="video-player-wrapper" style="position: relative; width: 100%; aspect-ratio: 16/9; border-radius: 1rem; overflow: hidden; background: #000; border: 2px solid var(--border); box-shadow: var(--shadow);">
+                                <video id="detailVideoPlayer" controls playsinline style="width: 100%; height: 100%; object-fit: cover;">
+                                    <source id="detailVideoSource" src="" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
                             </div>
-
-                            <div class="sound-mixer-list">
-                                <!-- Sound 1: Binaural Beat -->
-                                <div class="mixer-row">
-                                    <div class="mixer-sound-info">
-                                        <i data-lucide="audio-waveform" class="text-purple"></i>
-                                        <div>
-                                            <span class="sound-title">Binaural Calm Beats (432Hz)</span>
-                                            <span class="sound-desc">Encourages theta brainwaves for anxiety relief.</span>
-                                        </div>
-                                    </div>
-                                    <div class="mixer-controls">
-                                        <input type="range" class="volume-slider" id="vol-binaural" min="0" max="1" step="0.05" value="0.5">
-                                        <button class="synth-toggle-btn" id="btn-play-binaural">Play</button>
-                                    </div>
-                                </div>
-
-                                <!-- Sound 2: Rain Sound -->
-                                <div class="mixer-row">
-                                    <div class="mixer-sound-info">
-                                        <i data-lucide="cloud-rain" class="text-indigo"></i>
-                                        <div>
-                                            <span class="sound-title">Synthesized Pink Rain</span>
-                                            <span class="sound-desc">Continuous soothing white noise spectrum filter.</span>
-                                        </div>
-                                    </div>
-                                    <div class="mixer-controls">
-                                        <input type="range" class="volume-slider" id="vol-rain" min="0" max="1" step="0.05" value="0.5">
-                                        <button class="synth-toggle-btn" id="btn-play-rain">Play</button>
-                                    </div>
-                                </div>
-
-                                <!-- Sound 3: Zen Drone -->
-                                <div class="mixer-row">
-                                    <div class="mixer-sound-info">
-                                        <i data-lucide="music-4" class="text-mint"></i>
-                                        <div>
-                                            <span class="sound-title">Zen Meditation Drone</span>
-                                            <span class="sound-desc">Deep harmonic chord oscillations for grounding.</span>
-                                        </div>
-                                    </div>
-                                    <div class="mixer-controls">
-                                        <input type="range" class="volume-slider" id="vol-drone" min="0" max="1" step="0.05" value="0.5">
-                                        <button class="synth-toggle-btn" id="btn-play-drone">Play</button>
-                                    </div>
-                                </div>
+                            <h4 id="currentVideoTitle" style="margin-top: 1.25rem; font-size: 1.3rem; color: var(--text-dark); font-weight: 700;"></h4>
+                            <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.5rem; background: var(--bg-light); padding: 0.75rem; border-radius: 0.5rem; border: 1px dashed var(--border);">
+                                💡 <strong>Tip for Customization:</strong> To replace this with your own video, upload an MP4 file into the student <code>videos/</code> directory and name it according to the category (e.g. <code>anxiety_1.mp4</code>).
+                            </p>
+                        </div>
+                        <div class="category-playlist">
+                            <h4>Session Playlist</h4>
+                            <div class="playlist-items-list" id="playlistItems">
+                                <!-- Dynamic entries -->
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- Games & Relaxation Panel -->
                 <section class="panel" id="games-panel">
-                    <div class="games-layout">
+                    <!-- Ambient Decorative Floating Bubbles -->
+                    <div class="games-ambient-bg">
+                        <div class="ambient-bubble ab-1"></div>
+                        <div class="ambient-bubble ab-2"></div>
+                        <div class="ambient-bubble ab-3"></div>
+                        <div class="ambient-bubble ab-4"></div>
+                    </div>
 
-                        <!-- 开心消消乐 Match-3 Game (full width) -->
-                        <div class="game-card game-card-full" id="card-match3">
+                    <div class="games-layout">
+                        <!-- Canvas for Chief Designer Ambient Floating Particles -->
+                        <canvas id="games-ambient-canvas" style="position: absolute; inset: 0; pointer-events: none; z-index: 1;"></canvas>
+
+                        <!-- Game Menu Selector (Default View) -->
+                        <div class="games-menu-container" id="games-menu-container">
+
+                            <div class="games-portal-layout">
+                                
+                                <!-- Left Column: Stats Dashboard and Games Selection Grid -->
+                                <div class="games-portal-main">
+                                    <div class="games-menu-header">
+                                        <h3 class="menu-title">🎮 KawanKu Arcade Sanctuary</h3>
+                                        <p class="menu-desc">Choose a cozy playground to calm your mind. Zero pressure, no timers, pure relaxation. 🤍</p>
+                                    </div>
+
+                                    <!-- Sanctuary Stats Dashboard -->
+                                    <div class="sanctuary-dashboard">
+                                        <div class="dashboard-title">
+                                            <span class="pulse-indicator"></span>
+                                            <span>REAL-TIME COZY STATS TRACKER</span>
+                                        </div>
+                                        <div class="dashboard-stats-grid">
+                                            <div class="dash-stat-card">
+                                                <div class="stat-icon">😌</div>
+                                                <div class="stat-info">
+                                                    <span class="stat-label">Zen State</span>
+                                                    <span class="stat-value" id="dash-val-zen">Calm</span>
+                                                </div>
+                                            </div>
+                                            <div class="dash-stat-card">
+                                                <div class="stat-icon">🧩</div>
+                                                <div class="stat-info">
+                                                    <span class="stat-label">Fruits Matched</span>
+                                                    <span class="stat-value" id="dash-val-matches">0</span>
+                                                </div>
+                                            </div>
+                                            <div class="dash-stat-card">
+                                                <div class="stat-icon">⚔️</div>
+                                                <div class="stat-info">
+                                                    <span class="stat-label">Fruits Sliced</span>
+                                                    <span class="stat-value" id="dash-val-slices">0</span>
+                                                </div>
+                                            </div>
+                                            <div class="dash-stat-card">
+                                                <div class="stat-icon">🕒</div>
+                                                <div class="stat-info">
+                                                    <span class="stat-label">Relax Time</span>
+                                                    <span class="stat-value" id="dash-val-time">0m</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="games-selection-grid">
+                                        <!-- Game Card 1: Match-3 -->
+                                        <div class="menu-game-card" id="btn-select-match3">
+                                            <div class="menu-game-badge">Puzzler</div>
+                                            <div class="menu-game-icon">🍉</div>
+                                            <div class="menu-game-info">
+                                                <h4>开心消消乐 Happy Match-3</h4>
+                                                <p>Match cute local Malaysian fruits at your own pace. Perfect for slow breathing focus.</p>
+                                            </div>
+                                            <span class="menu-play-action">Play Game ➔</span>
+                                        </div>
+
+                                        <!-- Game Card 2: Fruit Zen -->
+                                        <div class="menu-game-card" id="btn-select-fruit-zen">
+                                            <div class="menu-game-badge zen">Zen Splash</div>
+                                            <div class="menu-game-icon">🍉✨</div>
+                                            <div class="menu-game-info">
+                                                <h4>KawanKu Fruit Zen</h4>
+                                                <p>Slice spiky durians, rambutans, coconuts, and mangosteens. Satisfying, juicy sensory feedback.</p>
+                                            </div>
+                                            <span class="menu-play-action">Play Game ➔</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Right Column: KawanKu Comfort Lounge Sidebar Card (Fills space, adds interactivity & daily checklist) -->
+                                <div class="games-portal-sidebar">
+                                    <div class="comfort-lounge-card" id="lounge-mascot-card">
+                                        <!-- Mascot Robot & Dynamic Bubble -->
+                                        <div class="lounge-mascot-row">
+                                            <div class="lounge-robot-avatar" id="lounge-robot-trigger" title="Click me for cozy wisdom!">
+                                                <div class="robot-antenna"></div>
+                                                <div class="robot-head">
+                                                    <div class="robot-ears"></div>
+                                                    <div class="robot-eyes">
+                                                        <div class="eye"></div>
+                                                        <div class="eye"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="robot-body">
+                                                    <div class="robot-heart pulse-heart"></div>
+                                                </div>
+                                            </div>
+                                            <div class="comfort-speech-bubble" id="lounge-speech-text">
+                                                Let's take a deep breath together, Kawan! 🌸 Click me for cozy wisdom.
+                                            </div>
+                                        </div>
+
+                                        <!-- Daily Zen Focus checklist -->
+                                        <div class="daily-zen-focus-box">
+                                            <h4 class="lounge-section-title">🌱 DAILY ZEN FOCUS</h4>
+                                            <div class="zen-task-list">
+                                                <div class="zen-task-item" id="task-cozy-start">
+                                                    <span class="checkbox-indicator"></span>
+                                                    <span class="task-label-text">Cozy Start (Play any game once)</span>
+                                                </div>
+                                                <div class="zen-task-item" id="task-cozy-matches">
+                                                    <span class="checkbox-indicator"></span>
+                                                    <span class="task-label-text">Match Master (Match 30 fruits)</span>
+                                                </div>
+                                                <div class="zen-task-item" id="task-cozy-slices">
+                                                    <span class="checkbox-indicator"></span>
+                                                    <span class="task-label-text">Zen Slicer (Slice 20 fruits)</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+
+
+
+                        <!-- 开心消消乐 Match-3 Game (Hidden by default) -->
+                        <div class="game-card game-card-full hidden" id="card-match3">
                             <div class="game-card-header">
                                 <div class="game-icon-title">
                                     <span class="game-title-emoji">🍉</span>
@@ -1182,7 +1248,7 @@
                                         <p class="game-subtitle">Swap cute Malaysian fruits · No timer · No limits · Pure relaxation 🌴</p>
                                     </div>
                                 </div>
-                                <span class="recommend-tag">KawanKu's Choice ⭐</span>
+                                <button class="game-btn-secondary back-to-menu-btn" id="btn-match3-back-menu">✕ Back to Menu</button>
                             </div>
 
                             <!-- Start Screen with Comforting Rules Guide -->
@@ -1238,9 +1304,9 @@
                                         <span class="feature-tag">💖 Infinite Turns (无限步数)</span>
                                         <span class="feature-tag">🌴 100% Calming (纯粹放松)</span>
                                     </div>
-                                </div>
 
-                                <button class="game-btn-primary" id="btn-start-match3">🎮 Start Playing!</button>
+                                    <button class="game-btn-primary" id="btn-start-match3">🎮 Start Playing!</button>
+                                </div>
                             </div>
 
                             <!-- Active Match-3 Arena -->
@@ -1251,24 +1317,179 @@
                                         <div class="progress-fill" id="match3-progress" style="width: 0%;"></div>
                                     </div>
                                     <span class="progress-value" id="match3-progress-val">0%</span>
-                                    <button class="game-btn-secondary" id="btn-quit-match3">✕ Quit</button>
+                                    <button class="game-btn-secondary" id="btn-quit-match3">✕ Quit Game</button>
                                 </div>
-                                <div class="match3-grid" id="match3-board"></div>
+                                
+                                <div class="match3-game-layout">
+                                    <div class="match3-board-wrapper" style="position: relative;">
+                                        <div class="match3-grid" id="match3-board"></div>
+                                        <div class="match3-combo-overlay" id="match3-combo-overlay" style="position: absolute; inset: 0; pointer-events: none; z-index: 100;"></div>
+                                    </div>
+
+                                    
+                                    <!-- Sidebar with Cute Tips Button -->
+                                    <div class="match3-sidebar">
+                                        <button class="match3-tip-btn" id="btn-match3-tip" title="Get a hint!">
+                                            <span class="tip-icon">💡</span>
+                                            <span class="tip-text">Kawan's Tip</span>
+                                        </button>
+                                        <div class="tip-box">
+                                            <p class="tip-box-title">💡 Relaxation Tip:</p>
+                                            <p class="tip-box-desc" id="match3-tip-box-text">Take deep breaths while matching. Let the stress melt away.</p>
+                                        </div>
+                                    </div>
+                                </div>
                                 <p class="match3-hint" id="match3-hint-text">Click a fruit, then click an adjacent fruit to swap them!</p>
                             </div>
                         </div>
 
-                        <!-- Post-Game Survey (inline, shown after win) -->
+                        <!-- KawanKu Fruit Zen Game (Hidden by default) -->
+                        <div class="game-card game-card-full hidden" id="card-fruit-zen">
+                            <div class="game-card-header">
+                                <div class="game-icon-title">
+                                    <span class="game-title-emoji">⚔️</span>
+                                    <div>
+                                        <h3>KawanKu Fruit Zen</h3>
+                                        <p class="game-subtitle">Slice local Malaysian fruits · No bombs · Infinite calm · Sensory satisfaction 🌴</p>
+                                    </div>
+                                </div>
+                                <button class="game-btn-secondary back-to-menu-btn" id="btn-fruit-zen-back-menu">✕ Back to Menu</button>
+                            </div>
+
+                            <!-- Start Screen with Comforting Rules Guide -->
+                            <div class="zen-start-screen" id="zen-start-action">
+                                <!-- Mascot Guide Message -->
+                                <div class="rules-mascot-row">
+                                    <div class="kawanku-robot-mini">
+                                        <div class="robot-antenna"></div>
+                                        <div class="robot-head">
+                                            <div class="robot-ears"></div>
+                                            <div class="robot-eyes">
+                                                <div class="eye"></div>
+                                                <div class="eye"></div>
+                                            </div>
+                                        </div>
+                                        <div class="robot-body">
+                                            <div class="robot-heart pulse-heart"></div>
+                                        </div>
+                                    </div>
+                                    <div class="rules-speech-bubble">
+                                        <p>Selamat datang! Swipe or drag your mouse to slice flying local fruits. There are no bombs, no lives, and no limits. Let's experience the flow! 🍍✨</p>
+                                    </div>
+                                </div>
+
+                                <!-- Fruits Preview -->
+                                <div class="fruit-preview-row">
+                                    <div class="fruit-preview-card" style="--fc: #FFD700" title="Durian 榴莲">
+                                        <span class="preview-emoji">🍈</span>
+                                        <span class="preview-name">Durian</span>
+                                    </div>
+                                    <div class="fruit-preview-card" style="--fc: #8A2BE2" title="Mangosteen 山竹">
+                                        <span class="preview-emoji">🍇</span>
+                                        <span class="preview-name">Mangosteen</span>
+                                    </div>
+                                    <div class="fruit-preview-card" style="--fc: #FF4500" title="Rambutan 红毛丹">
+                                        <span class="preview-emoji">🍓</span>
+                                        <span class="preview-name">Rambutan</span>
+                                    </div>
+                                    <div class="fruit-preview-card" style="--fc: #E0FFFF" title="Coconut 椰子">
+                                        <span class="preview-emoji">🥥</span>
+                                        <span class="preview-name">Coconut</span>
+                                    </div>
+                                </div>
+
+                                <!-- Visual Easy-to-Understand Rules -->
+                                <div class="simple-rules-card">
+                                    <h4 class="rules-title">🎮 How to Play (游戏规则)</h4>
+                                    <div class="rules-steps-grid">
+                                        <div class="step-item">
+                                            <span class="step-number">1</span>
+                                            <p class="step-text"><strong>划动切开 (Swipe to Slice)</strong><br>Click and drag your mouse or swipe across fruits to slice them.</p>
+                                        </div>
+                                        <div class="step-item">
+                                            <span class="step-number">2</span>
+                                            <p class="step-text"><strong>果汁飞溅 (Splash Effects)</strong><br>Splitting a fruit triggers beautiful sensory splashes and visual sparks.</p>
+                                        </div>
+                                        <div class="step-item">
+                                            <span class="step-number">3</span>
+                                            <p class="step-text"><strong>填满能量 (Fill Relaxation Bar)</strong><br>Slice 20 fruits to fill the Zen Bar and complete your session!</p>
+                                        </div>
+                                    </div>
+                                    <!-- Select Game Mode (Speed Settings) -->
+                                    <div class="pregame-settings-box">
+                                        <h4 class="pregame-settings-title">⚙️ Select Speed Mode (选择速度模式)</h4>
+                                        <div class="mode-select-buttons horizontal">
+                                            <button class="mode-btn" data-speed-mode="slow">😌 Zen (慢速)</button>
+                                            <button class="mode-btn active" data-speed-mode="normal">⚡ Normal (常速)</button>
+                                            <button class="mode-btn" data-speed-mode="fast">🔥 Arcade (快速)</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="rules-features-list">
+                                        <span class="feature-tag">💥 No Bombs (无炸弹)</span>
+                                        <span class="feature-tag">❤️ No Penalties (无惩罚)</span>
+                                        <span class="feature-tag">🔊 Soothing Audio (解压音效)</span>
+                                    </div>
+
+                                    <button class="game-btn-primary" id="btn-start-fruit-zen">🎮 Start Playing!</button>
+                                </div>
+                            </div>
+
+                            <!-- Active Fruit Zen Arena -->
+                            <div class="zen-arena hidden" id="zen-game-arena">
+                                <div class="zen-header">
+                                    <div class="progress-lbl">😌 Zen Relaxation Bar</div>
+                                    <div class="match3-progress-bar">
+                                        <div class="progress-fill" id="zen-progress" style="width: 0%;"></div>
+                                    </div>
+                                    <span class="progress-value" id="zen-progress-val">0/20</span>
+                                    <button class="game-btn-secondary" id="btn-quit-fruit-zen">✕ Quit Game</button>
+                                </div>
+
+                                <div class="zen-canvas-container">
+                                    <canvas id="zen-canvas"></canvas>
+                                    <div class="zen-canvas-hint">Drag your cursor or swipe to slice the fruits!</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Post-Game Survey (inline, shared/integrated after win) -->
                         <div class="survey-inline hidden" id="survey-inline">
                             <div class="survey-inline-inner">
                                 <div class="survey-win-banner">🎊 Relaxation Complete! 🎊</div>
-                                <p class="survey-prompt" id="survey-robot-prompt">Hey Kawan, after playing this, how are you feeling now?</p>
-                                <div class="emoji-options-grid">
-                                    <button class="emoji-btn" data-mood="1"><span class="emoji">🌟</span><span class="emoji-label">Much Better</span></button>
-                                    <button class="emoji-btn" data-mood="2"><span class="emoji">😊</span><span class="emoji-label">Calmer</span></button>
-                                    <button class="emoji-btn" data-mood="3"><span class="emoji">😐</span><span class="emoji-label">Neutral</span></button>
-                                    <button class="emoji-btn" data-mood="4"><span class="emoji">😕</span><span class="emoji-label">Still Stressed</span></button>
-                                    <button class="emoji-btn" data-mood="5"><span class="emoji">😢</span><span class="emoji-label">Chat with AI</span></button>
+                                <p class="survey-prompt" id="survey-win-prompt">You've successfully filled your relaxation bar! What would you like to do next?</p>
+                                <div class="win-choices-row" id="win-choices-row">
+                                    <button class="game-btn-primary" id="btn-win-replay">🎮 Play Again (继续玩)</button>
+                                    <button class="game-btn-secondary" id="btn-win-survey">📝 Log Mood & Exit (退出并记录心情)</button>
+                                </div>
+                                
+                                <div class="survey-mood-section hidden" id="survey-mood-section">
+                                    <!-- Mascot SVG beside prompt -->
+                                    <div class="rules-mascot-row" style="margin-bottom: 20px;">
+                                        <div class="kawanku-robot-mini">
+                                            <div class="robot-antenna"></div>
+                                            <div class="robot-head">
+                                                <div class="robot-ears"></div>
+                                                <div class="robot-eyes">
+                                                    <div class="eye"></div>
+                                                    <div class="eye"></div>
+                                                </div>
+                                            </div>
+                                            <div class="robot-body">
+                                                <div class="robot-heart pulse-heart"></div>
+                                            </div>
+                                        </div>
+                                        <div class="rules-speech-bubble" style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1);">
+                                            <p id="survey-robot-prompt">Hey Kawan, after playing this, how are you feeling now?</p>
+                                        </div>
+                                    </div>
+                                    <div class="emoji-options-grid">
+                                        <button class="emoji-btn" data-mood="1"><span class="emoji">🌟</span><span class="emoji-label">Much Better</span></button>
+                                        <button class="emoji-btn" data-mood="2"><span class="emoji">😊</span><span class="emoji-label">Calmer</span></button>
+                                        <button class="emoji-btn" data-mood="3"><span class="emoji">😐</span><span class="emoji-label">Neutral</span></button>
+                                        <button class="emoji-btn" data-mood="4"><span class="emoji">😕</span><span class="emoji-label">Still Stressed</span></button>
+                                        <button class="emoji-btn" data-mood="5"><span class="emoji">😢</span><span class="emoji-label">Chat with AI</span></button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
