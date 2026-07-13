@@ -1345,7 +1345,7 @@ Keep your conversational reply warm, healing and concise. The student should fee
         };
 
         try {
-            const data = await callGemini('gemini-2.5-flash', requestBody);
+            const data = await callGemini('gemini-1.5-flash', requestBody);
             if (!data) return null;
             const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
@@ -2315,7 +2315,7 @@ Non-content voice metadata:
 Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect the vocal metadata without sounding clinical, and ask one supportive follow-up question.`;
 
         try {
-            const data = await callGemini('gemini-2.5-flash', {
+            const data = await callGemini('gemini-1.5-flash', {
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: {
                     temperature: 0.75,
@@ -2473,7 +2473,7 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(DOM.webcamElement, 0, 0, canvas.width, canvas.height);
                 const base64Data = canvas.toDataURL('image/jpeg', 0.55).split(',')[1];
-                const data = await callGemini('gemini-2.5-flash', {
+                const data = await callGemini('gemini-1.5-flash', {
                     contents: [{
                         parts: [
                             {
@@ -3788,7 +3788,7 @@ For the Report (after monster defeat), respond with:
                 generationConfig: { temperature: 0.85, maxOutputTokens: 1024 }
             };
             try {
-                const data = await callGemini('gemini-2.5-flash', body);
+                const data = await callGemini('gemini-1.5-flash', body);
                 if (!data) return null;
                 const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
                 // Strip potential markdown fences
@@ -4634,7 +4634,7 @@ Strictly adhere to the following layout and do NOT add any extra introductory te
 
             if (canAttemptGemini()) {
                 try {
-                    const data = await callGemini('gemini-2.5-flash', {
+                    const data = await callGemini('gemini-1.5-flash', {
                         system_instruction: { parts: [{ text: "You are a clinical psychologist compiling a student mental wellness assessment report. Be professional, supportive, and clear." }] },
                         contents: [{ role: 'user', parts: [{ text: prompt }] }],
                         generationConfig: { temperature: 0.8, maxOutputTokens: 2048 }
@@ -4767,7 +4767,7 @@ Example format:
             try {
                 let questions = null;
                 if (canAttemptGemini()) {
-                    const data = await callGemini('gemini-2.5-flash', {
+                    const data = await callGemini('gemini-1.5-flash', {
                         system_instruction: { parts: [{ text: "You are a specialized JSON generator. You output raw JSON arrays containing strings and nothing else." }] },
                         contents: [{ role: 'user', parts: [{ text: prompt }] }],
                         generationConfig: { temperature: 0.7, maxOutputTokens: 1000 }
@@ -4948,7 +4948,7 @@ Example format:
             if (sInput) sInput.value = '';
             const shopPrompt = '你是 Kawanku AI 火花商店的潮流主理人。用户当前火花天数为 ' + sp.days + ' 天。当前显示第 ' + activeWeek + ' 周货架。请根据用户请求展示商品或处理兑换。保持极简留白风格。货架内容：' + JSON.stringify(SHOP_CATALOG[activeWeek]);
             try {
-                const data = await callGemini('gemini-2.5-flash', {
+                const data = await callGemini('gemini-1.5-flash', {
                     system_instruction: { parts: [{ text: shopPrompt }] },
                     contents: shopHistory,
                     generationConfig: { temperature: 0.8, maxOutputTokens: 1024 }
