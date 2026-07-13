@@ -793,6 +793,45 @@ def sync_student_analysis():
         db.session.rollback()
         return {'error': str(e)}, 500
 
+@student_bp.route('/dispatch', methods=['POST'])
+@student_required
+def trigger_dispatch():
+    """Trigger SOS dispatch to counselor, marking risk level as Urgent"""
+    try:
+        student_id = request.current_student_id
+        
+        # 1. Update wellness metrics if present
+        wellness = WellnessMetrics.query.filter_by(student_id=student_id).first()
+        if wellness:
+            wellness.mood_state = 'Low'
+            wellness.overall_stress_level = 'Critical'
+            
+        # 2. Add or update ClinicalRiskFlags to Urgent
+        risk = ClinicalRiskFlags.query.filter_by(student_id=student_id).order_by(
+            ClinicalRiskFlags.assessment_date.desc()
+        ).first()
+        if not risk:
+            risk = ClinicalRiskFlags(student_id=student_id)
+            db.session.add(risk)
+            
+        risk.overall_risk_level = 'Urgent'
+        risk.risk_description = 'Emergency SOS Counselor Dispatch triggered by student.'
+        risk.suicide_ideation_flag = True
+        risk.assessment_date = datetime.utcnow()
+        
+        # Log action
+        AuditLog.log_action('student', student_id, 'sos_dispatch', details='SOS Dispatch triggered by student')
+        db.session.commit()
+        
+        return {
+            'success': True,
+            'message': 'Emergency counselor dispatch successfully registered.'
+        }, 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return {'error': str(e)}, 500
+
 # =============================================================================
 # COUNSELOR ENDPOINTS
 # =============================================================================
