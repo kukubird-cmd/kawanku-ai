@@ -1181,7 +1181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // -----------------------------------------------------------------------
     // IMPORTANT: Replace the value below with your own Gemini API key.
     // Get one free at: https://aistudio.google.com/app/apikey
-    const GEMINI_API_KEY = (window.GEMINI_API_KEY || '').trim();
+    const GEMINI_API_KEY = (window.GEMINI_API_KEY || 'AIzaSyBogaR5dRORIkeOF6Gq6NyJqCmu6pUEg7k').trim();
     const GEMINI_QUOTA_COOLDOWN_MS = 60 * 1000;
     const GEMINI_AUDIO_COOLDOWN_MS = 60 * 1000;
     const GEMINI_NON_CHAT_COOLDOWN_MS = 90 * 1000;
