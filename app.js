@@ -9,17 +9,17 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch(e) {}
         return {
             hairStyle: 'crop',
-            skinTone: '#ffdbac',
+            skinTone: '#ffffff',
             expression: 'friendly',
             shirtStyle: 'hoodie',
             glasses: 'none',
-            accessories: 'none',
+            accessories: 'headphones',
             hoodieGraphic: 'star',
             pantsStyle: 'shorts',
             shoes: 'sneakers',
             pet: 'none',
             scene: 'yellow',
-            hairColor: '#1e293b',
+            hairColor: '#fbbf24',
             shirtColor: '#4f46e5',
             glowColor1: '#8b5cf6',
             glowColor2: '#ec4899'
@@ -410,7 +410,16 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Setup initial avatar state rendering
+        // Clone the main SVG into the studio preview container
+        const mainSVG = document.getElementById('mindbuddy-svg');
+        const studioContainer = document.getElementById('studio-avatar-container');
+        if (mainSVG && studioContainer) {
+            const clonedSVG = mainSVG.cloneNode(true);
+            clonedSVG.id = 'mindbuddy-studio-svg';
+            studioContainer.appendChild(clonedSVG);
+        }
+
+        // Init SVG layout components
         renderAvatarVisuals();
         
         // Hook up Sidebar Nav links
@@ -446,6 +455,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function switchPanel(panelId) {
+        // Pause Calm video player when switching away from Calm panel
+        if (panelId !== 'calm-panel') {
+            const player = document.getElementById('detailVideoPlayer');
+            if (player) {
+                player.pause();
+            }
+        }
+
         DOM.panels.forEach(panel => {
             panel.classList.remove('active');
         });
@@ -475,9 +492,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (panelId === 'shop-panel') {
             if (DOM.headerTitle) DOM.headerTitle.innerText = "Kawan Spark Shop";
             if (DOM.headerSubtitle) DOM.headerSubtitle.innerText = "Redeem your daily streak sparks for exclusive avatar items.";
-        } else if (panelId === 'games-panel') {
-            if (DOM.headerTitle) DOM.headerTitle.innerText = "Play & Relax";
-            if (DOM.headerSubtitle) DOM.headerSubtitle.innerText = "Take a quick mental break with our relaxing mini-games guided by KawanKu Robot.";
         }
     }
 
@@ -696,10 +710,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.documentElement.style.setProperty('--glow-color-2', conf.glowColor2);
 
         // Apply to both the main chat avatar and the studio preview
-        const mainContainer   = document.getElementById('avatar-container');
-        const studioContainer = document.getElementById('studio-avatar-container');
-        applyAvatarToSVG(mainContainer, conf);
-        applyAvatarToSVG(studioContainer, conf);
+        const mainSVG   = document.getElementById('mindbuddy-svg');
+        const studioSVG = document.getElementById('mindbuddy-studio-svg');
+        applyAvatarToSVG(mainSVG, conf);
+        applyAvatarToSVG(studioSVG, conf);
 
         // Update expression badge label
         if (DOM.avatarExpressionLabel) {
@@ -727,7 +741,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Expression class for CSS targeting
-        [mainContainer, studioContainer].forEach(svg => {
+        [mainSVG, studioSVG].forEach(svg => {
             if (!svg) return;
             svg.classList.remove('expression-friendly', 'expression-thoughtful', 'expression-attentive', 'expression-excited');
             svg.classList.add('expression-' + conf.expression);
@@ -737,14 +751,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Dynamic speaking controls — targets both SVGs by ID
     let mouthAnimationTimer = null;
     function triggerAvatarSpeechSpeak(durationMs) {
-        ['avatar-container', 'studio-avatar-container'].forEach(id => {
+        ['mindbuddy-svg', 'mindbuddy-studio-svg'].forEach(id => {
             const svg = document.getElementById(id);
             if (svg) svg.classList.add('speaking-now');
         });
 
         if (mouthAnimationTimer) clearTimeout(mouthAnimationTimer);
         mouthAnimationTimer = setTimeout(() => {
-            ['avatar-container', 'studio-avatar-container'].forEach(id => {
+            ['mindbuddy-svg', 'mindbuddy-studio-svg'].forEach(id => {
                 const svg = document.getElementById(id);
                 if (svg) svg.classList.remove('speaking-now');
             });
@@ -2638,163 +2652,6 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
             });
         }
 
-        // ─── Video Sanctuary ─────────────────────────────────────────
-        (function initVideoSanctuary() {
-            const fileInput     = document.getElementById('calm-video-input');
-            const uploadZone    = document.getElementById('video-upload-zone');
-            const dropTarget    = document.getElementById('video-drop-target');
-            const browseBtn     = document.getElementById('video-browse-btn');
-            const playerWrapper = document.getElementById('video-player-wrapper');
-            const vid           = document.getElementById('calm-video-player');
-            const playPauseBtn  = document.getElementById('calm-vid-playpause');
-            const playIcon      = document.getElementById('calm-vid-play-icon');
-            const progressBar   = document.getElementById('calm-vid-progress');
-            const timeLabel     = document.getElementById('calm-vid-time');
-            const volSlider     = document.getElementById('calm-vid-volume');
-            const muteBtn       = document.getElementById('calm-vid-mute');
-            const volIcon       = document.getElementById('calm-vid-vol-icon');
-            const loopBtn       = document.getElementById('calm-vid-loop-btn');
-            const fullscreenBtn = document.getElementById('calm-vid-fullscreen');
-            const removeBtn     = document.getElementById('calm-vid-remove');
-
-            if (!fileInput || !vid) return; // elements not on this page
-
-            let blobUrl = null;
-
-            function formatTime(sec) {
-                if (!isFinite(sec)) return '0:00';
-                const m = Math.floor(sec / 60);
-                const s = Math.floor(sec % 60);
-                return `${m}:${s.toString().padStart(2, '0')}`;
-            }
-
-            function loadVideo(file) {
-                if (!file || !file.type.startsWith('video/')) return;
-                if (blobUrl) URL.revokeObjectURL(blobUrl);
-                blobUrl = URL.createObjectURL(file);
-                vid.src = blobUrl;
-                vid.volume = parseFloat(volSlider.value);
-                vid.loop = loopBtn.classList.contains('active');
-                // Swap UI
-                uploadZone.classList.add('hidden');
-                uploadZone.style.display = 'none';
-                playerWrapper.classList.remove('hidden');
-                playerWrapper.style.display = 'flex';
-                lucide.createIcons(); // refresh icons in new elements
-            }
-
-            function resetPlayer() {
-                vid.pause();
-                vid.src = '';
-                if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
-                uploadZone.style.display = '';
-                uploadZone.classList.remove('hidden');
-                playerWrapper.style.display = 'none';
-                playerWrapper.classList.add('hidden');
-                progressBar.value = 0;
-                timeLabel.textContent = '0:00 / 0:00';
-                fileInput.value = '';
-                // Reset play icon
-                if (playIcon) { playIcon.setAttribute('data-lucide', 'play'); lucide.createIcons({ nodes: [playIcon] }); }
-            }
-
-            // File input change
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files && e.target.files[0]) loadVideo(e.target.files[0]);
-            });
-
-            // "Choose Video" button — forward click to the hidden input
-            if (browseBtn) {
-                browseBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    fileInput.click();
-                });
-            }
-
-            // Drag & Drop
-            if (uploadZone) {
-                uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
-                uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
-                uploadZone.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    uploadZone.classList.remove('drag-over');
-                    const file = e.dataTransfer.files[0];
-                    if (file) loadVideo(file);
-                });
-            }
-
-            // Play / Pause
-            if (playPauseBtn) {
-                playPauseBtn.addEventListener('click', () => {
-                    if (vid.paused) { vid.play(); }
-                    else { vid.pause(); }
-                });
-            }
-
-            vid.addEventListener('play', () => {
-                if (playIcon) { playIcon.setAttribute('data-lucide', 'pause'); lucide.createIcons({ nodes: [playIcon] }); }
-            });
-            vid.addEventListener('pause', () => {
-                if (playIcon) { playIcon.setAttribute('data-lucide', 'play'); lucide.createIcons({ nodes: [playIcon] }); }
-            });
-
-            // Progress bar sync
-            vid.addEventListener('timeupdate', () => {
-                if (!vid.duration) return;
-                progressBar.value = (vid.currentTime / vid.duration) * 100;
-                timeLabel.textContent = `${formatTime(vid.currentTime)} / ${formatTime(vid.duration)}`;
-            });
-
-            if (progressBar) {
-                progressBar.addEventListener('input', (e) => {
-                    if (vid.duration) vid.currentTime = (parseFloat(e.target.value) / 100) * vid.duration;
-                });
-            }
-
-            // Volume slider
-            if (volSlider) {
-                volSlider.addEventListener('input', (e) => {
-                    vid.volume = parseFloat(e.target.value);
-                    vid.muted = false;
-                    muteBtn.classList.remove('active');
-                    if (volIcon) { volIcon.setAttribute('data-lucide', vid.volume < 0.01 ? 'volume-x' : vid.volume < 0.5 ? 'volume-1' : 'volume-2'); lucide.createIcons({ nodes: [volIcon] }); }
-                });
-            }
-
-            // Mute toggle
-            if (muteBtn) {
-                muteBtn.addEventListener('click', () => {
-                    vid.muted = !vid.muted;
-                    muteBtn.classList.toggle('active', vid.muted);
-                    if (volIcon) { volIcon.setAttribute('data-lucide', vid.muted ? 'volume-x' : vid.volume < 0.5 ? 'volume-1' : 'volume-2'); lucide.createIcons({ nodes: [volIcon] }); }
-                });
-            }
-
-            // Loop toggle
-            if (loopBtn) {
-                loopBtn.addEventListener('click', () => {
-                    vid.loop = !vid.loop;
-                    loopBtn.classList.toggle('active', vid.loop);
-                });
-                // Start with loop ON (calming experience)
-                vid.loop = true;
-                loopBtn.classList.add('active');
-            }
-
-            // Fullscreen
-            if (fullscreenBtn) {
-                fullscreenBtn.addEventListener('click', () => {
-                    if (vid.requestFullscreen) vid.requestFullscreen();
-                    else if (vid.webkitRequestFullscreen) vid.webkitRequestFullscreen();
-                });
-            }
-
-            // Remove video
-            if (removeBtn) {
-                removeBtn.addEventListener('click', resetPlayer);
-            }
-        })();
-
         // Calm Hub Quiz buttons
         if (DOM.quizStartBtn) DOM.quizStartBtn.addEventListener('click', startQuizSession);
         if (DOM.quizRestartBtn) {
@@ -4074,8 +3931,6 @@ For the Report (after monster defeat), respond with:
             div.innerText = text;
             qMessages.appendChild(div);
             qMessages.scrollTop = qMessages.scrollHeight;
-            // Auto-scroll the page so the new bubble is visible
-            div.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
         function addQuizTyping() {
@@ -4140,10 +3995,6 @@ For the Report (after monster defeat), respond with:
                     removeQuizTyping();
                     addQuizBubble(`Question ${currentQuestionIdx + 1}/10 (${aspectName}):\n\n"${statement}"`, 'ai');
                     renderOptions();
-                    // Smooth-scroll the options into view so users don't have to scroll manually
-                    if (qOptions) {
-                        setTimeout(() => qOptions.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
-                    }
                 }, 400);
             } else {
                 generateFinalReport();
@@ -6780,3 +6631,132 @@ Example format:
     init();
 });
 
+// Calm Videos Integration (Exposed Globally for inline HTML onclick handlers)
+window.CalmVideoData = {
+    anxiety: {
+        title: "Anxiety Relief Support",
+        desc: "Soothing guides, deep breathing, and grounding exercises to help you manage anxiety and panic states.",
+        videos: [
+            { title: "5-Min Quick Calm Breathwork", src: "frontend/student/videos/anxiety_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" },
+            { title: "Grounding Exercise for Panic Relief", src: "frontend/student/videos/anxiety_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-with-stars-moving-14022-large.mp4" }
+        ]
+    },
+    depression: {
+        title: "Depression Support & Affirmations",
+        desc: "Gentle reminders, companion voices, and comforting visual soundscapes for heavy days.",
+        videos: [
+            { title: "Overcoming Fatigue & Heavy Days", src: "frontend/student/videos/depression_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-with-stars-moving-14022-large.mp4" },
+            { title: "Daily Comfort Affirmations", src: "frontend/student/videos/depression_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" }
+        ]
+    },
+    motivation: {
+        title: "Motivational Speeches",
+        desc: "Ignite your drive, build confidence, and get back on track with powerful mindset sessions.",
+        videos: [
+            { title: "Unshakable Willpower & Drive", src: "frontend/student/videos/motivation_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-ocean-near-a-cliff-34280-large.mp4" },
+            { title: "Rising Above Failure", src: "frontend/student/videos/motivation_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-with-stars-moving-14022-large.mp4" }
+        ]
+    },
+    academic: {
+        title: "Academic Stress Management",
+        desc: "Learn to navigate exam pressure, manage task burnout, and optimize your study focus.",
+        videos: [
+            { title: "Coping with Exam Anxiety & Stress", src: "frontend/student/videos/academic_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" },
+            { title: "Recovering from Academic Burnout", src: "frontend/student/videos/academic_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-ocean-near-a-cliff-34280-large.mp4" }
+        ]
+    },
+    confidence: {
+        title: "Building Unshakable Confidence",
+        desc: "Overcome self-doubt, silence your inner critic, and build lasting self-compassion.",
+        videos: [
+            { title: "Silencing Your Inner Critic", src: "frontend/student/videos/confidence_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-ocean-near-a-cliff-34280-large.mp4" },
+            { title: "Embracing Your Unique Journey", src: "frontend/student/videos/confidence_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" }
+        ]
+    },
+    meditate: {
+        title: "Guided Meditation & Grounding",
+        desc: "Find peace and centering through deep breathing techniques, mindfulness, and audio-visual meditation.",
+        videos: [
+            { title: "Deep Breathing Focus Session", src: "frontend/student/videos/meditate_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" },
+            { title: "Sleep Soundscape & Evening Rest", src: "frontend/student/videos/meditate_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-with-stars-moving-14022-large.mp4" }
+        ]
+    }
+};
+
+window.openCategory = function(catId) {
+    const cat = window.CalmVideoData[catId];
+    if (!cat) return;
+
+    const grid = document.getElementById('calmCategoryGrid');
+    const detail = document.getElementById('categoryDetail');
+    if (grid && detail) {
+        grid.style.display = 'none';
+        detail.style.display = 'flex';
+    }
+
+    const title = document.getElementById('currentCategoryTitle');
+    const desc = document.getElementById('currentCategoryDesc');
+    if (title) title.textContent = cat.title;
+    if (desc) desc.textContent = cat.desc;
+
+    const playlist = document.getElementById('playlistItems');
+    if (playlist) {
+        playlist.innerHTML = '';
+        cat.videos.forEach((video, index) => {
+            const btn = document.createElement('button');
+            btn.className = `playlist-video-item ${index === 0 ? 'active' : ''}`;
+            btn.onclick = () => {
+                document.querySelectorAll('.playlist-video-item').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                window.playVideo(video);
+            };
+            btn.innerHTML = `
+                <span class="playlist-video-icon">▶</span>
+                <span>${video.title}</span>
+            `;
+            playlist.appendChild(btn);
+        });
+    }
+
+    if (cat.videos.length > 0) {
+        window.playVideo(cat.videos[0]);
+    }
+};
+
+window.playVideo = function(videoObj) {
+    const player = document.getElementById('detailVideoPlayer');
+    const source = document.getElementById('detailVideoSource');
+    const title = document.getElementById('currentVideoTitle');
+
+    if (title) title.textContent = videoObj.title;
+
+    if (player && source) {
+        player.onerror = null;
+        source.src = videoObj.src;
+        player.load();
+        
+        player.onerror = function() {
+            if (source.src !== videoObj.fallback) {
+                console.log(`Local file ${videoObj.src} not found, falling back to public relaxation video.`);
+                source.src = videoObj.fallback;
+                player.load();
+                player.play().catch(e => console.warn("Fallback autoplay issue:", e));
+            }
+        };
+
+        player.play().catch(e => console.warn("Autoplay issue:", e));
+    }
+};
+
+window.closeCategory = function() {
+    const player = document.getElementById('detailVideoPlayer');
+    if (player) {
+        player.pause();
+    }
+    const grid = document.getElementById('calmCategoryGrid');
+    const detail = document.getElementById('categoryDetail');
+    if (grid && detail) {
+        detail.style.display = 'none';
+        grid.style.display = 'block';
+    }
+};

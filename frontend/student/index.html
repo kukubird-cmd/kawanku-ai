@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KawanKu AI - Student Portal</title>
     <script>
-        window.location.replace('http://127.0.0.1:5000/');
+        window.location.replace('http://127.0.0.1:5005/');
     </script>
     <style>
         * {
@@ -356,6 +356,155 @@
                 max-width: 85%;
             }
         }
+
+        /* Calm Hub Category Grid */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .category-card {
+            background: var(--bg-white);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .category-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .category-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .category-card p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+        }
+
+        .view-btn {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin-top: auto;
+        }
+
+        /* Category Detail View */
+        .btn-back {
+            padding: 0.5rem 1rem;
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-light);
+            transition: all 0.2s ease;
+        }
+
+        .btn-back:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--bg-light);
+        }
+
+        .video-container-layout {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 900px) {
+            .video-container-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .main-video-player {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .category-playlist {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            max-height: 450px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .category-playlist h4 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .playlist-items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .playlist-video-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            background: var(--bg-white);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            width: 100%;
+        }
+
+        .playlist-video-item:hover {
+            background: var(--bg-light);
+            border-color: var(--primary);
+        }
+
+        .playlist-video-item.active {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-color: var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .playlist-video-icon {
+            font-size: 1.25rem;
+        }
     </style>
 </head>
 <body>
@@ -373,6 +522,9 @@
                 </div>
                 <div class="nav-item" onclick="switchTab('wellness')">
                     <span>📊 Wellness</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('calm')">
+                    <span>🧘 Calm Hub</span>
                 </div>
                 <div class="nav-item" onclick="switchTab('settings')">
                     <span>⚙️ Settings</span>
@@ -474,12 +626,99 @@
                     </p>
                 </div>
             </div>
+
+            <!-- Calm Hub Tab -->
+            <div class="dashboard" id="calmTab">
+                <!-- 6 Categories Grid View -->
+                <div id="calmCategoryGrid">
+                    <h2 style="margin-bottom: 0.5rem;">🧘 Calm Hub & Mindfulness</h2>
+                    <p style="color: var(--text-light); margin-bottom: 2rem;">Select a category below to access resources, speeches, and meditations designed to support your wellbeing.</p>
+                    
+                    <div class="category-grid">
+                        <!-- Category 1: Anxiety -->
+                        <div class="category-card" onclick="openCategory('anxiety')">
+                            <div class="category-icon">😰</div>
+                            <h3>Anxiety Relief</h3>
+                            <p>Relaxing guides and slow breathing sessions to quiet anxiety, worry, and panic.</p>
+                            <span class="view-btn">Explore Videos &rarr;</span>
+                        </div>
+
+                        <!-- Category 2: Depression -->
+                        <div class="category-card" onclick="openCategory('depression')">
+                            <div class="category-icon">😔</div>
+                            <h3>Depression Support</h3>
+                            <p>Comforting messages, gentle check-ins, and light-filled landscapes for darker days.</p>
+                            <span class="view-btn">Explore Videos &rarr;</span>
+                        </div>
+
+                        <!-- Category 3: Motivation Speech -->
+                        <div class="category-card" onclick="openCategory('motivation')">
+                            <div class="category-icon">🔥</div>
+                            <h3>Motivational Speeches</h3>
+                            <p>Ignite your inner spark, build study momentum, and overcome mental blocks.</p>
+                            <span class="view-btn">Explore Videos &rarr;</span>
+                        </div>
+
+                        <!-- Category 4: Academic Stress -->
+                        <div class="category-card" onclick="openCategory('academic')">
+                            <div class="category-icon">📚</div>
+                            <h3>Academic Stress</h3>
+                            <p>Manage test pressure, deal with heavy study loads, and beat exam burnout.</p>
+                            <span class="view-btn">Explore Videos &rarr;</span>
+                        </div>
+
+                        <!-- Category 5: Lack of Confidence -->
+                        <div class="category-card" onclick="openCategory('confidence')">
+                            <div class="category-icon">💪</div>
+                            <h3>Building Confidence</h3>
+                            <p>Develop healthy self-compassion, silence self-doubt, and find your voice.</p>
+                            <span class="view-btn">Explore Videos &rarr;</span>
+                        </div>
+
+                        <!-- Category 6: Meditate -->
+                        <div class="category-card" onclick="openCategory('meditate')">
+                            <div class="category-icon">🧘</div>
+                            <h3>Guided Meditation</h3>
+                            <p>Calming breath check-ins, visualization, and Zen meditation sessions.</p>
+                            <span class="view-btn">Explore Videos &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video Player Detail View (Hidden Initially) -->
+                <div class="category-detail" id="categoryDetail" style="display: none;">
+                    <button class="btn-back" onclick="closeCategory()">&larr; Back to Calm Hub</button>
+                    <h3 id="currentCategoryTitle" style="margin: 1.5rem 0 0.5rem 0; font-size: 1.8rem; color: var(--primary);"></h3>
+                    <p id="currentCategoryDesc" style="color: var(--text-light); margin-bottom: 2rem;"></p>
+
+                    <div class="video-container-layout">
+                        <div class="main-video-player">
+                            <div class="video-player-wrapper" style="position: relative; width: 100%; aspect-ratio: 16/9; border-radius: 1rem; overflow: hidden; background: #000; border: 2px solid var(--border); box-shadow: var(--shadow);">
+                                <video id="detailVideoPlayer" controls playsinline style="width: 100%; height: 100%; object-fit: cover;">
+                                    <source id="detailVideoSource" src="" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                            <h4 id="currentVideoTitle" style="margin-top: 1.25rem; font-size: 1.3rem; color: var(--text-dark); font-weight: 700;"></h4>
+                            <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.5rem; background: var(--bg-light); padding: 0.75rem; border-radius: 0.5rem; border: 1px dashed var(--border);">
+                                💡 <strong>Tip for Customization:</strong> To replace this with your own video, upload an MP4 file into the student <code>videos/</code> directory and name it according to the category (e.g. <code>anxiety_1.mp4</code>).
+                            </p>
+                        </div>
+                        <div class="category-playlist">
+                            <h4>Session Playlist</h4>
+                            <div class="playlist-items-list" id="playlistItems">
+                                <!-- Dynamic entries -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script src="http://127.0.0.1:5000/config.js"></script>
+    <script src="http://127.0.0.1:5005/config.js"></script>
     <script>
-        const API_BASE = window.API_BASE || 'http://localhost:5000/api';
+        const API_BASE = window.API_BASE || 'http://localhost:5005/api';
         const GEMINI_API_KEY = (window.GEMINI_API_KEY || '').trim();
         const BACKEND_FALLBACK_REPLY = "Thank you for sharing. I'm here to listen.";
         let studentId, token;
@@ -512,9 +751,16 @@
         });
 
         function switchTab(tabName) {
+            // Pause video player if switching tab
+            const player = document.getElementById('detailVideoPlayer');
+            if (player) {
+                player.pause();
+            }
+
             // Hide all tabs
             document.querySelectorAll('[id$="Tab"]').forEach(el => {
                 el.classList.remove('active');
+                el.style.display = 'none'; // Make sure hidden tabs don't show or clash
             });
 
             // Remove active class from nav items
@@ -523,15 +769,135 @@
             });
 
             // Show selected tab
+            const targetTab = document.getElementById(tabName + 'Tab');
             if (tabName === 'chat') {
                 document.getElementById('chatTab').classList.add('active');
                 document.getElementById('chatTab').style.display = 'flex';
-            } else {
-                document.getElementById(tabName + 'Tab').classList.add('active');
+            } else if (targetTab) {
+                targetTab.classList.add('active');
+                targetTab.style.display = 'block';
             }
 
             // Set active nav item
             event.target.closest('.nav-item').classList.add('active');
+        }
+
+        const CalmVideoData = {
+            anxiety: {
+                title: "Anxiety Relief Support",
+                desc: "Soothing guides, deep breathing, and grounding exercises to help you manage anxiety and panic states.",
+                videos: [
+                    { title: "5-Min Quick Calm Breathwork", src: "videos/anxiety_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" },
+                    { title: "Grounding Exercise for Panic Relief", src: "videos/anxiety_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-with-stars-moving-14022-large.mp4" }
+                ]
+            },
+            depression: {
+                title: "Depression Support & Affirmations",
+                desc: "Gentle reminders, companion voices, and comforting visual soundscapes for heavy days.",
+                videos: [
+                    { title: "Overcoming Fatigue & Heavy Days", src: "videos/depression_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-with-stars-moving-14022-large.mp4" },
+                    { title: "Daily Comfort Affirmations", src: "videos/depression_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" }
+                ]
+            },
+            motivation: {
+                title: "Motivational Speeches",
+                desc: "Ignite your drive, build confidence, and get back on track with powerful mindset sessions.",
+                videos: [
+                    { title: "Unshakable Willpower & Drive", src: "videos/motivation_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-ocean-near-a-cliff-34280-large.mp4" },
+                    { title: "Rising Above Failure", src: "videos/motivation_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-with-stars-moving-14022-large.mp4" }
+                ]
+            },
+            academic: {
+                title: "Academic Stress Management",
+                desc: "Learn to navigate exam pressure, manage task burnout, and optimize your study focus.",
+                videos: [
+                    { title: "Coping with Exam Anxiety & Stress", src: "videos/academic_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" },
+                    { title: "Recovering from Academic Burnout", src: "videos/academic_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-ocean-near-a-cliff-34280-large.mp4" }
+                ]
+            },
+            confidence: {
+                title: "Building Unshakable Confidence",
+                desc: "Overcome self-doubt, silence your inner critic, and build lasting self-compassion.",
+                videos: [
+                    { title: "Silencing Your Inner Critic", src: "videos/confidence_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-ocean-near-a-cliff-34280-large.mp4" },
+                    { title: "Embracing Your Unique Journey", src: "videos/confidence_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" }
+                ]
+            },
+            meditate: {
+                title: "Guided Meditation & Grounding",
+                desc: "Find peace and centering through deep breathing techniques, mindfulness, and audio-visual meditation.",
+                videos: [
+                    { title: "Deep Breathing Focus Session", src: "videos/meditate_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" },
+                    { title: "Sleep Soundscape & Evening Rest", src: "videos/meditate_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-with-stars-moving-14022-large.mp4" }
+                ]
+            }
+        };
+
+        function openCategory(catId) {
+            const cat = CalmVideoData[catId];
+            if (!cat) return;
+
+            document.getElementById('calmCategoryGrid').style.display = 'none';
+            const detail = document.getElementById('categoryDetail');
+            detail.style.display = 'block';
+
+            document.getElementById('currentCategoryTitle').textContent = cat.title;
+            document.getElementById('currentCategoryDesc').textContent = cat.desc;
+
+            const playlist = document.getElementById('playlistItems');
+            playlist.innerHTML = '';
+
+            cat.videos.forEach((video, index) => {
+                const btn = document.createElement('button');
+                btn.className = `playlist-video-item ${index === 0 ? 'active' : ''}`;
+                btn.onclick = () => {
+                    document.querySelectorAll('.playlist-video-item').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    playVideo(video);
+                };
+                btn.innerHTML = `
+                    <span class="playlist-video-icon">▶</span>
+                    <span>${video.title}</span>
+                `;
+                playlist.appendChild(btn);
+            });
+
+            if (cat.videos.length > 0) {
+                playVideo(cat.videos[0]);
+            }
+        }
+
+        function playVideo(videoObj) {
+            const player = document.getElementById('detailVideoPlayer');
+            const source = document.getElementById('detailVideoSource');
+            const title = document.getElementById('currentVideoTitle');
+
+            title.textContent = videoObj.title;
+
+            // Reset source
+            player.onerror = null;
+            source.src = videoObj.src;
+            player.load();
+            
+            player.onerror = function() {
+                if (source.src !== videoObj.fallback) {
+                    console.log(`Local file ${videoObj.src} not found, falling back to public relaxation video.`);
+                    source.src = videoObj.fallback;
+                    player.load();
+                    player.play().catch(e => console.warn(e));
+                }
+            };
+
+            player.play().catch(e => console.warn(e));
+        }
+
+        function closeCategory() {
+            const player = document.getElementById('detailVideoPlayer');
+            if (player) {
+                player.pause();
+            }
+            document.getElementById('categoryDetail').style.display = 'none';
+            document.getElementById('calmCategoryGrid').style.display = 'grid';
         }
 
         async function sendMessage() {

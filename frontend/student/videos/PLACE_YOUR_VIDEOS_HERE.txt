@@ -1,0 +1,28 @@
+Please place your custom video files here to make them play in the student portal's Calm Hub.
+Name the files exactly as follows:
+
+For Anxiety Relief:
+- anxiety_1.mp4
+- anxiety_2.mp4
+
+For Depression Support:
+- depression_1.mp4
+- depression_2.mp4
+
+For Motivational Speeches:
+- motivation_1.mp4
+- motivation_2.mp4
+
+For Academic Stress:
+- academic_1.mp4
+- academic_2.mp4
+
+For Building Confidence:
+- confidence_1.mp4
+- confidence_2.mp4
+
+For Guided Meditation:
+- meditate_1.mp4
+- meditate_2.mp4
+
+If any video file is missing, the player will automatically fall back to online calming nature video streams, so the page will always work!
