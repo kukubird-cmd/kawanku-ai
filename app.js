@@ -1218,24 +1218,8 @@ document.addEventListener('DOMContentLoaded', () => {
         lastGeminiFailure = null;
 
         let response = null;
-        const canUseBackendProxy = window.location.protocol !== 'file:';
-
-        if (canUseBackendProxy) {
-            try {
-                response = await fetch('/api/ai/gemini', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model, payload: requestBody })
-                });
-            } catch (e) {
-                console.warn('Backend proxy fetch failed:', e);
-            }
-        }
-
-        // If backend proxy failed (either threw an exception, returned a non-ok status, or returned 503),
-        // we fall back to direct fetch using the local GEMINI_API_KEY if available.
-        const needsFallback = !response || !response.ok || response.status === 503;
-        if (needsFallback && GEMINI_API_KEY) {
+        // Prioritize direct API call if local key exists, to avoid 404 proxy errors on static server port 8086
+        if (GEMINI_API_KEY) {
             try {
                 const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
                 response = await fetch(endpoint, {
@@ -1244,7 +1228,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify(requestBody)
                 });
             } catch (e) {
-                console.error('Fallback direct Gemini fetch failed:', e);
+                console.error('Direct Gemini fetch failed:', e);
+            }
+        } else if (window.location.protocol !== 'file:') {
+            try {
+                response = await fetch('/api/ai/gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model, payload: requestBody })
+                });
+            } catch (e) {
+                console.warn('Backend proxy fetch failed:', e);
             }
         }
 
@@ -1562,7 +1556,7 @@ Keep your conversational reply warm, healing and concise. The student should fee
         renderAvatarVisuals();
         appendChatMessage('Buddy', reply);
         const geminiDiagnostic = formatGeminiDiagnostic();
-        if (geminiDiagnostic) appendChatMessage('Buddy', geminiDiagnostic);
+        if (geminiDiagnostic) console.warn(geminiDiagnostic);
         speakResponse(reply, true);
         syncStudentAnalysisToBackend(text, reply, 'text');
     }
