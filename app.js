@@ -7170,6 +7170,11 @@ Example format:
 
     // Run launcher
     init();
+
+    // Initial sync of real-time cozy stats and daily zen focus checklists on load
+    if (window.updateSanctuaryDashboard) {
+        window.updateSanctuaryDashboard();
+    }
 });
 
 // Calm Videos Integration (Exposed Globally for inline HTML onclick handlers)

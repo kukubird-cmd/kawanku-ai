@@ -6756,7 +6756,7 @@ body {
 }
 
 .zen-task-item.completed .checkbox-indicator::after {
-    content: '✓';
+    content: "\2713";
     color: #ffffff;
     font-size: 0.72rem;
     font-weight: 900;
