@@ -896,20 +896,25 @@ body {
     background: linear-gradient(135deg, #FFB3C1, #FFCDD7);
     border: 3.5px solid #4A3E3D !important; /* Thick, distinct dark border line */
     color: #4A3E3D !important;
-    border-radius: 50px;  /* pill shape */
-    padding: 12px 20px;
+    border-radius: 24px;  /* comfortable rounded corners for 2 lines */
+    padding: 10px 12px;
     font-family: var(--font-heading);
     font-weight: 700;
-    font-size: 0.82rem;
+    font-size: 0.76rem;   /* slightly smaller font to fit nicely */
     cursor: pointer;
     display: flex;
+    flex-direction: column; /* stack icon and text vertically to save horizontal space */
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
     box-shadow: 4px 4px 0px rgba(74, 62, 61, 0.15);
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
     overflow: hidden;
+    width: 100%;          /* fit sidebar width precisely */
+    box-sizing: border-box;
+    white-space: normal !important; /* allow text wrapping */
+    text-align: center;
 }
 
 .huggeet-btn:hover {
