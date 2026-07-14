@@ -6500,7 +6500,7 @@ body {
 /* Shifting Twilight Gradient Backdrop on games container - Brighter, more vibrant pastel transitions */
 .games-layout {
     position: relative;
-    background: linear-gradient(135deg, #ffd1d5, #fed7aa, #c7beff, #a7f3d0) !important;
+    background: linear-gradient(135deg, #ffd1d5, #e0f2fe, #c7beff, #a7f3d0) !important;
     background-size: 400% 400% !important;
     animation: cozyGradientShift 18s infinite ease-in-out !important;
     box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.45) !important;
