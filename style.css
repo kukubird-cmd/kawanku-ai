@@ -6764,8 +6764,7 @@ body {
 
 .zen-task-item.completed .task-label-text {
     color: #047857;
-    text-decoration: line-through;
-    opacity: 0.75;
+    opacity: 0.85;
 }
 
 /* Restyle Game cards into organic warm pastel glass gradients - Brighter, more saturated, rich colors */
