@@ -3877,7 +3877,7 @@ body {
 
 .games-selection-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 24px;
 }
 
@@ -5825,8 +5825,9 @@ body {
 
 .games-selection-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 32px !important;
+    align-items: stretch !important;
 }
 
 .menu-game-card {
@@ -6538,23 +6539,24 @@ body {
 /* Frosted glass Cozy Companion Card - Brighter emerald-mint green tint */
 .comfort-lounge-card {
     background: linear-gradient(135deg, rgba(167, 243, 208, 0.82), rgba(110, 231, 183, 0.58)) !important;
-    border: 2px solid rgba(16, 185, 129, 0.8) !important;
-    border-radius: 28px !important;
-    padding: 20px !important;
+    border: 2.5px solid rgba(16, 185, 129, 0.8) !important;
+    border-radius: 32px !important;
+    padding: 28px 20px !important;
     box-shadow: 0 15px 40px rgba(16, 185, 129, 0.12), inset 0 4px 12px rgba(255, 255, 255, 0.3) !important;
     backdrop-filter: blur(16px) !important;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: auto;
+    height: 100%;
     box-sizing: border-box;
     gap: 20px;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
 }
 
 .comfort-lounge-card:hover {
     border-color: rgba(16, 185, 129, 1) !important;
-    box-shadow: 0 18px 45px rgba(16, 185, 129, 0.18), inset 0 4px 12px rgba(255, 255, 255, 0.4) !important;
+    transform: translateY(-6px) !important;
+    box-shadow: 0 20px 40px rgba(16, 185, 129, 0.15), 0 0 18px rgba(16, 185, 129, 0.3) !important;
 }
 
 
