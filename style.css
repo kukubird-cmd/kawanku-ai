@@ -6695,25 +6695,25 @@ body {
 .zen-task-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
 .zen-task-item {
     background: rgba(255, 255, 255, 0.55);
     border: 1.5px solid rgba(255, 255, 255, 0.8);
-    border-radius: 14px;
-    padding: 10px 14px;
+    border-radius: 12px;
+    padding: 8px 12px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .zen-task-item .checkbox-indicator {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     border: 2px solid #a7f3d0;
-    border-radius: 6px;
+    border-radius: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -6723,7 +6723,7 @@ body {
 }
 
 .zen-task-item .task-label-text {
-    font-size: 0.76rem;
+    font-size: 0.72rem;
     font-weight: 600;
     color: #4b5563;
     transition: all 0.25s ease;
