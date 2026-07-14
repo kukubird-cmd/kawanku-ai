@@ -88,6 +88,12 @@ document.addEventListener('DOMContentLoaded', () => {
             currentQuestionIdx: 0,
             answers: [],
             questions: []
+        },
+
+        // Game Stats Tracker
+        gameStats: {
+            matches: 0,
+            slices: 0
         }
     };
 
@@ -7121,6 +7127,46 @@ Example format:
             }
         }
     })();
+
+    // Expose dashboard updater globally so other scopes can invoke it
+    window.updateSanctuaryDashboard = function() {
+        const elZen = document.getElementById('dash-val-zen');
+        const elMatches = document.getElementById('dash-val-matches');
+        const elSlices = document.getElementById('dash-val-slices');
+        const elTime = document.getElementById('dash-val-time');
+
+        if (elZen) elZen.textContent = state.diagnostics.sentiment || 'Calm';
+        if (elMatches) elMatches.textContent = state.gameStats.matches;
+        if (elSlices) elSlices.textContent = state.gameStats.slices;
+
+        // Keep simple play session timer tracker
+        if (elTime) {
+            let startTime = sessionStorage.getItem('relax_start_time');
+            if (!startTime) {
+                startTime = Date.now();
+                sessionStorage.setItem('relax_start_time', startTime);
+            }
+            const diffMins = Math.floor((Date.now() - Number(startTime)) / 60000);
+            elTime.textContent = diffMins + 'm';
+        }
+
+        // Update Checklist Items in Daily Zen Focus
+        const isGameStarted = localStorage.getItem('relax_game_started') === 'true';
+        const taskStart = document.getElementById('task-cozy-start');
+        if (taskStart && isGameStarted) {
+            taskStart.classList.add('completed');
+        }
+
+        const taskMatches = document.getElementById('task-cozy-matches');
+        if (taskMatches && state.gameStats.matches >= 30) {
+            taskMatches.classList.add('completed');
+        }
+
+        const taskSlices = document.getElementById('task-cozy-slices');
+        if (taskSlices && state.gameStats.slices >= 20) {
+            taskSlices.classList.add('completed');
+        }
+    };
 
     // Run launcher
     init();
