@@ -768,6 +768,71 @@ document.addEventListener('DOMContentLoaded', () => {
                     <path d="M 150,190 L 140,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
                     <path d="M 250,190 L 260,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
                 `;
+            } else if (acc === 'angel_glasses') {
+                accSVG = `
+                    <!-- Left Wing -->
+                    <path d="M 154,190 C 144,178 132,182 130,192 C 128,200 138,204 146,198 C 136,200 136,208 140,212 C 144,215 150,208 154,198 Z" fill="#fff5f7" stroke="#4A3E3D" stroke-width="2.5" stroke-linejoin="round" />
+                    <!-- Right Wing -->
+                    <path d="M 246,190 C 256,178 268,182 270,192 C 272,200 262,204 254,198 C 264,200 264,208 260,212 C 256,215 250,208 246,198 Z" fill="#fff5f7" stroke="#4A3E3D" stroke-width="2.5" stroke-linejoin="round" />
+                    <!-- Left Lens -->
+                    <circle cx="172" cy="190" r="18" fill="#ffd6e0" fill-opacity="0.2" stroke="#4A3E3D" stroke-width="3" />
+                    <ellipse cx="166" cy="182" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,166,182)" />
+                    <!-- Right Lens -->
+                    <circle cx="228" cy="190" r="18" fill="#ffd6e0" fill-opacity="0.2" stroke="#4A3E3D" stroke-width="3" />
+                    <ellipse cx="222" cy="182" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,222,182)" />
+                    <!-- Bridge & Sides -->
+                    <path d="M 190,190 Q 200,188 210,190" fill="none" stroke="#4A3E3D" stroke-width="3" />
+                    <path d="M 154,190 L 142,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                    <path d="M 246,190 L 258,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                `;
+            } else if (acc === 'boba_glasses') {
+                accSVG = `
+                    <!-- Left Lens -->
+                    <circle cx="172" cy="190" r="20" fill="none" stroke="#b45309" stroke-width="3.5" />
+                    <circle cx="164" cy="200" r="3.5" fill="#4A3E3D" />
+                    <circle cx="172" cy="202" r="3.5" fill="#4A3E3D" />
+                    <circle cx="180" cy="200" r="3.5" fill="#4A3E3D" />
+                    <!-- Right Lens -->
+                    <circle cx="228" cy="190" r="20" fill="none" stroke="#b45309" stroke-width="3.5" />
+                    <circle cx="220" cy="200" r="3.5" fill="#4A3E3D" />
+                    <circle cx="228" cy="202" r="3.5" fill="#4A3E3D" />
+                    <circle cx="236" cy="200" r="3.5" fill="#4A3E3D" />
+                    <!-- Bridge & Sides -->
+                    <path d="M 192,190 Q 200,188 208,190" fill="none" stroke="#b45309" stroke-width="3.5" />
+                    <path d="M 152,190 L 140,192" fill="none" stroke="#b45309" stroke-width="2.5" />
+                    <path d="M 248,190 L 260,192" fill="none" stroke="#b45309" stroke-width="2.5" />
+                `;
+            } else if (acc === 'puppy_glasses') {
+                accSVG = `
+                    <!-- Left Puppy Ear -->
+                    <path d="M 152,180 C 140,170 142,200 148,206 C 154,200 158,185 152,180 Z" fill="#ffffff" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" />
+                    <path d="M 151,183 C 145,176 146,195 149,199 C 152,195 154,186 151,183 Z" fill="#ffa2b6" />
+                    <!-- Right Puppy Ear -->
+                    <path d="M 248,180 C 260,170 258,200 252,206 C 246,200 242,185 248,180 Z" fill="#ffffff" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" />
+                    <path d="M 249,183 C 255,176 254,195 251,199 C 248,195 246,186 249,183 Z" fill="#ffa2b6" />
+                    <!-- Lenses -->
+                    <circle cx="172" cy="190" r="18" fill="none" stroke="#4A3E3D" stroke-width="3.5" />
+                    <circle cx="228" cy="190" r="18" fill="none" stroke="#4A3E3D" stroke-width="3.5" />
+                    <!-- Bridge & Sides -->
+                    <path d="M 190,190 Q 200,188 210,190" fill="none" stroke="#4A3E3D" stroke-width="3.5" />
+                    <path d="M 154,190 L 142,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                    <path d="M 246,190 L 258,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                `;
+            } else if (acc === 'star_wing_glasses') {
+                accSVG = `
+                    <!-- Left Winged Lens -->
+                    <path d="M 148,180 C 160,180 186,185 190,195 C 180,205 160,205 148,180 Z" fill="#a78bfa" fill-opacity="0.7" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" />
+                    <!-- Left Sparkle Star -->
+                    <polygon points="152,176 154,180 158,181 155,183 156,187 152,185 148,187 149,183 146,181 150,180" fill="#facc15" stroke="#4A3E3D" stroke-width="1.5" />
+                    <!-- Right Winged Lens -->
+                    <path d="M 252,180 C 240,180 214,185 210,195 C 220,205 240,205 252,180 Z" fill="#a78bfa" fill-opacity="0.7" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" />
+                    <!-- Right Sparkle Star -->
+                    <polygon points="248,176 250,180 254,181 251,183 252,187 248,185 244,187 245,183 242,181 246,180" fill="#facc15" stroke="#4A3E3D" stroke-width="1.5" />
+                    <!-- Bridge & Sides -->
+                    <path d="M 190,190 Q 200,188 210,190" fill="none" stroke="#4A3E3D" stroke-width="3" />
+                    <path d="M 148,182 L 140,184" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                    <path d="M 252,182 L 260,184" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                `;
             }
             accessoryGroup.innerHTML = accSVG;
         }
@@ -3323,7 +3388,11 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
                     { id: 'sprout', label: 'Tiny Head Sprout', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 50,45 Q 50,25 58,15" fill="none" stroke="#22c55e" stroke-width="3.5" stroke-linecap="round"/><path d="M 210,95 Q 222,98 218,108 C 213,113 203,107 210,95 Z" fill="#22c55e" stroke="#166534" stroke-width="1.5"/><path d="M 200,118 Q 188,110 192,102 C 196,98 204,105 200,118 Z" fill="#22c55e" stroke="#166534" stroke-width="1.5"/></svg>' },
                     { id: 'heart_glasses', label: 'Sweet Heart Glasses 💖', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 35,40 C 23,28 11,36 15,50 C 19,62 35,68 35,68 C 35,68 51,62 55,50 C 59,36 47,28 35,40 Z" fill="#ff758f" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="29" cy="44" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,29,44)" /><path d="M 65,40 C 53,28 41,36 45,50 C 49,62 65,68 65,68 C 65,68 81,62 85,50 C 89,36 77,28 65,40 Z" fill="#ff758f" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="59" cy="44" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,59,44)" /><path d="M 47,50 Q 50,48 53,50" fill="none" stroke="#4A3E3D" stroke-width="3" /></svg>' },
                     { id: 'cat_glasses', label: 'Cat Ear Glasses 🐱', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="25,42 16,28 34,37" fill="#ffd6e0" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" /><polygon points="26,41 20,31 32,37" fill="#ff758f" /><polygon points="75,42 84,28 66,37" fill="#ffd6e0" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" /><polygon points="74,41 80,31 68,37" fill="#ff758f" /><circle cx="35" cy="50" r="12" fill="#ffd6e0" fill-opacity="0.25" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="29" cy="44" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,29,44)" /><circle cx="65" cy="50" r="12" fill="#ffd6e0" fill-opacity="0.25" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="59" cy="44" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,59,44)" /><path d="M 47,50 Q 50,48 53,50" fill="none" stroke="#4A3E3D" stroke-width="3" /></svg>' },
-                    { id: 'flower_glasses', label: 'Daisy Sunglasses 🌼', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="32" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="51" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="51" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="35" cy="68" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="19" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="19" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="35" cy="50" r="12" fill="#fef08a" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="2.5" /><circle cx="35" cy="50" r="7" fill="#facc15" opacity="0.8" /><circle cx="65" cy="32" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="81" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="81" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="65" cy="68" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="49" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="49" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="65" cy="50" r="12" fill="#fef08a" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="2.5" /><circle cx="65" cy="50" r="7" fill="#facc15" opacity="0.8" /><path d="M 45,50 Q 50,48 55,50" fill="none" stroke="#4A3E3D" stroke-width="2.5" /></svg>' }
+                    { id: 'flower_glasses', label: 'Daisy Sunglasses 🌼', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="32" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="51" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="51" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="35" cy="68" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="19" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="19" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="35" cy="50" r="12" fill="#fef08a" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="2.5" /><circle cx="35" cy="50" r="7" fill="#facc15" opacity="0.8" /><circle cx="65" cy="32" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="81" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="81" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="65" cy="68" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="49" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="49" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="65" cy="50" r="12" fill="#fef08a" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="2.5" /><circle cx="65" cy="50" r="7" fill="#facc15" opacity="0.8" /><path d="M 45,50 Q 50,48 55,50" fill="none" stroke="#4A3E3D" stroke-width="2.5" /></svg>' },
+                    { id: 'angel_glasses', label: 'Angel Wing Glasses 👼', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="50" r="12" fill="#ffd6e0" fill-opacity="0.4" stroke="#4A3E3D" stroke-width="3"/><circle cx="65" cy="50" r="12" fill="#ffd6e0" fill-opacity="0.4" stroke="#4A3E3D" stroke-width="3"/><path d="M 23,50 C 15,42 8,45 6,52 Q 13,54 23,50 Z" fill="#ffffff" stroke="#4A3E3D" stroke-width="2"/><path d="M 77,50 C 85,42 92,45 94,52 Q 87,54 77,50 Z" fill="#ffffff" stroke="#4A3E3D" stroke-width="2"/><line x1="47" y1="50" x2="53" y2="50" stroke="#4A3E3D" stroke-width="3"/></svg>' },
+                    { id: 'boba_glasses', label: 'Sweet Boba Glasses 🧋', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="50" r="12" fill="none" stroke="#b45309" stroke-width="3.5"/><circle cx="65" cy="50" r="12" fill="none" stroke="#b45309" stroke-width="3.5"/><circle cx="31" cy="56" r="2.5" fill="#4A3E3D"/><circle cx="35" cy="58" r="2.5" fill="#4A3E3D"/><circle cx="61" cy="56" r="2.5" fill="#4A3E3D"/><circle cx="65" cy="58" r="2.5" fill="#4A3E3D"/><line x1="47" y1="50" x2="53" y2="50" stroke="#b45309" stroke-width="3"/></svg>' },
+                    { id: 'puppy_glasses', label: 'Puppy Ear Glasses 🐶', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 24,42 C 16,36 17,55 21,59 Z" fill="#ffffff" stroke="#4A3E3D" stroke-width="2"/><path d="M 76,42 C 84,36 83,55 79,59 Z" fill="#ffffff" stroke="#4A3E3D" stroke-width="2"/><circle cx="35" cy="50" r="11" fill="none" stroke="#4A3E3D" stroke-width="3"/><circle cx="65" cy="50" r="11" fill="none" stroke="#4A3E3D" stroke-width="3"/><line x1="46" y1="50" x2="54" y2="50" stroke="#4A3E3D" stroke-width="3"/></svg>' },
+                    { id: 'star_wing_glasses', label: 'Star Wing Sunglasses 🕶️', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 18,44 C 28,44 44,48 47,54 Q 32,59 18,44 Z" fill="#a78bfa" stroke="#4A3E3D" stroke-width="2.5"/><path d="M 82,44 C 72,44 56,48 53,54 Q 68,59 82,44 Z" fill="#a78bfa" stroke="#4A3E3D" stroke-width="2.5"/><polygon points="22,40 23,43 26,44 24,45 25,48 22,46 19,48 20,45 18,44 21,43" fill="#facc15" stroke="#4A3E3D" stroke-width="1.2"/><polygon points="78,40 79,43 82,44 80,45 81,48 78,46 75,48 76,45 74,44 77,43" fill="#facc15" stroke="#4A3E3D" stroke-width="1.2"/><line x1="47" y1="50" x2="53" y2="50" stroke="#4A3E3D" stroke-width="3"/></svg>' }
                 ]
             }
         },
@@ -3492,7 +3561,7 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
         const mascotColors = ['#ffd6e0', '#dbf7f9', '#e8f5e9', '#e8dff5'];
         const expressionOptions  = ['friendly', 'starry', 'wink', 'sleepy', 'blep', 'uwu', 'teary', 'cat'];
         const blushOptions       = ['circle', 'heart', 'star', 'sakura', 'sparkle', 'dots', 'crescent', 'butterfly'];
-        const accOptions         = ['none', 'round_glasses', 'star_glasses', 'night_mask', 'sprout', 'heart_glasses', 'cat_glasses', 'flower_glasses'];
+        const accOptions         = ['none', 'round_glasses', 'star_glasses', 'night_mask', 'sprout', 'heart_glasses', 'cat_glasses', 'flower_glasses', 'angel_glasses', 'boba_glasses', 'puppy_glasses', 'star_wing_glasses'];
         const sceneOptions       = ['starry_night', 'lofi_study', 'floating_garden', 'boba_cafe', 'pink_bedroom', 'cozy_cabin', 'cozy_rain'];
 
         state.avatar.skinTone     = getRandomElement(mascotColors);
