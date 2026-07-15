@@ -5103,7 +5103,7 @@ body {
 
 /* Cards layout overrides */
 .panel-container {
-    padding: 32px !important;
+    padding: 12px 32px 32px 32px !important;
 }
 .avatar-card, .chat-window-card {
     background-color: #ffffff !important;
