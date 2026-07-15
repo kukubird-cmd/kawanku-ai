@@ -3751,7 +3751,8 @@ body {
 .shop-items-grid { display: flex; flex-direction: column; gap: 12px; }
 .shop-item-card { display: flex; align-items: center; gap: 16px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-glass); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.3s ease; }
 .shop-item-card:hover { border-color: var(--border-glass-hover); background: rgba(255,255,255,0.04); transform: translateX(4px); }
-.shop-item-icon { font-size: 1.8rem; width: 48px; text-align: center; }
+.shop-item-icon { font-size: 1.8rem; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; text-align: center; }
+.shop-item-icon svg { width: 48px; height: 48px; display: block; }
 .shop-item-info { display: flex; flex-direction: column; flex-grow: 1; }
 .shop-item-name { font-size: 0.92rem; font-weight: 600; color: var(--color-text-primary); }
 .shop-item-cost { font-size: 0.78rem; color: var(--color-amber); margin-top: 4px; }

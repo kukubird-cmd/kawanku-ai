@@ -4957,9 +4957,18 @@ Example format:
             sGrid.innerHTML = '';
             const items = SHOP_CATALOG[week] || [];
             items.forEach((item, idx) => {
+                let iconContent = item.icon;
+                if (item.prop === 'accessory') {
+                    const catItem = AVATAR_CATALOG.Avatar.items['Face Accessories'].find(i => i.id === item.val);
+                    if (catItem && catItem.svg) iconContent = catItem.svg;
+                } else if (item.prop === 'activeOutfit') {
+                    const catItem = AVATAR_CATALOG.Fashion.items['Outfits'].find(i => i.id === item.val);
+                    if (catItem && catItem.svg) iconContent = catItem.svg;
+                }
+
                 const card = document.createElement('div');
                 card.className = 'shop-item-card';
-                card.innerHTML = '<span class="shop-item-icon">' + item.icon + '</span>' +
+                card.innerHTML = '<span class="shop-item-icon">' + iconContent + '</span>' +
                     '<div class="shop-item-info">' +
                     '<span class="shop-item-name">' + item.name + '</span>' +
                     '<span class="shop-item-cost">🔥 ' + item.cost + ' Day Sparks</span></div>' +
