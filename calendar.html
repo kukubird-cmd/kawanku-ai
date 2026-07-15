@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Sanctuary & Calendar - KawanKu AI</title>
+    
+    <!-- Outfit Google Font (Rounded, friendly, therapeutic) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    
+    <!-- Babel for inline JSX compilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f3e8ff 50%, #fdf2f8 100%);
+            min-height: 100vh;
+        }
+
+        /* Glassmorphism utility */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        /* Custom Box Breathing Animations */
+        @keyframes breatheAnimation {
+            0%, 100% { transform: scale(1); background-color: rgba(224, 242, 254, 0.4); }
+            25% { transform: scale(1.4); background-color: rgba(186, 230, 253, 0.6); }
+            50% { transform: scale(1.4); background-color: rgba(186, 230, 253, 0.6); }
+            75% { transform: scale(1); background-color: rgba(224, 242, 254, 0.4); }
+        }
+        
+        .breathing-circle {
+            animation: breatheAnimation 16s ease-in-out infinite;
+        }
+
+        /* Custom scrollbar for ref tags */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(74, 62, 61, 0.15);
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div id="root" class="max-w-5xl mx-auto"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Mock data matching the requested therapist reframing & pre-populated 20 days
+        const INITIAL_MOCK_DAYS = {
+            1: { mood: 'joy', icon: '✨', title: 'Joyful & Energetic', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', notes: 'Completed all assignments early. Had a great jog in the park!', tags: ['📚 Heavy workload today', '🏃‍♀️ Natural movement', '☀️ Caught some sun'], sleep: 7.2, heart: 68, chat: true, face: true, quiz: true },
+            2: { mood: 'peace', icon: '🌿', title: 'Peaceful & Balanced', color: 'bg-emerald-100 text-emerald-800 border-emerald-200', notes: 'Calm group study session. Enjoyed a warm chamomile tea.', tags: ['🍵 Self-care evening', '😌 Calm social connection'], sleep: 7.5, heart: 65, chat: true, face: false, quiz: true },
+            3: { mood: 'stress', icon: '☁️', title: 'Overwhelmed & High Stress', color: 'bg-sky-100 text-sky-800 border-sky-200', notes: 'Big math exam tomorrow. Feeling nervous and struggling to focus.', tags: ['📚 Heavy workload today', '😴 Rest was disrupted', '🌀 Exam anxiety'], sleep: 5.2, heart: 88, chat: true, face: true, quiz: false },
+            4: { mood: 'sad', icon: '💜', title: 'Sad & Low Energy', color: 'bg-purple-100 text-purple-800 border-purple-200', notes: 'Felt lonely in the evening. Rest was disrupted and body felt heavy.', tags: ['😴 Rest was disrupted', '😢 Feeling isolated'], sleep: 5.8, heart: 82, chat: true, face: true, quiz: true },
+            5: null, // Unlogged
+            6: { mood: 'joy', icon: '😊', title: 'Joyful & Energetic', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', notes: 'Met friends for lunch. Finished drawing my art project today!', tags: ['🎨 Finished project', '😌 Calm social connection'], sleep: 8.0, heart: 70, chat: false, face: true, quiz: true },
+            7: { mood: 'peace', icon: '😌', title: 'Peaceful & Balanced', color: 'bg-emerald-100 text-emerald-800 border-emerald-200', notes: 'Cozy reading time. Listened to relaxing rain sounds in my room.', tags: ['🍵 Self-care evening', '🍃 Nature atmosphere'], sleep: 7.8, heart: 64, chat: true, face: false, quiz: true },
+            8: { mood: 'stress', icon: '🌀', title: 'Overwhelmed & High Stress', color: 'bg-sky-100 text-sky-800 border-sky-200', notes: 'Presentation slides are due. Non-stop meetings made me anxious.', tags: ['📚 Heavy workload today', '🌀 Tight deadline'], sleep: 5.5, heart: 85, chat: true, face: true, quiz: true },
+            9: null, // Unlogged
+            10: { mood: 'sad', icon: '😢', title: 'Sad & Low Energy', color: 'bg-purple-100 text-purple-800 border-purple-200', notes: 'Missing home and family today. Had bad dreams last night.', tags: ['😴 Rest was disrupted', '🏠 Homesick feeling'], sleep: 5.0, heart: 79, chat: true, face: false, quiz: true },
+            11: { mood: 'peace', icon: '🌿', title: 'Peaceful & Balanced', color: 'bg-emerald-100 text-emerald-800 border-emerald-200', notes: 'Gardening session in the school backyard. Felt very grounded.', tags: ['🍃 Nature atmosphere', '🏃‍♀️ Natural movement'], sleep: 7.4, heart: 66, chat: false, face: true, quiz: true },
+            12: { mood: 'joy', icon: '✨', title: 'Joyful & Energetic', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', notes: 'Passed the programming test! Ordered delicious pizza to celebrate.', tags: ['🎉 Little wins', '🍕 Treated myself'], sleep: 7.6, heart: 72, chat: true, face: true, quiz: true },
+            13: null, // Unlogged
+            14: { mood: 'stress', icon: '☁️', title: 'Overwhelmed & High Stress', color: 'bg-sky-100 text-sky-800 border-sky-200', notes: 'Tight project deadline. Drank too much coffee and my heart is racing.', tags: ['☕ Too much caffeine', '🌀 Tight deadline', '😴 Rest was disrupted'], sleep: 4.8, heart: 92, chat: true, face: true, quiz: false },
+            15: { mood: 'sad', icon: '💜', title: 'Sad & Low Energy', color: 'bg-purple-100 text-purple-800 border-purple-200', notes: 'Feeling run-down and flu-ish. Spent the whole day in bed.', tags: ['🤒 Feeling unwell', '😴 Rest was disrupted'], sleep: 9.0, heart: 76, chat: false, face: false, quiz: true },
+            16: { mood: 'peace', icon: '😌', title: 'Peaceful & Balanced', color: 'bg-emerald-100 text-emerald-800 border-emerald-200', notes: 'Soft instrumental music and a nice walk around the lake.', tags: ['🍃 Nature atmosphere', '🍵 Self-care evening'], sleep: 7.0, heart: 68, chat: true, face: true, quiz: true },
+            17: { mood: 'joy', icon: '😊', title: 'Joyful & Energetic', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', notes: 'Board game night with roommates. Laughed so much my stomach hurts!', tags: ['😌 Calm social connection', '🎉 Little wins'], sleep: 8.2, heart: 70, chat: true, face: true, quiz: true },
+            18: null, // Unlogged
+            19: { mood: 'peace', icon: '🌿', title: 'Peaceful & Balanced', color: 'bg-emerald-100 text-emerald-800 border-emerald-200', notes: 'Organized my bedroom desk. Feels so good to have a clean space.', tags: ['🍵 Self-care evening', '🧹 Clean environment'], sleep: 7.3, heart: 67, chat: true, face: false, quiz: true },
+            20: { mood: 'stress', icon: '☁️', title: 'Overwhelmed & High Stress', color: 'bg-sky-100 text-sky-800 border-sky-200', notes: 'Heavy family responsibilities. Couldn\'t fall asleep for hours.', tags: ['🌀 Family duties', '😴 Rest was disrupted'], sleep: 5.1, heart: 86, chat: true, face: true, quiz: true }
+        };
+
+        const ZEN_QUOTES = [
+            "You don't have to carry it all. Taking a break is also a form of progress. 🕊️",
+            "Inhale peace, exhale tension. You are doing completely fine right here. ✨",
+            "This very moment is enough. You are safe, you are protected, and you are loved. 🌿",
+            "Clouds come and go, but the sky remains. Your stress is temporary; your light is permanent. ☁️",
+            "Be gentle with yourself. You are recovering, growing, and learning at your own pace. 💜",
+            "Your value is not measured by your productivity. Simply breathing is a success. 🕊️"
+        ];
+
+        function App() {
+            const [selectedDayNum, setSelectedDayNum] = useState(1);
+            const [isSafeSpaceMode, setIsSafeSpaceMode] = useState(false);
+            const [breathingStep, setBreathingStep] = useState(0); // 0: Inhale, 1: Hold, 2: Exhale, 3: Hold
+            const [quoteIndex, setQuoteIndex] = useState(0);
+
+            // Breath cycle text helper
+            const breathingTexts = [
+                { text: "Inhale...", instruction: "Fill your chest with peace" },
+                { text: "Hold...", instruction: "Let the calmness settle" },
+                { text: "Exhale...", instruction: "Release all stress and tension" },
+                { text: "Hold...", instruction: "Rest in the quiet space" }
+            ];
+
+            useEffect(() => {
+                let interval;
+                if (isSafeSpaceMode) {
+                    // Start breathing step interval (4 seconds per step)
+                    interval = setInterval(() => {
+                        setBreathingStep(prev => (prev + 1) % 4);
+                    }, 4000);
+
+                    // Randomize quote on mount
+                    setQuoteIndex(Math.floor(Math.random() * ZEN_QUOTES.length));
+                } else {
+                    setBreathingStep(0);
+                }
+                return () => clearInterval(interval);
+            }, [isSafeSpaceMode]);
+
+            const daysArray = Array.from({ length: 31 }, (_, i) => i + 1);
+            const selectedDayData = INITIAL_MOCK_DAYS[selectedDayNum] || null;
+
+            // Mood details mapper
+            const getMoodDetails = (dayNum) => {
+                const day = INITIAL_MOCK_DAYS[dayNum];
+                if (!day) return { bg: 'bg-white/30 border-dashed border-gray-300', text: 'text-gray-400', emoji: '_' };
+                
+                switch (day.mood) {
+                    case 'joy':
+                        return { bg: 'bg-amber-100/80 border-amber-200 hover:bg-amber-200/90 shadow-sm shadow-amber-100', text: 'text-amber-800', emoji: day.icon };
+                    case 'peace':
+                        return { bg: 'bg-emerald-100/80 border-emerald-200 hover:bg-emerald-200/90 shadow-sm shadow-emerald-100', text: 'text-emerald-800', emoji: day.icon };
+                    case 'stress':
+                        return { bg: 'bg-sky-100/80 border-sky-200 hover:bg-sky-200/90 shadow-sm shadow-sky-100', text: 'text-sky-800', emoji: day.icon };
+                    case 'sad':
+                        return { bg: 'bg-purple-100/80 border-purple-200 hover:bg-purple-200/90 shadow-sm shadow-purple-100', text: 'text-purple-800', emoji: day.icon };
+                    default:
+                        return { bg: 'bg-white/30 border-dashed border-gray-300', text: 'text-gray-400', emoji: '_' };
+                }
+            };
+
+            return (
+                <div className="w-full">
+                    {/* Header */}
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-sky-400 to-indigo-500 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-sky-200">
+                                K
+                            </div>
+                            <div>
+                                <h1 className="text-2xl font-bold text-[#4A3E3D] flex items-center gap-1.5">
+                                    KawanKu AI <span className="text-rose-400">💖</span>
+                                </h1>
+                                <p className="text-xs text-sky-800/80 font-medium">Mental Health Sanctuary & Calendar</p>
+                            </div>
+                        </div>
+
+                        {/* Dual-Mode Toggle Switch */}
+                        <div className="flex items-center bg-white/50 backdrop-blur-md p-1 border border-white/40 rounded-full shadow-inner">
+                            <button 
+                                onClick={() => setIsSafeSpaceMode(false)}
+                                className={`px-5 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 ${!isSafeSpaceMode ? 'bg-[#4A3E3D] text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}
+                            >
+                                📊 Reflection Mode
+                            </button>
+                            <button 
+                                onClick={() => setIsSafeSpaceMode(true)}
+                                className={`px-5 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 ${isSafeSpaceMode ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-600 hover:text-gray-900'}`}
+                            >
+                                🕊️ Safe Space Mode
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Sanctuary Container */}
+                    <div className="glass-card rounded-[32px] overflow-hidden shadow-2xl p-6 md:p-8 min-h-[500px] transition-all duration-700 ease-in-out">
+                        {!isSafeSpaceMode ? (
+                            /* Reflection Mode (Grid + Insights) */
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 transition-all duration-700">
+                                
+                                {/* Left Side: Emoji Calendar */}
+                                <div className="lg:col-span-7 flex flex-col justify-between">
+                                    <div>
+                                        <div className="flex items-center justify-between mb-6">
+                                            <div className="flex items-center gap-2">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                                <span className="text-base font-semibold text-[#4A3E3D]">October 2026</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <button className="p-2 hover:bg-white/50 rounded-full transition-all text-[#4A3E3D]" disabled>
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                                                </button>
+                                                <button className="p-2 hover:bg-white/50 rounded-full transition-all text-[#4A3E3D]" disabled>
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Calendar Weekday Names */}
+                                        <div className="grid grid-cols-7 gap-2 mb-2 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                                        </div>
+
+                                        {/* Calendar Days Grid */}
+                                        <div className="grid grid-cols-7 gap-3">
+                                            {/* Padding offset for Oct 1st, 2026 (Starts on Thursday, so 4 empty days offset) */}
+                                            {Array.from({ length: 4 }).map((_, idx) => (
+                                                <div key={`offset-${idx}`} className="aspect-square opacity-0"></div>
+                                            ))}
+
+                                            {daysArray.map((dayNum) => {
+                                                const mood = getMoodDetails(dayNum);
+                                                const isSelected = selectedDayNum === dayNum;
+                                                return (
+                                                    <button
+                                                        key={`day-${dayNum}`}
+                                                        onClick={() => setSelectedDayNum(dayNum)}
+                                                        className={`aspect-square relative rounded-2xl flex flex-col items-center justify-center p-1 border transition-all duration-300 ${mood.bg} ${isSelected ? 'ring-4 ring-indigo-400 ring-offset-2' : ''}`}
+                                                    >
+                                                        {/* Soft Cloud-like Shape Container inside */}
+                                                        <span className="text-sm font-bold block">{dayNum}</span>
+                                                        <span className="text-xs mt-0.5 opacity-90">{mood.emoji}</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* Color Map Legend */}
+                                    <div className="mt-8 pt-6 border-t border-white/20 flex flex-wrap gap-4 items-center justify-center text-xs text-gray-600 font-semibold">
+                                        <span className="flex items-center gap-1.5"><span className="w-3.5 h-3.5 rounded-full bg-yellow-100 border border-yellow-200 flex items-center justify-center text-[10px]">✨</span> Joyful</span>
+                                        <span className="flex items-center gap-1.5"><span className="w-3.5 h-3.5 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center text-[10px]">🌿</span> Balanced</span>
+                                        <span className="flex items-center gap-1.5"><span className="w-3.5 h-3.5 rounded-full bg-sky-100 border border-sky-200 flex items-center justify-center text-[10px]">☁️</span> Overwhelmed</span>
+                                        <span className="flex items-center gap-1.5"><span className="w-3.5 h-3.5 rounded-full bg-purple-100 border border-purple-200 flex items-center justify-center text-[10px]">💜</span> Low Energy</span>
+                                        <span className="flex items-center gap-1.5"><span className="w-3.5 h-3.5 rounded-full border border-dashed border-gray-300 flex items-center justify-center text-[10px] text-gray-400">_</span> Unlogged</span>
+                                    </div>
+                                </div>
+
+                                {/* Right Side: Gentle Reflection Panel */}
+                                <div className="lg:col-span-5 flex flex-col justify-between bg-white/50 backdrop-blur-md rounded-3xl p-6 border border-white/40 shadow-inner">
+                                    {selectedDayData ? (
+                                        <div className="flex flex-col gap-5 h-full justify-between">
+                                            {/* Validation Header */}
+                                            <div>
+                                                <div className="flex items-start justify-between">
+                                                    <div>
+                                                        <p className="text-xs text-indigo-700/80 font-bold uppercase tracking-wider">Your Day's Vibe</p>
+                                                        <h2 className="text-xl font-bold text-[#4A3E3D]">Oct {selectedDayNum}, 2026</h2>
+                                                    </div>
+                                                    <span className="text-3xl filter drop-shadow-sm">{selectedDayData.icon}</span>
+                                                </div>
+                                                
+                                                <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border mt-2 ${selectedDayData.color}`}>
+                                                    {selectedDayData.title}
+                                                </span>
+                                            </div>
+
+                                            {/* Notes / Reflection Text */}
+                                            <div className="bg-white/70 p-4 rounded-2xl border border-white/20 shadow-sm text-sm text-[#4A3E3D] italic leading-relaxed">
+                                                "{selectedDayData.notes}"
+                                            </div>
+
+                                            {/* Self-Compassion Tags */}
+                                            <div>
+                                                <h4 className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Pills of Awareness</h4>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {selectedDayData.tags.map((tag, idx) => (
+                                                        <span key={idx} className="bg-[#FAF8F5]/80 text-[#4A3E3D] border border-gray-200/80 text-xs px-3 py-1.5 rounded-full font-medium shadow-sm flex items-center gap-1">
+                                                            {tag}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* Multimodal Verification */}
+                                            <div>
+                                                <h4 className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Verified Mood Sources</h4>
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    <div className={`p-2 rounded-xl border text-center transition-all ${selectedDayData.chat ? 'bg-emerald-50/50 border-emerald-200 text-emerald-800' : 'bg-gray-50/30 border-gray-200 text-gray-400'}`}>
+                                                        <span className="text-base block mb-0.5">💬</span>
+                                                        <span className="text-[10px] font-bold">Chat Log</span>
+                                                    </div>
+                                                    <div className={`p-2 rounded-xl border text-center transition-all ${selectedDayData.face ? 'bg-emerald-50/50 border-emerald-200 text-emerald-800' : 'bg-gray-50/30 border-gray-200 text-gray-400'}`}>
+                                                        <span className="text-base block mb-0.5">📷</span>
+                                                        <span className="text-[10px] font-bold">Facial Cues</span>
+                                                    </div>
+                                                    <div className={`p-2 rounded-xl border text-center transition-all ${selectedDayData.quiz ? 'bg-emerald-50/50 border-emerald-200 text-emerald-800' : 'bg-gray-50/30 border-gray-200 text-gray-400'}`}>
+                                                        <span className="text-base block mb-0.5">📊</span>
+                                                        <span className="text-[10px] font-bold">Quiz Score</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* IoT Synced Card */}
+                                            <div className="grid grid-cols-2 gap-4 bg-gradient-to-tr from-[#FAF8F5] to-[#FFFDF9] p-4 rounded-2xl border border-white/30 shadow-sm">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-lg">😴</span>
+                                                    <div>
+                                                        <span className="text-[10px] text-gray-500 block font-bold">Sleep</span>
+                                                        <span className="text-xs font-bold text-[#4A3E3D]">{selectedDayData.sleep}h</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-lg">💓</span>
+                                                    <div>
+                                                        <span className="text-[10px] text-gray-500 block font-bold">Avg Heart Rate</span>
+                                                        <span className="text-xs font-bold text-[#4A3E3D]">{selectedDayData.heart} bpm</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        /* Unlogged state */
+                                        <div className="flex flex-col items-center justify-center text-center py-16 h-full">
+                                            <span className="text-4xl opacity-50 mb-3">🕯️</span>
+                                            <h3 className="text-base font-bold text-gray-600">Unlogged Day</h3>
+                                            <p className="text-xs text-gray-500 max-w-xs mt-2 leading-relaxed">
+                                                There is no log for this day. Self-care doesn't require perfection. Rest is always enough.
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {/* Privacy Assurance Anchor */}
+                                    <div className="mt-6 pt-4 border-t border-white/20 flex items-center justify-center gap-1.5 text-[10px] text-gray-500/80 font-bold tracking-wide">
+                                        <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                        <span>Your private diary. Encrypted & completely safe with KawanKu.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            /* Safe Space Mode (Zen View) */
+                            <div className="flex flex-col items-center justify-center text-center py-12 px-4 transition-all duration-700 ease-in-out">
+                                <span className="text-5xl filter drop-shadow-md mb-6 animate-pulse-slow">🕊️</span>
+                                
+                                {/* pulsating breathing circle */}
+                                <div className="w-56 h-56 rounded-full flex flex-col items-center justify-center relative shadow-inner border border-white/30 mb-8 select-none">
+                                    <div className="breathing-circle w-40 h-40 rounded-full flex flex-col items-center justify-center relative border border-sky-300/40">
+                                        <span className="text-xl font-bold text-sky-800 tracking-wide transition-all duration-500">
+                                            {breathingTexts[breathingStep].text}
+                                        </span>
+                                    </div>
+                                    <span className="text-[10px] uppercase font-bold text-sky-700/70 tracking-wider absolute bottom-6">
+                                        {breathingTexts[breathingStep].instruction}
+                                    </span>
+                                </div>
+
+                                <div className="max-w-xl bg-white/40 p-6 rounded-3xl border border-white/20 shadow-sm">
+                                    <p className="text-base text-[#4A3E3D] italic font-medium leading-relaxed">
+                                        "{ZEN_QUOTES[quoteIndex]}"
+                                    </p>
+                                    <span className="text-[10px] uppercase font-bold tracking-wider text-indigo-700/60 block mt-3">KawanKu Zen Affirmations</span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
