@@ -7223,21 +7223,55 @@ Example format:
             elTime.textContent = diffMins + 'm';
         }
 
+        // Helper function to award a spark exactly once
+        function awardSparkOnce(missionId, missionName) {
+            const key = 'mission_awarded_' + missionId;
+            if (localStorage.getItem(key) !== 'true') {
+                let sp = { days: 1, boxesOpened: 0, lastDiagnosis: '', personalityTag: '' };
+                try {
+                    const raw = localStorage.getItem('kawanku_spark');
+                    if (raw) sp = JSON.parse(raw);
+                } catch (e) {}
+                
+                sp.days = (sp.days || 0) + 1;
+                localStorage.setItem('kawanku_spark', JSON.stringify(sp));
+                localStorage.setItem(key, 'true');
+
+                // Update UI elements instantly
+                const sBalance = document.getElementById('shop-spark-balance');
+                if (sBalance) sBalance.innerText = sp.days;
+                const qCount = document.getElementById('quiz-spark-count');
+                if (qCount) qCount.innerText = sp.days;
+
+                // Sync shop balance display inside the shop module scope if defined
+                if (typeof syncShopBalance === 'function') {
+                    try {
+                        syncShopBalance(sp);
+                    } catch (e) {}
+                }
+
+                showToast(`Mission Completed: "${missionName}"! Earned +1 Spark! 🔥`, 'success');
+            }
+        }
+
         // Update Checklist Items in Daily Zen Focus
         const isGameStarted = localStorage.getItem('relax_game_started') === 'true';
         const taskStart = document.getElementById('task-cozy-start');
         if (taskStart && isGameStarted) {
             taskStart.classList.add('completed');
+            awardSparkOnce('cozy_start', 'Cozy Start');
         }
 
         const taskMatches = document.getElementById('task-cozy-matches');
         if (taskMatches && state.gameStats.matches >= 30) {
             taskMatches.classList.add('completed');
+            awardSparkOnce('match_master', 'Match Master');
         }
 
         const taskSlices = document.getElementById('task-cozy-slices');
         if (taskSlices && state.gameStats.slices >= 20) {
             taskSlices.classList.add('completed');
+            awardSparkOnce('zen_slicer', 'Zen Slicer');
         }
     };
 
