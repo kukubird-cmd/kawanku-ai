@@ -3621,7 +3621,7 @@ body {
     display: flex; 
     flex-direction: column; 
     gap: 16px; 
-    min-height: 300px; 
+    min-height: 0; 
     background: #FCF9F2; 
 }
 .quiz-welcome-msg, .shop-welcome-msg { 
@@ -3811,6 +3811,9 @@ body {
     padding: 16px 20px;
     background: #E8F5E9; /* Comforting soft light green */
     border-top: 3px solid #4A3E3D;
+    max-height: 230px;
+    overflow-y: auto;
+    flex-shrink: 0;
 }
 .quiz-opt-btn {
     background: #FFFFFF;
