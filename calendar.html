@@ -83,26 +83,352 @@
 
         // Mock data matching the requested therapist reframing & pre-populated 20 days
         const INITIAL_MOCK_DAYS = {
-            1: { mood: 'joy', icon: '✨', title: 'Joyful & Energetic', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', notes: 'Completed all assignments early. Had a great jog in the park!', tags: ['📚 Heavy workload today', '🏃‍♀️ Natural movement', '☀️ Caught some sun'], sleep: 7.2, heart: 68, chat: true, face: true, quiz: true },
-            2: { mood: 'peace', icon: '🌿', title: 'Peaceful & Balanced', color: 'bg-emerald-100 text-emerald-800 border-emerald-200', notes: 'Calm group study session. Enjoyed a warm chamomile tea.', tags: ['🍵 Self-care evening', '😌 Calm social connection'], sleep: 7.5, heart: 65, chat: true, face: false, quiz: true },
-            3: { mood: 'stress', icon: '☁️', title: 'Overwhelmed & High Stress', color: 'bg-sky-100 text-sky-800 border-sky-200', notes: 'Big math exam tomorrow. Feeling nervous and struggling to focus.', tags: ['📚 Heavy workload today', '😴 Rest was disrupted', '🌀 Exam anxiety'], sleep: 5.2, heart: 88, chat: true, face: true, quiz: false },
-            4: { mood: 'sad', icon: '💜', title: 'Sad & Low Energy', color: 'bg-purple-100 text-purple-800 border-purple-200', notes: 'Felt lonely in the evening. Rest was disrupted and body felt heavy.', tags: ['😴 Rest was disrupted', '😢 Feeling isolated'], sleep: 5.8, heart: 82, chat: true, face: true, quiz: true },
+            1: { 
+                mood: 'joy', 
+                icon: '✨', 
+                title: 'Joyful & Energetic', 
+                color: 'bg-yellow-100 text-yellow-800 border-yellow-200', 
+                notes: 'Completed all assignments early. Had a great jog in the park!', 
+                tags: ['📚 Heavy workload today', '🏃‍♀️ Natural movement', '☀️ Caught some sun'], 
+                chat: {
+                    time: "10:15 AM",
+                    summary: "Shared excitement about finishing coursework early. Expressed high optimism and positive self-talk.",
+                    comfortMessage: "Your energy is beautifully balanced. Remember this feeling on heavier days!"
+                },
+                face: {
+                    time: "02:30 PM",
+                    breakdown: { Joy: "75%", Neutral: "20%", Stress: "5%" },
+                    notes: "Soft smile detected, relaxed facial muscles, zero micro-expressions of anxiety."
+                },
+                quiz: {
+                    time: "09:00 AM",
+                    score: "92/100",
+                    result: "Excellent Resilience",
+                    summary: "High coping capacity, solid sleep quality, strong social connection index."
+                }
+            },
+            2: { 
+                mood: 'peace', 
+                icon: '🌿', 
+                title: 'Peaceful & Balanced', 
+                color: 'bg-emerald-100 text-emerald-800 border-emerald-200', 
+                notes: 'Calm group study session. Enjoyed a warm chamomile tea.', 
+                tags: ['🍵 Self-care evening', '😌 Calm social connection'], 
+                chat: {
+                    time: "11:30 AM",
+                    summary: "Discussed group work and calm collaboration. Felt fully supported by team members.",
+                    comfortMessage: "Cooperative learning nourishes safety. Keep collaborating!"
+                },
+                face: null,
+                quiz: {
+                    time: "08:45 AM",
+                    score: "85/100",
+                    result: "Good Balance",
+                    summary: "Stable stress indicators, restful sleep cycles, minor test anxiety."
+                }
+            },
+            3: { 
+                mood: 'stress', 
+                icon: '☁️', 
+                title: 'Overwhelmed & High Stress', 
+                color: 'bg-sky-100 text-sky-800 border-sky-200', 
+                notes: 'Big math exam tomorrow. Feeling nervous and struggling to focus.', 
+                tags: ['📚 Heavy workload today', '😴 Rest was disrupted', '🌀 Exam anxiety'], 
+                chat: {
+                    time: "04:15 PM",
+                    summary: "Expressed severe stress about tomorrow's math exam. Self-critical regarding preparation.",
+                    comfortMessage: "It is normal to feel nervous. One exam does not define your wisdom. Breathe."
+                },
+                face: {
+                    time: "03:00 PM",
+                    breakdown: { Stress: "70%", Neutral: "20%", Sadness: "10%" },
+                    notes: "Tension detected in forehead (brow furrowing), tight lips, frequent blinking."
+                },
+                quiz: null
+            },
+            4: { 
+                mood: 'sad', 
+                icon: '💜', 
+                title: 'Sad & Low Energy', 
+                color: 'bg-purple-100 text-purple-800 border-purple-200', 
+                notes: 'Felt lonely in the evening. Rest was disrupted and body felt heavy.', 
+                tags: ['😴 Rest was disrupted', '😢 Feeling isolated'], 
+                chat: {
+                    time: "08:30 PM",
+                    summary: "Felt isolated and lonely. Mentioned lacking motivation to complete school tasks.",
+                    comfortMessage: "It is okay to have low-energy days. You do not need to perform. I am here for you."
+                },
+                face: {
+                    time: "11:00 AM",
+                    breakdown: { Sadness: "60%", Neutral: "30%", Stress: "10%" },
+                    notes: "Downward mouth curvature, heavy eyelids, slow facial response rates."
+                },
+                quiz: {
+                    time: "09:15 AM",
+                    score: "54/100",
+                    result: "Needs Support",
+                    summary: "Disrupted sleep quality, low physical activity, feeling overwhelmed by workload."
+                }
+            },
             5: null, // Unlogged
-            6: { mood: 'joy', icon: '😊', title: 'Joyful & Energetic', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', notes: 'Met friends for lunch. Finished drawing my art project today!', tags: ['🎨 Finished project', '😌 Calm social connection'], sleep: 8.0, heart: 70, chat: false, face: true, quiz: true },
-            7: { mood: 'peace', icon: '😌', title: 'Peaceful & Balanced', color: 'bg-emerald-100 text-emerald-800 border-emerald-200', notes: 'Cozy reading time. Listened to relaxing rain sounds in my room.', tags: ['🍵 Self-care evening', '🍃 Nature atmosphere'], sleep: 7.8, heart: 64, chat: true, face: false, quiz: true },
-            8: { mood: 'stress', icon: '🌀', title: 'Overwhelmed & High Stress', color: 'bg-sky-100 text-sky-800 border-sky-200', notes: 'Presentation slides are due. Non-stop meetings made me anxious.', tags: ['📚 Heavy workload today', '🌀 Tight deadline'], sleep: 5.5, heart: 85, chat: true, face: true, quiz: true },
+            6: { 
+                mood: 'joy', 
+                icon: '😊', 
+                title: 'Joyful & Energetic', 
+                color: 'bg-yellow-100 text-yellow-800 border-yellow-200', 
+                notes: 'Met friends for lunch. Finished drawing my art project today!', 
+                tags: ['🎨 Finished project', '😌 Calm social connection'], 
+                chat: null,
+                face: {
+                    time: "01:20 PM",
+                    breakdown: { Joy: "80%", Neutral: "20%" },
+                    notes: "Genuine Duchenne smile detected, relaxed facial expression, bright eye cues."
+                },
+                quiz: {
+                    time: "10:30 AM",
+                    score: "90/100",
+                    result: "High Well-being",
+                    summary: "Great emotional regulation, high social involvement, feeling positive."
+                }
+            },
+            7: { 
+                mood: 'peace', 
+                icon: '😌', 
+                title: 'Peaceful & Balanced', 
+                color: 'bg-emerald-100 text-emerald-800 border-emerald-200', 
+                notes: 'Cozy reading time. Listened to relaxing rain sounds in my room.', 
+                tags: ['🍵 Self-care evening', '🍃 Nature atmosphere'], 
+                chat: {
+                    time: "09:15 PM",
+                    summary: "Expressed peacefulness and calm while reading cozy books in bedroom.",
+                    comfortMessage: "Cozy spaces heal. Guard your quiet hours!"
+                },
+                face: null,
+                quiz: {
+                    time: "09:00 AM",
+                    score: "88/100",
+                    result: "Balanced Mind",
+                    summary: "Excellent sleep recovery, balanced diet index, low environmental stress."
+                }
+            },
+            8: { 
+                mood: 'stress', 
+                icon: '🌀', 
+                title: 'Overwhelmed & High Stress', 
+                color: 'bg-sky-100 text-sky-800 border-sky-200', 
+                notes: 'Presentation slides are due. Non-stop meetings made me anxious.', 
+                tags: ['📚 Heavy workload today', '🌀 Tight deadline'], 
+                chat: {
+                    time: "02:00 PM",
+                    summary: "Mentioned panic about slides delivery and tight team meetings.",
+                    comfortMessage: "Break down tasks into tiny pieces. You are fully capable!"
+                },
+                face: {
+                    time: "11:45 AM",
+                    breakdown: { Stress: "65%", Neutral: "25%", Sadness: "10%" },
+                    notes: "Tight jaw muscles detected, elevated forehead tension."
+                },
+                quiz: {
+                    time: "09:30 AM",
+                    score: "62/100",
+                    result: "Moderate Stress",
+                    summary: "Slight sleep latency, high workload pressure, average resilience score."
+                }
+            },
             9: null, // Unlogged
-            10: { mood: 'sad', icon: '😢', title: 'Sad & Low Energy', color: 'bg-purple-100 text-purple-800 border-purple-200', notes: 'Missing home and family today. Had bad dreams last night.', tags: ['😴 Rest was disrupted', '🏠 Homesick feeling'], sleep: 5.0, heart: 79, chat: true, face: false, quiz: true },
-            11: { mood: 'peace', icon: '🌿', title: 'Peaceful & Balanced', color: 'bg-emerald-100 text-emerald-800 border-emerald-200', notes: 'Gardening session in the school backyard. Felt very grounded.', tags: ['🍃 Nature atmosphere', '🏃‍♀️ Natural movement'], sleep: 7.4, heart: 66, chat: false, face: true, quiz: true },
-            12: { mood: 'joy', icon: '✨', title: 'Joyful & Energetic', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', notes: 'Passed the programming test! Ordered delicious pizza to celebrate.', tags: ['🎉 Little wins', '🍕 Treated myself'], sleep: 7.6, heart: 72, chat: true, face: true, quiz: true },
+            10: { 
+                mood: 'sad', 
+                icon: '😢', 
+                title: 'Sad & Low Energy', 
+                color: 'bg-purple-100 text-purple-800 border-purple-200', 
+                notes: 'Missing home and family today. Had bad dreams last night.', 
+                tags: ['😴 Rest was disrupted', '🏠 Homesick feeling'], 
+                chat: {
+                    time: "07:30 PM",
+                    summary: "Expressed homesickness and longing for family support.",
+                    comfortMessage: "Missing home shows how deeply you love. Call your loved ones tonight."
+                },
+                face: null,
+                quiz: {
+                    time: "08:15 AM",
+                    score: "58/100",
+                    result: "Low Energy",
+                    summary: "Poor sleep quality, low emotional energy, feelings of homesickness."
+                }
+            },
+            11: { 
+                mood: 'peace', 
+                icon: '🌿', 
+                title: 'Peaceful & Balanced', 
+                color: 'bg-emerald-100 text-emerald-800 border-emerald-200', 
+                notes: 'Gardening session in the school backyard. Felt very grounded.', 
+                tags: ['🍃 Nature atmosphere', '🏃‍♀️ Natural movement'], 
+                chat: null,
+                face: {
+                    time: "03:40 PM",
+                    breakdown: { Calm: "85%", Neutral: "15%" },
+                    notes: "Steady, slow breathing detected, soft eye focus, completely relaxed forehead."
+                },
+                quiz: {
+                    time: "09:00 AM",
+                    score: "87/100",
+                    result: "Grounded Mind",
+                    summary: "High scores in environmental connection, healthy heart rate variability."
+                }
+            },
+            12: { 
+                mood: 'joy', 
+                icon: '✨', 
+                title: 'Joyful & Energetic', 
+                color: 'bg-yellow-100 text-yellow-800 border-yellow-200', 
+                notes: 'Passed the programming test! Ordered delicious pizza to celebrate.', 
+                tags: ['🎉 Little wins', '🍕 Treated myself'], 
+                chat: {
+                    time: "06:15 PM",
+                    summary: "Shared great news about passing coding lab test and rewarding self with cheat meal.",
+                    comfortMessage: "Celebrating small successes fuels the brain with dopamine. Bravo!"
+                },
+                face: {
+                    time: "05:00 PM",
+                    breakdown: { Joy: "90%", Neutral: "10%" },
+                    notes: "Broad smile, cheeks lifted, sparkle detected in pupils."
+                },
+                quiz: {
+                    time: "09:30 AM",
+                    score: "94/100",
+                    result: "Peak Motivation",
+                    summary: "Strong sense of achievement, good energy levels, very low anxiety scores."
+                }
+            },
             13: null, // Unlogged
-            14: { mood: 'stress', icon: '☁️', title: 'Overwhelmed & High Stress', color: 'bg-sky-100 text-sky-800 border-sky-200', notes: 'Tight project deadline. Drank too much coffee and my heart is racing.', tags: ['☕ Too much caffeine', '🌀 Tight deadline', '😴 Rest was disrupted'], sleep: 4.8, heart: 92, chat: true, face: true, quiz: false },
-            15: { mood: 'sad', icon: '💜', title: 'Sad & Low Energy', color: 'bg-purple-100 text-purple-800 border-purple-200', notes: 'Feeling run-down and flu-ish. Spent the whole day in bed.', tags: ['🤒 Feeling unwell', '😴 Rest was disrupted'], sleep: 9.0, heart: 76, chat: false, face: false, quiz: true },
-            16: { mood: 'peace', icon: '😌', title: 'Peaceful & Balanced', color: 'bg-emerald-100 text-emerald-800 border-emerald-200', notes: 'Soft instrumental music and a nice walk around the lake.', tags: ['🍃 Nature atmosphere', '🍵 Self-care evening'], sleep: 7.0, heart: 68, chat: true, face: true, quiz: true },
-            17: { mood: 'joy', icon: '😊', title: 'Joyful & Energetic', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', notes: 'Board game night with roommates. Laughed so much my stomach hurts!', tags: ['😌 Calm social connection', '🎉 Little wins'], sleep: 8.2, heart: 70, chat: true, face: true, quiz: true },
+            14: { 
+                mood: 'stress', 
+                icon: '☁️', 
+                title: 'Overwhelmed & High Stress', 
+                color: 'bg-sky-100 text-sky-800 border-sky-200', 
+                notes: 'Tight project deadline. Drank too much coffee and my heart is racing.', 
+                tags: ['☕ Too much caffeine', '🌀 Tight deadline', '😴 Rest was disrupted'], 
+                chat: {
+                    time: "03:10 PM",
+                    summary: "Expressed physiological anxiety symptoms. Admitted drinking three espressos to finish project.",
+                    comfortMessage: "Caffeine can mimic panic in the body. Switch to warm water and take a slow lap around the floor."
+                },
+                face: {
+                    time: "02:00 PM",
+                    breakdown: { Stress: "80%", Neutral: "20%" },
+                    notes: "Frequent lip chewing, high blinking speed, elevated tension in forehead."
+                },
+                quiz: null
+            },
+            15: { 
+                mood: 'sad', 
+                icon: '💜', 
+                title: 'Sad & Low Energy', 
+                color: 'bg-purple-100 text-purple-800 border-purple-200', 
+                notes: 'Feeling run-down and flu-ish. Spent the whole day in bed.', 
+                tags: ['🤒 Feeling unwell', '😴 Rest was disrupted'], 
+                chat: null,
+                face: null,
+                quiz: {
+                    time: "09:00 AM",
+                    score: "42/100",
+                    result: "High Vulnerability",
+                    summary: "Very high physical fatigue score, zero motivation indicators, poor self-care scores."
+                }
+            },
+            16: { 
+                mood: 'peace', 
+                icon: '😌', 
+                title: 'Peaceful & Balanced', 
+                color: 'bg-emerald-100 text-emerald-800 border-emerald-200', 
+                notes: 'Soft instrumental music and a nice walk around the lake.', 
+                tags: ['🍃 Nature atmosphere', '🍵 Self-care evening'], 
+                chat: {
+                    time: "05:30 PM",
+                    summary: "Talked about grounding exercises and walking barefoot near the lawn.",
+                    comfortMessage: "Nature is the ultimate stabilizer. Keep breathing in the outdoor air."
+                },
+                face: {
+                    time: "03:20 PM",
+                    breakdown: { Calm: "80%", Neutral: "20%" },
+                    notes: "Soft focal points, relaxed breathing muscles, smooth jaw contour."
+                },
+                quiz: {
+                    time: "09:30 AM",
+                    score: "86/100",
+                    result: "Harmonious State",
+                    summary: "Low stress symptoms, high mindfulness practice index, solid recovery score."
+                }
+            },
+            17: { 
+                mood: 'joy', 
+                icon: '😊', 
+                title: 'Joyful & Energetic', 
+                color: 'bg-yellow-100 text-yellow-800 border-yellow-200', 
+                notes: 'Board game night with roommates. Laughed so much my stomach hurts!', 
+                tags: ['😌 Calm social connection', '🎉 Little wins'], 
+                chat: {
+                    time: "10:30 PM",
+                    summary: "Reported deep social satisfaction and feeling very loved by housemates.",
+                    comfortMessage: "Safe social bonds are the best mental cushion. Cherish these friendships!"
+                },
+                face: {
+                    time: "09:00 PM",
+                    breakdown: { Joy: "85%", Neutral: "15%" },
+                    notes: "Consistent smiling, open eyes, positive crinkling in outer eye corners."
+                },
+                quiz: {
+                    time: "10:00 AM",
+                    score: "91/100",
+                    result: "Strong Social Connectedness",
+                    summary: "Excellent belonging index, low loneliness indicators, good recovery."
+                }
+            },
             18: null, // Unlogged
-            19: { mood: 'peace', icon: '🌿', title: 'Peaceful & Balanced', color: 'bg-emerald-100 text-emerald-800 border-emerald-200', notes: 'Organized my bedroom desk. Feels so good to have a clean space.', tags: ['🍵 Self-care evening', '🧹 Clean environment'], sleep: 7.3, heart: 67, chat: true, face: false, quiz: true },
-            20: { mood: 'stress', icon: '☁️', title: 'Overwhelmed & High Stress', color: 'bg-sky-100 text-sky-800 border-sky-200', notes: 'Heavy family responsibilities. Couldn\'t fall asleep for hours.', tags: ['🌀 Family duties', '😴 Rest was disrupted'], sleep: 5.1, heart: 86, chat: true, face: true, quiz: true }
+            19: { 
+                mood: 'peace', 
+                icon: '🌿', 
+                title: 'Peaceful & Balanced', 
+                color: 'bg-emerald-100 text-emerald-800 border-emerald-200', 
+                notes: 'Organized my bedroom desk. Feels so good to have a clean space.', 
+                tags: ['🍵 Self-care evening', '🧹 Clean environment'], 
+                chat: {
+                    time: "04:10 PM",
+                    summary: "Shared satisfaction of decluttering studies space. Expressed inner clarity.",
+                    comfortMessage: "External order brings internal peace. Decluttering is self-love!"
+                },
+                face: null,
+                quiz: {
+                    time: "09:00 AM",
+                    score: "84/100",
+                    result: "Clean Workspace, Clear Mind",
+                    summary: "High focus capacity, moderate energy index, stable coping mechanisms."
+                }
+            },
+            20: { 
+                mood: 'stress', 
+                icon: '☁️', 
+                title: 'Overwhelmed & High Stress', 
+                color: 'bg-sky-100 text-sky-800 border-sky-200', 
+                notes: 'Heavy family responsibilities. Couldn\'t fall asleep for hours.', 
+                tags: ['🌀 Family duties', '😴 Rest was disrupted'], 
+                chat: {
+                    time: "09:40 PM",
+                    summary: "Shared feeling stressed about home conflicts and poor sleep latency.",
+                    comfortMessage: "Boundaries are healthy. Give yourself permission to rest despite outside noise."
+                },
+                face: {
+                    time: "07:30 PM",
+                    breakdown: { Stress: "75%", Sadness: "15%", Neutral: "10%" },
+                    notes: "Tight lip closure, drooping mouth corners, high forehead lines."
+                },
+                quiz: {
+                    time: "09:00 AM",
+                    score: "59/100",
+                    result: "Overextended",
+                    summary: "Poor recovery score, high sleep latency, elevated emotional stress index."
+                }
+            }
         };
 
         const ZEN_QUOTES = [
@@ -119,6 +445,7 @@
             const [isSafeSpaceMode, setIsSafeSpaceMode] = useState(false);
             const [breathingStep, setBreathingStep] = useState(0); // 0: Inhale, 1: Hold, 2: Exhale, 3: Hold
             const [quoteIndex, setQuoteIndex] = useState(0);
+            const [activeReport, setActiveReport] = useState(null);
 
             // Breath cycle text helper
             const breathingTexts = [
@@ -167,7 +494,7 @@
             };
 
             return (
-                <div className="w-full">
+                <div className="w-full relative">
                     {/* Header */}
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
                         <div className="flex items-center gap-3">
@@ -299,22 +626,31 @@
                                                 </div>
                                             </div>
 
-                                            {/* Multimodal Verification */}
+                                            {/* Multimodal Verification & Final Reports */}
                                             <div>
-                                                <h4 className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Verified Mood Sources</h4>
+                                                <h4 className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Verified Mood Sources (Click for Final Report)</h4>
                                                 <div className="grid grid-cols-3 gap-2">
-                                                    <div className={`p-2 rounded-xl border text-center transition-all ${selectedDayData.chat ? 'bg-emerald-50/50 border-emerald-200 text-emerald-800' : 'bg-gray-50/30 border-gray-200 text-gray-400'}`}>
+                                                    <button 
+                                                        onClick={() => selectedDayData.chat && setActiveReport({ type: 'chat', data: selectedDayData.chat, date: `Oct ${selectedDayNum}, 2026` })}
+                                                        className={`p-2 rounded-xl border text-center transition-all w-full select-none ${selectedDayData.chat ? 'bg-emerald-50/50 border-emerald-200 text-emerald-800 hover:scale-[1.03] active:scale-95 cursor-pointer shadow-sm shadow-emerald-50' : 'bg-gray-50/30 border-gray-200 text-gray-400 cursor-not-allowed'}`}
+                                                    >
                                                         <span className="text-base block mb-0.5">💬</span>
-                                                        <span className="text-[10px] font-bold">Chat Log</span>
-                                                    </div>
-                                                    <div className={`p-2 rounded-xl border text-center transition-all ${selectedDayData.face ? 'bg-emerald-50/50 border-emerald-200 text-emerald-800' : 'bg-gray-50/30 border-gray-200 text-gray-400'}`}>
+                                                        <span className="text-[10px] font-bold block">Chat Log</span>
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => selectedDayData.face && setActiveReport({ type: 'face', data: selectedDayData.face, date: `Oct ${selectedDayNum}, 2026` })}
+                                                        className={`p-2 rounded-xl border text-center transition-all w-full select-none ${selectedDayData.face ? 'bg-emerald-50/50 border-emerald-200 text-emerald-800 hover:scale-[1.03] active:scale-95 cursor-pointer shadow-sm shadow-emerald-50' : 'bg-gray-50/30 border-gray-200 text-gray-400 cursor-not-allowed'}`}
+                                                    >
                                                         <span className="text-base block mb-0.5">📷</span>
-                                                        <span className="text-[10px] font-bold">Facial Cues</span>
-                                                    </div>
-                                                    <div className={`p-2 rounded-xl border text-center transition-all ${selectedDayData.quiz ? 'bg-emerald-50/50 border-emerald-200 text-emerald-800' : 'bg-gray-50/30 border-gray-200 text-gray-400'}`}>
+                                                        <span className="text-[10px] font-bold block">Facial Cues</span>
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => selectedDayData.quiz && setActiveReport({ type: 'quiz', data: selectedDayData.quiz, date: `Oct ${selectedDayNum}, 2026` })}
+                                                        className={`p-2 rounded-xl border text-center transition-all w-full select-none ${selectedDayData.quiz ? 'bg-emerald-50/50 border-emerald-200 text-emerald-800 hover:scale-[1.03] active:scale-95 cursor-pointer shadow-sm shadow-emerald-50' : 'bg-gray-50/30 border-gray-200 text-gray-400 cursor-not-allowed'}`}
+                                                    >
                                                         <span className="text-base block mb-0.5">📊</span>
-                                                        <span className="text-[10px] font-bold">Quiz Score</span>
-                                                    </div>
+                                                        <span className="text-[10px] font-bold block">Quiz Score</span>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -362,6 +698,111 @@
                             </div>
                         )}
                     </div>
+
+                    {/* Final Report Modal dialog Overlay */}
+                    {activeReport && (
+                        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                            <div className="glass-card bg-white/95 rounded-3xl p-6 max-w-md w-full shadow-2xl border border-white/20 relative animate-fade-in">
+                                {/* Close Button */}
+                                <button 
+                                    onClick={() => setActiveReport(null)}
+                                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-semibold transition-all"
+                                >
+                                    &times;
+                                </button>
+                                
+                                {activeReport.type === 'chat' && (
+                                    <div>
+                                        <div className="flex items-center gap-2 text-indigo-700 font-bold text-lg mb-4">
+                                            <span>💬</span>
+                                            <h3>Gentle Chat Log Report</h3>
+                                        </div>
+                                        <p className="text-xs text-gray-500 font-bold mb-3">{activeReport.date} • {activeReport.data.time}</p>
+                                        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-sm text-gray-700 leading-relaxed mb-4">
+                                            <span className="font-bold block text-xs text-slate-500 uppercase mb-1">Interactive Summary</span>
+                                            "{activeReport.data.summary}"
+                                        </div>
+                                        <div className="bg-rose-50/70 p-4 rounded-2xl border border-rose-100 text-sm text-rose-800 leading-relaxed">
+                                            <span className="font-bold block text-xs text-rose-500 uppercase mb-1">Therapeutic Comfort</span>
+                                            "{activeReport.data.comfortMessage}"
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeReport.type === 'face' && (
+                                    <div>
+                                        <div className="flex items-center gap-2 text-sky-700 font-bold text-lg mb-4">
+                                            <span>📷</span>
+                                            <h3>Facial Expression Analysis</h3>
+                                        </div>
+                                        <p className="text-xs text-gray-500 font-bold mb-3">{activeReport.date} • {activeReport.data.time}</p>
+                                        
+                                        {/* Breakdown Bars */}
+                                        <div className="space-y-3 mb-4">
+                                            <span className="font-bold block text-xs text-slate-500 uppercase">Emotion Breakdown</span>
+                                            {Object.entries(activeReport.data.breakdown).map(([emotion, val]) => (
+                                                <div key={emotion}>
+                                                    <div className="flex justify-between text-xs font-bold text-[#4A3E3D] mb-1">
+                                                        <span>{emotion}</span>
+                                                        <span>{val}</span>
+                                                    </div>
+                                                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                                        <div 
+                                                            className={`h-full rounded-full ${
+                                                                emotion === 'Joy' ? 'bg-amber-400' : 
+                                                                emotion === 'Neutral' ? 'bg-emerald-400' : 
+                                                                emotion === 'Calm' ? 'bg-emerald-400' : 
+                                                                emotion === 'Stress' ? 'bg-sky-400' : 'bg-purple-400'
+                                                            }`} 
+                                                            style={{ width: val }}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        
+                                        <div className="bg-sky-50 p-4 rounded-2xl border border-sky-100 text-sm text-sky-800 leading-relaxed">
+                                            <span className="font-bold block text-xs text-sky-600 uppercase mb-1">Facial Muscle Cues</span>
+                                            "{activeReport.data.notes}"
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeReport.type === 'quiz' && (
+                                    <div>
+                                        <div className="flex items-center gap-2 text-emerald-700 font-bold text-lg mb-4">
+                                            <span>📊</span>
+                                            <h3>Emotion Quiz Final Report</h3>
+                                        </div>
+                                        <p className="text-xs text-gray-500 font-bold mb-3">{activeReport.date} • {activeReport.data.time}</p>
+                                        
+                                        {/* Score badge */}
+                                        <div className="flex items-center gap-3 bg-emerald-50 p-4 rounded-2xl border border-emerald-100 mb-4">
+                                            <span className="text-3xl">🏆</span>
+                                            <div>
+                                                <span className="text-[10px] text-emerald-600 font-bold uppercase block">Score & Level</span>
+                                                <span className="text-sm font-bold text-emerald-800">{activeReport.data.score} ({activeReport.data.result})</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-sm text-gray-700 leading-relaxed">
+                                            <span className="font-bold block text-xs text-slate-500 uppercase mb-1.5">Assessment Summary</span>
+                                            <p className="text-xs font-semibold leading-relaxed text-gray-600">
+                                                {activeReport.data.summary}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                <button 
+                                    onClick={() => setActiveReport(null)}
+                                    className="w-full mt-6 bg-[#4A3E3D] hover:bg-[#3D3330] text-white text-sm font-bold py-3 rounded-2xl shadow-md transition-all active:scale-[0.98]"
+                                >
+                                    Close Report
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         }
