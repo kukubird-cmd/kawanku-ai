@@ -4961,9 +4961,6 @@ Example format:
                 if (item.prop === 'accessory') {
                     const catItem = AVATAR_CATALOG.Avatar.items['Face Accessories'].find(i => i.id === item.val);
                     if (catItem && catItem.svg) iconContent = catItem.svg;
-                } else if (item.prop === 'activeOutfit') {
-                    const catItem = AVATAR_CATALOG.Fashion.items['Outfits'].find(i => i.id === item.val);
-                    if (catItem && catItem.svg) iconContent = catItem.svg;
                 }
 
                 const card = document.createElement('div');
