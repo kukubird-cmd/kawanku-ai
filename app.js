@@ -3267,10 +3267,10 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
                     { id: 'nautical', label: 'Sailor Dress', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#ffffff" stroke="#2b5c8f" stroke-width="3"/><circle cx="24" cy="24" r="8" fill="#2b5c8f"/></svg>' },
                     { id: 'strawberry', label: 'Strawberry Picnic', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#fca5a5" stroke="#e11d48" stroke-width="3"/><circle cx="24" cy="24" r="6" fill="#e11d48"/></svg>' },
                     { id: 'wizard', label: 'Wizard Cape', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#4a154b" stroke="#ffd166" stroke-width="3"/><polygon points="24,14 26,19 31,19 27,22 29,27 24,24 19,27 21,22 17,19 22,19" fill="#ffd166"/></svg>' },
-                    { id: 'princess', label: 'Princess Gown 👑', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#f43f5e" stroke="#4A3E3D" stroke-width="2.5"/><circle cx="24" cy="24" r="6" fill="#fef08a" stroke="#4A3E3D" stroke-width="1.5"/></svg>' },
-                    { id: 'mermaid', label: 'Mermaid Gown 🧜‍♀️', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#0284c7" stroke="#4A3E3D" stroke-width="2.5"/><path d="M 18,24 Q 24,18 30,24" stroke="#ffffff" stroke-width="1.5"/></svg>' },
-                    { id: 'lolita', label: 'Lolita Ruffle 🎀', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#bae6fd" stroke="#4A3E3D" stroke-width="2.5"/><path d="M 20,24 H 28" stroke="#ffb3cc" stroke-width="2.5"/></svg>' },
-                    { id: 'unicorn', label: 'Unicorn Suit 🦄', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#fca5a5" stroke="#4A3E3D" stroke-width="2.5"/><polygon points="24,16 21,24 27,24" fill="#facc15" stroke="#4A3E3D" stroke-width="1.5"/></svg>' }
+                    { id: 'princess', label: 'Princess Gown 👑', prop: 'activeOutfit', locked: true, svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#f43f5e" stroke="#4A3E3D" stroke-width="2.5"/><circle cx="24" cy="24" r="6" fill="#fef08a" stroke="#4A3E3D" stroke-width="1.5"/></svg>' },
+                    { id: 'mermaid', label: 'Mermaid Gown 🧜‍♀️', prop: 'activeOutfit', locked: true, svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#0284c7" stroke="#4A3E3D" stroke-width="2.5"/><path d="M 18,24 Q 24,18 30,24" stroke="#ffffff" stroke-width="1.5"/></svg>' },
+                    { id: 'lolita', label: 'Lolita Ruffle 🎀', prop: 'activeOutfit', locked: true, svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#bae6fd" stroke="#4A3E3D" stroke-width="2.5"/><path d="M 20,24 H 28" stroke="#ffb3cc" stroke-width="2.5"/></svg>' },
+                    { id: 'unicorn', label: 'Unicorn Suit 🦄', prop: 'activeOutfit', locked: true, svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#fca5a5" stroke="#4A3E3D" stroke-width="2.5"/><polygon points="24,16 21,24 27,24" fill="#facc15" stroke="#4A3E3D" stroke-width="1.5"/></svg>' }
                 ]
             }
         },
@@ -4856,22 +4856,22 @@ Example format:
             1: [
                 { icon: '👓', name: '智者金丝边框眼镜', cost: 3, prop: 'accessory', val: 'gold' },
                 { icon: '💇', name: '慵懒微卷空气感发型', cost: 5, prop: 'hairStyle', val: 'curly' },
-                { icon: '🎨', name: '限定皮肤：深夜食堂 · 温暖微光', cost: 15, prop: 'skinTone', val: '#FFD1A4' }
+                { icon: '👗', name: '限定服饰：公主礼服 Princess Gown', cost: 15, prop: 'activeOutfit', val: 'princess' }
             ],
             2: [
                 { icon: '👓', name: '复古原色厚街黑框眼镜', cost: 3, prop: 'accessory', val: 'green' },
                 { icon: '💇', name: '少年感清爽利落碎发', cost: 5, prop: 'hairStyle', val: 'crop' },
-                { icon: '🎨', name: '限定皮肤：赛博朋克 · 暗夜霓虹', cost: 15, prop: 'skinTone', val: '#C8A2C8' }
+                { icon: '🧜‍♀️', name: '限定服饰：美人鱼姬 Mermaid Gown', cost: 15, prop: 'activeOutfit', val: 'mermaid' }
             ],
             3: [
                 { icon: '👓', name: '蹦迪专用蹦碎极光墨镜', cost: 4, prop: 'accessory', val: 'gold' },
                 { icon: '💇', name: '触电般炸毛狂想发型', cost: 6, prop: 'hairStyle', val: 'bob' },
-                { icon: '🎨', name: '限定皮肤：深空流浪 · 孤独星云', cost: 18, prop: 'skinTone', val: '#87CEEB' }
+                { icon: '🎀', name: '限定服饰：洛丽塔裙 Lolita Ruffle', cost: 18, prop: 'activeOutfit', val: 'lolita' }
             ],
             4: [
                 { icon: '👓', name: '智商爆表科学家圆框镜', cost: 4, prop: 'accessory', val: 'green' },
                 { icon: '💇', name: '高级感微翘狼尾发型', cost: 6, prop: 'hairStyle', val: 'long' },
-                { icon: '🎨', name: '限定皮肤：荒野求生 · 岛屿极光', cost: 18, prop: 'skinTone', val: '#98FB98' }
+                { icon: '🦄', name: '限定服饰：独角兽装 Unicorn Suit', cost: 18, prop: 'activeOutfit', val: 'unicorn' }
             ]
         };
 
