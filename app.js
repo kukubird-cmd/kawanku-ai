@@ -348,6 +348,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (panelId === 'games-panel') {
             if (DOM.headerTitle) DOM.headerTitle.innerText = "Play & Relax";
             if (DOM.headerSubtitle) DOM.headerSubtitle.innerText = "Take a quick mental break with our relaxing mini-games guided by KawanKu Robot.";
+        } else if (panelId === 'calendar-panel') {
+            if (DOM.headerTitle) DOM.headerTitle.innerText = "Empathy-First Mental Health Sanctuary & Calendar";
+            if (DOM.headerSubtitle) DOM.headerSubtitle.innerText = "Reflect on your mood tracking records and explore safe breathing spaces.";
         }
     }
 
