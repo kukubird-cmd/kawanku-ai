@@ -3352,7 +3352,7 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
             }
         },
         Avatar: {
-            subcategories: ['Mascot Color', 'Expressions', 'Blushes', 'Accessories'],
+            subcategories: ['Mascot Color', 'Expressions', 'Cheek Blushes', 'Face Accessories'],
             items: {
                 'Mascot Color': [
                     { id: '#ffd6e0', label: 'Soft Cloud Pink', prop: 'skinTone', color: '#ffd6e0' },
@@ -3370,7 +3370,7 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
                     { id: 'teary', label: 'Teary Joy 🥹', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="45" r="8" fill="#3c2f46"/><circle cx="32" cy="42" r="3" fill="#fff"/><ellipse cx="27" cy="55" rx="2.5" ry="4" fill="#bae6fd" opacity="0.9"/><circle cx="65" cy="45" r="8" fill="#3c2f46"/><circle cx="62" cy="42" r="3" fill="#fff"/><ellipse cx="73" cy="55" rx="2.5" ry="4" fill="#bae6fd" opacity="0.9"/><path d="M 42,57 Q 50,65 58,57" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round"/></svg>' },
                     { id: 'cat', label: 'Cat Face 🐱', prop: 'expression', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 27,52 L 37,46 L 47,52" fill="none" stroke="#4A3E3D" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M 73,52 L 63,46 L 53,52" fill="none" stroke="#4A3E3D" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M 43,58 Q 47,54 50,58 Q 53,54 57,58" fill="none" stroke="#4A3E3D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>' }
                 ],
-                'Blushes': [
+                'Cheek Blushes': [
                     { id: 'circle', label: 'Classic Rosy Circles', prop: 'blushShape', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="30" cy="50" rx="10" ry="6" fill="#ffa2b6" opacity="0.85"/><ellipse cx="70" cy="50" rx="10" ry="6" fill="#ffa2b6" opacity="0.85"/></svg>' },
                     { id: 'heart', label: 'Tiny Pink Hearts', prop: 'blushShape', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 25,48 C 22,43 18,48 25,55 C 32,48 28,43 25,48 Z" fill="#ffa2b6"/><path d="M 75,48 C 72,43 68,48 75,55 C 82,48 78,43 75,48 Z" fill="#ffa2b6"/></svg>' },
                     { id: 'star', label: 'Soft Mini Stars', prop: 'blushShape', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="30,42 32,46 36,46 33,48 34,52 30,50 26,52 27,48 24,46 28,46" fill="#ffa2b6"/><polygon points="70,42 72,46 76,46 73,48 74,52 70,50 66,52 67,48 64,46 68,46" fill="#ffa2b6"/></svg>' },
@@ -3380,7 +3380,7 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
                     { id: 'crescent', label: 'Crescent Glow 🌙', prop: 'blushShape', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 37,46 A 9 8 0 1 0 37,57 A 7 6 0 1 1 37,46 Z" fill="#ffa2b6" opacity="0.8"/><path d="M 63,46 A 9 8 0 1 1 63,57 A 7 6 0 1 0 63,46 Z" fill="#ffa2b6" opacity="0.8"/></svg>' },
                     { id: 'butterfly', label: 'Butterfly Blush 🦋', prop: 'blushShape', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 29,51 Q 20,43 19,51 Q 20,59 29,51 Z" fill="#ffb3cc" opacity="0.82"/><path d="M 29,51 Q 38,43 39,51 Q 38,59 29,51 Z" fill="#ffc8dd" opacity="0.75"/><circle cx="29" cy="51" r="2.5" fill="#ff6b9d" opacity="0.9"/><path d="M 71,51 Q 62,43 61,51 Q 62,59 71,51 Z" fill="#ffb3cc" opacity="0.82"/><path d="M 71,51 Q 80,43 81,51 Q 80,59 71,51 Z" fill="#ffc8dd" opacity="0.75"/><circle cx="71" cy="51" r="2.5" fill="#ff6b9d" opacity="0.9"/></svg>' }
                 ],
-                'Accessories': [
+                'Face Accessories': [
                     { id: 'none', label: 'None', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="24" fill="none" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="4,4"/><line x1="35" y1="35" x2="65" y2="65" stroke="#cbd5e1" stroke-width="3"/></svg>' },
                     { id: 'round_glasses', label: 'Oversized Round Glasses', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="50" r="12" fill="none" stroke="#4A3E3D" stroke-width="3"/><circle cx="65" cy="50" r="12" fill="none" stroke="#4A3E3D" stroke-width="3"/><line x1="47" y1="50" x2="53" y2="50" stroke="#4A3E3D" stroke-width="3"/></svg>' },
                     { id: 'star_glasses', label: 'Star Sunglasses', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="35,38 39,47 48,47 41,52 43,61 35,56 27,61 29,52 22,47 31,47" fill="none" stroke="#4A3E3D" stroke-width="2.5"/><polygon points="65,38 69,47 78,47 71,52 73,61 65,56 57,61 59,52 52,47 61,47" fill="none" stroke="#4A3E3D" stroke-width="2.5"/><line x1="47" y1="48" x2="53" y2="48" stroke="#4A3E3D" stroke-width="3"/></svg>' },
