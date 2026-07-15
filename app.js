@@ -1230,8 +1230,21 @@ document.addEventListener('DOMContentLoaded', () => {
         lastGeminiFailure = null;
 
         let response = null;
-        // Prioritize direct API call if local key exists, to avoid 404 proxy errors on static server port 8086
-        if (GEMINI_API_KEY) {
+        // Prioritize backend proxy if running on a server, to avoid exposing API keys in client-side network requests
+        if (window.location.protocol !== 'file:') {
+            try {
+                response = await fetch('/api/ai/gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model, payload: requestBody })
+                });
+            } catch (e) {
+                console.warn('Backend proxy fetch failed, trying direct browser call:', e);
+            }
+        }
+
+        // Fall back to direct browser fetch only if proxy failed and a local API key is configured
+        if ((!response || !response.ok) && typeof GEMINI_API_KEY !== 'undefined' && GEMINI_API_KEY && GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY_HERE') {
             try {
                 const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
                 response = await fetch(endpoint, {
@@ -1241,16 +1254,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             } catch (e) {
                 console.error('Direct Gemini fetch failed:', e);
-            }
-        } else if (window.location.protocol !== 'file:') {
-            try {
-                response = await fetch('/api/ai/gemini', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model, payload: requestBody })
-                });
-            } catch (e) {
-                console.warn('Backend proxy fetch failed:', e);
             }
         }
 
