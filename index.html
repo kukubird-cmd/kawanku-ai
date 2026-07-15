@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="lucide.min.js"></script>
-    <link rel="stylesheet" href="style.css?v=2">
+    <link rel="stylesheet" href="style.css?v=5">
     <!-- React & ReactDOM CDN -->
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
@@ -674,6 +674,13 @@
                                 <div class="webcam-viewport">
                                     <video id="webcam-element" autoplay playsinline muted></video>
                                     <canvas id="face-tracker-canvas"></canvas>
+                                    
+                                    <!-- Shown when camera access is blocked -->
+                                    <div class="cam-denied-msg hidden" id="cam-denied-msg">
+                                        <div class="cam-denied-icon">🔒</div>
+                                        <div class="cam-denied-title">Camera Blocked</div>
+                                        <div class="cam-denied-hint">Click the 🔒 icon in the browser address bar → set Camera to <strong>Allow</strong>, then refresh.</div>
+                                    </div>
                                     
                                     <!-- Scan animation guidelines -->
                                     <div class="scanner-laser"></div>
@@ -1586,7 +1593,7 @@
     <!-- Local Configuration (API Keys, etc.) -->
     <script src="config.js"></script>
     <!-- Main JavaScript App module -->
-    <script src="app.js?v=2"></script>
+    <script src="app.js?v=5"></script>
 
     <!-- React Mental Health Sanctuary App Script -->
     <script type="text/babel">

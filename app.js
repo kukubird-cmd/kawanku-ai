@@ -197,6 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         webcamElement: document.getElementById('webcam-element'),
         faceTrackerCanvas: document.getElementById('face-tracker-canvas'),
         closeCamBtn: document.getElementById('close-cam-btn'),
+        camDeniedMsg: document.getElementById('cam-denied-msg'),
         camMetricTension: document.getElementById('cam-metric-tension'),
         camMetricMood: document.getElementById('cam-metric-mood'),
         camMetricSaccadic: document.getElementById('cam-metric-saccadic'),
@@ -1194,7 +1195,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // IMPORTANT: Replace the value below with your own Gemini API key.
     // Get one free at: https://aistudio.google.com/app/apikey
     const GEMINI_API_KEY = (window.GEMINI_API_KEY || '').trim();
-    const GEMINI_QUOTA_COOLDOWN_MS = 60 * 1000;
+    const GEMINI_QUOTA_COOLDOWN_MS = 3 * 1000;
     const GEMINI_AUDIO_COOLDOWN_MS = 60 * 1000;
     const GEMINI_NON_CHAT_COOLDOWN_MS = 90 * 1000;
     const GEMINI_FACE_COOLDOWN_MS = 5 * 60 * 1000;
@@ -1230,83 +1231,120 @@ document.addEventListener('DOMContentLoaded', () => {
         lastGeminiFailure = null;
 
         let response = null;
-        // Prioritize backend proxy if running on a server, to avoid exposing API keys in client-side network requests
-        if (window.location.protocol !== 'file:') {
-            try {
-                response = await fetch('/api/ai/gemini', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model, payload: requestBody })
-                });
-            } catch (e) {
-                console.warn('Backend proxy fetch failed, trying direct browser call:', e);
+        let data = null;
+        const attempts = 3;
+        let delay = 1500; // start with 1.5 seconds
+
+        for (let attempt = 0; attempt < attempts; attempt++) {
+            response = null;
+            data = null;
+
+            // Prioritize backend proxy if running on a server
+            if (window.location.protocol !== 'file:') {
+                try {
+                    response = await fetch('/api/ai/gemini', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ model, payload: requestBody })
+                    });
+                } catch (e) {
+                    console.warn('Backend proxy fetch failed, trying direct browser call:', e);
+                }
             }
-        }
 
-        // Fall back to direct browser fetch only if proxy failed and a local API key is configured
-        if ((!response || !response.ok) && typeof GEMINI_API_KEY !== 'undefined' && GEMINI_API_KEY && GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY_HERE') {
-            try {
-                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
-                response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
-                });
-            } catch (e) {
-                console.error('Direct Gemini fetch failed:', e);
+            // Fall back to direct browser fetch
+            if ((!response || !response.ok) && typeof GEMINI_API_KEY !== 'undefined' && GEMINI_API_KEY && GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY_HERE') {
+                try {
+                    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+                    response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(requestBody)
+                    });
+                } catch (e) {
+                    console.error('Direct Gemini fetch failed:', e);
+                }
             }
+
+            if (!response) {
+                if (attempt < attempts - 1) {
+                    console.warn(`No response from Gemini. Retrying in ${delay}ms...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                    continue;
+                }
+                return null;
+            }
+
+            // Missing API key error (503) from proxy
+            if (response.status === 503) {
+                const errData = await response.json().catch(() => null);
+                lastGeminiFailure = {
+                    code: errData?.code || 'missing_api_key',
+                    status: 503,
+                    detail: errData?.error || 'The backend could not find a Gemini API key.'
+                };
+                return null;
+            }
+
+            // HTTP 429 rate limit
+            if (response.status === 429) {
+                if (attempt < attempts - 1) {
+                    console.warn(`Gemini API rate limit (429). Retrying in ${delay}ms... (Attempt ${attempt + 1}/${attempts})`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                    continue;
+                }
+                geminiDisabledUntil = Date.now() + GEMINI_QUOTA_COOLDOWN_MS;
+                lastGeminiFailure = {
+                    code: 'http_429',
+                    status: 429,
+                    detail: 'Gemini returned HTTP 429 directly.'
+                };
+                return null;
+            }
+
+            if (!response.ok) {
+                throw new Error(`Gemini API error: ${response.status}`);
+            }
+
+            try {
+                data = await response.json();
+            } catch (err) {
+                console.error('Failed to parse Gemini response:', err);
+            }
+
+            // Quota exceeded flag inside JSON from backend proxy
+            if (data?.quota_exceeded) {
+                if (attempt < attempts - 1) {
+                    console.warn(`Backend reported Gemini quota exceeded. Retrying in ${delay}ms... (Attempt ${attempt + 1}/${attempts})`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                    continue;
+                }
+                geminiDisabledUntil = Date.now() + GEMINI_QUOTA_COOLDOWN_MS;
+                lastGeminiFailure = {
+                    code: data.code || 'quota_exceeded',
+                    status: data.status || 429,
+                    detail: data.error || 'Gemini reported quota exceeded.'
+                };
+                return null;
+            }
+
+            // General proxy errors
+            if (data?.code === 'gemini_error' || data?.code === 'gemini_request_failed') {
+                lastGeminiFailure = {
+                    code: data.code,
+                    status: data.status || 'unknown',
+                    detail: data.error || 'The Gemini proxy returned an error.'
+                };
+                console.warn(`Gemini proxy returned fallbackable error: ${data.status || data.code}`);
+                return null;
+            }
+
+            return data;
         }
-
-        if (!response) return null;
-
-        // Prefer the backend proxy. Browser-direct calls can expose the key and
-        // surface raw network errors, so only use them for file:// demos.
-        if (response.status === 503) {
-            const data = await response.json().catch(() => null);
-            lastGeminiFailure = {
-                code: data?.code || 'missing_api_key',
-                status: 503,
-                detail: data?.error || 'The backend could not find a Gemini API key.'
-            };
-            return null;
-        }
-
-        if (response.status === 429) {
-            geminiDisabledUntil = Date.now() + GEMINI_QUOTA_COOLDOWN_MS;
-            lastGeminiFailure = {
-                code: 'http_429',
-                status: 429,
-                detail: 'Gemini returned HTTP 429 directly.'
-            };
-            return null;
-        }
-
-        if (!response.ok) {
-            throw new Error(`Gemini API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        if (data?.quota_exceeded) {
-            geminiDisabledUntil = Date.now() + GEMINI_QUOTA_COOLDOWN_MS;
-            lastGeminiFailure = {
-                code: data.code || 'quota_exceeded',
-                status: data.status || 429,
-                detail: data.error || 'Gemini reported quota exceeded.'
-            };
-            return null;
-        }
-
-        if (data?.code === 'gemini_error' || data?.code === 'gemini_request_failed') {
-            lastGeminiFailure = {
-                code: data.code,
-                status: data.status || 'unknown',
-                detail: data.error || 'The Gemini proxy returned an error.'
-            };
-            console.warn(`Gemini proxy returned fallbackable error: ${data.status || data.code}`);
-            return null;
-        }
-
-        return data;
+        return null;
     }
 
     function formatGeminiDiagnostic() {
@@ -1322,13 +1360,22 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add the student message to history
         conversationHistory.push({ role: 'user', parts: [{ text: studentText }] });
 
+        // Keep only the last 8 messages (4 turns) to avoid hitting token-per-minute limits
+        while (conversationHistory.length > 8) {
+            conversationHistory.shift();
+        }
+
         const systemPrompt = `You are "Your Buddy" (智能共情虚拟伙伴), a healing, extremely warm and empathetic peer-like AI companion for students.
 Your appearance is a cyan, fluffy, round monster with two star antennas, sitting comfortably on a soft beige round quilted cushion.
 Your personality: supportive, caring, non-judgmental, warm and comforting.
 
-When responding, you must:
-1. Dynamically respond to the student's message (2-4 sentences max for chat) in the same language they used (Chinese or English).
-3. At the END of your response, append a JSON block (wrapped in triple backticks) with this exact format:
+When responding, you must follow these guidelines:
+1. Reflect and Summarize: Begin or include a brief reflection (refleksi) in your response. Summarize what the student just said or the problem they explained, and repeat the core message back to them to ensure they feel heard and understood.
+2. Show Empathy: Always maintain an encouraging, supportive, and empathetic tone. Acknowledge their effort, validate their challenges, and show genuine care for their learning journey.
+3. Ask Open-Ended Questions: Never give direct answers or closed (yes/no) questions. Always end your response with an open-ended question (question terbuka) that encourages the student to share more about their feelings.
+4. Keep it Short and Simple: Make sure the reply is short and simple (2-4 sentences max). Ensure all sentences are complete, fully finished, and do not end mid-way. Respond in the same language they used (Chinese or English).
+
+At the END of your response, append a JSON block (wrapped in triple backticks) with this exact format:
 \`\`\`json
 {
   "sentiment": "Positive|Neutral|Negative",
@@ -1354,7 +1401,7 @@ Keep your conversational reply warm, healing and concise. The student should fee
         };
 
         try {
-            const data = await callGemini('gemini-1.5-flash', requestBody);
+            const data = await callGemini('gemini-2.5-flash', requestBody);
             if (!data) return null;
             const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
@@ -2324,7 +2371,7 @@ Non-content voice metadata:
 Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect the vocal metadata without sounding clinical, and ask one supportive follow-up question.`;
 
         try {
-            const data = await callGemini('gemini-1.5-flash', {
+            const data = await callGemini('gemini-2.5-flash', {
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: {
                     temperature: 0.75,
@@ -2344,27 +2391,47 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
     function startWebcamAnalyzer() {
         if (state.webcam.isActive || !DOM.webcamOverlay.classList.contains('hidden')) return;
 
+        // Check if getUserMedia is supported
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            showToast('Camera API not supported in this browser.', 'error');
+            return;
+        }
+
         // Show overlay immediately so user sees we're attempting to connect
         DOM.webcamOverlay.classList.remove('hidden');
         DOM.webcamOverlay.style.display = 'flex';
         DOM.camToggleBtn.classList.add('active');
-        state.webcam.isActive = true;
+        // NOTE: isActive is set AFTER camera permission is confirmed, not before
+
+        // Hide any previous denied message
+        if (DOM.camDeniedMsg) DOM.camDeniedMsg.classList.add('hidden');
+        DOM.webcamElement.style.display = '';
 
         navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } })
             .then(stream => {
                 state.webcam.stream = stream;
+                state.webcam.isActive = true;
                 DOM.webcamElement.srcObject = stream;
 
                 // Start visual overlay tracking loop
                 drawFaceScannerHUD();
-                showToast("Webcam face metrics activated.", "success");
+                showToast('Webcam face metrics activated.', 'success');
             })
             .catch(err => {
-                console.error("Camera access failed", err);
-                // Overlay is already visible — user can still close it with × button
-                // Mark inactive so stop() doesn't skip
+                console.error('Camera access failed:', err.name, err.message);
                 state.webcam.isActive = false;
-                showToast("Camera access was denied. Click × to close.", "error");
+
+                // Show user-friendly denied message inside overlay
+                if (DOM.camDeniedMsg) DOM.camDeniedMsg.classList.remove('hidden');
+                DOM.webcamElement.style.display = 'none';
+
+                if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                    showToast('Camera blocked. Click the lock 🔒 in the address bar and set Camera to Allow.', 'error');
+                } else if (err.name === 'NotFoundError') {
+                    showToast('No camera found on this device.', 'error');
+                } else {
+                    showToast('Camera error: ' + err.message, 'error');
+                }
             });
     }
 
@@ -2482,7 +2549,7 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(DOM.webcamElement, 0, 0, canvas.width, canvas.height);
                 const base64Data = canvas.toDataURL('image/jpeg', 0.55).split(',')[1];
-                const data = await callGemini('gemini-1.5-flash', {
+                const data = await callGemini('gemini-2.5-flash', {
                     contents: [{
                         parts: [
                             {
@@ -3797,7 +3864,7 @@ For the Report (after monster defeat), respond with:
                 generationConfig: { temperature: 0.85, maxOutputTokens: 1024 }
             };
             try {
-                const data = await callGemini('gemini-1.5-flash', body);
+                const data = await callGemini('gemini-2.5-flash', body);
                 if (!data) return null;
                 const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
                 // Strip potential markdown fences
@@ -4643,7 +4710,7 @@ Strictly adhere to the following layout and do NOT add any extra introductory te
 
             if (canAttemptGemini()) {
                 try {
-                    const data = await callGemini('gemini-1.5-flash', {
+                    const data = await callGemini('gemini-2.5-flash', {
                         system_instruction: { parts: [{ text: "You are a clinical psychologist compiling a student mental wellness assessment report. Be professional, supportive, and clear." }] },
                         contents: [{ role: 'user', parts: [{ text: prompt }] }],
                         generationConfig: { temperature: 0.8, maxOutputTokens: 2048 }
@@ -4776,7 +4843,7 @@ Example format:
             try {
                 let questions = null;
                 if (canAttemptGemini()) {
-                    const data = await callGemini('gemini-1.5-flash', {
+                    const data = await callGemini('gemini-2.5-flash', {
                         system_instruction: { parts: [{ text: "You are a specialized JSON generator. You output raw JSON arrays containing strings and nothing else." }] },
                         contents: [{ role: 'user', parts: [{ text: prompt }] }],
                         generationConfig: { temperature: 0.7, maxOutputTokens: 1000 }
@@ -4957,7 +5024,7 @@ Example format:
             if (sInput) sInput.value = '';
             const shopPrompt = '你是 Kawanku AI 火花商店的潮流主理人。用户当前火花天数为 ' + sp.days + ' 天。当前显示第 ' + activeWeek + ' 周货架。请根据用户请求展示商品或处理兑换。保持极简留白风格。货架内容：' + JSON.stringify(SHOP_CATALOG[activeWeek]);
             try {
-                const data = await callGemini('gemini-1.5-flash', {
+                const data = await callGemini('gemini-2.5-flash', {
                     system_instruction: { parts: [{ text: shopPrompt }] },
                     contents: shopHistory,
                     generationConfig: { temperature: 0.8, maxOutputTokens: 1024 }
