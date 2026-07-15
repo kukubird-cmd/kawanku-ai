@@ -1746,6 +1746,7 @@ body {
     cursor: pointer;
     white-space: nowrap;
     transition: all 0.25s ease;
+    flex-shrink: 0; /* Prevent flex children from squishing/compressing together */
 }
 
 .subtab-btn:hover {
