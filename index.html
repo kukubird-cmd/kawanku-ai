@@ -2030,40 +2030,57 @@
                     }
 
                     let liveQuiz = null;
-                    if (state.quiz && state.quiz.answers && state.quiz.answers.length > 0) {
-                        if (state.quiz.report) {
-                            const r = state.quiz.report;
-                            liveQuiz = {
-                                time: "Live Quiz",
-                                score: r.score,
-                                result: r.result,
-                                metrics: {
-                                    burnout: { value: `${r.burnoutPct || 0}%`, level: (r.burnoutPct || 0) > 70 ? "High" : ((r.burnoutPct || 0) > 35 ? "Moderate" : "Low") },
-                                    fatigue: { value: `${r.fatiguePct || 0}%`, level: (r.fatiguePct || 0) > 70 ? "High" : ((r.fatiguePct || 0) > 35 ? "Moderate" : "Low") },
-                                    social: { value: `${r.socialPct || 0}%`, level: (r.socialPct || 0) > 70 ? "High" : ((r.socialPct || 0) > 35 ? "Moderate" : "Low") },
-                                    academic: { value: `${r.academicPct || 0}%`, level: (r.academicPct || 0) > 70 ? "High" : ((r.academicPct || 0) > 35 ? "Moderate" : "Low") }
-                                },
-                                summary: `Completed student adaptive quiz check-in. Total answered: 10. Calculated wellbeing score: ${r.score}.`
-                            };
-                        } else {
-                            const score = state.quiz.answers.reduce((acc, a) => acc + (typeof a === 'number' ? a : (a.score || 0)), 0);
-                            const maxScore = state.quiz.answers.length * 3;
-                            const percent = maxScore > 0 ? Math.round((score / maxScore) * 100) : 50;
-                            const wellbeing = 100 - percent;
-                            
-                            liveQuiz = {
-                                time: "Live Quiz",
-                                score: `${wellbeing}/100`,
-                                result: wellbeing > 75 ? "Excellent Resilience" : (wellbeing > 45 ? "Good Balance" : "Needs Support"),
-                                metrics: {
-                                    burnout: { value: `${percent}%`, level: percent > 70 ? "High" : (percent > 35 ? "Moderate" : "Low") },
-                                    fatigue: { value: `${Math.round(percent * 0.8)}%`, level: percent > 70 ? "High" : (percent > 35 ? "Moderate" : "Low") },
-                                    social: { value: `${Math.round(percent * 0.9)}%`, level: percent > 70 ? "High" : (percent > 35 ? "Moderate" : "Low") },
-                                    academic: { value: `${Math.round(percent * 0.85)}%`, level: percent > 70 ? "High" : (percent > 35 ? "Moderate" : "Low") }
-                                },
-                                summary: `Completed student adaptive quiz check-in. Total answered: ${state.quiz.answers.length}. Calculated wellbeing score: ${wellbeing}/100.`
-                            };
-                        }
+                    let storedQuizReport = null;
+                    try {
+                        const s = localStorage.getItem('kawanku_latest_quiz_report');
+                        if (s) storedQuizReport = JSON.parse(s);
+                    } catch(e) {}
+
+                    if (state.quiz && state.quiz.report) {
+                        const r = state.quiz.report;
+                        liveQuiz = {
+                            time: "Live Quiz",
+                            score: r.score || "85/100",
+                            result: r.result || "Good Balance",
+                            metrics: {
+                                burnout: { value: `${r.burnoutPct || r.academicPct || 30}%`, level: (r.burnoutPct || r.academicPct || 30) > 70 ? "High" : ((r.burnoutPct || r.academicPct || 30) > 35 ? "Moderate" : "Low") },
+                                fatigue: { value: `${r.fatiguePct || r.selfEsteemPct || 25}%`, level: (r.fatiguePct || r.selfEsteemPct || 25) > 70 ? "High" : ((r.fatiguePct || r.selfEsteemPct || 25) > 35 ? "Moderate" : "Low") },
+                                social: { value: `${r.socialPct || r.anxietyPct || 35}%`, level: (r.socialPct || r.anxietyPct || 35) > 70 ? "High" : ((r.socialPct || r.anxietyPct || 35) > 35 ? "Moderate" : "Low") },
+                                academic: { value: `${r.academicPct || 30}%`, level: (r.academicPct || 30) > 70 ? "High" : ((r.academicPct || 30) > 35 ? "Moderate" : "Low") }
+                            },
+                            summary: r.reportText || `Completed adaptive student clinical quiz check-in (${r.score || '85/100'}).`
+                        };
+                    } else if (storedQuizReport) {
+                        liveQuiz = {
+                            time: "Live Quiz",
+                            score: storedQuizReport.score || "85/100",
+                            result: (storedQuizReport.anxiety_level || 30) < 30 ? "Excellent Resilience" : "Good Balance",
+                            metrics: {
+                                burnout: { value: `${storedQuizReport.academic_pressure || storedQuizReport.burnout || 30}%`, level: (storedQuizReport.academic_pressure || 30) > 70 ? "High" : "Moderate" },
+                                fatigue: { value: `${storedQuizReport.self_esteem || 25}%`, level: (storedQuizReport.self_esteem || 25) > 70 ? "High" : "Moderate" },
+                                social: { value: `${storedQuizReport.anxiety_level || 35}%`, level: (storedQuizReport.anxiety_level || 35) > 70 ? "High" : "Moderate" },
+                                academic: { value: `${storedQuizReport.academic_pressure || 30}%`, level: (storedQuizReport.academic_pressure || 30) > 70 ? "High" : "Moderate" }
+                            },
+                            summary: storedQuizReport.summary || `Completed clinical screening quiz (${storedQuizReport.score || '85/100'}).`
+                        };
+                    } else if (state.quiz && state.quiz.answers && state.quiz.answers.length > 0) {
+                        const score = state.quiz.answers.reduce((acc, a) => acc + (typeof a === 'number' ? a : (a.score || 0)), 0);
+                        const maxScore = state.quiz.answers.length * 3;
+                        const percent = maxScore > 0 ? Math.round((score / maxScore) * 100) : 50;
+                        const wellbeing = 100 - percent;
+                        
+                        liveQuiz = {
+                            time: "Live Quiz",
+                            score: `${wellbeing}/100`,
+                            result: wellbeing > 75 ? "Excellent Resilience" : (wellbeing > 45 ? "Good Balance" : "Needs Support"),
+                            metrics: {
+                                burnout: { value: `${percent}%`, level: percent > 70 ? "High" : (percent > 35 ? "Moderate" : "Low") },
+                                fatigue: { value: `${Math.round(percent * 0.8)}%`, level: percent > 70 ? "High" : (percent > 35 ? "Moderate" : "Low") },
+                                social: { value: `${Math.round(percent * 0.9)}%`, level: percent > 70 ? "High" : (percent > 35 ? "Moderate" : "Low") },
+                                academic: { value: `${Math.round(percent * 0.85)}%`, level: percent > 70 ? "High" : (percent > 35 ? "Moderate" : "Low") }
+                            },
+                            summary: `Completed student adaptive quiz check-in. Total answered: ${state.quiz.answers.length}. Calculated wellbeing score: ${wellbeing}/100.`
+                        };
                     }
 
                     // Overwrite current day with real live wellness data & persist in localStorage

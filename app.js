@@ -3207,19 +3207,29 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
 
         // Tabulate results and choose avatar response modifier
         let counts = { Friendly: 0, Thoughtful: 0, Attentive: 0 };
-        state.quiz.answers.forEach(val => {
+        (state.quiz.answers || []).forEach(val => {
             if (counts[val] !== undefined) counts[val]++;
         });
 
         let dominantExpression = 'friendly';
         let feedbackMessage = "Excellent work checking in with your mind. Taking a moment to trace how your body and thoughts are behaving is a core mindfulness skill. I've adjusted my active presence to match your state.";
 
+        let academicScore = 35;
+        let selfEsteemScore = 25;
+        let anxietyScore = 30;
+
         if (counts.Attentive > counts.Friendly && counts.Attentive > counts.Thoughtful) {
             dominantExpression = 'attentive';
             feedbackMessage = "Your alignment check suggests you are carrying notable tension. Let's focus on calming down. Try toggling on the Pink Rain or Binaural Beats mixers below to ground your focus.";
+            academicScore = 75;
+            selfEsteemScore = 65;
+            anxietyScore = 80;
         } else if (counts.Thoughtful > counts.Friendly) {
             dominantExpression = 'thoughtful';
             feedbackMessage = "Your answers reflect deep analytical thoughts, likely reflecting school or task pressure. Allow yourself permission to step back from goals for just one hour tonight. I'm right here with you.";
+            academicScore = 60;
+            selfEsteemScore = 40;
+            anxietyScore = 55;
         }
 
         // Apply updated expression
@@ -3227,7 +3237,43 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
         renderAvatarVisuals();
         
         if (DOM.quizResultFeedback) DOM.quizResultFeedback.innerText = feedbackMessage;
-        showToast("Wellness Check-in Complete.", "success");
+
+        // Generate Quiz Report for Calendar & Counselor
+        const wellbeingScore = Math.max(10, 100 - anxietyScore);
+        const reportResult = wellbeingScore > 75 ? "Excellent Resilience" : (wellbeingScore > 45 ? "Good Balance" : "Needs Support");
+
+        state.quiz.report = {
+            score: `${wellbeingScore}/100`,
+            result: reportResult,
+            burnoutPct: academicScore,
+            fatiguePct: selfEsteemScore,
+            socialPct: anxietyScore,
+            academicPct: academicScore,
+            reportText: feedbackMessage
+        };
+        window.state = state;
+
+        // Save to localStorage for Counselor Portal & Persistence
+        const latestQuizReport = {
+            student_id: 'STU-88421',
+            timestamp: new Date().toLocaleString(),
+            score: `${wellbeingScore}/100`,
+            academic_pressure: academicScore,
+            self_esteem: selfEsteemScore,
+            anxiety_level: anxietyScore,
+            burnout: academicScore,
+            summary: `Mindfulness Grounding Checkup Completed (${reportResult}). Academic Pressure: ${academicScore}%, Self-Esteem: ${selfEsteemScore}%, Anxiety Level: ${anxietyScore}%.`
+        };
+        try {
+            localStorage.setItem('kawanku_latest_quiz_report', JSON.stringify(latestQuizReport));
+        } catch(e) {}
+
+        // Immediately sync to Sanctuary Calendar
+        if (window.updateSanctuaryDashboard) {
+            window.updateSanctuaryDashboard();
+        }
+
+        showToast("Wellness Check-in Complete & Report Logged to Calendar!", "success");
     }
 
     // ----------------------------------------------------------------------
