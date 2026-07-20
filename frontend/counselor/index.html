@@ -1062,51 +1062,57 @@
                 }
 
                 const sosData = JSON.parse(localStorage.getItem(`kawanku_sos_dispatched_${studentId}`));
+                const latestQuiz = JSON.parse(localStorage.getItem('kawanku_latest_quiz_report') || 'null');
                 
-                // Mock report object
+                // Report object incorporating real Quiz screening data if present
                 const mockReport = {
                     metadata: {
                         total_sessions: sosData ? 3 : 1,
                         total_messages: sosData ? 14 : 4,
-                        compiled_at: new Date().toLocaleString()
+                        compiled_at: latestQuiz ? latestQuiz.timestamp : new Date().toLocaleString()
                     },
                     mood_state: {
-                        current_state: sosData ? sosData.sentiment : 'Neutral',
+                        current_state: sosData ? sosData.sentiment : (latestQuiz ? 'Screened' : 'Neutral'),
                         trajectory: sosData ? 'Descending emotional trend' : 'Stable',
-                        description: sosData 
-                            ? 'Student voice parameters and chat indicators show elevated tension, speech rate fluctuations, and repeated stress patterns.'
-                            : 'Student has steady interaction logs. Broad indicators suggest calm or neutral state.'
+                        description: latestQuiz 
+                            ? `Latest Student Clinical Quiz Assessment (Score: ${latestQuiz.score}): ${latestQuiz.summary}`
+                            : (sosData 
+                                ? 'Student voice parameters and chat indicators show elevated tension, speech rate fluctuations, and repeated stress patterns.'
+                                : 'Student has steady interaction logs. Broad indicators suggest calm or neutral state.')
                     },
                     stress_assessment: {
-                        overall_level: sosData ? 'High' : 'Minimal',
+                        overall_level: sosData ? 'High' : (latestQuiz ? (latestQuiz.anxiety_level > 60 ? 'High' : 'Moderate') : 'Minimal'),
                         breakdown: {
-                            cognitive_burnout: sosData ? 75 : 20,
-                            emotional_fatigue: sosData ? 80 : 15,
-                            social_stress: sosData ? 60 : 30,
-                            academic_pressure: sosData ? 85 : 45
+                            cognitive_burnout: latestQuiz ? latestQuiz.burnout : (sosData ? 75 : 20),
+                            emotional_fatigue: latestQuiz ? latestQuiz.self_esteem : (sosData ? 80 : 15),
+                            social_stress: latestQuiz ? latestQuiz.anxiety_level : (sosData ? 60 : 30),
+                            academic_pressure: latestQuiz ? latestQuiz.academic_pressure : (sosData ? 85 : 45)
                         }
                     },
                     clinical_screening: {
                         gad7: {
-                            score: sosData ? 14 : 3,
-                            risk_level: sosData ? 'Moderate Anxiety' : 'Minimal Anxiety'
+                            score: latestQuiz ? Math.round(latestQuiz.anxiety_level * 0.21) : (sosData ? 14 : 3),
+                            risk_level: latestQuiz ? (latestQuiz.anxiety_level > 60 ? 'Moderate Anxiety' : 'Mild Anxiety') : (sosData ? 'Moderate Anxiety' : 'Minimal Anxiety')
                         },
                         phq9: {
-                            score: sosData ? 16 : 4,
-                            risk_level: sosData ? 'Moderately Severe Depression' : 'Minimal Depression'
+                            score: latestQuiz ? Math.round(latestQuiz.academic_pressure * 0.27) : (sosData ? 16 : 4),
+                            risk_level: latestQuiz ? (latestQuiz.academic_pressure > 60 ? 'Moderately Severe' : 'Minimal Depression') : (sosData ? 'Moderately Severe Depression' : 'Minimal Depression')
                         }
                     },
                     risk_assessment: {
-                        overall_risk_level: sosData ? 'Urgent' : 'Low',
+                        overall_risk_level: sosData ? 'Urgent' : (latestQuiz && latestQuiz.anxiety_level > 70 ? 'Moderate' : 'Low'),
                         immediate_intervention_needed: !!sosData,
-                        follow_up_priority: sosData ? 'Urgent' : 'Low'
+                        follow_up_priority: sosData ? 'Urgent' : (latestQuiz && latestQuiz.anxiety_level > 70 ? 'Medium' : 'Low')
                     },
                     clinical_recommendations: sosData ? [
                         { action: 'Schedule Direct Advisor Session', urgency: 'Critical', description: 'Reach out to the student immediately via their school email or schedule an in-person diagnostic meeting.' },
                         { action: 'De-escalation exercises', urgency: 'Medium', description: 'Recommend specific breathing, journaling, or Spark Shop relaxation assets inside the MindBuddy hub.' }
+                    ] : (latestQuiz ? [
+                        { action: 'Review Quiz Breakdown', urgency: 'Medium', description: `Student scored ${latestQuiz.score}. Highest stress vectors: Academic Pressure (${latestQuiz.academic_pressure}%), Anxiety Level (${latestQuiz.anxiety_level}%).` },
+                        { action: 'Follow Up Guidance', urgency: 'Low', description: 'Recommend stress tolerance exercises and academic break scheduling.' }
                     ] : [
                         { action: 'Periodic Monitoring', urgency: 'Low', description: 'Student is operating within wellness baselines. No immediate follow-up required.' }
-                    ],
+                    ]),
                     privacy_notice: 'This report complies with student privacy protocols. Conversations are kept completely private and only aggregated stress indices are shared.'
                 };
 

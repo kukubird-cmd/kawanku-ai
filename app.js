@@ -96,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
             slices: 0
         }
     };
+    window.state = state;
 
     // ----------------------------------------------------------------------
     // DESIGN SYSTEM METADATA DEFINITIONS
@@ -4857,6 +4858,38 @@ Strictly adhere to the following layout and do NOT add any extra introductory te
             spark.days++;
             saveSpark(spark);
             syncQuizUI();
+
+            // Sync quiz report to state.quiz & window.state for Calendar and Counselor
+            state.quiz = {
+                answers: selectedAnswers,
+                report: {
+                    score: `${Math.max(10, 100 - anxietyPct)}/100`,
+                    result: anxietyPct < 30 ? "Excellent Resilience" : (anxietyPct < 60 ? "Good Balance" : "Needs Support"),
+                    burnoutPct: academicPct,
+                    fatiguePct: selfEsteemPct,
+                    socialPct: anxietyPct,
+                    academicPct: academicPct
+                }
+            };
+            window.state = state;
+
+            try {
+                const latestQuizReport = {
+                    student_id: 'STU-88421',
+                    timestamp: new Date().toLocaleString(),
+                    score: `${Math.max(10, 100 - anxietyPct)}/100`,
+                    academic_pressure: academicPct,
+                    self_esteem: selfEsteemPct,
+                    anxiety_level: anxietyPct,
+                    burnout: academicPct,
+                    summary: `Clinical Assessment Completed. Academic Pressure: ${academicPct}%, Self-Esteem: ${selfEsteemPct}%, Anxiety Level: ${anxietyPct}%.`
+                };
+                localStorage.setItem('kawanku_latest_quiz_report', JSON.stringify(latestQuizReport));
+            } catch(e) {}
+
+            if (window.updateSanctuaryDashboard) {
+                window.updateSanctuaryDashboard();
+            }
 
             if (qRestartBtn) qRestartBtn.classList.remove('hidden');
         }

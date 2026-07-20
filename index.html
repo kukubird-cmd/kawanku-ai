@@ -1976,10 +1976,9 @@
 
             useEffect(() => {
                 window.updateSanctuaryDashboard = () => {
-                    if (!window.state) return;
-                    
-                    const state = window.state;
-                    const moodVal = state.diagnostics.sentiment || 'Neutral';
+                    const state = window.state || (typeof state !== 'undefined' ? state : {});
+                    const diagnostics = state.diagnostics || { sentiment: 'Calm' };
+                    const moodVal = diagnostics.sentiment || 'Neutral';
                     
                     let moodType = 'peace';
                     let emoji = '🌱';
@@ -1999,7 +1998,7 @@
                     }
                     
                     let liveChat = null;
-                    if (state.diagnostics.totalConversations > 0) {
+                    if (diagnostics.totalConversations > 0 || (state.rant && state.rant.transcript)) {
                         let chatSummary = "Live conversation with MindBuddy companion.";
                         if (state.rant && state.rant.transcript) {
                             chatSummary = `Student shared: "${state.rant.transcript.substring(0, 100)}..."`;
@@ -2047,7 +2046,7 @@
                                 summary: `Completed student adaptive quiz check-in. Total answered: 10. Calculated wellbeing score: ${r.score}.`
                             };
                         } else {
-                            const score = state.quiz.answers.reduce((acc, a) => acc + (a.score || 0), 0);
+                            const score = state.quiz.answers.reduce((acc, a) => acc + (typeof a === 'number' ? a : (a.score || 0)), 0);
                             const maxScore = state.quiz.answers.length * 3;
                             const percent = maxScore > 0 ? Math.round((score / maxScore) * 100) : 50;
                             const wellbeing = 100 - percent;
@@ -2067,20 +2066,27 @@
                         }
                     }
 
-                    // Overwrite current day with the real live wellness data!
+                    // Overwrite current day with real live wellness data & persist in localStorage
                     const currentDayOfMonth = new Date().getDate();
                     setCalendarDays(prev => {
-                        const existingDay = prev[currentDayOfMonth] || {};
-                        return {
+                        let stored = {};
+                        try {
+                            const s = localStorage.getItem('kawanku_calendar_days_v2');
+                            if (s) stored = JSON.parse(s);
+                        } catch(e) {}
+                        const existingDay = stored[currentDayOfMonth] || prev[currentDayOfMonth] || {};
+                        const updated = {
                             ...prev,
+                            ...stored,
                             [currentDayOfMonth]: {
                                 mood: moodType,
                                 icon: emoji,
                                 title: title,
                                 color: color,
-                                notes: liveFace ? `Visual expression analysis suggests: ${liveFace.notes}` : (liveChat ? `Empathetic chat conversation summary: ${liveChat.summary}` : (existingDay.notes || "Active counseling session started by student on KawanKu Sanctuary.")),
+                                notes: liveQuiz ? `Completed clinical adaptive quiz screening (${liveQuiz.score}).` : (liveFace ? `Visual expression analysis suggests: ${liveFace.notes}` : (liveChat ? `Empathetic chat conversation summary: ${liveChat.summary}` : (existingDay.notes || "Active counseling session logged on KawanKu Sanctuary."))),
                                 tags: Array.from(new Set([
                                     ...(existingDay.tags || []),
+                                    ...(liveQuiz ? ['📊 Clinical Quiz'] : []),
                                     ...(liveFace ? ['📷 Facial Analysis'] : []),
                                     '🧠 Active Session'
                                 ])),
@@ -2089,6 +2095,10 @@
                                 quiz: liveQuiz || existingDay.quiz || null
                             }
                         };
+                        try {
+                            localStorage.setItem('kawanku_calendar_days_v2', JSON.stringify(updated));
+                        } catch(e) {}
+                        return updated;
                     });
                 };
 
