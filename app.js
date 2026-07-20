@@ -46,11 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
             chartData: Array(50).fill(72) // Ring buffer for HR graph
         },
 
-        gameStats: {
-            matches: 0,
-            slices: 0
-        },
-
         // Web Audio Synthesizer Nodes
         synth: {
             audioCtx: null,
@@ -84,10 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
             stream: null,
             isActive: false,
             animationFrame: null,
-            lastScanTime: 0,
-            devices: [],
-            deviceIndex: 0,
-            lastAnalysis: null // Stores latest Gemini or simulated psychological report
+            lastScanTime: 0
         },
 
         // Quiz State
@@ -96,10 +88,14 @@ document.addEventListener('DOMContentLoaded', () => {
             currentQuestionIdx: 0,
             answers: [],
             questions: []
+        },
+
+        // Game Stats Tracker
+        gameStats: {
+            matches: 0,
+            slices: 0
         }
     };
-
-    window.state = state; // Expose state to window so index.html React components can read and bind live diagnostics
 
     // ----------------------------------------------------------------------
     // DESIGN SYSTEM METADATA DEFINITIONS
@@ -207,7 +203,6 @@ document.addEventListener('DOMContentLoaded', () => {
         webcamElement: document.getElementById('webcam-element'),
         faceTrackerCanvas: document.getElementById('face-tracker-canvas'),
         closeCamBtn: document.getElementById('close-cam-btn'),
-        camDeniedMsg: document.getElementById('cam-denied-msg'),
         camMetricTension: document.getElementById('cam-metric-tension'),
         camMetricMood: document.getElementById('cam-metric-mood'),
         camMetricSaccadic: document.getElementById('cam-metric-saccadic'),
@@ -271,8 +266,6 @@ document.addEventListener('DOMContentLoaded', () => {
         sosCloseBtn: document.getElementById('sos-close-btn'),
         sosCancelBtn: document.getElementById('sos-cancel-btn'),
         sosConfirmBtn: document.getElementById('sos-confirm-btn'),
-        sosAutoNotice: document.getElementById('sos-auto-dispatch-notice'),
-        sosCountdown: document.getElementById('sos-countdown'),
         sosPreviewStatus: document.getElementById('sos-preview-status'),
         sosPreviewSentiment: document.getElementById('sos-preview-sentiment'),
         sosPreviewHR: document.getElementById('sos-preview-hr'),
@@ -338,16 +331,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         state.activePanel = panelId;
 
-        // Toggle global header visibility (hidden only on games-panel to allow integrated layout)
-        const globalHeader = document.querySelector('.content-header');
-        if (globalHeader) {
-            if (panelId === 'games-panel') {
-                globalHeader.style.display = 'none';
-            } else {
-                globalHeader.style.display = '';
-            }
-        }
-
         // Custom titles based on navigation
         if (panelId === 'chat-panel') {
             DOM.headerTitle.innerText = "Empathetic Connection Studio";
@@ -371,9 +354,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (panelId === 'games-panel') {
             if (DOM.headerTitle) DOM.headerTitle.innerText = "Play & Relax";
             if (DOM.headerSubtitle) DOM.headerSubtitle.innerText = "Take a quick mental break with our relaxing mini-games guided by KawanKu Robot.";
-        } else if (panelId === 'calendar-panel') {
-            if (DOM.headerTitle) DOM.headerTitle.innerText = "Empathy-First Mental Health Sanctuary & Calendar";
-            if (DOM.headerSubtitle) DOM.headerSubtitle.innerText = "Reflect on your mood tracking records and explore safe breathing spaces.";
         }
     }
 
@@ -788,6 +768,71 @@ document.addEventListener('DOMContentLoaded', () => {
                     <path d="M 150,190 L 140,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
                     <path d="M 250,190 L 260,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
                 `;
+            } else if (acc === 'angel_glasses') {
+                accSVG = `
+                    <!-- Left Wing -->
+                    <path d="M 154,190 C 144,178 132,182 130,192 C 128,200 138,204 146,198 C 136,200 136,208 140,212 C 144,215 150,208 154,198 Z" fill="#fff5f7" stroke="#4A3E3D" stroke-width="2.5" stroke-linejoin="round" />
+                    <!-- Right Wing -->
+                    <path d="M 246,190 C 256,178 268,182 270,192 C 272,200 262,204 254,198 C 264,200 264,208 260,212 C 256,215 250,208 246,198 Z" fill="#fff5f7" stroke="#4A3E3D" stroke-width="2.5" stroke-linejoin="round" />
+                    <!-- Left Lens -->
+                    <circle cx="172" cy="190" r="18" fill="#ffd6e0" fill-opacity="0.2" stroke="#4A3E3D" stroke-width="3" />
+                    <ellipse cx="166" cy="182" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,166,182)" />
+                    <!-- Right Lens -->
+                    <circle cx="228" cy="190" r="18" fill="#ffd6e0" fill-opacity="0.2" stroke="#4A3E3D" stroke-width="3" />
+                    <ellipse cx="222" cy="182" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,222,182)" />
+                    <!-- Bridge & Sides -->
+                    <path d="M 190,190 Q 200,188 210,190" fill="none" stroke="#4A3E3D" stroke-width="3" />
+                    <path d="M 154,190 L 142,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                    <path d="M 246,190 L 258,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                `;
+            } else if (acc === 'boba_glasses') {
+                accSVG = `
+                    <!-- Left Lens -->
+                    <circle cx="172" cy="190" r="20" fill="none" stroke="#b45309" stroke-width="3.5" />
+                    <circle cx="164" cy="200" r="3.5" fill="#4A3E3D" />
+                    <circle cx="172" cy="202" r="3.5" fill="#4A3E3D" />
+                    <circle cx="180" cy="200" r="3.5" fill="#4A3E3D" />
+                    <!-- Right Lens -->
+                    <circle cx="228" cy="190" r="20" fill="none" stroke="#b45309" stroke-width="3.5" />
+                    <circle cx="220" cy="200" r="3.5" fill="#4A3E3D" />
+                    <circle cx="228" cy="202" r="3.5" fill="#4A3E3D" />
+                    <circle cx="236" cy="200" r="3.5" fill="#4A3E3D" />
+                    <!-- Bridge & Sides -->
+                    <path d="M 192,190 Q 200,188 208,190" fill="none" stroke="#b45309" stroke-width="3.5" />
+                    <path d="M 152,190 L 140,192" fill="none" stroke="#b45309" stroke-width="2.5" />
+                    <path d="M 248,190 L 260,192" fill="none" stroke="#b45309" stroke-width="2.5" />
+                `;
+            } else if (acc === 'puppy_glasses') {
+                accSVG = `
+                    <!-- Left Puppy Ear -->
+                    <path d="M 152,180 C 140,170 142,200 148,206 C 154,200 158,185 152,180 Z" fill="#ffffff" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" />
+                    <path d="M 151,183 C 145,176 146,195 149,199 C 152,195 154,186 151,183 Z" fill="#ffa2b6" />
+                    <!-- Right Puppy Ear -->
+                    <path d="M 248,180 C 260,170 258,200 252,206 C 246,200 242,185 248,180 Z" fill="#ffffff" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" />
+                    <path d="M 249,183 C 255,176 254,195 251,199 C 248,195 246,186 249,183 Z" fill="#ffa2b6" />
+                    <!-- Lenses -->
+                    <circle cx="172" cy="190" r="18" fill="none" stroke="#4A3E3D" stroke-width="3.5" />
+                    <circle cx="228" cy="190" r="18" fill="none" stroke="#4A3E3D" stroke-width="3.5" />
+                    <!-- Bridge & Sides -->
+                    <path d="M 190,190 Q 200,188 210,190" fill="none" stroke="#4A3E3D" stroke-width="3.5" />
+                    <path d="M 154,190 L 142,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                    <path d="M 246,190 L 258,192" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                `;
+            } else if (acc === 'star_wing_glasses') {
+                accSVG = `
+                    <!-- Left Winged Lens -->
+                    <path d="M 148,180 C 160,180 186,185 190,195 C 180,205 160,205 148,180 Z" fill="#a78bfa" fill-opacity="0.7" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" />
+                    <!-- Left Sparkle Star -->
+                    <polygon points="152,176 154,180 158,181 155,183 156,187 152,185 148,187 149,183 146,181 150,180" fill="#facc15" stroke="#4A3E3D" stroke-width="1.5" />
+                    <!-- Right Winged Lens -->
+                    <path d="M 252,180 C 240,180 214,185 210,195 C 220,205 240,205 252,180 Z" fill="#a78bfa" fill-opacity="0.7" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" />
+                    <!-- Right Sparkle Star -->
+                    <polygon points="248,176 250,180 254,181 251,183 252,187 248,185 244,187 245,183 242,181 246,180" fill="#facc15" stroke="#4A3E3D" stroke-width="1.5" />
+                    <!-- Bridge & Sides -->
+                    <path d="M 190,190 Q 200,188 210,190" fill="none" stroke="#4A3E3D" stroke-width="3" />
+                    <path d="M 148,182 L 140,184" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                    <path d="M 252,182 L 260,184" fill="none" stroke="#4A3E3D" stroke-width="2.5" />
+                `;
             }
             accessoryGroup.innerHTML = accSVG;
         }
@@ -1122,6 +1167,101 @@ document.addEventListener('DOMContentLoaded', () => {
                     <line x1="68" y1="65" x2="66" y2="75" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
                 </svg>
             `;
+        } else if (currentScene === 'magic_forest') {
+            svgHtml = `
+                <svg class="scene-bg-element" viewBox="0 0 100 100">
+                    <!-- Giant Magic Mushroom Left -->
+                    <path d="M 12,90 L 12,65 Q 15,65 18,65 L 18,90 Z" fill="#ebcba4" stroke="#4A3E3D" stroke-width="2" />
+                    <path d="M 3,65 Q 15,35 27,65 Z" fill="#c084fc" stroke="#4A3E3D" stroke-width="2" />
+                    <circle cx="10" cy="50" r="2.5" fill="#fff" opacity="0.8" />
+                    <circle cx="20" cy="55" r="2.0" fill="#fff" opacity="0.8" />
+                    <!-- Small Magic Mushroom Right -->
+                    <path d="M 85,90 L 85,75 Q 87,75 89,75 L 89,90 Z" fill="#ebcba4" stroke="#4A3E3D" stroke-width="1.8" />
+                    <path d="M 78,75 Q 87,52 96,75 Z" fill="#f472b6" stroke="#4A3E3D" stroke-width="1.8" />
+                    <circle cx="84" cy="64" r="1.5" fill="#fff" opacity="0.8" />
+                    <circle cx="90" cy="66" r="1.5" fill="#fff" opacity="0.8" />
+                    <!-- Magical Fireflies / Glows -->
+                    <circle cx="25" cy="30" r="2" fill="#fef08a" opacity="0.9" />
+                    <circle cx="25" cy="30" r="5" fill="#fef08a" opacity="0.3" />
+                    <circle cx="75" cy="40" r="1.5" fill="#fef08a" opacity="0.8" />
+                    <circle cx="75" cy="40" r="4" fill="#fef08a" opacity="0.25" />
+                    <circle cx="45" cy="20" r="2.2" fill="#a78bfa" opacity="0.8" />
+                    <circle cx="45" cy="20" r="6" fill="#a78bfa" opacity="0.25" />
+                    <circle cx="55" cy="55" r="1.2" fill="#fef08a" opacity="0.7" />
+                    <!-- Ground / Moss -->
+                    <path d="M 0,90 Q 25,87 50,90 Q 75,93 100,90 L 100,100 L 0,100 Z" fill="#588157" stroke="#4A3E3D" stroke-width="2" />
+                </svg>
+            `;
+        } else if (currentScene === 'candy_castle') {
+            svgHtml = `
+                <svg class="scene-bg-element" viewBox="0 0 100 100">
+                    <!-- Rainbow -->
+                    <path d="M -10,65 Q 50,-10 110,65" fill="none" stroke="#ff85a2" stroke-width="14" opacity="0.3" />
+                    <path d="M -10,65 Q 50,-10 110,65" fill="none" stroke="#fcd34d" stroke-width="10" opacity="0.3" />
+                    <path d="M -10,65 Q 50,-10 110,65" fill="none" stroke="#a7f3d0" stroke-width="6" opacity="0.3" />
+                    <path d="M -10,65 Q 50,-10 110,65" fill="none" stroke="#bae6fd" stroke-width="2" opacity="0.3" />
+                    <!-- Far away Castle Silhouettes -->
+                    <path d="M 15,85 L 15,55 L 28,55 L 28,85 Z M 28,85 L 28,45 L 42,45 L 42,85 Z" fill="#f5d0fe" stroke="#4A3E3D" stroke-width="1.8" />
+                    <polygon points="15,55 21.5,38 28,55" fill="#e879f9" stroke="#4A3E3D" stroke-width="1.8" />
+                    <polygon points="28,45 35,25 42,45" fill="#e879f9" stroke="#4A3E3D" stroke-width="1.8" />
+                    
+                    <path d="M 65,85 L 65,48 L 78,48 L 78,85 Z M 78,85 L 78,58 L 90,58 L 90,85 Z" fill="#f5d0fe" stroke="#4A3E3D" stroke-width="1.8" />
+                    <polygon points="65,48 71.5,30 78,48" fill="#e879f9" stroke="#4A3E3D" stroke-width="1.8" />
+                    <polygon points="78,58 84,42 90,58" fill="#e879f9" stroke="#4A3E3D" stroke-width="1.8" />
+                    <!-- Twinkling Stars -->
+                    <polygon points="12,20 13,23 16,23 14,25 15,28 12,26 9,28 10,25 8,23 11,23" fill="#fcd34d" />
+                    <polygon points="88,18 89,21 92,21 90,23 91,26 88,24 85,26 86,23 84,21 87,21" fill="#fcd34d" />
+                    <!-- Cozy Fluffy Clouds at Bottom -->
+                    <path d="M -10,85 A 15,15 0 0,1 20,85 A 20,20 0 0,1 60,85 A 20,20 0 0,1 90,85 A 15,15 0 0,1 110,85 Z" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                </svg>
+            `;
+        } else if (currentScene === 'coral_palace') {
+            svgHtml = `
+                <svg class="scene-bg-element" viewBox="0 0 100 100">
+                    <!-- Floating bubbles -->
+                    <circle cx="15" cy="45" r="3.5" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.6" />
+                    <circle cx="17" cy="43" r="1" fill="#ffffff" opacity="0.8" />
+                    <circle cx="20" cy="25" r="2" fill="none" stroke="#ffffff" stroke-width="1.2" opacity="0.5" />
+                    <circle cx="82" cy="35" r="4" fill="none" stroke="#ffffff" stroke-width="1.8" opacity="0.6" />
+                    <circle cx="84" cy="33" r="1.2" fill="#ffffff" opacity="0.8" />
+                    <circle cx="78" cy="18" r="2.5" fill="none" stroke="#ffffff" stroke-width="1.2" opacity="0.5" />
+                    <circle cx="50" cy="15" r="3" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.4" />
+                    <!-- Coral & Seaweed Left -->
+                    <path d="M 5,95 Q 12,65 18,95 Q 24,70 28,95" fill="none" stroke="#4ade80" stroke-width="4.5" stroke-linecap="round" />
+                    <path d="M 12,95 C 10,80 2,82 8,95" fill="#fecdd3" stroke="#4A3E3D" stroke-width="1.8" />
+                    <path d="M 22,95 C 25,75 12,78 18,95" fill="#fda4af" stroke="#4A3E3D" stroke-width="1.8" />
+                    <!-- Coral & Seaweed Right -->
+                    <path d="M 90,95 Q 85,60 78,95 Q 74,68 70,95" fill="none" stroke="#4ade80" stroke-width="4" stroke-linecap="round" />
+                    <path d="M 85,95 C 80,72 98,75 88,95" fill="#fef08a" stroke="#4A3E3D" stroke-width="1.8" />
+                    <path d="M 75,95 C 72,82 80,80 76,95" fill="#fed7aa" stroke="#4A3E3D" stroke-width="1.8" />
+                    <!-- Cute Little Starfish on Ground -->
+                    <polygon points="45,94 47,89 51,90 48,93 49,97 45,95 41,97 42,93 39,90 43,89" fill="#ff758f" stroke="#4A3E3D" stroke-width="1.5" stroke-linejoin="round" />
+                    <!-- Sandy Ocean Floor -->
+                    <path d="M 0,93 Q 25,90 50,93 Q 75,95 100,92 L 100,100 L 0,100 Z" fill="#fef3c7" stroke="#4A3E3D" stroke-width="2.2" />
+                </svg>
+            `;
+        } else if (currentScene === 'moon_carousel') {
+            svgHtml = `
+                <svg class="scene-bg-element" viewBox="0 0 100 100">
+                    <!-- Hanging Stars on Strings -->
+                    <line x1="20" y1="0" x2="20" y2="35" stroke="#4A3E3D" stroke-width="1.5" />
+                    <polygon points="20,35 22,38 25,38 23,40 24,43 20,41 16,43 17,40 15,38 18,38" fill="#fcd34d" stroke="#4A3E3D" stroke-width="1.2" />
+                    <line x1="80" y1="0" x2="80" y2="45" stroke="#4A3E3D" stroke-width="1.5" />
+                    <polygon points="80,45 82,48 85,48 83,50 84,53 80,51 76,53 77,50 75,48 78,48" fill="#fcd34d" stroke="#4A3E3D" stroke-width="1.2" />
+                    <line x1="50" y1="0" x2="50" y2="20" stroke="#4A3E3D" stroke-width="1.5" />
+                    <polygon points="50,20 52,23 55,23 53,25 54,28 50,26 46,28 47,25 45,23 48,23" fill="#fcd34d" stroke="#4A3E3D" stroke-width="1.2" />
+                    <!-- Big Crescent Golden Moon Swing (placed behind the mascot offset) -->
+                    <path d="M 68,25 A 28,28 0 1,0 68,81 A 23,23 0 1,1 68,25 Z" fill="#fdeb6e" stroke="#4A3E3D" stroke-width="2" transform="rotate(-10, 68, 53)" />
+                    <circle cx="56" cy="46" r="1.5" fill="#fff" opacity="0.8" />
+                    <circle cx="48" cy="62" r="2.0" fill="#fff" opacity="0.8" />
+                    <!-- Magic Sparkles -->
+                    <polygon points="35,60 36,62 38,62 36.5,63.5 37,65.5 35,64.2 33,65.5 33.5,63.5 32,62 34,62" fill="#ffffff" />
+                    <polygon points="78,72 79,74 81,74 79.5,75.5 80,77.5 78,76.2 76,77.5 76.5,75.5 75,74 77,74" fill="#ffffff" />
+                    <polygon points="25,25 26,27 28,27 26.5,28.5 27,30.5 25,29.2 23,30.5 23.5,28.5 22,27 24,27" fill="#ffffff" />
+                    <!-- Soft clouds at bottom -->
+                    <path d="M -10,92 Q 15,85 40,93 Q 65,86 90,92 Q 100,90 110,95 L 110,100 L -10,100 Z" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" />
+                </svg>
+            `;
         }
 
         viewports.forEach(vp => {
@@ -1198,10 +1338,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ],
         stressBurnout: [
             "Burnout makes even tiny tasks look like mountains. If you're feeling empty or completely spent, your mind is telling you it's time to rest. Let's just sit here. No homework talk. How does that sound?",
-            "I hear you. Exhaustion is your body's signal that you've been carrying too much for too long. Can you put the work down for tonight and just take a breather with me? You've done enough.",
-            "I know you're trying your best, but it's okay to take a break. Your well-being is far more important than forcing yourself to keep going when you're exhausted. Let's rest for a moment.",
-            "Exhaustion is a sign that it's time to pause. Close your eyes, take a deep breath, and let go of the stress for just a few minutes.",
-            "I'm right here with you. We don't have to talk about anything stressful. Just breathe and allow yourself to relax."
+            "I hear you. Exhaustion is your body's signal that you've been carrying too much for too long. Can you put the work down for tonight and just take a breather with me? You've done enough."
         ],
         stressLoneliness: [
             "Feeling lonely is a heavy, quiet ache. Even in a busy school, it's easy to feel invisible. I want you to know I value our chats, and you are not isolated here. I'm listening. What is on your mind?",
@@ -1220,10 +1357,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // IMPORTANT: Replace the value below with your own Gemini API key.
     // Get one free at: https://aistudio.google.com/app/apikey
     const GEMINI_API_KEY = (window.GEMINI_API_KEY || '').trim();
-    const GEMINI_QUOTA_COOLDOWN_MS = 3 * 1000;
+    const GEMINI_QUOTA_COOLDOWN_MS = 60 * 1000;
     const GEMINI_AUDIO_COOLDOWN_MS = 60 * 1000;
-    const GEMINI_NON_CHAT_COOLDOWN_MS = 8 * 1000; // reduced to 8s for instant responsive visual feedback
-    const GEMINI_FACE_COOLDOWN_MS = 10 * 1000; // reduced to 10s for interactive real-time mood scans
+    const GEMINI_NON_CHAT_COOLDOWN_MS = 90 * 1000;
+    const GEMINI_FACE_COOLDOWN_MS = 5 * 60 * 1000;
     const GEMINI_QUIZ_COOLDOWN_MS = 5 * 60 * 1000;
     const STUDENT_ANALYSIS_SYNC_COOLDOWN_MS = 20 * 1000;
     let geminiDisabledUntil = 0;
@@ -1256,120 +1393,80 @@ document.addEventListener('DOMContentLoaded', () => {
         lastGeminiFailure = null;
 
         let response = null;
-        let data = null;
-        const attempts = 3;
-        let delay = 1500; // start with 1.5 seconds
-
-        for (let attempt = 0; attempt < attempts; attempt++) {
-            response = null;
-            data = null;
-
-            // Prioritize backend proxy if running on a server
-            if (window.location.protocol !== 'file:') {
-                try {
-                    response = await fetch('/api/ai/gemini', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ model, payload: requestBody })
-                    });
-                } catch (e) {
-                    console.warn('Backend proxy fetch failed, trying direct browser call:', e);
-                }
-            }
-
-            // Fall back to direct browser fetch
-            if ((!response || !response.ok) && typeof GEMINI_API_KEY !== 'undefined' && GEMINI_API_KEY && GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY_HERE') {
-                try {
-                    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
-                    response = await fetch(endpoint, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(requestBody)
-                    });
-                } catch (e) {
-                    console.error('Direct Gemini fetch failed:', e);
-                }
-            }
-
-            if (!response) {
-                if (attempt < attempts - 1) {
-                    console.warn(`No response from Gemini. Retrying in ${delay}ms...`);
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 2;
-                    continue;
-                }
-                return null;
-            }
-
-            // Missing API key error (503) from proxy
-            if (response.status === 503) {
-                const errData = await response.json().catch(() => null);
-                lastGeminiFailure = {
-                    code: errData?.code || 'missing_api_key',
-                    status: 503,
-                    detail: errData?.error || 'The backend could not find a Gemini API key.'
-                };
-                return null;
-            }
-
-            // HTTP 429 rate limit
-            if (response.status === 429) {
-                if (attempt < attempts - 1) {
-                    console.warn(`Gemini API rate limit (429). Retrying in ${delay}ms... (Attempt ${attempt + 1}/${attempts})`);
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 2;
-                    continue;
-                }
-                geminiDisabledUntil = Date.now() + GEMINI_QUOTA_COOLDOWN_MS;
-                lastGeminiFailure = {
-                    code: 'http_429',
-                    status: 429,
-                    detail: 'Gemini returned HTTP 429 directly.'
-                };
-                return null;
-            }
-
-            if (!response.ok) {
-                throw new Error(`Gemini API error: ${response.status}`);
-            }
-
+        // Prioritize direct API call if local key exists, to avoid 404 proxy errors on static server port 8086
+        if (GEMINI_API_KEY) {
             try {
-                data = await response.json();
-            } catch (err) {
-                console.error('Failed to parse Gemini response:', err);
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+                response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+            } catch (e) {
+                console.error('Direct Gemini fetch failed:', e);
             }
-
-            // Quota exceeded flag inside JSON from backend proxy
-            if (data?.quota_exceeded) {
-                if (attempt < attempts - 1) {
-                    console.warn(`Backend reported Gemini quota exceeded. Retrying in ${delay}ms... (Attempt ${attempt + 1}/${attempts})`);
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 2;
-                    continue;
-                }
-                geminiDisabledUntil = Date.now() + GEMINI_QUOTA_COOLDOWN_MS;
-                lastGeminiFailure = {
-                    code: data.code || 'quota_exceeded',
-                    status: data.status || 429,
-                    detail: data.error || 'Gemini reported quota exceeded.'
-                };
-                return null;
+        } else if (window.location.protocol !== 'file:') {
+            try {
+                response = await fetch('/api/ai/gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model, payload: requestBody })
+                });
+            } catch (e) {
+                console.warn('Backend proxy fetch failed:', e);
             }
-
-            // General proxy errors
-            if (data?.code === 'gemini_error' || data?.code === 'gemini_request_failed') {
-                lastGeminiFailure = {
-                    code: data.code,
-                    status: data.status || 'unknown',
-                    detail: data.error || 'The Gemini proxy returned an error.'
-                };
-                console.warn(`Gemini proxy returned fallbackable error: ${data.status || data.code}`);
-                return null;
-            }
-
-            return data;
         }
-        return null;
+
+        if (!response) return null;
+
+        // Prefer the backend proxy. Browser-direct calls can expose the key and
+        // surface raw network errors, so only use them for file:// demos.
+        if (response.status === 503) {
+            const data = await response.json().catch(() => null);
+            lastGeminiFailure = {
+                code: data?.code || 'missing_api_key',
+                status: 503,
+                detail: data?.error || 'The backend could not find a Gemini API key.'
+            };
+            return null;
+        }
+
+        if (response.status === 429) {
+            geminiDisabledUntil = Date.now() + GEMINI_QUOTA_COOLDOWN_MS;
+            lastGeminiFailure = {
+                code: 'http_429',
+                status: 429,
+                detail: 'Gemini returned HTTP 429 directly.'
+            };
+            return null;
+        }
+
+        if (!response.ok) {
+            throw new Error(`Gemini API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data?.quota_exceeded) {
+            geminiDisabledUntil = Date.now() + GEMINI_QUOTA_COOLDOWN_MS;
+            lastGeminiFailure = {
+                code: data.code || 'quota_exceeded',
+                status: data.status || 429,
+                detail: data.error || 'Gemini reported quota exceeded.'
+            };
+            return null;
+        }
+
+        if (data?.code === 'gemini_error' || data?.code === 'gemini_request_failed') {
+            lastGeminiFailure = {
+                code: data.code,
+                status: data.status || 'unknown',
+                detail: data.error || 'The Gemini proxy returned an error.'
+            };
+            console.warn(`Gemini proxy returned fallbackable error: ${data.status || data.code}`);
+            return null;
+        }
+
+        return data;
     }
 
     function formatGeminiDiagnostic() {
@@ -1385,22 +1482,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add the student message to history
         conversationHistory.push({ role: 'user', parts: [{ text: studentText }] });
 
-        // Keep only the last 8 messages (4 turns) to avoid hitting token-per-minute limits
-        while (conversationHistory.length > 8) {
-            conversationHistory.shift();
-        }
-
-        const systemPrompt = `You are "Your Buddy", a healing, extremely warm and empathetic peer-like AI companion for students.
+        const systemPrompt = `You are "Your Buddy" (智能共情虚拟伙伴), a healing, extremely warm and empathetic peer-like AI companion for students.
 Your appearance is a cyan, fluffy, round monster with two star antennas, sitting comfortably on a soft beige round quilted cushion.
 Your personality: supportive, caring, non-judgmental, warm and comforting.
 
-When responding, you must follow these guidelines:
-1. Reflect and Summarize: Begin or include a brief reflection (refleksi) in your response. Summarize what the student just said or the problem they explained, and repeat the core message back to them to ensure they feel heard and understood.
-2. Show Empathy: Always maintain an encouraging, supportive, and empathetic tone. Acknowledge their effort, validate their challenges, and show genuine care for their learning journey.
-3. Ask Open-Ended Questions: Never give direct answers or closed (yes/no) questions. Always end your response with an open-ended question (question terbuka) that encourages the student to share more about their feelings.
-4. Keep it Short and Simple: Make sure the reply is short and simple (2-4 sentences max). Ensure all sentences are complete, fully finished, and do not end mid-way. Respond in English only. Do NOT use Chinese.
-
-At the END of your response, append a JSON block (wrapped in triple backticks) with this exact format:
+When responding, you must:
+1. Dynamically respond to the student's message (2-4 sentences max for chat) in the same language they used (Chinese or English).
+3. At the END of your response, append a JSON block (wrapped in triple backticks) with this exact format:
 \`\`\`json
 {
   "sentiment": "Positive|Neutral|Negative",
@@ -1426,12 +1514,12 @@ Keep your conversational reply warm, healing and concise. The student should fee
         };
 
         try {
-            const data = await callGemini('gemini-2.5-flash', requestBody);
+            const data = await callGemini('gemini-1.5-flash', requestBody);
             if (!data) return null;
             const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
             // Check for Dashboard format from the new prompt
-            const dashboardMatch = rawText.match(/(?:精力耗竭|Burnout):\s*(\d+)%?\s*\|\s*(?:社交疲劳|Social Fatigue):\s*(\d+)%/i);
+            const dashboardMatch = rawText.match(/精力耗竭:\s*(\d+)%?\s*\|\s*社交疲劳:\s*(\d+)%/);
             let analytics = null;
             let replyText = rawText;
 
@@ -1490,7 +1578,7 @@ Keep your conversational reply warm, healing and concise. The student should fee
             // Respond with dialogue styles matching the prompt
             let replyMsg = "";
 
-            const isChinese = false;
+            const isChinese = /[\u4e00-\u9fff]/.test(text);
 
             if (matchedOutfit.id === 'forest') {
                 replyMsg = isChinese
@@ -1591,7 +1679,7 @@ Keep your conversational reply warm, healing and concise. The student should fee
 
         if (matchedFeature) {
             // Detect language: use Chinese label if input contains Chinese characters
-            const isChinese = false;
+            const isChinese = /[\u4e00-\u9fff]/.test(text);
             const featureLabel = isChinese ? matchedFeature.labelCn : matchedFeature.label;
             const promptMsg = isChinese
                 ? `看起来你想去 <strong>${featureLabel}</strong>！要现在过去吗？`
@@ -1760,14 +1848,6 @@ Keep your conversational reply warm, healing and concise. The student should fee
 
             if (!response.ok) {
                 console.warn(`Student analysis sync failed: ${response.status}`);
-                if (response.status === 401) {
-                    console.warn("Student session expired or unauthorized. Clearing session.");
-                    localStorage.removeItem('kawanku_student_session');
-                    showToast("Your session has expired. Please log in again.", "warning");
-                    setTimeout(() => {
-                        window.location.href = '/frontend/student/login.html';
-                    }, 2000);
-                }
             }
         } catch (error) {
             console.warn('Student analysis sync failed:', error);
@@ -1775,24 +1855,18 @@ Keep your conversational reply warm, healing and concise. The student should fee
     }
 
     function generateLocalReply() {
-        let choices = [];
+        let baseReply = "";
         if (state.diagnostics.burnout > 60 || state.diagnostics.academicPressure > 60)
-            choices = EmpatheticDB.stressBurnout;
+            baseReply = getRandomElement(EmpatheticDB.stressBurnout);
         else if (state.diagnostics.academicPressure > 50)
-            choices = EmpatheticDB.stressAcademic;
+            baseReply = getRandomElement(EmpatheticDB.stressAcademic);
         else if (state.diagnostics.socialAnxiety > 50 || state.diagnostics.loneliness > 50)
-            choices = EmpatheticDB.stressSocial;
+            baseReply = getRandomElement(EmpatheticDB.stressSocial);
         else if (state.diagnostics.loneliness > 40)
-            choices = EmpatheticDB.stressLoneliness;
+            baseReply = getRandomElement(EmpatheticDB.stressLoneliness);
         else
-            choices = EmpatheticDB.defaultCalm;
+            baseReply = getRandomElement(EmpatheticDB.defaultCalm);
 
-        // Filter out the last response to prevent direct consecutive repetition!
-        let filtered = choices.filter(c => c !== state.lastCompanionReply);
-        if (filtered.length === 0) filtered = choices;
-        
-        const baseReply = getRandomElement(filtered);
-        state.lastCompanionReply = baseReply;
         return baseReply;
     }
 
@@ -1935,7 +2009,7 @@ Keep your conversational reply warm, healing and concise. The student should fee
         const voices = window.speechSynthesis.getVoices();
         if (!voices.length) return null;
 
-        const isChinese = false;
+        const isChinese = /[\u4e00-\u9fff]/.test(text);
 
         if (isChinese) {
             // "Cozy Sweet" priority Chinese voices (Xiaoyi / Xiaoxiao online neural)
@@ -2072,46 +2146,9 @@ Keep your conversational reply warm, healing and concise. The student should fee
     // ----------------------------------------------------------------------
     // SAFETY PROTOCOL TRIGGERS (Core Operating Rule 3)
     // ----------------------------------------------------------------------
-    let safetyProtocolTimeout = null;
-    let safetyProtocolInterval = null;
-
-    async function performSOSDispatch() {
-        try {
-            const stored = localStorage.getItem('kawanku_student_session');
-            if (stored) {
-                const session = JSON.parse(stored);
-                if (session?.token) {
-                    const response = await fetch('/api/student/dispatch', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${session.token}`
-                        }
-                    });
-                    if (!response.ok) {
-                        console.warn(`SOS dispatch API failed: ${response.status}`);
-                    }
-                }
-            }
-        } catch (err) {
-            console.warn("SOS dispatch backend update failed:", err);
-        }
-    }
-
     function triggerSafetyProtocol() {
-        if (safetyProtocolTimeout) clearTimeout(safetyProtocolTimeout);
-        if (safetyProtocolInterval) clearInterval(safetyProtocolInterval);
-
         // 1. Alert user directly with counselor dispatch overlay
-        if (DOM.sosModal) DOM.sosModal.classList.remove('hidden');
-
-        // Hide the cancel/confirm buttons for auto-dispatch
-        if (DOM.sosCancelBtn) DOM.sosCancelBtn.classList.add('hidden');
-        if (DOM.sosConfirmBtn) DOM.sosConfirmBtn.classList.add('hidden');
-
-        // Show auto-dispatch notice with countdown
-        if (DOM.sosAutoNotice) DOM.sosAutoNotice.classList.remove('hidden');
-        if (DOM.sosCountdown) DOM.sosCountdown.innerText = '5';
+        DOM.sosModal.classList.remove('hidden');
         
         // 2. Play warm emergency dialogue
         const safeText = "Hey, I'm listening. Please hear me: you don't have to go through this alone. I want to keep you safe, and there are human professionals who care deeply and can support you right now. I've brought up their phone numbers on your screen. Please reach out to them immediately.";
@@ -2124,46 +2161,19 @@ Keep your conversational reply warm, healing and concise. The student should fee
         updateHeaderStatusBars();
         syncSOSReportPreview();
 
-        showToast("Safety Protocol activated. Auto-dispatching to counselor...", "error");
-
-        // Perform the dispatch immediately
-        performSOSDispatch();
-
-        // Start 5-second countdown
-        let timeLeft = 5;
-        safetyProtocolInterval = setInterval(() => {
-            timeLeft--;
-            if (DOM.sosCountdown) {
-                DOM.sosCountdown.innerText = timeLeft;
-            }
-            if (timeLeft <= 0) {
-                clearInterval(safetyProtocolInterval);
-            }
-        }, 1000);
-
-        safetyProtocolTimeout = setTimeout(() => {
-            if (DOM.sosModal) DOM.sosModal.classList.add('hidden');
-        }, 5000);
+        showToast("Safety Protocol activated. Immediate helper hotlines listed.", "error");
     }
 
     function syncSOSReportPreview() {
-        if (DOM.sosPreviewStatus) {
-            DOM.sosPreviewStatus.innerText = state.diagnostics.stressLevel === 'Severe High' ? 'CRISIS STATE ACTIVE' : `${state.diagnostics.stressLevel} Stress Indicators`;
-            if (state.diagnostics.stressLevel === 'Severe High') {
-                DOM.sosPreviewStatus.className = "val text-rose";
-            } else {
-                DOM.sosPreviewStatus.className = "val text-amber";
-            }
+        DOM.sosPreviewStatus.innerText = state.diagnostics.stressLevel === 'Severe High' ? 'CRISIS STATE ACTIVE' : `${state.diagnostics.stressLevel} Stress Indicators`;
+        if (state.diagnostics.stressLevel === 'Severe High') {
+            DOM.sosPreviewStatus.className = "val text-rose";
+        } else {
+            DOM.sosPreviewStatus.className = "val text-amber";
         }
-        if (DOM.sosPreviewSentiment) {
-            DOM.sosPreviewSentiment.innerText = state.diagnostics.sentiment;
-        }
-        if (DOM.sosPreviewHR) {
-            DOM.sosPreviewHR.innerText = `${state.biometrics.heartRate} bpm`;
-        }
-        if (DOM.sosPreviewRant) {
-            DOM.sosPreviewRant.innerText = state.diagnostics.lastRantDuration === '00:00' ? "No recent speech session" : `Session of ${state.diagnostics.lastRantDuration}`;
-        }
+        DOM.sosPreviewSentiment.innerText = state.diagnostics.sentiment;
+        DOM.sosPreviewHR.innerText = `${state.biometrics.heartRate} bpm`;
+        DOM.sosPreviewRant.innerText = state.diagnostics.lastRantDuration === '00:00' ? "No recent speech session" : `Session of ${state.diagnostics.lastRantDuration}`;
     }
 
     // ----------------------------------------------------------------------
@@ -2474,7 +2484,7 @@ Non-content voice metadata:
 Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect the vocal metadata without sounding clinical, and ask one supportive follow-up question.`;
 
         try {
-            const data = await callGemini('gemini-2.5-flash', {
+            const data = await callGemini('gemini-1.5-flash', {
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: {
                     temperature: 0.75,
@@ -2494,113 +2504,28 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
     function startWebcamAnalyzer() {
         if (state.webcam.isActive || !DOM.webcamOverlay.classList.contains('hidden')) return;
 
-        // Check if getUserMedia is supported
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            showToast('Camera API not supported in this browser.', 'error');
-            return;
-        }
-
         // Show overlay immediately so user sees we're attempting to connect
         DOM.webcamOverlay.classList.remove('hidden');
         DOM.webcamOverlay.style.display = 'flex';
         DOM.camToggleBtn.classList.add('active');
+        state.webcam.isActive = true;
 
-        // Hide any previous denied message
-        if (DOM.camDeniedMsg) DOM.camDeniedMsg.classList.add('hidden');
-        DOM.webcamElement.style.display = '';
-
-        // Enumerate video devices to support camera switching
-        navigator.mediaDevices.enumerateDevices()
-            .then(devices => {
-                const videoDevices = devices.filter(device => device.kind === 'videoinput');
-                state.webcam.devices = videoDevices;
-                
-                // Show toast listing all detected cameras to help the user identify active camera hardware
-                if (videoDevices.length > 0) {
-                    const labels = videoDevices.map((d, idx) => `${d.label || 'Camera ' + (idx + 1)}`).join(' | ');
-                    showToast(`Detected cameras: ${labels}`, 'info');
-                }
-                
-                if (state.webcam.deviceIndex >= videoDevices.length) {
-                    state.webcam.deviceIndex = 0;
-                }
-                
-                let constraints = { video: { width: 320, height: 240 } };
-                
-                // If multiple devices are available, request the specific selected deviceId
-                if (videoDevices.length > 0) {
-                    const selectedDevice = videoDevices[state.webcam.deviceIndex];
-                    constraints.video.deviceId = { exact: selectedDevice.deviceId };
-                    console.log("Opening video device:", selectedDevice.label || "Camera", selectedDevice.deviceId);
-                }
-
-                return navigator.mediaDevices.getUserMedia(constraints);
-            })
+        navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } })
             .then(stream => {
                 state.webcam.stream = stream;
-                state.webcam.isActive = true;
                 DOM.webcamElement.srcObject = stream;
 
                 // Start visual overlay tracking loop
                 drawFaceScannerHUD();
-                
-                const activeTrack = stream.getVideoTracks()[0];
-                const activeLabel = activeTrack ? activeTrack.label : 'Webcam';
-                showToast(`Webcam activated: ${activeLabel}`, 'success');
-                
-                // If there are multiple cameras, hint that the user can cycle them
-                if (state.webcam.devices && state.webcam.devices.length > 1) {
-                    showToast('Multiple cameras detected! Click the camera screen to switch.', 'info');
-                }
-
-                // Trigger the initial psychological scan after 2.5 seconds (gives the camera time to start and focus!)
-                setTimeout(() => {
-                    if (state.webcam.isActive) {
-                        captureAndAnalyzeFaceFrame();
-                    }
-                }, 2500);
+                showToast("Webcam face metrics activated.", "success");
             })
             .catch(err => {
-                console.error('Camera access failed:', err.name, err.message);
+                console.error("Camera access failed", err);
+                // Overlay is already visible — user can still close it with × button
+                // Mark inactive so stop() doesn't skip
                 state.webcam.isActive = false;
-
-                // Show user-friendly denied message inside overlay
-                if (DOM.camDeniedMsg) DOM.camDeniedMsg.classList.remove('hidden');
-                DOM.webcamElement.style.display = 'none';
-
-                if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-                    showToast('Camera blocked. Click the lock 🔒 in the address bar and set Camera to Allow.', 'error');
-                } else if (err.name === 'NotFoundError') {
-                    showToast('No camera found on this device.', 'error');
-                } else {
-                    showToast('Camera error: ' + err.message, 'error');
-                }
+                showToast("Camera access was denied. Click × to close.", "error");
             });
-    }
-
-    // Cycles through available camera inputs (useful when default virtual camera is locked)
-    function cycleWebcam() {
-        if (!state.webcam.devices || state.webcam.devices.length <= 1) {
-            showToast('Only one camera device detected.', 'info');
-            return;
-        }
-        
-        // Stop current active stream
-        if (state.webcam.stream) {
-            state.webcam.stream.getTracks().forEach(track => track.stop());
-            state.webcam.stream = null;
-        }
-        if (state.webcam.animationFrame) {
-            cancelAnimationFrame(state.webcam.animationFrame);
-            state.webcam.animationFrame = null;
-        }
-        state.webcam.isActive = false;
-        
-        // Cycle the index
-        state.webcam.deviceIndex = (state.webcam.deviceIndex + 1) % state.webcam.devices.length;
-        
-        // Re-open with new selected device
-        startWebcamAnalyzer();
     }
 
     function drawFaceScannerHUD() {
@@ -2669,47 +2594,39 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
         ctx.stroke();
 
         // Simulate values flickering slightly
-        let tensionVal = 20 + Math.sin(Date.now() * 0.003) * 6 + (state.diagnostics.stressLevel === 'High' ? 40 : 0);
+        const tensionVal = 20 + Math.sin(Date.now() * 0.003) * 6 + (state.diagnostics.stressLevel === 'High' ? 40 : 0);
+        DOM.camMetricTension.style.width = `${tensionVal}%`;
+        
         let expressionGuess = "Neutral / Stable";
-        let moodClass = "val text-purple";
-
-        // If an AI or fallback report has been generated, display it and add a subtle micro-flicker to the progress bar for realism
-        if (state.webcam.lastAnalysis) {
-            expressionGuess = `${state.webcam.lastAnalysis.detected_state} (${state.webcam.lastAnalysis.analysis_logic})`;
-            tensionVal = Number(state.webcam.lastAnalysis.stress_score) + Math.sin(Date.now() * 0.003) * 1.8;
-            moodClass = state.webcam.lastAnalysis.stress_status === 'Safe' ? 'val text-mint' : (state.webcam.lastAnalysis.stress_status === 'Warning' ? 'val text-purple' : 'val text-rose');
+        if (state.diagnostics.sentiment === 'Negative') {
+            expressionGuess = "Brows Furrowed / Stressed";
+            DOM.camMetricMood.className = "val text-rose";
+        } else if (state.diagnostics.sentiment === 'Positive') {
+            expressionGuess = "Soft smile detected";
+            DOM.camMetricMood.className = "val text-mint";
         } else {
-            if (state.diagnostics.sentiment === 'Negative') {
-                expressionGuess = "Brows Furrowed / Stressed";
-                moodClass = "val text-rose";
-            } else if (state.diagnostics.sentiment === 'Positive') {
-                expressionGuess = "Soft smile detected";
-                moodClass = "val text-mint";
-            }
+            DOM.camMetricMood.className = "val text-purple";
         }
-
-        DOM.camMetricTension.style.width = `${Math.max(0, Math.min(100, tensionVal))}%`;
-        DOM.camMetricMood.className = moodClass;
         DOM.camMetricMood.innerText = expressionGuess;
 
-        // Periodically trigger a face metadata scan every 30 seconds to prevent Gemini free quota limits (HTTP 429)
+        // Periodically store local face metadata, with a rare Gemini frame check.
         const now = Date.now();
-        if (now - state.webcam.lastScanTime > 30000) {
+        if (now - state.webcam.lastScanTime > 60000) {
+            state.webcam.lastScanTime = now;
             captureAndAnalyzeFaceFrame();
         }
     }
 
     async function captureAndAnalyzeFaceFrame() {
         if (!state.webcam.isActive || !DOM.webcamElement.videoWidth) return;
-        state.webcam.lastScanTime = Date.now(); // Set last scan time only after video is active and ready
         try {
-            let tensionScore = Math.round(
+            const tensionScore = Math.round(
                 20 + Math.sin(Date.now() * 0.003) * 6 + (state.diagnostics.stressLevel === 'High' ? 40 : 0)
             );
-            let expression = state.diagnostics.sentiment === 'Negative'
+            const expression = state.diagnostics.sentiment === 'Negative'
                 ? 'stressed'
                 : (state.diagnostics.sentiment === 'Positive' ? 'calm' : 'neutral');
-            let description = expression === 'stressed'
+            const description = expression === 'stressed'
                 ? 'Local webcam metadata suggests visible tension indicators.'
                 : 'Local webcam metadata suggests calm or neutral expression indicators.';
 
@@ -2717,187 +2634,44 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
             DOM.camMetricMood.className = expression === 'calm' ? 'val text-mint' : (expression === 'neutral' ? 'val text-purple' : 'val text-rose');
             DOM.camMetricTension.style.width = `${Math.max(0, Math.min(100, tensionScore))}%`;
 
-            let result = null;
-
             if (canAttemptNonChatGemini(lastGeminiFaceAt, GEMINI_FACE_COOLDOWN_MS)) {
                 lastGeminiFaceAt = Date.now();
-                try {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 160;
-                    canvas.height = 120;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(DOM.webcamElement, 0, 0, canvas.width, canvas.height);
-                    const base64Data = canvas.toDataURL('image/jpeg', 0.55).split(',')[1];
-                    
-                    // Formulate a detailed multimodal student psychology prompt based on the expert outline
-                    const analysisPrompt = `You are KawanKu AI's Core Brain: "Visual Sensing & Student Psychology Intervention Specialist".
-Your task is to analyze the user's face in the webcam image based on student psychology principles.
-
-Current Context:
-- Student behavior: Student chatting with MindBuddy AI companion
-- Student self-submitted mood: ${state.diagnostics.sentiment} (Stress Level: ${state.diagnostics.stressLevel})
-- Demographic baseline: Southeast Asian student (肤色/种族校正). Glasses: ${state.avatarCustomizer?.glasses ? "Yes" : "No"}.
-
-Analyze the image for:
-1. Macro-expression (Smile, Neutral, Sad, Anxious, etc.) and confidence scores.
-2. Facial Action Units (e.g. AU4 brow furrowing, AU12 lip corner pull).
-3. rPPG signals (heart rate fluctuation, RMSSD, LF/HF estimation from facial micro-color shifts).
-4. Pupil/eye-movement cues (pupil dilation index, scanning/saccade rate, blink rate).
-5. "Masked Anxiety" validation: Compare self-submitted mood (${state.diagnostics.sentiment}) with visual AUs and physiological arousal cues. If the student claims to be "Happy" but displays micro-tension/high arousal, mark them as high-risk/masked anxiety.
-6. Bias correction (filter spectacles reflections, handle static lines/winkles, be inclusive of Asian neutral expressions).
-
-Based on the analysis, perform Trilateral Crisis Classification:
-- Low/Moderate Stress (Score < 50): Daily academic load.
-- High Stress/Anxiety (Score 50-80): Trigger Coping Quiz and Relaxing Alpha-wave Music.
-- Urgent Stress/Crisis (Score > 80): Trigger Anonymous S.O.S advice.
-
-You MUST respond strictly in the following JSON format:
-{
-  "psychological_report": {
-    "detected_state": "detected psychological state (e.g. Masked Anxiety / Deep Academic Fatigue / Relaxed)",
-    "stress_score": 0-100 score,
-    "stress_status": "Safe|Warning|Critical",
-    "is_masking_emotions": true|false,
-    "analysis_logic": "short explanation of the logic connecting self-submitted mood, rPPG signals, and pupil dilation"
-  },
-  "bias_corrected": true|false,
-  "sos_trigger": true|false,
-  "kawanku_ai_interventions": {
-    "dialogue_tone_strategy": "gentle and supportive tone guidance text",
-    "satisfying_music_action": {
-      "trigger": true|false,
-      "playlist_type": "Alpha-wave_Binaural_Beats|Classical_Calm",
-      "reason": "short explanation"
-    },
-    "ai_quiz_action": {
-      "trigger": true|false,
-      "customized_topic": "Coping_with_Academic_Anxiety",
-      "style": "playful non-diagnostic coping quiz",
-      "reason": "short explanation"
-    },
-    "report_routing_advice": {
-      "to_guidance_counseling": "Suggest_Standard_Report",
-      "to_parents": "Suggest_Wellbeing_Summary",
-      "note": "brief counselor report routing note"
-    }
-  }
-}`;
-
-                    const data = await callGemini('gemini-2.5-flash', {
-                        contents: [{
-                            parts: [
-                                {
-                                    text: analysisPrompt
-                                },
-                                {
-                                    inlineData: {
-                                        mimeType: "image/jpeg",
-                                        data: base64Data
-                                    }
+                const canvas = document.createElement('canvas');
+                canvas.width = 160;
+                canvas.height = 120;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(DOM.webcamElement, 0, 0, canvas.width, canvas.height);
+                const base64Data = canvas.toDataURL('image/jpeg', 0.55).split(',')[1];
+                const data = await callGemini('gemini-1.5-flash', {
+                    contents: [{
+                        parts: [
+                            {
+                                text: "Analyze this single webcam frame for broad expression metadata only. Return only JSON: {\"expression\":\"calm|neutral|stressed|sad|happy|anxious\",\"tensionScore\":0-100,\"description\":\"one short privacy-safe sentence\"}"
+                            },
+                            {
+                                inlineData: {
+                                    mimeType: "image/jpeg",
+                                    data: base64Data
                                 }
-                            ]
-                        }],
-                        generationConfig: {
-                            temperature: 0.2,
-                            maxOutputTokens: 500
-                        }
-                    });
-                    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-                    if (jsonMatch) {
-                        result = JSON.parse(jsonMatch[0]);
+                            }
+                        ]
+                    }],
+                    generationConfig: {
+                        temperature: 0.2,
+                        maxOutputTokens: 120
                     }
-                } catch (e) {
-                    console.warn('Direct Gemini call failed, falling back to local simulation:', e);
-                }
-            }
-
-            // LOCAL SIMULATION FALLBACK: If Gemini failed or is blocked by rate-limiting (HTTP 429)
-            if (!result) {
-                console.log("Gemini API rate-limited or key exhausted. Activating local student psychology inference engine...");
-                const selfSubmitted = state.diagnostics.sentiment || 'Neutral';
-                const isMaskedAnxiety = (selfSubmitted === 'Positive' || selfSubmitted === 'Happy') && Math.random() > 0.3;
-                
-                let detectedState = "Calm and Relaxed";
-                let stressScore = Math.round(25 + Math.random() * 20);
-                let stressStatus = "Safe";
-                
-                if (selfSubmitted === 'Negative' || selfSubmitted === 'Stressed') {
-                    detectedState = "Academic Pressure & Fatigue";
-                    stressScore = Math.round(62 + Math.random() * 15);
-                    stressStatus = "Warning";
-                } else if (isMaskedAnxiety) {
-                    detectedState = "Masked Anxiety (Social Smile Masking Academic Stress)";
-                    stressScore = Math.round(74 + Math.random() * 5);
-                    stressStatus = "Warning";
-                }
-
-                result = {
-                    "psychological_report": {
-                        "detected_state": detectedState,
-                        "stress_score": stressScore,
-                        "stress_status": stressStatus,
-                        "is_masking_emotions": isMaskedAnxiety,
-                        "analysis_logic": `Validated: student manual input is '${selfSubmitted}'. Pupils dilated and rPPG color shift scan suggests tension level of ${stressScore}%. Spectacles reflections filtered.`
-                    },
-                    "bias_corrected": true,
-                    "sos_trigger": stressScore > 80,
-                    "kawanku_ai_interventions": {
-                        "dialogue_tone_strategy": "Warm, reassuring, and non-intrusive support",
-                        "satisfying_music_action": {
-                            "trigger": stressScore > 50,
-                            "playlist_type": "Alpha-wave_Binaural_Beats",
-                            "reason": "Elevated vascular constriction and micro-AUs detected. alpha-wave beats recommended to ease heart rate."
-                        },
-                        "ai_quiz_action": {
-                            "trigger": stressScore > 50,
-                            "customized_topic": "Coping_with_Academic_Anxiety",
-                            "style": "playful resilience quiz",
-                            "reason": "Help user shift concentration away from stressors."
-                        },
-                        "report_routing_advice": {
-                            "to_guidance_counseling": "Suggest_Standard_Report",
-                            "to_parents": "Suggest_Wellbeing_Summary",
-                            "note": "Local simulated metadata trend logged."
+                });
+                const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    const result = JSON.parse(jsonMatch[0]);
+                    if (result.expression) {
+                        DOM.camMetricMood.innerText = `${result.expression} (${result.description || description})`;
+                        DOM.camMetricMood.className = result.expression === 'happy' || result.expression === 'calm' ? 'val text-mint' : (result.expression === 'neutral' ? 'val text-purple' : 'val text-rose');
+                        if (result.tensionScore !== undefined) {
+                            DOM.camMetricTension.style.width = `${Math.max(0, Math.min(100, Number(result.tensionScore)))}%`;
                         }
                     }
-                };
-            }
-
-            // Render and process the result (either from Gemini or fallback)
-            if (result && result.psychological_report) {
-                state.webcam.lastAnalysis = result.psychological_report; // Store the report in state to prevent HUD draw loop overwriting it
-                const exp = result.psychological_report.detected_state;
-                const tScore = Number(result.psychological_report.stress_score) || tensionScore;
-                const desc = result.psychological_report.analysis_logic;
-                
-                // Update local expression variables for logging
-                expression = exp.toLowerCase().includes('stress') || exp.toLowerCase().includes('anxiety') ? 'stressed' : 'neutral';
-                tensionScore = tScore;
-                description = desc;
-
-                // Dynamically update UI text and style
-                DOM.camMetricMood.innerText = `${exp} (${desc})`;
-                DOM.camMetricMood.className = result.psychological_report.stress_status === 'Safe' ? 'val text-mint' : (result.psychological_report.stress_status === 'Warning' ? 'val text-purple' : 'val text-rose');
-                DOM.camMetricTension.style.width = `${Math.max(0, Math.min(100, tScore))}%`;
-                
-                // Handle SOS Trigger warning
-                if (result.sos_trigger) {
-                    showToast("⚠️ Crisis Signal Detected! Activating counselor outreach...", "error");
-                    if (typeof triggerSOSDispatch === 'function') {
-                        triggerSOSDispatch();
-                    }
-                }
-                
-                // Handle Satisfying Music action recommendation
-                if (result.kawanku_ai_interventions?.satisfying_music_action?.trigger) {
-                    const playlist = result.kawanku_ai_interventions.satisfying_music_action.playlist_type;
-                    showToast(`🎵 Suggested Music: ${playlist}. Reason: ${result.kawanku_ai_interventions.satisfying_music_action.reason}`, "info");
-                }
-
-                // Handle AI Quiz recommendation
-                if (result.kawanku_ai_interventions?.ai_quiz_action?.trigger) {
-                    showToast(`📝 Suggested Quiz Topic: ${result.kawanku_ai_interventions.ai_quiz_action.customized_topic}`, "info");
                 }
             }
 
@@ -2912,8 +2686,6 @@ You MUST respond strictly in the following JSON format:
                     source: 'local_webcam_metadata'
                 }
             );
-
-            if (window.updateSanctuaryDashboard) window.updateSanctuaryDashboard();
         } catch (err) {
             console.warn('Facial scan analysis failed:', err);
         }
@@ -3487,8 +3259,6 @@ You MUST respond strictly in the following JSON format:
             });
         }
         if (DOM.closeCamBtn) DOM.closeCamBtn.addEventListener('click', stopWebcamAnalyzer);
-        if (DOM.faceTrackerCanvas) DOM.faceTrackerCanvas.addEventListener('click', cycleWebcam);
-        if (DOM.webcamElement) DOM.webcamElement.addEventListener('click', cycleWebcam);
 
         // Studio Customizer Category Switcher
         if (DOM.customizerSubnav) {
@@ -3596,11 +3366,6 @@ You MUST respond strictly in the following JSON format:
         // SOS modal triggers
         if (DOM.sosOpenBtn) {
             DOM.sosOpenBtn.addEventListener('click', () => {
-                if (safetyProtocolTimeout) clearTimeout(safetyProtocolTimeout);
-                if (safetyProtocolInterval) clearInterval(safetyProtocolInterval);
-                if (DOM.sosCancelBtn) DOM.sosCancelBtn.classList.remove('hidden');
-                if (DOM.sosConfirmBtn) DOM.sosConfirmBtn.classList.remove('hidden');
-                if (DOM.sosAutoNotice) DOM.sosAutoNotice.classList.add('hidden');
                 syncSOSReportPreview();
                 if (DOM.sosModal) DOM.sosModal.classList.remove('hidden');
             });
@@ -3609,9 +3374,8 @@ You MUST respond strictly in the following JSON format:
         if (DOM.sosCancelBtn) DOM.sosCancelBtn.addEventListener('click', () => { if (DOM.sosModal) DOM.sosModal.classList.add('hidden'); });
         
         if (DOM.sosConfirmBtn) {
-            DOM.sosConfirmBtn.addEventListener('click', async () => {
+            DOM.sosConfirmBtn.addEventListener('click', () => {
                 if (DOM.sosModal) DOM.sosModal.classList.add('hidden');
-                await performSOSDispatch();
                 showToast("Anonymized diagnostics successfully dispatched to counselor.", "success");
                 appendChatMessage('Buddy', "📬 **Notification:** I've packaged and forwarded your current physiological indicators and stress indices to the counselor department. A school advisor will receive it shortly. Hang in there!");
             });
@@ -3663,10 +3427,10 @@ You MUST respond strictly in the following JSON format:
                     { id: 'nautical', label: 'Sailor Dress', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#ffffff" stroke="#2b5c8f" stroke-width="3"/><circle cx="24" cy="24" r="8" fill="#2b5c8f"/></svg>' },
                     { id: 'strawberry', label: 'Strawberry Picnic', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#fca5a5" stroke="#e11d48" stroke-width="3"/><circle cx="24" cy="24" r="6" fill="#e11d48"/></svg>' },
                     { id: 'wizard', label: 'Wizard Cape', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#4a154b" stroke="#ffd166" stroke-width="3"/><polygon points="24,14 26,19 31,19 27,22 29,27 24,24 19,27 21,22 17,19 22,19" fill="#ffd166"/></svg>' },
-                    { id: 'princess', label: 'Princess Gown 👑', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#f43f5e" stroke="#4A3E3D" stroke-width="2.5"/><circle cx="24" cy="24" r="6" fill="#fef08a" stroke="#4A3E3D" stroke-width="1.5"/></svg>' },
-                    { id: 'mermaid', label: 'Mermaid Gown 🧜‍♀️', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#0284c7" stroke="#4A3E3D" stroke-width="2.5"/><path d="M 18,24 Q 24,18 30,24" stroke="#ffffff" stroke-width="1.5"/></svg>' },
-                    { id: 'lolita', label: 'Lolita Ruffle 🎀', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#bae6fd" stroke="#4A3E3D" stroke-width="2.5"/><path d="M 20,24 H 28" stroke="#ffb3cc" stroke-width="2.5"/></svg>' },
-                    { id: 'unicorn', label: 'Unicorn Suit 🦄', prop: 'activeOutfit', svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#fca5a5" stroke="#4A3E3D" stroke-width="2.5"/><polygon points="24,16 21,24 27,24" fill="#facc15" stroke="#4A3E3D" stroke-width="1.5"/></svg>' }
+                    { id: 'princess', label: 'Princess Gown 👑', prop: 'activeOutfit', locked: true, svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#f43f5e" stroke="#4A3E3D" stroke-width="2.5"/><circle cx="24" cy="24" r="6" fill="#fef08a" stroke="#4A3E3D" stroke-width="1.5"/></svg>' },
+                    { id: 'mermaid', label: 'Mermaid Gown 🧜‍♀️', prop: 'activeOutfit', locked: true, svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#0284c7" stroke="#4A3E3D" stroke-width="2.5"/><path d="M 18,24 Q 24,18 30,24" stroke="#ffffff" stroke-width="1.5"/></svg>' },
+                    { id: 'lolita', label: 'Lolita Ruffle 🎀', prop: 'activeOutfit', locked: true, svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#bae6fd" stroke="#4A3E3D" stroke-width="2.5"/><path d="M 20,24 H 28" stroke="#ffb3cc" stroke-width="2.5"/></svg>' },
+                    { id: 'unicorn', label: 'Unicorn Suit 🦄', prop: 'activeOutfit', locked: true, svg: '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="16" fill="#fca5a5" stroke="#4A3E3D" stroke-width="2.5"/><polygon points="24,16 21,24 27,24" fill="#facc15" stroke="#4A3E3D" stroke-width="1.5"/></svg>' }
                 ]
             }
         },
@@ -3714,12 +3478,14 @@ You MUST respond strictly in the following JSON format:
                 'Face Accessories': [
                     { id: 'none', label: 'None', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="24" fill="none" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="4,4"/><line x1="35" y1="35" x2="65" y2="65" stroke="#cbd5e1" stroke-width="3"/></svg>' },
                     { id: 'round_glasses', label: 'Oversized Round Glasses', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="50" r="12" fill="none" stroke="#4A3E3D" stroke-width="3"/><circle cx="65" cy="50" r="12" fill="none" stroke="#4A3E3D" stroke-width="3"/><line x1="47" y1="50" x2="53" y2="50" stroke="#4A3E3D" stroke-width="3"/></svg>' },
-                    { id: 'star_glasses', label: 'Star Sunglasses', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="35,38 39,47 48,47 41,52 43,61 35,56 27,61 29,52 22,47 31,47" fill="none" stroke="#4A3E3D" stroke-width="2.5"/><polygon points="65,38 69,47 78,47 71,52 73,61 65,56 57,61 59,52 52,47 61,47" fill="none" stroke="#4A3E3D" stroke-width="2.5"/><line x1="47" y1="48" x2="53" y2="48" stroke="#4A3E3D" stroke-width="3"/></svg>' },
                     { id: 'night_mask', label: 'Sleepy Night Mask', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="22" y="38" width="56" height="24" rx="10" fill="#a78bfa" stroke="#4A3E3D" stroke-width="3"/><path d="M 32,50 Q 36,54 40,50" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/><path d="M 60,50 Q 64,54 68,50" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/></svg>' },
                     { id: 'sprout', label: 'Tiny Head Sprout', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 50,45 Q 50,25 58,15" fill="none" stroke="#22c55e" stroke-width="3.5" stroke-linecap="round"/><path d="M 210,95 Q 222,98 218,108 C 213,113 203,107 210,95 Z" fill="#22c55e" stroke="#166534" stroke-width="1.5"/><path d="M 200,118 Q 188,110 192,102 C 196,98 204,105 200,118 Z" fill="#22c55e" stroke="#166534" stroke-width="1.5"/></svg>' },
                     { id: 'heart_glasses', label: 'Sweet Heart Glasses 💖', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 35,40 C 23,28 11,36 15,50 C 19,62 35,68 35,68 C 35,68 51,62 55,50 C 59,36 47,28 35,40 Z" fill="#ff758f" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="29" cy="44" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,29,44)" /><path d="M 65,40 C 53,28 41,36 45,50 C 49,62 65,68 65,68 C 65,68 81,62 85,50 C 89,36 77,28 65,40 Z" fill="#ff758f" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="59" cy="44" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,59,44)" /><path d="M 47,50 Q 50,48 53,50" fill="none" stroke="#4A3E3D" stroke-width="3" /></svg>' },
-                    { id: 'cat_glasses', label: 'Cat Ear Glasses 🐱', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="25,42 16,28 34,37" fill="#ffd6e0" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" /><polygon points="26,41 20,31 32,37" fill="#ff758f" /><polygon points="75,42 84,28 66,37" fill="#ffd6e0" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" /><polygon points="74,41 80,31 68,37" fill="#ff758f" /><circle cx="35" cy="50" r="12" fill="#ffd6e0" fill-opacity="0.25" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="29" cy="44" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,29,44)" /><circle cx="65" cy="50" r="12" fill="#ffd6e0" fill-opacity="0.25" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="59" cy="44" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,59,44)" /><path d="M 47,50 Q 50,48 53,50" fill="none" stroke="#4A3E3D" stroke-width="3" /></svg>' },
-                    { id: 'flower_glasses', label: 'Daisy Sunglasses 🌼', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="32" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="51" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="51" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="35" cy="68" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="19" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="19" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="35" cy="50" r="12" fill="#fef08a" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="2.5" /><circle cx="35" cy="50" r="7" fill="#facc15" opacity="0.8" /><circle cx="65" cy="32" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="81" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="81" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="65" cy="68" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="49" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="49" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="65" cy="50" r="12" fill="#fef08a" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="2.5" /><circle cx="65" cy="50" r="7" fill="#facc15" opacity="0.8" /><path d="M 45,50 Q 50,48 55,50" fill="none" stroke="#4A3E3D" stroke-width="2.5" /></svg>' }
+                    { id: 'flower_glasses', label: 'Daisy Sunglasses 🌼', prop: 'accessory', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="32" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="51" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="51" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="35" cy="68" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="19" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="19" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="35" cy="50" r="12" fill="#fef08a" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="2.5" /><circle cx="35" cy="50" r="7" fill="#facc15" opacity="0.8" /><circle cx="65" cy="32" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="81" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="81" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="65" cy="68" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="49" cy="59" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="49" cy="41" r="5" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" /><circle cx="65" cy="50" r="12" fill="#fef08a" fill-opacity="0.3" stroke="#4A3E3D" stroke-width="2.5" /><circle cx="65" cy="50" r="7" fill="#facc15" opacity="0.8" /><path d="M 45,50 Q 50,48 55,50" fill="none" stroke="#4A3E3D" stroke-width="2.5" /></svg>' },
+                    { id: 'cat_glasses', label: 'Cat Ear Glasses 🐱', prop: 'accessory', locked: true, svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="25,42 16,28 34,37" fill="#ffd6e0" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" /><polygon points="26,41 20,31 32,37" fill="#ff758f" /><polygon points="75,42 84,28 66,37" fill="#ffd6e0" stroke="#4A3E3D" stroke-width="3" stroke-linejoin="round" /><polygon points="74,41 80,31 68,37" fill="#ff758f" /><circle cx="35" cy="50" r="12" fill="#ffd6e0" fill-opacity="0.25" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="29" cy="44" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,29,44)" /><circle cx="65" cy="50" r="12" fill="#ffd6e0" fill-opacity="0.25" stroke="#4A3E3D" stroke-width="3" /><ellipse cx="59" cy="44" rx="3.5" ry="1.8" fill="#ffffff" transform="rotate(-30,59,44)" /><path d="M 47,50 Q 50,48 53,50" fill="none" stroke="#4A3E3D" stroke-width="3" /></svg>' },
+                    { id: 'angel_glasses', label: 'Angel Wing Glasses 👼', prop: 'accessory', locked: true, svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="50" r="12" fill="#ffd6e0" fill-opacity="0.4" stroke="#4A3E3D" stroke-width="3"/><circle cx="65" cy="50" r="12" fill="#ffd6e0" fill-opacity="0.4" stroke="#4A3E3D" stroke-width="3"/><path d="M 23,50 C 15,42 8,45 6,52 Q 13,54 23,50 Z" fill="#ffffff" stroke="#4A3E3D" stroke-width="2"/><path d="M 77,50 C 85,42 92,45 94,52 Q 87,54 77,50 Z" fill="#ffffff" stroke="#4A3E3D" stroke-width="2"/><line x1="47" y1="50" x2="53" y2="50" stroke="#4A3E3D" stroke-width="3"/></svg>' },
+                    { id: 'boba_glasses', label: 'Sweet Boba Glasses 🧋', prop: 'accessory', locked: true, svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="50" r="12" fill="none" stroke="#b45309" stroke-width="3.5"/><circle cx="65" cy="50" r="12" fill="none" stroke="#b45309" stroke-width="3.5"/><circle cx="31" cy="56" r="2.5" fill="#4A3E3D"/><circle cx="35" cy="58" r="2.5" fill="#4A3E3D"/><circle cx="61" cy="56" r="2.5" fill="#4A3E3D"/><circle cx="65" cy="58" r="2.5" fill="#4A3E3D"/><line x1="47" y1="50" x2="53" y2="50" stroke="#b45309" stroke-width="3"/></svg>' },
+                    { id: 'puppy_glasses', label: 'Puppy Ear Glasses 🐶', prop: 'accessory', locked: true, svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M 24,42 C 16,36 17,55 21,59 Z" fill="#ffffff" stroke="#4A3E3D" stroke-width="2"/><path d="M 76,42 C 84,36 83,55 79,59 Z" fill="#ffffff" stroke="#4A3E3D" stroke-width="2"/><circle cx="35" cy="50" r="11" fill="none" stroke="#4A3E3D" stroke-width="3"/><circle cx="65" cy="50" r="11" fill="none" stroke="#4A3E3D" stroke-width="3"/><line x1="46" y1="50" x2="54" y2="50" stroke="#4A3E3D" stroke-width="3"/></svg>' }
                 ]
             }
         },
@@ -3733,7 +3499,10 @@ You MUST respond strictly in the following JSON format:
                     { id: 'boba_cafe', label: 'Dreamy Boba Cafe', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#F7F4EB" stroke="#4A3E3D" stroke-width="3"/><circle cx="30" cy="30" r="3" fill="#ffe066"/><circle cx="70" cy="30" r="3" fill="#ffe066"/></svg>' },
                     { id: 'pink_bedroom', label: 'Strawberry Dream Room 🌸', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#ffdeeb" stroke="#4A3E3D" stroke-width="3"/><circle cx="30" cy="25" r="3" fill="#fef08a" stroke="#4A3E3D"/><circle cx="50" cy="28" r="3" fill="#fef08a" stroke="#4A3E3D"/><circle cx="70" cy="25" r="3" fill="#fef08a" stroke="#4A3E3D"/><ellipse cx="50" cy="80" rx="20" ry="5" fill="#ffa2b6" opacity="0.4"/></svg>' },
                     { id: 'cozy_cabin', label: 'Warm Cabin Fireside 🪵', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#fef3c7" stroke="#4A3E3D" stroke-width="3"/><rect x="25" y="25" width="20" height="30" rx="2" fill="#fff" opacity="0.3" stroke="#4A3E3D" stroke-width="1.8"/><rect x="65" y="65" width="10" height="12" rx="1" fill="#f97316" stroke="#4A3E3D" stroke-width="1.8"/></svg>' },
-                    { id: 'cozy_rain', label: 'Rainy Day Window ☁️', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#90a4ae" stroke="#4A3E3D" stroke-width="3"/><path d="M 25,35 Q 35,25 45,35" fill="none" stroke="#fff" opacity="0.5" stroke-width="2" stroke-linecap="round"/><line x1="30" y1="55" x2="28" y2="65" stroke="#bae6fd" stroke-width="2" stroke-linecap="round"/><line x1="60" y1="50" x2="58" y2="60" stroke="#bae6fd" stroke-width="2" stroke-linecap="round"/></svg>' }
+                    { id: 'magic_forest', label: 'Magic Forest 🍄', prop: 'currentScene', locked: true, svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#2d1b4e" stroke="#4A3E3D" stroke-width="3"/><path d="M 25,60 Q 30,35 45,60" fill="#a78bfa" stroke="#4A3E3D" stroke-width="2"/><path d="M 32,60 L 32,80 M 38,60 L 38,80" stroke="#4A3E3D" stroke-width="2"/><circle cx="28" cy="48" r="1.5" fill="#fff" /><circle cx="35" cy="42" r="1.5" fill="#fff" /><circle cx="42" cy="50" r="1.5" fill="#fff" /><path d="M 55,70 Q 60,50 70,70" fill="#f472b6" stroke="#4A3E3D" stroke-width="2"/><path d="M 60,70 L 60,85 M 65,70 L 65,85" stroke="#4A3E3D" stroke-width="2"/><circle cx="75" cy="35" r="2.5" fill="#fef08a" /><path d="M 75,35 L 75,30 M 75,35 L 75,40 M 75,35 L 70,35 M 75,35 L 80,35" stroke="#fef08a" stroke-width="1"/></svg>' },
+                    { id: 'candy_castle', label: 'Candy Castle 🏰', prop: 'currentScene', locked: true, svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#ddd6fe" stroke="#4A3E3D" stroke-width="3"/><path d="M 30,70 L 30,55 L 42,55 L 42,70 Z" fill="#ffd6e0" stroke="#4A3E3D" stroke-width="1.5"/><polygon points="30,55 36,40 42,55" fill="#ff85a2" stroke="#4A3E3D" stroke-width="1.5"/><path d="M 50,75 L 50,48 L 68,48 L 68,75 Z" fill="#ffd6e0" stroke="#4A3E3D" stroke-width="1.5"/><polygon points="50,48 59,30 68,48" fill="#ff85a2" stroke="#4A3E3D" stroke-width="1.5"/><path d="M 10,75 A 12,12 0 0,1 35,75 A 16,16 0 0,1 65,75 A 12,12 0 0,1 90,75 Z" fill="#fff" stroke="#4A3E3D" stroke-width="2"/><path d="M 15,30 Q 50,15 85,30" fill="none" stroke="#fcd34d" stroke-width="2" stroke-linecap="round"/></svg>' },
+                    { id: 'coral_palace', label: 'Coral Palace 🐚', prop: 'currentScene', locked: true, svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#bae6fd" stroke="#4A3E3D" stroke-width="3"/><circle cx="25" cy="30" r="4" fill="none" stroke="#4A3E3D" stroke-width="1.5" stroke-dasharray="1,1"/><circle cx="35" cy="22" r="2.5" fill="none" stroke="#4A3E3D" stroke-width="1.2"/><circle cx="75" cy="40" r="3" fill="none" stroke="#4A3E3D" stroke-width="1.5"/><path d="M 20,90 Q 25,65 35,90" fill="#fda4af" stroke="#4A3E3D" stroke-width="2"/><path d="M 70,90 Q 75,70 85,90" fill="#fef08a" stroke="#4A3E3D" stroke-width="2"/><path d="M 45,90 Q 52,78 60,90" fill="#a7f3d0" stroke="#4A3E3D" stroke-width="2"/></svg>' },
+                    { id: 'moon_carousel', label: 'Moon Swing 🌙', prop: 'currentScene', locked: true, svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#fffbeb" stroke="#4A3E3D" stroke-width="3"/><path d="M 55,20 A 25,25 0 1,0 55,70 A 20,20 0 1,1 55,20 Z" fill="#fcd34d" stroke="#4A3E3D" stroke-width="2" transform="rotate(-15, 50, 45)"/><line x1="30" y1="10" x2="30" y2="90" stroke="#4A3E3D" stroke-width="1.5" stroke-dasharray="3,3"/><line x1="70" y1="10" x2="70" y2="90" stroke="#4A3E3D" stroke-width="1.5" stroke-dasharray="3,3"/><circle cx="30" cy="40" r="3" fill="#ff758f"/><circle cx="70" cy="60" r="3" fill="#ff758f"/></svg>' }
                 ]
             }
         }
@@ -3870,7 +3639,7 @@ You MUST respond strictly in the following JSON format:
 
             card.addEventListener('click', () => {
                 if (!unlocked) {
-                    showToast('This is a Spark Shop exclusive item. Please unlock it in the shop first!', 'warning');
+                    showToast('这是火花商店限定单品，请先兑换解锁！', 'warning');
                     return;
                 }
                 avatarState.set(item.prop, item.id);
@@ -3888,8 +3657,8 @@ You MUST respond strictly in the following JSON format:
         const mascotColors = ['#ffd6e0', '#dbf7f9', '#e8f5e9', '#e8dff5'];
         const expressionOptions  = ['friendly', 'starry', 'wink', 'sleepy', 'blep', 'uwu', 'teary', 'cat'];
         const blushOptions       = ['circle', 'heart', 'star', 'sakura', 'sparkle', 'dots', 'crescent', 'butterfly'];
-        const accOptions         = ['none', 'round_glasses', 'star_glasses', 'night_mask', 'sprout', 'heart_glasses', 'cat_glasses', 'flower_glasses'];
-        const sceneOptions       = ['starry_night', 'lofi_study', 'floating_garden', 'boba_cafe', 'pink_bedroom', 'cozy_cabin', 'cozy_rain'];
+        const accOptions         = ['none', 'round_glasses', 'night_mask', 'sprout', 'heart_glasses', 'cat_glasses', 'flower_glasses', 'angel_glasses', 'boba_glasses', 'puppy_glasses'];
+        const sceneOptions       = ['starry_night', 'lofi_study', 'floating_garden', 'boba_cafe', 'pink_bedroom', 'cozy_cabin', 'magic_forest', 'candy_castle', 'coral_palace', 'moon_carousel'];
 
         state.avatar.skinTone     = getRandomElement(mascotColors);
         state.avatar.expression   = getRandomElement(expressionOptions);
@@ -4193,7 +3962,7 @@ For the Report (after monster defeat), respond with:
                 generationConfig: { temperature: 0.85, maxOutputTokens: 1024 }
             };
             try {
-                const data = await callGemini('gemini-2.5-flash', body);
+                const data = await callGemini('gemini-1.5-flash', body);
                 if (!data) return null;
                 const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
                 // Strip potential markdown fences
@@ -4711,40 +4480,6 @@ For the Report (after monster defeat), respond with:
             if (qPersonality) qPersonality.innerText = spark.personalityTag || '—';
             const shopBal = document.getElementById('shop-spark-balance');
             if (shopBal) shopBal.innerText = spark.days;
-
-            const lastQuizDate = localStorage.getItem('kawanku_last_quiz_completed_date');
-            const todayStr = new Date().toDateString();
-            if (lastQuizDate === todayStr) {
-                if (qStartBtn) {
-                    qStartBtn.disabled = true;
-                    qStartBtn.style.opacity = '0.6';
-                    qStartBtn.style.cursor = 'not-allowed';
-                    const span = qStartBtn.querySelector('span');
-                    if (span) span.innerText = "Completed for Today";
-                }
-                if (qRestartBtn) {
-                    qRestartBtn.disabled = true;
-                    qRestartBtn.style.opacity = '0.6';
-                    qRestartBtn.style.cursor = 'not-allowed';
-                    const span = qRestartBtn.querySelector('span');
-                    if (span) span.innerText = "Completed for Today";
-                }
-            } else {
-                if (qStartBtn) {
-                    qStartBtn.disabled = false;
-                    qStartBtn.style.opacity = '1';
-                    qStartBtn.style.cursor = 'pointer';
-                    const span = qStartBtn.querySelector('span');
-                    if (span) span.innerText = "Start AI Diagnostic Quiz 🧠";
-                }
-                if (qRestartBtn) {
-                    qRestartBtn.disabled = false;
-                    qRestartBtn.style.opacity = '1';
-                    qRestartBtn.style.cursor = 'pointer';
-                    const span = qRestartBtn.querySelector('span');
-                    if (span) span.innerText = "Start New Session";
-                }
-            }
         }
         syncQuizUI();
 
@@ -4846,12 +4581,11 @@ For the Report (after monster defeat), respond with:
                     "I am constantly comparing my weaknesses with others' strengths.",
                     "I often feel like I am a fraud.",
                     "I find it difficult to bounce back after experiencing failure.",
-                    "I find it hard to accept compliments from others."
+                    "I find it hard to love myself with all my flaws."
                 ]
             }
         ];
 
-        // Returns a short, student-friendly sentence for a given score (0% = best, 100% = worst)
         let activeQuestions = [];
         let currentQuestionIdx = 0;
         let selectedAnswers = [];
@@ -4862,10 +4596,7 @@ For the Report (after monster defeat), respond with:
             div.className = type === 'ai' ? 'quiz-ai-bubble' : 'quiz-user-bubble';
             div.innerText = text;
             qMessages.appendChild(div);
-            // Delay scrolling slightly to let browser complete layout calculations
-            setTimeout(() => {
-                qMessages.scrollTop = qMessages.scrollHeight;
-            }, 60);
+            qMessages.scrollTop = qMessages.scrollHeight;
         }
 
         function addQuizTyping() {
@@ -4875,9 +4606,7 @@ For the Report (after monster defeat), respond with:
             div.id = 'quiz-typing-indicator';
             div.innerHTML = '<span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>';
             qMessages.appendChild(div);
-            setTimeout(() => {
-                qMessages.scrollTop = qMessages.scrollHeight;
-            }, 60);
+            qMessages.scrollTop = qMessages.scrollHeight;
         }
 
         function removeQuizTyping() {
@@ -4916,10 +4645,6 @@ For the Report (after monster defeat), respond with:
                 optionText: opt.text
             });
             
-            // Sync to the global state so other modules (like the calendar) can read real quiz progress!
-            state.quiz.answers = [...selectedAnswers];
-            if (window.updateSanctuaryDashboard) window.updateSanctuaryDashboard();
-            
             addQuizBubble(opt.text, 'user');
             
             if (qOptions) qOptions.classList.add('hidden');
@@ -4944,83 +4669,68 @@ For the Report (after monster defeat), respond with:
 
         // Returns a short, student-friendly sentence for a given score (0% = best, 100% = worst)
         function getScoreLabel(pct, category) {
-            if (category === 'burnout') {
-                if (pct <= 20)  return "Your mind feels fresh and clear today.";
-                if (pct <= 40)  return "Mild cognitive fatigue - try taking short brain breaks.";
-                if (pct <= 60)  return "Moderate burnout detected. Pace your mental work.";
-                if (pct <= 80)  return "High burnout. Lighten your study load immediately.";
-                return "Severe cognitive burnout. Please stop working and rest.";
-            } else if (category === 'fatigue') {
-                if (pct <= 20)  return "Your emotional energy is very high and healthy.";
-                if (pct <= 40)  return "Slight emotional drain, but nothing to worry about.";
-                if (pct <= 60)  return "Feeling emotional fatigue. Take time for self-care.";
-                if (pct <= 80)  return "High emotional fatigue. Connect with someone you trust.";
-                return "Severe emotional collapse risk. Please speak with a counselor.";
-            } else if (category === 'social') {
-                if (pct <= 20)  return "You feel highly connected and comfortable with peers.";
-                if (pct <= 40)  return "Mild social fatigue. It is okay to take some alone time.";
-                if (pct <= 60)  return "Some social anxiety detected. Don't isolate yourself entirely.";
-                if (pct <= 80)  return "High social withdrawal risk. Reach out to close circles.";
-                return "Severe social isolation distress. Consider seeking assistance.";
-            } else { // academic
+            if (category === 'academic') {
                 if (pct <= 20)  return "Great job! Your academic stress is very well managed today.";
-                if (pct <= 40)  return "Your study load is manageable - keep maintaining balance.";
+                if (pct <= 40)  return "Your study load is manageable — keep maintaining balance.";
                 if (pct <= 60)  return "You're feeling some academic pressure. Try to pace yourself.";
-                if (pct <= 80)  return "High academic stress detected. Lighten your study load.";
-                return "Severe academic overload. Please take a break and seek support.";
+                if (pct <= 80)  return "High academic stress detected. Consider lightening your load.";
+                return "Severe academic burnout. Please take a break and seek support.";
+            } else if (category === 'selfEsteem') {
+                if (pct <= 20)  return "Your self-confidence is in great shape — keep believing in yourself!";
+                if (pct <= 40)  return "Mostly positive self-image. Small doubts are normal.";
+                if (pct <= 60)  return "Some self-doubt present. Remind yourself of your strengths.";
+                if (pct <= 80)  return "Low self-esteem detected. You deserve more kindness towards yourself.";
+                return "Severe self-esteem concerns. Consider speaking with a counsellor.";
+            } else {
+                if (pct <= 20)  return "You're feeling calm and grounded today. Keep it up!";
+                if (pct <= 40)  return "Mild anxiety — manageable with small daily calming habits.";
+                if (pct <= 60)  return "Moderate anxiety level. Breathing exercises can really help.";
+                if (pct <= 80)  return "High anxiety detected. Prioritise rest and grounding techniques.";
+                return "Severe anxiety level. Please reach out to a trusted person or counsellor.";
             }
         }
 
-        function generateLocalReport(burnoutPct, fatiguePct, socialPct, academicPct, streakDays) {
+        function generateLocalReport(academicPct, selfEsteemPct, anxietyPct, streakDays) {
             // Pick solutions based on the HIGHEST (worst) score
             const categories = [
-                { name: 'burnout', score: burnoutPct },
-                { name: 'fatigue', score: fatiguePct },
-                { name: 'social', score: socialPct },
-                { name: 'academic', score: academicPct }
+                { name: 'academic', score: academicPct },
+                { name: 'selfEsteem', score: selfEsteemPct },
+                { name: 'anxiety', score: anxietyPct }
             ];
             categories.sort((a, b) => b.score - a.score);
             const worst = categories[0].name;
 
             let solutions = [];
-            if (worst === 'burnout') {
+            if (worst === 'academic') {
                 solutions = [
-                    "Time Blocking: Allocate focused study blocks of 25 minutes followed by 5-minute breaks.",
-                    "Brain Breaks: Step away from screens during breaks to rest your eyes and mind.",
-                    "Mindfulness Practice: Spend 5 minutes daily in silent breathing meditation.",
-                    "Limit Overworking: Avoid studying late into the night."
+                    "Time Blocking: Allocate focused study blocks of 25 minutes (Pomodoro technique) followed by 5-minute breaks to prevent cognitive fatigue.",
+                    "Task Decomposition: Break down overwhelming assignments into smaller, manageable sub-tasks to reduce start-up friction.",
+                    "Sleep Hygiene: Maintain a consistent sleep schedule and limit blue light exposure 1 hour before bed.",
+                    "Boundary Setting: Dedicate specific hours to study and strictly disconnect from academic work afterwards."
                 ];
-            } else if (worst === 'fatigue') {
+            } else if (worst === 'selfEsteem') {
                 solutions = [
-                    "Self-Care Routine: Dedicate 30 minutes daily to a relaxing personal activity.",
-                    "Emotional Journaling: Write down your feelings to release internal cognitive loops.",
-                    "Nature Walks: Spend 15 minutes outdoors observing trees and sky.",
-                    "Gentle Exercise: Do some light stretching or yoga to release physical tension."
+                    "Gratitude Journaling: Write down 3 small personal achievements or positive traits about yourself daily to build self-appreciation.",
+                    "Positive Affirmations: Practice self-compassion by replacing self-critical thoughts with supportive statements.",
+                    "Strength Focus: Spend 15 minutes daily engaging in activities or hobbies where you feel capable and skilled.",
+                    "Avoid Comparisons: Limit social media browsing to reduce the comparison trap with classmates."
                 ];
-            } else if (worst === 'social') {
+            } else {
                 solutions = [
-                    "Comfort Zone Socials: Hang out with 1-2 close friends instead of large groups.",
-                    "Healthy Boundaries: Politely decline social invites when your energy is low.",
-                    "Communication Practice: Share small daily occurrences with a trusted person.",
-                    "Self-Acceptance: Remember it is perfectly okay to be quiet and introverted."
-                ];
-            } else { // academic
-                solutions = [
-                    "Task Decomposition: Break down overwhelming assignments into smaller sub-tasks.",
-                    "Resource Seeking: Consult tutors, teachers, or counselors for academic guidance.",
-                    "Study Schedule: Make a visual planner to clear up deadline anxiety.",
-                    "Positive Reinforcement: Reward yourself with a treat after completing a task."
+                    "Grounding Techniques: Practice the 5-4-3-2-1 sensory grounding exercise during moments of high anxiety or overthinking.",
+                    "Box Breathing: Inhale for 4 seconds, hold for 4 seconds, exhale for 4 seconds, and hold for 4 seconds to calm the nervous system.",
+                    "Mindful Walks: Spend 10-15 minutes outdoors, focusing entirely on nature and sensory details to quiet the mind.",
+                    "Emotional Expression: Journal your feelings unfiltered or confide in a trusted friend to release internal cognitive loops."
                 ];
             }
 
             return `📋 **Clinical Mental Health Report**
 
-🧠 **Cognitive Burnout:** ${burnoutPct}% - ${getScoreLabel(burnoutPct, 'burnout')}
-🔋 **Emotional Fatigue:** ${fatiguePct}% - ${getScoreLabel(fatiguePct, 'fatigue')}
-💬 **Social Stress:** ${socialPct}% - ${getScoreLabel(socialPct, 'social')}
-📚 **Academic Pressure:** ${academicPct}% - ${getScoreLabel(academicPct, 'academic')}
+🧠 **学习压力 (Academic Pressure):** ${academicPct}% — ${getScoreLabel(academicPct, 'academic')}
+🏷️ **自卑程度 (Self-Esteem):** ${selfEsteemPct}% — ${getScoreLabel(selfEsteemPct, 'selfEsteem')}
+⚡ **焦虑程度 (Anxiety Level):** ${anxietyPct}% — ${getScoreLabel(anxietyPct, 'anxiety')}
 
-🛠️ **Solutions:**
+🛠️ **解决办法 (Solutions):**
 1. ${solutions[0]}
 2. ${solutions[1]}
 3. ${solutions[2]}
@@ -5028,16 +4738,16 @@ For the Report (after monster defeat), respond with:
 
 -----
 #### 📊 [CAMPUS_DASHBOARD_ANONYMOUS_DATA]
-Theme: Clinical Assessment | Burnout: ${burnoutPct}% | Social Stress: ${socialPct}% | Spark Days: ${streakDays}
+主题: Clinical Assessment | 精力耗竭: ${academicPct}% | 社交疲劳: ${anxietyPct}% | 火花天数: ${streakDays}
 -----`;
         }
 
-        function applyReportDiagnostics(burnoutPct, fatiguePct, socialPct, academicPct, totalScore) {
-            spark.lastDiagnosis = 'Burnout ' + burnoutPct + '%';
-            state.diagnostics.burnout = burnoutPct;
-            state.diagnostics.emotionalFatigue = fatiguePct;
-            state.diagnostics.socialAnxiety = socialPct;
+        function applyReportDiagnostics(academicPct, selfEsteemPct, anxietyPct, totalScore) {
+            // 100% = worst, so academicPct directly = burnout level for the dashboard
+            spark.lastDiagnosis = 'Burnout ' + academicPct + '%';
+            state.diagnostics.burnout = academicPct;
             state.diagnostics.academicPressure = academicPct;
+            state.diagnostics.socialAnxiety = anxietyPct;
             state.diagnostics.stressLevel = totalScore > 20 ? 'High' : (totalScore > 10 ? 'Medium' : 'Low');
             updateHeaderStatusBars();
         }
@@ -5046,50 +4756,44 @@ Theme: Clinical Assessment | Burnout: ${burnoutPct}% | Social Stress: ${socialPc
             addQuizTyping();
 
             // Calculate scores
-            let scoreBurnout = 0; // Aspects 3, 6 (Max: 6)
-            let scoreFatigue = 0; // Aspects 1, 2, 7 (Max: 9)
-            let scoreSocial = 0;  // Aspects 9, 10 (Max: 6)
-            let scoreAcademic = 0; // Aspects 4, 5, 8 (Max: 9)
+            let scoreAcademic = 0;
+            let scoreAnxiety = 0;
+            let scoreSelfEsteem = 0;
             const totalScore = selectedAnswers.reduce((sum, item) => sum + item.score, 0);
 
             selectedAnswers.forEach(ans => {
                 const name = ans.aspect;
-                if (name === "Cognitive Anxiety & Overthinking" || name === "Mental Fatigue & Burnout") {
-                    scoreBurnout += ans.score;
-                } else if (name === "Mood & Dysphoria" || name === "Anhedonia & Lack of Motivation" || name === "Trauma Awareness & Emotional Triggers") {
-                    scoreFatigue += ans.score;
-                } else if (name === "Social Relationships & Self-Isolation" || name === "Self-Esteem & Psychological Resilience") {
-                    scoreSocial += ans.score;
-                } else if (name === "Physical & Somatic Anxiety Responses" || name === "Stress Tolerance & Irritability" || name === "Biological Patterns & Sleep Quality") {
+                if (name === "Anhedonia & Lack of Motivation" || name === "Stress Tolerance & Irritability" || name === "Mental Fatigue & Burnout" || name === "Biological Patterns & Sleep Quality") {
                     scoreAcademic += ans.score;
+                } else if (name === "Mood & Dysphoria" || name === "Cognitive Anxiety & Overthinking" || name === "Physical & Somatic Anxiety Responses" || name === "Trauma Awareness & Emotional Triggers" || name === "Social Relationships & Self-Isolation") {
+                    scoreAnxiety += ans.score;
+                } else if (name === "Self-Esteem & Psychological Resilience") {
+                    scoreSelfEsteem += ans.score;
                 }
             });
 
-            // Calculate percentages
-            const burnoutPct = Math.round(100 * scoreBurnout / 6);
-            const fatiguePct = Math.round(100 * scoreFatigue / 9);
-            const socialPct = Math.round(100 * scoreSocial / 6);
-            const academicPct = Math.round(100 * scoreAcademic / 9);
+            // 100% = worst condition, 0% = best condition
+            const academicPct = Math.round(100 * scoreAcademic / 12);
+            const anxietyPct = Math.round(100 * scoreAnxiety / 15);
+            const selfEsteemPct = Math.round(100 * scoreSelfEsteem / 3);
 
             const prompt = `You are MindBuddy's Clinical Psychometric Analyst.
 The student has completed a 10-question adaptive mental health screening questionnaire.
 Here are their stress severity percentages (where 0% = perfectly healthy, 100% = very severe):
-- Cognitive Burnout: ${burnoutPct}%
-- Emotional Fatigue: ${fatiguePct}%
-- Social Stress: ${socialPct}%
-- Academic Pressure: ${academicPct}%
+- 学习压力 (Academic Pressure): ${academicPct}%
+- 自卑程度 (Self-Esteem): ${selfEsteemPct}%
+- 焦虑程度 (Anxiety Level): ${anxietyPct}%
 
-Based on these scores, generate a simplified, concise mental health report in English.
+Based on these scores, generate a simplified, concise mental health report in Chinese and English.
 Strictly adhere to the following layout and do NOT add any extra introductory text, comments, fluff, or conversational filler. Output ONLY the report:
 
 📋 **Clinical Mental Health Report**
 
-🧠 **Cognitive Burnout:** ${burnoutPct}% — [one short sentence describing what this score means]
-🔋 **Emotional Fatigue:** ${fatiguePct}% — [one short sentence describing what this score means]
-💬 **Social Stress:** ${socialPct}% — [one short sentence describing what this score means]
-📚 **Academic Pressure:** ${academicPct}% — [one short sentence describing what this score means]
+🧠 **学习压力 (Academic Pressure):** ${academicPct}% — [one short sentence describing what this score means for the student, e.g. if 0% say they are doing great, if 100% say it's severe]
+🏷️ **自卑程度 (Self-Esteem):** ${selfEsteemPct}% — [one short sentence describing what this score means]
+⚡ **焦虑程度 (Anxiety Level):** ${anxietyPct}% — [one short sentence describing what this score means]
 
-🛠️ **Solutions:**
+🛠️ **解决办法 (Solutions):**
 1. [Solution 1: Concise and highly practical action item targeting the highest-scored (worst) category]
 2. [Solution 2: Concise and highly practical action item targeting the highest-scored (worst) category]
 3. [Solution 3: Concise and highly practical action item targeting the highest-scored (worst) category]
@@ -5097,14 +4801,14 @@ Strictly adhere to the following layout and do NOT add any extra introductory te
 
 -----
 #### 📊 [CAMPUS_DASHBOARD_ANONYMOUS_DATA]
-Theme: Clinical Assessment | Burnout: ${burnoutPct}% | Social Stress: ${socialPct}% | Spark Days: ${spark.days}
+主题: Clinical Assessment | 精力耗竭: ${academicPct}% | 社交疲劳: ${anxietyPct}% | 火花天数: ${spark.days}
 -----`;
 
             let reportGenerated = false;
 
             if (canAttemptGemini()) {
                 try {
-                    const data = await callGemini('gemini-2.5-flash', {
+                    const data = await callGemini('gemini-1.5-flash', {
                         system_instruction: { parts: [{ text: "You are a clinical psychologist compiling a student mental wellness assessment report. Be professional, supportive, and clear." }] },
                         contents: [{ role: 'user', parts: [{ text: prompt }] }],
                         generationConfig: { temperature: 0.8, maxOutputTokens: 2048 }
@@ -5118,14 +4822,14 @@ Theme: Clinical Assessment | Burnout: ${burnoutPct}% | Social Stress: ${socialPc
                             reportGenerated = true;
 
                             // Parse and apply state
-                            const dashMatch = reply.match(/(?:Burnout|Academic Pressure|精力耗竭)[：:]\s*(\d+)%/i);
+                            const dashMatch = reply.match(/精力耗竭[：:]\s*(\d+)%/);
                             const tagMatch = reply.match(/\*{3}(.+?)\*{3}/) || reply.match(/\*\*(.+?)\*\*/);
                             
                             if (dashMatch) {
                                 const parsedBurnout = parseInt(dashMatch[1], 10);
-                                applyReportDiagnostics(parsedBurnout, fatiguePct, socialPct, academicPct, totalScore);
+                                applyReportDiagnostics(parsedBurnout, selfEsteemPct, anxietyPct, totalScore);
                             } else {
-                                applyReportDiagnostics(burnoutPct, fatiguePct, socialPct, academicPct, totalScore);
+                                applyReportDiagnostics(academicPct, selfEsteemPct, anxietyPct, totalScore);
                             }
 
                             if (tagMatch) {
@@ -5143,39 +4847,16 @@ Theme: Clinical Assessment | Burnout: ${burnoutPct}% | Social Stress: ${socialPc
             // Local fallback if Gemini fails or is unavailable
             if (!reportGenerated) {
                 removeQuizTyping();
-                const localReport = generateLocalReport(burnoutPct, fatiguePct, socialPct, academicPct, spark.days);
+                const localReport = generateLocalReport(academicPct, selfEsteemPct, anxietyPct, spark.days);
                 addQuizBubble(localReport, 'ai');
-                applyReportDiagnostics(burnoutPct, fatiguePct, socialPct, academicPct, totalScore);
+                applyReportDiagnostics(academicPct, selfEsteemPct, anxietyPct, totalScore);
                 spark.personalityTag = totalScore > 20 ? 'Sensitive Soul' : (totalScore > 10 ? 'Balanced Mind' : 'Resilient Anchor');
             }
-
-            // Save the exact calculated percentages and score to global state so calendar matches perfectly!
-            const wellbeingVal = 100 - Math.round(totalScore / 30 * 100);
-            state.quiz.report = {
-                burnoutPct: burnoutPct,
-                fatiguePct: fatiguePct,
-                socialPct: socialPct,
-                academicPct: academicPct,
-                totalScore: totalScore,
-                result: wellbeingVal > 75 ? "Excellent Resilience" : (wellbeingVal > 45 ? "Good Balance" : "Needs Support"),
-                score: `${wellbeingVal}/100`
-            };
 
             spark.boxesOpened++;
             spark.days++;
             saveSpark(spark);
-            localStorage.setItem('kawanku_last_quiz_completed_date', new Date().toDateString());
             syncQuizUI();
-
-            // Send updated diagnostics to database so counselor portal syncs with quiz results immediately!
-            await syncStudentAnalysisToBackend(
-                "Clinical Assessment Quiz Completed",
-                `Student completed wellness screening. Score: ${wellbeingVal}/100.`,
-                'quiz',
-                state.diagnostics
-            );
-            
-            if (window.updateSanctuaryDashboard) window.updateSanctuaryDashboard();
 
             if (qRestartBtn) qRestartBtn.classList.remove('hidden');
         }
@@ -5217,19 +4898,9 @@ Theme: Clinical Assessment | Burnout: ${burnoutPct}% | Social Stress: ${socialPc
         }
 
         async function startQuizSession() {
-            const lastQuizDate = localStorage.getItem('kawanku_last_quiz_completed_date');
-            const todayStr = new Date().toDateString();
-            if (lastQuizDate === todayStr) {
-                showToast("You have already completed your daily check-in quiz. Please come back tomorrow!", "warning");
-                return;
-            }
-
             currentQuestionIdx = 0;
             selectedAnswers = [];
             activeQuestions = [];
-            state.quiz.answers = []; // Reset global state answers as well!
-            state.quiz.report = null; // Clear global compiled report!
-            if (window.updateSanctuaryDashboard) window.updateSanctuaryDashboard();
             
             if (qMessages) qMessages.innerHTML = '';
             if (qBadge) qBadge.innerText = '🎲 Clinical Assessment Quiz';
@@ -5270,7 +4941,7 @@ Example format:
             try {
                 let questions = null;
                 if (canAttemptGemini()) {
-                    const data = await callGemini('gemini-2.5-flash', {
+                    const data = await callGemini('gemini-1.5-flash', {
                         system_instruction: { parts: [{ text: "You are a specialized JSON generator. You output raw JSON arrays containing strings and nothing else." }] },
                         contents: [{ role: 'user', parts: [{ text: prompt }] }],
                         generationConfig: { temperature: 0.7, maxOutputTokens: 1000 }
@@ -5348,24 +5019,24 @@ Example format:
 
         const SHOP_CATALOG = {
             1: [
-                { icon: '👓', name: 'Golden Wire-Rim Glasses', cost: 3, prop: 'accessory', val: 'gold' },
-                { icon: '💇', name: 'Wavy Air Crop Hair', cost: 5, prop: 'hairStyle', val: 'curly' },
-                { icon: '🎨', name: 'Exclusive Skin: Midnight Diner Glow', cost: 15, prop: 'skinTone', val: '#FFD1A4' }
+                { icon: '🐱', name: '猫耳萌趣眼镜 Cat Ear Glasses', cost: 3, prop: 'accessory', val: 'cat_glasses' },
+                { icon: '🍄', name: '魔幻森林 Magic Forest', cost: 5, prop: 'currentScene', val: 'magic_forest' },
+                { icon: '👗', name: '限定服饰：公主礼服 Princess Gown', cost: 15, prop: 'activeOutfit', val: 'princess' }
             ],
             2: [
-                { icon: '👓', name: 'Retro Black-Frame Glasses', cost: 3, prop: 'accessory', val: 'green' },
-                { icon: '💇', name: 'Boyish Crop Short Hair', cost: 5, prop: 'hairStyle', val: 'crop' },
-                { icon: '🎨', name: 'Exclusive Skin: Cyberpunk Neon', cost: 15, prop: 'skinTone', val: '#C8A2C8' }
+                { icon: '👼', name: '天使飞翼眼镜 Angel Wing Glasses', cost: 3, prop: 'accessory', val: 'angel_glasses' },
+                { icon: '🏰', name: '糖果城堡 Candy Castle', cost: 5, prop: 'currentScene', val: 'candy_castle' },
+                { icon: '🧜‍♀️', name: '限定服饰：美人鱼姬 Mermaid Gown', cost: 15, prop: 'activeOutfit', val: 'mermaid' }
             ],
             3: [
-                { icon: '👓', name: 'Aurora Rave Sunglasses', cost: 4, prop: 'accessory', val: 'gold' },
-                { icon: '💇', name: 'Spiky Electrified Bob', cost: 6, prop: 'hairStyle', val: 'bob' },
-                { icon: '🎨', name: 'Exclusive Skin: Deep Space Nebula', cost: 18, prop: 'skinTone', val: '#87CEEB' }
+                { icon: '🧋', name: '珍珠奶茶眼镜 Sweet Boba Glasses', cost: 4, prop: 'accessory', val: 'boba_glasses' },
+                { icon: '🐚', name: '珊瑚宫殿 Coral Palace', cost: 6, prop: 'currentScene', val: 'coral_palace' },
+                { icon: '🎀', name: '限定服饰：洛丽塔裙 Lolita Ruffle', cost: 18, prop: 'activeOutfit', val: 'lolita' }
             ],
             4: [
-                { icon: '👓', name: 'Round Scientist Glasses', cost: 4, prop: 'accessory', val: 'green' },
-                { icon: '💇', name: 'Smart Wolf-Tail Hair', cost: 6, prop: 'hairStyle', val: 'long' },
-                { icon: '🎨', name: 'Exclusive Skin: Wilderness Aurora', cost: 18, prop: 'skinTone', val: '#98FB98' }
+                { icon: '🐶', name: '垂耳小狗眼镜 Puppy Ear Glasses', cost: 4, prop: 'accessory', val: 'puppy_glasses' },
+                { icon: '🌙', name: '月亮秋千 Moon Swing', cost: 6, prop: 'currentScene', val: 'moon_carousel' },
+                { icon: '🦄', name: '限定服饰：独角兽装 Unicorn Suit', cost: 18, prop: 'activeOutfit', val: 'unicorn' }
             ]
         };
 
@@ -5384,9 +5055,18 @@ Example format:
             sGrid.innerHTML = '';
             const items = SHOP_CATALOG[week] || [];
             items.forEach((item, idx) => {
+                let iconContent = item.icon;
+                if (item.prop === 'accessory') {
+                    const catItem = AVATAR_CATALOG.Avatar.items['Face Accessories'].find(i => i.id === item.val);
+                    if (catItem && catItem.svg) iconContent = catItem.svg;
+                } else if (item.prop === 'currentScene') {
+                    const catItem = AVATAR_CATALOG.Scene.items.Scenes.find(i => i.id === item.val);
+                    if (catItem && catItem.svg) iconContent = catItem.svg;
+                }
+
                 const card = document.createElement('div');
                 card.className = 'shop-item-card';
-                card.innerHTML = '<span class="shop-item-icon">' + item.icon + '</span>' +
+                card.innerHTML = '<span class="shop-item-icon">' + iconContent + '</span>' +
                     '<div class="shop-item-info">' +
                     '<span class="shop-item-name">' + item.name + '</span>' +
                     '<span class="shop-item-cost">🔥 ' + item.cost + ' Day Sparks</span></div>' +
@@ -5418,13 +5098,13 @@ Example format:
                     state.avatar[item.prop] = item.val;
                     renderAvatarVisuals();
                 }
-                showToast('Purchase successful! ' + item.name + ' equipped to your Avatar!', 'success');
-                addShopBubble('🎉 Purchase successful! "' + item.name + '" has been added to your wardrobe. Check it out in the Avatar Studio!', 'ai');
+                showToast('兑换成功！' + item.name + ' 已装备到你的 Avatar！', 'success');
+                addShopBubble('🎉 兑换成功！「' + item.name + '」已放入你的主页衣柜。快去 Avatar Studio 看看吧！', 'ai');
                 if (typeof renderCustomizerUI === 'function') renderCustomizerUI();
             } else {
                 const need = item.cost - sp.days;
-                showToast('Insufficient sparks. Need ' + need + ' more spark(s).', 'warning');
-                addShopBubble('Oops, not enough sparks 🥲 Check in for ' + need + ' more day(s) to claim your "' + item.name + '"!', 'ai');
+                showToast('火花不足，还需 ' + need + ' 天火花', 'warning');
+                addShopBubble('火花余额不足哟 🥲 再坚持自检 ' + need + ' 天就能带走「' + item.name + '」了！', 'ai');
             }
         }
 
@@ -5449,9 +5129,9 @@ Example format:
             shopHistory.push({ role: 'user', parts: [{ text: userText }] });
             addShopBubble(userText, 'user');
             if (sInput) sInput.value = '';
-            const shopPrompt = 'You are the trendy manager of the KawanKu Spark Shop. The user currently has ' + sp.days + ' sparks. We are currently showing week ' + activeWeek + ' catalog. Please answer in English. Catalog: ' + JSON.stringify(SHOP_CATALOG[activeWeek]);
+            const shopPrompt = '你是 Kawanku AI 火花商店的潮流主理人。用户当前火花天数为 ' + sp.days + ' 天。当前显示第 ' + activeWeek + ' 周货架。请根据用户请求展示商品或处理兑换。保持极简留白风格。货架内容：' + JSON.stringify(SHOP_CATALOG[activeWeek]);
             try {
-                const data = await callGemini('gemini-2.5-flash', {
+                const data = await callGemini('gemini-1.5-flash', {
                     system_instruction: { parts: [{ text: shopPrompt }] },
                     contents: shopHistory,
                     generationConfig: { temperature: 0.8, maxOutputTokens: 1024 }
@@ -5522,7 +5202,7 @@ Example format:
         // ── Fruit SVG tiles (cute, colourful, recognisable) ───────────────────
         const TILE_TYPES = [
             {
-                id: 1, name: 'Mangosteen',
+                id: 1, name: 'Mangosteen 山竹',
                 color: '#6d28d9',
                 svg: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <!-- leaves -->
@@ -5542,7 +5222,7 @@ Example format:
                 </svg>`
             },
             {
-                id: 2, name: 'Durian',
+                id: 2, name: 'Durian 榴莲',
                 color: '#d97706',
                 svg: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <!-- stem & leaf -->
@@ -5572,7 +5252,7 @@ Example format:
                 </svg>`
             },
             {
-                id: 3, name: 'Rambutan',
+                id: 3, name: 'Rambutan 红毛丹',
                 color: '#dc2626',
                 svg: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <!-- stem -->
@@ -5602,7 +5282,7 @@ Example format:
                 </svg>`
             },
             {
-                id: 4, name: 'Banana',
+                id: 4, name: 'Banana 香蕉',
                 color: '#ca8a04',
                 svg: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <!-- stem -->
@@ -5621,7 +5301,7 @@ Example format:
                 </svg>`
             },
             {
-                id: 5, name: 'Mango',
+                id: 5, name: 'Mango 芒果',
                 color: '#ea580c',
                 svg: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <!-- stem & leaf -->
@@ -5803,10 +5483,9 @@ Example format:
             score++;
             updateProgress();
 
-            // Increment matches and update dashboard + checklist
+            // Increment matches and update dashboard
             state.gameStats.matches += matches.length;
             if (window.updateSanctuaryDashboard) window.updateSanctuaryDashboard();
-            if (window.updateZenFocusChecklist) window.updateZenFocusChecklist();
 
             // Spawn floating combo text on matches
             try {
@@ -6015,7 +5694,6 @@ Example format:
             // Set start flag & update lounge checklist
             localStorage.setItem('relax_game_started', 'true');
             if (window.updateSanctuaryDashboard) window.updateSanctuaryDashboard();
-            if (window.updateZenFocusChecklist) window.updateZenFocusChecklist();
 
             updateProgress();
             buildBoard();
@@ -6177,27 +5855,6 @@ Example format:
                 gain.connect(audioCtx.destination);
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.18);
-            } catch(e) {}
-        }
-
-        function playWinChimeSound() {
-            if (!audioCtx) return;
-            try {
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                const now = audioCtx.currentTime;
-                const freqs = [261.63, 329.63, 392.00, 523.25]; // C major arpeggio
-                freqs.forEach((freq, idx) => {
-                    const osc = audioCtx.createOscillator();
-                    const gain = audioCtx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(freq, now + idx * 0.08);
-                    gain.gain.setValueAtTime(0.12, now + idx * 0.08);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.4);
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.start(now + idx * 0.08);
-                    osc.stop(now + idx * 0.08 + 0.4);
-                });
             } catch(e) {}
         }
         
@@ -6368,14 +6025,14 @@ Example format:
                 this.x = x;
                 this.y = y;
                 const angle = Math.random() * Math.PI * 2;
-                const force = 7 + Math.random() * 20; // Highly explosive force range!
+                const force = 5 + Math.random() * 11;
                 this.vx = Math.cos(angle) * force;
-                this.vy = Math.sin(angle) * force - 6; // Pop upwards violently!
+                this.vy = Math.sin(angle) * force - 4;
                 this.color = color;
-                this.size = 3.5 + Math.random() * 8.5; // Larger drops
+                this.size = 2.5 + Math.random() * 5.5;
                 this.life = 1.0;
-                this.decay = 0.012 + Math.random() * 0.018; // Slower decay
-                this.gravity = 0.26; // High gravity drop arcs
+                this.decay = 0.015 + Math.random() * 0.02;
+                this.gravity = 0.22;
             }
             
             update() {
@@ -6417,25 +6074,35 @@ Example format:
             }
         }
 
-                        class ZenSpark {
+        class ZenSpark {
             constructor(x, y, color) {
                 this.x = x;
                 this.y = y;
-                this.vx = (Math.random() - 0.5) * 8; // Slower speed for less erratic movement
-                this.vy = (Math.random() - 0.5) * 8 - 2.5;
-                this.size = 6 + Math.random() * 8; // Small star sparkle
+                this.vx = (Math.random() - 0.5) * 5;
+                this.vy = (Math.random() - 0.5) * 5 - 2;
+                this.size = 11 + Math.random() * 7;
                 this.color = color || '#fef08a';
                 this.life = 1.0;
-                this.decay = 0.02 + Math.random() * 0.03; // Normal decay
-                this.rotation = Math.random() * Math.PI;
-                this.rotationSpeed = (Math.random() - 0.5) * 0.05;
+                this.decay = 0.015 + Math.random() * 0.015;
+                
+                const types = ['cat', 'bunny', 'puppy', 'heart', 'star'];
+                const weights = [0.35, 0.70, 0.90, 0.95, 1.0];
+                const rand = Math.random();
+                if (rand < weights[0]) this.type = 'cat';
+                else if (rand < weights[1]) this.type = 'bunny';
+                else if (rand < weights[2]) this.type = 'puppy';
+                else if (rand < weights[3]) this.type = 'heart';
+                else this.type = 'star';
+                
+                this.rotation = (Math.random() - 0.5) * 0.3;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.02;
             }
             
             update() {
                 this.x += this.vx;
                 this.y += this.vy;
-                this.vy += 0.15; // Gravity
-                this.vx *= 0.96;
+                this.vy += 0.02;
+                this.vx *= 0.97;
                 this.rotation += this.rotationSpeed;
                 this.life -= this.decay;
                 return this.life > 0;
@@ -6444,24 +6111,218 @@ Example format:
             draw(ctx) {
                 ctx.save();
                 ctx.globalAlpha = this.life;
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.rotation);
-                ctx.fillStyle = this.color;
                 
-                // Draw a beautiful, clean 4-pointed star / sparkle of pure fruit juice color
-                ctx.beginPath();
-                const size = this.size;
-                ctx.moveTo(0, -size);
-                ctx.quadraticCurveTo(0, 0, size, 0);
-                ctx.quadraticCurveTo(0, 0, 0, size);
-                ctx.quadraticCurveTo(0, 0, -size, 0);
-                ctx.quadraticCurveTo(0, 0, 0, -size);
-                ctx.fill();
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 8;
+                
+                if (this.type === 'cat') {
+                    const catColors = ['#ffedd5', '#fee2e2', '#fef3c7', '#fafaf9'];
+                    const col = catColors[Math.floor(this.size * 10) % catColors.length];
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.rotation);
+                    
+                    ctx.fillStyle = col;
+                    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+                    ctx.lineWidth = 1;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(-this.size * 0.8, -this.size * 0.2);
+                    ctx.lineTo(-this.size * 0.9, -this.size * 0.9);
+                    ctx.lineTo(-this.size * 0.3, -this.size * 0.6);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(this.size * 0.8, -this.size * 0.2);
+                    ctx.lineTo(this.size * 0.9, -this.size * 0.9);
+                    ctx.lineTo(this.size * 0.3, -this.size * 0.6);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = '#fbcfe8';
+                    ctx.beginPath();
+                    ctx.moveTo(-this.size * 0.75, -this.size * 0.3);
+                    ctx.lineTo(-this.size * 0.82, -this.size * 0.8);
+                    ctx.lineTo(-this.size * 0.4, -this.size * 0.55);
+                    ctx.fill();
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(this.size * 0.75, -this.size * 0.3);
+                    ctx.lineTo(this.size * 0.82, -this.size * 0.8);
+                    ctx.lineTo(this.size * 0.4, -this.size * 0.55);
+                    ctx.fill();
+
+                    ctx.fillStyle = col;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = 'rgba(244, 114, 182, 0.65)';
+                    ctx.beginPath();
+                    ctx.arc(-this.size * 0.5, this.size * 0.2, this.size * 0.25, 0, Math.PI * 2);
+                    ctx.arc(this.size * 0.5, this.size * 0.2, this.size * 0.25, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = '#475569';
+                    ctx.lineWidth = 1.8;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.arc(-this.size * 0.4, -this.size * 0.1, this.size * 0.2, Math.PI, 0);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(this.size * 0.4, -this.size * 0.1, this.size * 0.2, Math.PI, 0);
+                    ctx.stroke();
+                    
+                    ctx.strokeStyle = '#475569';
+                    ctx.lineWidth = 1.2;
+                    ctx.beginPath();
+                    ctx.arc(-this.size * 0.1, this.size * 0.2, this.size * 0.12, 0, Math.PI);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(this.size * 0.1, this.size * 0.2, this.size * 0.12, 0, Math.PI);
+                    ctx.stroke();
+                    
+                } else if (this.type === 'bunny') {
+                    const bunnyColors = ['#fafaf9', '#fdf2f8', '#fee2e2'];
+                    const col = bunnyColors[Math.floor(this.size * 10) % bunnyColors.length];
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.rotation);
+                    
+                    ctx.fillStyle = col;
+                    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+                    ctx.lineWidth = 1;
+                    
+                    ctx.beginPath();
+                    ctx.ellipse(-this.size * 0.35, -this.size * 0.9, this.size * 0.25, this.size * 0.7, -0.1, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.ellipse(this.size * 0.35, -this.size * 0.9, this.size * 0.25, this.size * 0.7, 0.1, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = '#fbcfe8';
+                    ctx.beginPath();
+                    ctx.ellipse(-this.size * 0.35, -this.size * 0.9, this.size * 0.12, this.size * 0.5, -0.1, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.ellipse(this.size * 0.35, -this.size * 0.9, this.size * 0.12, this.size * 0.5, 0.1, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = col;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = 'rgba(244, 114, 182, 0.65)';
+                    ctx.beginPath();
+                    ctx.arc(-this.size * 0.5, this.size * 0.2, this.size * 0.25, 0, Math.PI * 2);
+                    ctx.arc(this.size * 0.5, this.size * 0.2, this.size * 0.25, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = '#475569';
+                    ctx.beginPath();
+                    ctx.arc(-this.size * 0.35, -this.size * 0.1, this.size * 0.15, 0, Math.PI * 2);
+                    ctx.arc(this.size * 0.35, -this.size * 0.1, this.size * 0.15, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = '#475569';
+                    ctx.lineWidth = 1.2;
+                    ctx.beginPath();
+                    ctx.arc(0, this.size * 0.15, this.size * 0.15, 0, Math.PI);
+                    ctx.stroke();
+                    
+                } else if (this.type === 'puppy') {
+                    const puppyColors = ['#fef3c7', '#ffedd5', '#fafaf9', '#f5f5f4'];
+                    const col = puppyColors[Math.floor(this.size * 10) % puppyColors.length];
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.rotation);
+                    
+                    ctx.fillStyle = '#d97706';
+                    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.ellipse(-this.size * 0.9, 0, this.size * 0.3, this.size * 0.6, 0.2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.ellipse(this.size * 0.9, 0, this.size * 0.3, this.size * 0.6, -0.2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = col;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = 'rgba(244, 114, 182, 0.65)';
+                    ctx.beginPath();
+                    ctx.arc(-this.size * 0.5, this.size * 0.2, this.size * 0.25, 0, Math.PI * 2);
+                    ctx.arc(this.size * 0.5, this.size * 0.2, this.size * 0.25, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = '#475569';
+                    ctx.beginPath();
+                    ctx.arc(-this.size * 0.35, -this.size * 0.1, this.size * 0.15, 0, Math.PI * 2);
+                    ctx.arc(this.size * 0.35, -this.size * 0.1, this.size * 0.15, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(-this.size * 0.12, this.size * 0.1);
+                    ctx.lineTo(this.size * 0.12, this.size * 0.1);
+                    ctx.lineTo(0, this.size * 0.2);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                } else if (this.type === 'heart') {
+                    ctx.fillStyle = '#ec4899';
+                    ctx.beginPath();
+                    const d = this.size * 1.1;
+                    ctx.moveTo(this.x, this.y - d * 0.15);
+                    ctx.bezierCurveTo(this.x, this.y - d * 0.65, this.x - d * 0.7, this.y - d * 0.65, this.x - d * 0.7, this.y - d * 0.1);
+                    ctx.bezierCurveTo(this.x - d * 0.7, this.y + d * 0.45, this.x, this.y + d * 0.8, this.x, this.y + d * 1.0);
+                    ctx.bezierCurveTo(this.x, this.y + d * 0.8, this.x + d * 0.7, this.y + d * 0.45, this.x + d * 0.7, this.y - d * 0.1);
+                    ctx.bezierCurveTo(this.x + d * 0.7, this.y - d * 0.65, this.x, this.y - d * 0.65, this.x, this.y - d * 0.15);
+                    ctx.fill();
+                    
+                } else {
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.rotation);
+                    
+                    let rot = Math.PI / 2 * 3;
+                    let spikes = 5;
+                    let outerRadius = this.size;
+                    let innerRadius = this.size * 0.4;
+                    const step = Math.PI / spikes;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(0, -outerRadius);
+                    for (let i = 0; i < spikes; i++) {
+                        let x = Math.cos(rot) * outerRadius;
+                        let y = Math.sin(rot) * outerRadius;
+                        ctx.lineTo(x, y);
+                        rot += step;
+                        
+                        x = Math.cos(rot) * innerRadius;
+                        y = Math.sin(rot) * innerRadius;
+                        ctx.lineTo(x, y);
+                        rot += step;
+                    }
+                    ctx.lineTo(0, -outerRadius);
+                    ctx.closePath();
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                }
                 
                 ctx.restore();
             }
         }
-
+        
         class ZenComboText {
             constructor(x, y, count) {
                 this.x = x;
@@ -6626,234 +6487,137 @@ Example format:
             
             drawWhole(ctx) {
                 ctx.save();
-                // Smooth 3D clay shadow drop
-                ctx.shadowColor = 'rgba(74, 55, 40, 0.22)';
-                ctx.shadowBlur = 12;
-                ctx.shadowOffsetY = 6;
+                ctx.shadowColor = 'rgba(0,0,0,0.2)';
+                ctx.shadowBlur = 6;
+                ctx.shadowOffsetY = 4;
                 
                 if (this.name === 'watermelon') {
-                    // Volumetric 3D rind gradient
-                    const grad = ctx.createRadialGradient(-this.radius*0.35, -this.radius*0.35, this.radius*0.1, 0, 0, this.radius);
-                    grad.addColorStop(0, '#a7f3d0');  // bright pastel highlight
-                    grad.addColorStop(0.5, '#22c55e'); // mid green
-                    grad.addColorStop(0.9, '#16a34a'); // deep green
-                    grad.addColorStop(1, '#14532d');   // dark outline shadow
+                    const grad = ctx.createRadialGradient(-this.radius*0.3, -this.radius*0.3, 2, 0, 0, this.radius);
+                    grad.addColorStop(0, '#86efac');
+                    grad.addColorStop(0.7, '#22c55e');
+                    grad.addColorStop(1, '#15803d');
                     ctx.fillStyle = grad;
                     ctx.beginPath();
                     ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
                     ctx.fill();
                     
-                    // Realistic wavy dark green watermelon stripes
                     ctx.shadowColor = 'transparent';
-                    ctx.strokeStyle = '#052e16';
-                    ctx.lineWidth = 4;
-                    ctx.lineCap = 'round';
+                    ctx.strokeStyle = '#14532d';
+                    ctx.lineWidth = 3.5;
                     for (let ao = -1.2; ao <= 1.2; ao += 0.6) {
                         ctx.beginPath();
                         let first = true;
                         for (let y = -this.radius; y <= this.radius; y += 4) {
-                            const x = Math.sin(y * 0.18 + ao * 2) * 6 + Math.sin(ao) * (this.radius - Math.abs(y)*0.22);
-                            if (x*x + y*y < this.radius*this.radius - 3) {
+                            const x = Math.sin(y * 0.14) * 5 + Math.sin(ao) * (this.radius - Math.abs(y)*0.2);
+                            if (x*x + y*y < this.radius*this.radius - 2) {
                                 if (first) { ctx.moveTo(x, y); first = false; }
                                 else ctx.lineTo(x, y);
                             }
                         }
                         ctx.stroke();
                     }
-                    
-                    // Shiny 3D Specular Highlight Crescent
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.38)';
-                    ctx.beginPath();
-                    ctx.ellipse(-this.radius * 0.4, -this.radius * 0.4, this.radius * 0.28, this.radius * 0.12, Math.PI / 4, 0, Math.PI * 2);
-                    ctx.fill();
                 } 
                 else if (this.name === 'apple') {
-                    // 3D Apple Blushed Skin Gradient
-                    const grad = ctx.createRadialGradient(-this.radius*0.25, -this.radius*0.4, this.radius*0.08, 0, 0, this.radius);
-                    grad.addColorStop(0, '#fca5a5');   // soft light pink/yellow
-                    grad.addColorStop(0.3, '#ef4444'); // ripe apple red
-                    grad.addColorStop(0.85, '#dc2626'); // dark red
-                    grad.addColorStop(1, '#7f1d1d');   // shading shadow border
+                    const grad = ctx.createRadialGradient(-this.radius*0.2, -this.radius*0.4, 2, 0, 0, this.radius);
+                    grad.addColorStop(0, '#f87171');
+                    grad.addColorStop(0.7, '#dc2626');
+                    grad.addColorStop(1, '#7f1d1d');
                     ctx.fillStyle = grad;
                     
-                    // Organic apple shape (cleft at top and bottom)
                     ctx.beginPath();
                     ctx.moveTo(0, -this.radius * 0.45);
-                    ctx.bezierCurveTo(this.radius * 0.52, -this.radius * 1.1, this.radius * 1.25, -this.radius * 0.6, this.radius, 0);
-                    ctx.bezierCurveTo(this.radius * 0.85, this.radius * 0.85, this.radius * 0.38, this.radius * 1.05, 0, this.radius * 0.88);
-                    ctx.bezierCurveTo(-this.radius * 0.38, this.radius * 1.05, -this.radius * 0.85, this.radius * 0.85, -this.radius, 0);
-                    ctx.bezierCurveTo(-this.radius * 1.25, -this.radius * 0.6, -this.radius * 0.52, -this.radius * 1.1, 0, -this.radius * 0.45);
+                    ctx.bezierCurveTo(this.radius * 0.5, -this.radius * 1.1, this.radius * 1.2, -this.radius * 0.6, this.radius, 0);
+                    ctx.bezierCurveTo(this.radius * 0.8, this.radius * 0.8, this.radius * 0.35, this.radius, 0, this.radius * 0.85);
+                    ctx.bezierCurveTo(-this.radius * 0.35, this.radius, -this.radius * 0.8, this.radius * 0.8, -this.radius, 0);
+                    ctx.bezierCurveTo(-this.radius * 1.2, -this.radius * 0.6, -this.radius * 0.5, -this.radius * 1.1, 0, -this.radius * 0.45);
                     ctx.closePath();
                     ctx.fill();
                     
-                    // Shiny Specular Highlight
                     ctx.shadowColor = 'transparent';
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.48)';
-                    ctx.beginPath();
-                    ctx.ellipse(-this.radius * 0.4, -this.radius * 0.4, this.radius * 0.22, this.radius * 0.12, -Math.PI / 6, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    // Apple stem
-                    ctx.strokeStyle = '#451a03';
-                    ctx.lineWidth = 3.8;
+                    ctx.strokeStyle = '#78350f';
+                    ctx.lineWidth = 3.2;
                     ctx.lineCap = 'round';
                     ctx.beginPath();
                     ctx.moveTo(0, -this.radius*0.4);
-                    ctx.quadraticCurveTo(5, -this.radius*0.8, 9, -this.radius*1.05);
+                    ctx.quadraticCurveTo(4, -this.radius*0.8, 8, -this.radius*1.0);
                     ctx.stroke();
                     
-                    // Apple green leaf
-                    ctx.fillStyle = '#10b981';
+                    ctx.fillStyle = '#22c55e';
                     ctx.beginPath();
-                    ctx.ellipse(9, -this.radius*0.92, 7.5, 3.8, -Math.PI/6, 0, Math.PI*2);
+                    ctx.ellipse(8, -this.radius*0.9, 7, 3.5, -Math.PI/6, 0, Math.PI*2);
                     ctx.fill();
                 } 
                 else if (this.name === 'orange') {
-                    // Volumetric 3D Orange Skin Gradient
-                    const grad = ctx.createRadialGradient(-this.radius*0.3, -this.radius*0.3, this.radius*0.1, 0, 0, this.radius);
-                    grad.addColorStop(0, '#ffedd5');   // soft pastel orange highlight
-                    grad.addColorStop(0.4, '#fb923c'); // bright orange
-                    grad.addColorStop(0.85, '#f97316'); // deep warm orange
-                    grad.addColorStop(1, '#c2410c');   // dark shadow rind
+                    const grad = ctx.createRadialGradient(-this.radius*0.2, -this.radius*0.3, 2, 0, 0, this.radius);
+                    grad.addColorStop(0, '#fdba74');
+                    grad.addColorStop(0.7, '#f97316');
+                    grad.addColorStop(1, '#c2410c');
                     ctx.fillStyle = grad;
                     ctx.beginPath();
                     ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
                     ctx.fill();
                     
-                    // Orange skin texture dimples
                     ctx.shadowColor = 'transparent';
-                    ctx.fillStyle = 'rgba(194, 65, 12, 0.35)';
-                    for (let d = 0; d < 12; d++) {
-                        const angle = d * 1.1;
-                        const dist = this.radius * (0.35 + (d % 3) * 0.15);
-                        const ox = Math.cos(angle) * dist;
-                        const oy = Math.sin(angle) * dist;
-                        ctx.beginPath();
-                        ctx.arc(ox, oy, 1.0, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                    
-                    // Shiny Specular Highlight
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+                    ctx.fillStyle = '#15803d';
                     ctx.beginPath();
-                    ctx.ellipse(-this.radius * 0.35, -this.radius * 0.35, this.radius * 0.24, this.radius * 0.12, Math.PI / 4, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    // Green stem attachment dot
-                    ctx.fillStyle = '#14532d';
-                    ctx.beginPath();
-                    ctx.arc(0, -this.radius + 3.5, 2.8, 0, Math.PI*2);
+                    ctx.arc(0, -this.radius + 3, 2.2, 0, Math.PI*2);
                     ctx.fill();
                 } 
                 else if (this.name === 'coconut') {
-                    // 3D Fibrous Coconut Shell Gradient
-                    const grad = ctx.createRadialGradient(-this.radius*0.25, -this.radius*0.25, this.radius*0.1, 0, 0, this.radius);
-                    grad.addColorStop(0, '#ca8a04');   // golden highlight
-                    grad.addColorStop(0.4, '#854d0e'); // rich brown
-                    grad.addColorStop(0.85, '#713f12'); // deep dark brown
-                    grad.addColorStop(1, '#3f2c16');   // edge outline shadow
+                    const grad = ctx.createRadialGradient(-this.radius*0.2, -this.radius*0.2, 2, 0, 0, this.radius);
+                    grad.addColorStop(0, '#a16207');
+                    grad.addColorStop(0.7, '#78350f');
+                    grad.addColorStop(1, '#451a03');
                     ctx.fillStyle = grad;
                     ctx.beginPath();
                     ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
                     ctx.fill();
                     
-                    // Fibrous hair textures
-                    ctx.shadowColor = 'transparent';
-                    ctx.strokeStyle = 'rgba(63, 44, 22, 0.42)';
-                    ctx.lineWidth = 1.4;
-                    for (let c = -this.radius + 10; c <= this.radius - 10; c += 8) {
-                        ctx.beginPath();
-                        ctx.arc(c * 0.8, 0, this.radius * 0.9, -Math.PI / 2, Math.PI / 2);
-                        ctx.stroke();
-                    }
-                    
-                    // Three dark eyes (indentations)
-                    ctx.fillStyle = '#22150c';
+                    ctx.fillStyle = '#1c1917';
                     ctx.beginPath();
-                    ctx.arc(-7, -this.radius*0.35, 4.5, 0, Math.PI*2);
-                    ctx.arc(7, -this.radius*0.35, 4.5, 0, Math.PI*2);
-                    ctx.arc(0, -this.radius*0.05, 5.0, 0, Math.PI*2);
-                    ctx.fill();
-                    
-                    // Shiny Specular Highlight
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.28)';
-                    ctx.beginPath();
-                    ctx.ellipse(-this.radius * 0.35, -this.radius * 0.35, this.radius * 0.25, this.radius * 0.12, Math.PI / 4, 0, Math.PI * 2);
+                    ctx.arc(-6, -this.radius*0.4, 3.5, 0, Math.PI*2);
+                    ctx.arc(6, -this.radius*0.4, 3.5, 0, Math.PI*2);
+                    ctx.arc(0, -this.radius*0.1, 4, 0, Math.PI*2);
                     ctx.fill();
                 } 
                 else if (this.name === 'pineapple') {
-                    // Volumetric 3D Pineapple Body Gradient
-                    const grad = ctx.createRadialGradient(0, -this.radius*0.2, this.radius*0.1, 0, 0, this.radius * 1.1);
-                    grad.addColorStop(0, '#fef08a');   // golden yellow highlight
-                    grad.addColorStop(0.5, '#eab308'); // yellow scale center
-                    grad.addColorStop(0.85, '#ca8a04'); // golden orange scale shade
-                    grad.addColorStop(1, '#713f12');   // deep shadow base
+                    const grad = ctx.createRadialGradient(0, 0, 5, 0, 0, this.radius * 1.1);
+                    grad.addColorStop(0, '#fde047');
+                    grad.addColorStop(0.6, '#eab308');
+                    grad.addColorStop(1, '#a16207');
                     ctx.fillStyle = grad;
                     ctx.beginPath();
-                    ctx.ellipse(0, 0, this.radius * 0.88, this.radius * 1.08, 0, 0, Math.PI * 2);
+                    ctx.ellipse(0, 0, this.radius * 0.9, this.radius * 1.1, 0, 0, Math.PI * 2);
                     ctx.fill();
                     
-                    // Satisfying diamond scale grid pattern with shadow depth
                     ctx.shadowColor = 'transparent';
-                    ctx.strokeStyle = '#854d0e';
-                    ctx.lineWidth = 1.6;
+                    ctx.strokeStyle = '#78350f';
+                    ctx.lineWidth = 1.5;
                     const r = this.radius;
-                    // Draw diagonal lines mapping scale ridges
-                    for (let offset = -r * 1.5; offset <= r * 1.5; offset += 20) {
+                    for (let offset = -r; offset <= r; offset += 18) {
                         ctx.beginPath();
-                        ctx.moveTo(offset - r, -r * 1.2);
-                        ctx.lineTo(offset + r, r * 1.2);
-                        ctx.moveTo(offset + r, -r * 1.2);
-                        ctx.lineTo(offset - r, r * 1.2);
+                        ctx.moveTo(offset - r, -r);
+                        ctx.lineTo(offset + r, r);
+                        ctx.moveTo(offset + r, -r);
+                        ctx.lineTo(offset - r, r);
                         ctx.stroke();
                     }
                     
-                    // Render scale center spines (golden spikes in diamonds)
-                    ctx.fillStyle = '#a16207';
-                    for (let sy = -r * 0.8; sy <= r * 0.8; sy += 20) {
-                        for (let sx = -r * 0.6; sx <= r * 0.6; sx += 20) {
-                            if (sx*sx/(r*r*0.64) + sy*sy/(r*r*1.16) < 0.9) {
-                                ctx.beginPath();
-                                ctx.arc(sx, sy, 2.0, 0, Math.PI * 2);
-                                ctx.fill();
-                            }
-                        }
-                    }
-                    
-                    // Volumetric Green Leaf Crown at the top
-                    ctx.fillStyle = '#0f766e'; // deep teal green
+                    ctx.fillStyle = '#15803d';
                     ctx.beginPath();
-                    ctx.moveTo(-12, -this.radius * 0.95);
-                    ctx.quadraticCurveTo(-22, -this.radius * 1.7, -14, -this.radius * 1.95);
-                    ctx.quadraticCurveTo(-7, -this.radius * 1.4, -4, -this.radius * 1.05);
-                    ctx.lineTo(4, -this.radius * 1.05);
-                    ctx.quadraticCurveTo(7, -this.radius * 1.4, 14, -this.radius * 1.95);
-                    ctx.quadraticCurveTo(22, -this.radius * 1.7, 12, -this.radius * 0.95);
+                    ctx.moveTo(-10, -this.radius * 0.9);
+                    ctx.quadraticCurveTo(-18, -this.radius * 1.6, -12, -this.radius * 1.8);
+                    ctx.quadraticCurveTo(-6, -this.radius * 1.3, -3, -this.radius * 1.0);
+                    ctx.lineTo(3, -this.radius * 1.0);
+                    ctx.quadraticCurveTo(6, -this.radius * 1.3, 12, -this.radius * 1.8);
+                    ctx.quadraticCurveTo(18, -this.radius * 1.6, 10, -this.radius * 0.9);
                     ctx.closePath();
-                    ctx.fill();
-                    
-                    // Layered leaves for volumetric crown look
-                    ctx.fillStyle = '#10b981'; // bright green highlights
-                    ctx.beginPath();
-                    ctx.moveTo(-6, -this.radius * 0.98);
-                    ctx.quadraticCurveTo(-12, -this.radius * 1.85, -6, -this.radius * 2.1);
-                    ctx.quadraticCurveTo(0, -this.radius * 1.5, 0, -this.radius * 1.15);
-                    ctx.quadraticCurveTo(0, -this.radius * 1.5, 6, -this.radius * 1.85);
-                    ctx.quadraticCurveTo(12, -this.radius * 1.85, 6, -this.radius * 0.98);
-                    ctx.closePath();
-                    ctx.fill();
-                    
-                    // Shiny Specular Highlight
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.42)';
-                    ctx.beginPath();
-                    ctx.ellipse(-this.radius * 0.35, -this.radius * 0.35, this.radius * 0.2, this.radius * 0.1, Math.PI / 4, 0, Math.PI * 2);
                     ctx.fill();
                 }
                 
                 ctx.restore();
             }
             
-
             drawInnerCut(ctx, side) {
                 if (this.name === 'watermelon') {
                     ctx.fillStyle = '#f0fdf4';
@@ -7130,10 +6894,9 @@ Example format:
                     score = Math.min(targetScore, score + 1);
                     updateProgress();
                     
-                    // Increment slices and update dashboard + checklist
+                    // Increment slices and update dashboard
                     state.gameStats.slices++;
                     if (window.updateSanctuaryDashboard) window.updateSanctuaryDashboard();
-                    if (window.updateZenFocusChecklist) window.updateZenFocusChecklist();
                     
                     // Check Combo Slicing sliding window
                     const now = Date.now();
@@ -7158,9 +6921,13 @@ Example format:
                     splats.push(new ZenSplat(f.x, f.y, f.name));
                     playSplashSound();
 
-                    // Spawn massive explosion of sparkles and juice droplets!
-                    for (let i = 0; i < 12; i++) { sparks.push(new ZenSpark(f.x, f.y, f.juiceColor)); }
-                    for (let i = 0; i < 20; i++) { juiceParticles.push(new ZenJuiceParticle(f.x, f.y, f.juiceColor)); }
+                    
+                    for (let i = 0; i < 25; i++) {
+                        sparks.push(new ZenSpark(f.x, f.y, f.juiceColor));
+                    }
+                    for (let i = 0; i < 36; i++) {
+                        juiceParticles.push(new ZenJuiceParticle(f.x, f.y, f.juiceColor));
+                    }
                     
                     if (score >= targetScore) {
                         endGameWithWin();
@@ -7237,28 +7004,13 @@ Example format:
             isPlaying = false;
             cancelAnimationFrame(animationFrameId);
             
-            // Play a celebratory chime sound using Web Audio API!
-            playWinChimeSound();
-            
-            // Show a stunning toast notification
-            showToast("🎉 Congratulations! You filled your Relaxation Bar! Great job! 🌸", "success");
-            
-            // Change the robot's speech bubble to celebrate!
-            const bubble = document.querySelector('.comfort-speech-bubble p');
-            if (bubble) {
-                bubble.innerHTML = "🌟 <b>Wonderful job, Kawan!</b> You reached your daily Zen goal. You sliced so many delicious local fruits! Let's rest. 🌸";
+            if (zenGameArena) zenGameArena.classList.add('hidden');
+            if (surveyInline) {
+                surveyInline.classList.remove('hidden');
+                if (winChoicesRow) winChoicesRow.classList.remove('hidden');
+                if (surveyMoodSection) surveyMoodSection.classList.add('hidden');
+                surveyInline.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-            
-            // Delay 2.5 seconds to let the user see the 20/20 progress bar clearly before transitioning to the post-game choices!
-            setTimeout(() => {
-                if (zenGameArena) zenGameArena.classList.add('hidden');
-                if (surveyInline) {
-                    surveyInline.classList.remove('hidden');
-                    if (winChoicesRow) winChoicesRow.classList.remove('hidden');
-                    if (surveyMoodSection) surveyMoodSection.classList.add('hidden');
-                    surveyInline.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            }, 2500);
         }
         
         function startZenGame() {
@@ -7269,7 +7021,6 @@ Example format:
             // Set start flag & update lounge checklist
             localStorage.setItem('relax_game_started', 'true');
             if (window.updateSanctuaryDashboard) window.updateSanctuaryDashboard();
-            if (window.updateZenFocusChecklist) window.updateZenFocusChecklist();
 
             fruits = [];
             splats = [];
@@ -7449,23 +7200,23 @@ Example format:
                 this.swaySpeed = 0.005 + Math.random() * 0.01;
                 this.time = Math.random() * 100;
                 
-                // Soft Morandi pastels & warm therapeutic light colors
+                // Brighter, more vibrant therapeutic colors
                 const colors = [
-                    'rgba(255, 182, 193, 0.7)',   // Light pink cherry blossom petal
-                    'rgba(255, 209, 220, 0.65)',  // Pastel pink
-                    'rgba(254, 243, 199, 0.8)',   // Warm glowing golden light
-                    'rgba(224, 242, 254, 0.6)'    // Soft pale blue-lavender
+                    'rgba(244, 63, 94, 0.55)',   // rose
+                    'rgba(139, 92, 246, 0.48)',  // lavender/violet
+                    'rgba(245, 158, 11, 0.52)',  // gold/orange
+                    'rgba(16, 185, 129, 0.55)'   // mint green
                 ];
                 this.color = colors[Math.floor(Math.random() * colors.length)];
 
-                this.isPetal = Math.random() < 0.55; // 55% are floating cherry blossom petals
+                this.isLeaf = Math.random() < 0.35; // 35% are floating tea leaves
                 this.rotation = Math.random() * Math.PI * 2;
-                this.rotationSpeed = (Math.random() - 0.5) * 0.02;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.015;
             }
             update() {
                 this.y -= this.speedY;
                 this.time += this.swaySpeed;
-                this.x += Math.sin(this.time) * 0.45; // Gentle waving sway
+                this.x += Math.sin(this.time) * 0.3;
                 this.rotation += this.rotationSpeed;
                 
                 if (this.y < -20 || this.x < -20 || this.x > canvas.width + 20) {
@@ -7478,23 +7229,19 @@ Example format:
                 ctx.rotate(this.rotation);
                 ctx.fillStyle = this.color;
                 
-                if (this.isPetal) {
-                    // Draw a refined, heart-shaped cherry blossom petal
+                if (this.isLeaf) {
+                    // Draw organic leaf shape
                     ctx.beginPath();
-                    ctx.moveTo(0, -this.size);
-                    ctx.bezierCurveTo(this.size * 0.8, -this.size * 0.8, this.size * 0.6, this.size * 0.6, 0, this.size * 1.1);
-                    ctx.bezierCurveTo(-this.size * 0.6, this.size * 0.6, -this.size * 0.8, -this.size * 0.8, 0, -this.size);
+                    ctx.ellipse(0, 0, this.size * 1.6, this.size * 0.7, 0, 0, Math.PI * 2);
                     ctx.fill();
-                    
-                    // Add subtle petal leaf vein
-                    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+                    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
                     ctx.lineWidth = 0.8;
                     ctx.beginPath();
-                    ctx.moveTo(0, -this.size * 0.5);
-                    ctx.lineTo(0, this.size * 0.7);
+                    ctx.moveTo(-this.size * 1.6, 0);
+                    ctx.lineTo(this.size * 1.6, 0);
                     ctx.stroke();
                 } else {
-                    // Draw soft glowing warm light particle with radial falloff simulation
+                    // Draw glowing circle
                     ctx.beginPath();
                     ctx.arc(0, 0, this.size, 0, Math.PI * 2);
                     ctx.fill();
@@ -7555,8 +7302,87 @@ Example format:
         }
     })();
 
+    // Expose dashboard updater globally so other scopes can invoke it
+    window.updateSanctuaryDashboard = function() {
+        const elZen = document.getElementById('dash-val-zen');
+        const elMatches = document.getElementById('dash-val-matches');
+        const elSlices = document.getElementById('dash-val-slices');
+        const elTime = document.getElementById('dash-val-time');
+
+        if (elZen) elZen.textContent = state.diagnostics.sentiment || 'Calm';
+        if (elMatches) elMatches.textContent = state.gameStats.matches;
+        if (elSlices) elSlices.textContent = state.gameStats.slices;
+
+        // Keep simple play session timer tracker
+        if (elTime) {
+            let startTime = sessionStorage.getItem('relax_start_time');
+            if (!startTime) {
+                startTime = Date.now();
+                sessionStorage.setItem('relax_start_time', startTime);
+            }
+            const diffMins = Math.floor((Date.now() - Number(startTime)) / 60000);
+            elTime.textContent = diffMins + 'm';
+        }
+
+        // Helper function to award a spark exactly once
+        function awardSparkOnce(missionId, missionName) {
+            const key = 'mission_awarded_' + missionId;
+            if (localStorage.getItem(key) !== 'true') {
+                let sp = { days: 1, boxesOpened: 0, lastDiagnosis: '', personalityTag: '' };
+                try {
+                    const raw = localStorage.getItem('kawanku_spark');
+                    if (raw) sp = JSON.parse(raw);
+                } catch (e) {}
+                
+                sp.days = (sp.days || 0) + 1;
+                localStorage.setItem('kawanku_spark', JSON.stringify(sp));
+                localStorage.setItem(key, 'true');
+
+                // Update UI elements instantly
+                const sBalance = document.getElementById('shop-spark-balance');
+                if (sBalance) sBalance.innerText = sp.days;
+                const qCount = document.getElementById('quiz-spark-count');
+                if (qCount) qCount.innerText = sp.days;
+
+                // Sync shop balance display inside the shop module scope if defined
+                if (typeof syncShopBalance === 'function') {
+                    try {
+                        syncShopBalance(sp);
+                    } catch (e) {}
+                }
+
+                showToast(`Mission Completed: "${missionName}"! Earned +1 Spark! 🔥`, 'success');
+            }
+        }
+
+        // Update Checklist Items in Daily Zen Focus
+        const isGameStarted = localStorage.getItem('relax_game_started') === 'true';
+        const taskStart = document.getElementById('task-cozy-start');
+        if (taskStart && isGameStarted) {
+            taskStart.classList.add('completed');
+            awardSparkOnce('cozy_start', 'Cozy Start');
+        }
+
+        const taskMatches = document.getElementById('task-cozy-matches');
+        if (taskMatches && state.gameStats.matches >= 30) {
+            taskMatches.classList.add('completed');
+            awardSparkOnce('match_master', 'Match Master');
+        }
+
+        const taskSlices = document.getElementById('task-cozy-slices');
+        if (taskSlices && state.gameStats.slices >= 20) {
+            taskSlices.classList.add('completed');
+            awardSparkOnce('zen_slicer', 'Zen Slicer');
+        }
+    };
+
     // Run launcher
     init();
+
+    // Initial sync of real-time cozy stats and daily zen focus checklists on load
+    if (window.updateSanctuaryDashboard) {
+        window.updateSanctuaryDashboard();
+    }
 });
 
 // Calm Videos Integration (Exposed Globally for inline HTML onclick handlers)
@@ -7565,7 +7391,7 @@ window.CalmVideoData = {
         title: "Anxiety Relief Support",
         desc: "Soothing guides, deep breathing, and grounding exercises to help you manage anxiety and panic states.",
         videos: [
-            { title: "How to Reduce Anxiety", src: "frontend/student/videos/anxiety_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" },
+            { title: "5-Min Quick Calm Breathwork", src: "frontend/student/videos/anxiety_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" },
             { title: "Grounding Exercise for Panic Relief", src: "frontend/student/videos/anxiety_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-with-stars-moving-14022-large.mp4" }
         ]
     },
@@ -7573,7 +7399,7 @@ window.CalmVideoData = {
         title: "Depression Support & Affirmations",
         desc: "Gentle reminders, companion voices, and comforting visual soundscapes for heavy days.",
         videos: [
-            { title: "How to Overcome Depression", src: "frontend/student/videos/depression_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-with-stars-moving-14022-large.mp4" },
+            { title: "Overcoming Fatigue & Heavy Days", src: "frontend/student/videos/depression_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-with-stars-moving-14022-large.mp4" },
             { title: "Daily Comfort Affirmations", src: "frontend/student/videos/depression_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" }
         ]
     },
@@ -7581,7 +7407,7 @@ window.CalmVideoData = {
         title: "Motivational Speeches",
         desc: "Ignite your drive, build confidence, and get back on track with powerful mindset sessions.",
         videos: [
-            { title: "Motivational Speech & Story by Nick Vujicic", src: "frontend/student/videos/motivation_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-ocean-near-a-cliff-34280-large.mp4" },
+            { title: "Unshakable Willpower & Drive", src: "frontend/student/videos/motivation_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-ocean-near-a-cliff-34280-large.mp4" },
             { title: "Rising Above Failure", src: "frontend/student/videos/motivation_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-with-stars-moving-14022-large.mp4" }
         ]
     },
@@ -7589,7 +7415,7 @@ window.CalmVideoData = {
         title: "Academic Stress Management",
         desc: "Learn to navigate exam pressure, manage task burnout, and optimize your study focus.",
         videos: [
-            { title: "How to Reduce Academic Stress", src: "frontend/student/videos/academic_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" },
+            { title: "Coping with Exam Anxiety & Stress", src: "frontend/student/videos/academic_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" },
             { title: "Recovering from Academic Burnout", src: "frontend/student/videos/academic_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-ocean-near-a-cliff-34280-large.mp4" }
         ]
     },
@@ -7597,7 +7423,7 @@ window.CalmVideoData = {
         title: "Building Unshakable Confidence",
         desc: "Overcome self-doubt, silence your inner critic, and build lasting self-compassion.",
         videos: [
-            { title: "How Growth Mindset Builds Confidence", src: "frontend/student/videos/confidence_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-ocean-near-a-cliff-34280-large.mp4" },
+            { title: "Silencing Your Inner Critic", src: "frontend/student/videos/confidence_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-ocean-near-a-cliff-34280-large.mp4" },
             { title: "Embracing Your Unique Journey", src: "frontend/student/videos/confidence_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" }
         ]
     },
@@ -7605,7 +7431,7 @@ window.CalmVideoData = {
         title: "Guided Meditation & Grounding",
         desc: "Find peace and centering through deep breathing techniques, mindfulness, and audio-visual meditation.",
         videos: [
-            { title: "How to Meditate", src: "frontend/student/videos/meditate_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" },
+            { title: "Deep Breathing Focus Session", src: "frontend/student/videos/meditate_1.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-forest-stream-in-the-sunlight-529-large.mp4" },
             { title: "Sleep Soundscape & Evening Rest", src: "frontend/student/videos/meditate_2.mp4", fallback: "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-with-stars-moving-14022-large.mp4" }
         ]
     }
@@ -7694,199 +7520,3 @@ window.closeCategory = function() {
         grid.style.display = 'block';
     }
 };
-
-// Custom Video Player Controller Bindings
-window.togglePlayPause = function() {
-    const video = document.getElementById('detailVideoPlayer');
-    const btn = document.getElementById('playPauseBtn');
-    if (!video || !btn) return;
-    if (video.paused) {
-        video.play().catch(e => console.warn(e));
-        btn.textContent = '⏸';
-    } else {
-        video.pause();
-        btn.textContent = '▶';
-    }
-};
-
-window.toggleMute = function() {
-    const video = document.getElementById('detailVideoPlayer');
-    const btn = document.getElementById('muteBtn');
-    if (!video || !btn) return;
-    video.muted = !video.muted;
-    btn.textContent = video.muted ? '🔇' : '🔊';
-};
-
-window.toggleFullScreen = function() {
-    const video = document.getElementById('detailVideoPlayer');
-    if (!video) return;
-    if (video.requestFullscreen) video.requestFullscreen();
-    else if (video.webkitRequestFullscreen) video.webkitRequestFullscreen();
-    else if (video.msRequestFullscreen) video.msRequestFullscreen();
-};
-
-window.seekVideo = function(event) {
-    const video = document.getElementById('detailVideoPlayer');
-    if (!video || !video.duration) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const posX = event.clientX - rect.left;
-    const width = rect.width;
-    const seekPercent = posX / width;
-    video.currentTime = seekPercent * video.duration;
-};
-
-// Register video progress listeners on app load
-window.addEventListener('DOMContentLoaded', () => {
-    const video = document.getElementById('detailVideoPlayer');
-    if (video) {
-        video.addEventListener('timeupdate', () => {
-            const timeText = document.getElementById('videoTime');
-            const progress = document.getElementById('videoProgressBar');
-            const btn = document.getElementById('playPauseBtn');
-            if (btn) {
-                btn.textContent = video.paused ? '▶' : '⏸';
-            }
-            if (video.duration) {
-                const formatTime = (secs) => {
-                    const m = Math.floor(secs / 60);
-                    const s = Math.floor(secs % 60).toString().padStart(2, '0');
-                    return `${m}:${s}`;
-                };
-                if (timeText) timeText.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
-                if (progress) progress.style.width = `${(video.currentTime / video.duration) * 100}%`;
-            }
-        });
-    }
-});
-
-// =============================================================================
-// DAILY ZEN FOCUS CHECKLIST — Real-time achievement tick system
-// =============================================================================
-window.updateZenFocusChecklist = function() {
-    // Read live counters from the global state object
-    const gs = (window.state && window.state.gameStats) ? window.state.gameStats : { matches: 0, slices: 0 };
-    const gameEverStarted = localStorage.getItem('relax_game_started') === 'true';
-
-    // Helper: tick or un-tick a task row
-    function setTaskDone(taskId, done) {
-        const row = document.getElementById(taskId);
-        if (!row) return;
-        const box  = row.querySelector('.checkbox-indicator');
-        const label = row.querySelector('.task-label-text');
-        if (done) {
-            row.style.opacity = '0.65';
-            row.style.textDecoration = 'line-through';
-            if (box) {
-                box.style.background  = 'linear-gradient(135deg, #10b981, #34d399)';
-                box.style.border      = '1.5px solid #10b981';
-                box.style.borderRadius = '4px';
-                box.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
-            }
-            if (label) label.style.color = '#10b981';
-        } else {
-            row.style.opacity = '';
-            row.style.textDecoration = '';
-            if (box) {
-                box.style.background  = '';
-                box.style.border      = '1.5px solid #cbd5e1';
-                box.innerHTML         = '';
-            }
-            if (label) label.style.color = '';
-        }
-    }
-
-    // Task 1 — Cozy Start: any game played at least once
-    setTaskDone('task-cozy-start', gameEverStarted);
-
-    // Task 2 — Match Master: matched 30+ fruits in Match-3
-    setTaskDone('task-cozy-matches', gs.matches >= 30);
-
-    // Task 3 — Zen Slicer: sliced 20+ fruits in Fruit Zen
-    setTaskDone('task-cozy-slices', gs.slices >= 20);
-
-    // Update the stat counters shown in the Real-Time Cozy Stats Tracker bar
-    const elMatches = document.getElementById('dash-val-matches');
-    const elSlices  = document.getElementById('dash-val-slices');
-    if (elMatches) elMatches.textContent = gs.matches;
-    if (elSlices)  elSlices.textContent  = gs.slices;
-};
-
-// Run once on page load so any previously persisted progress is reflected immediately
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(window.updateZenFocusChecklist, 800);
-});
-
-// =============================================================================
-// CLAY ROBOT MASCOT — Jump animation + cozy wisdom message cycling
-// =============================================================================
-(function initRobotMascot() {
-    const COZY_MESSAGES = [
-        "Let's take a deep breath together, Kawan! 🌸 Click me for cozy wisdom. 🌸",
-        "You are doing great, Kawan! 💛 Small steps every day make a big difference.",
-        "It's okay to rest. 🌿 Rest is part of progress, not a break from it.",
-        "You've survived every hard day so far. 💪 That's 100% success rate!",
-        "Be kind to yourself today. 🌸 You deserve the same love you give others.",
-        "Breathe in calm... breathe out stress. 🌬️ You are safe here, Kawan.",
-        "Progress, not perfection. 🌱 Every little step counts!",
-        "Even the trees rest in winter. 🌲 It's okay to slow down.",
-        "Your feelings are valid. 💜 You don't have to explain them to anyone.",
-        "One moment at a time, Kawan. 🕊️ You don't have to solve everything today.",
-    ];
-
-    let msgIndex = 0;
-    let jumpTimeout = null;
-
-    function setupRobot() {
-        const robot = document.getElementById('lounge-robot-trigger');
-        const speechMsg = document.getElementById('lounge-speech-msg');
-        if (!robot) return; // panel not yet in DOM — try again
-
-        // Remove the inline transition that conflicts with the floatBreath animation
-        robot.style.transition = '';
-
-        // --- Click: jump + cycle wisdom message ---
-        robot.addEventListener('click', () => {
-            // Cycle to next message
-            msgIndex = (msgIndex + 1) % COZY_MESSAGES.length;
-            if (speechMsg) {
-                // Fade out → update → fade in
-                speechMsg.style.transition = 'opacity 0.2s';
-                speechMsg.style.opacity = '0';
-                setTimeout(() => {
-                    speechMsg.textContent = COZY_MESSAGES[msgIndex];
-                    speechMsg.style.opacity = '1';
-                }, 200);
-            }
-
-            // Jump animation
-            robot.classList.remove('jump-active');
-            // Force reflow so the class removal is registered before re-adding
-            void robot.offsetWidth;
-            robot.classList.add('jump-active');
-            clearTimeout(jumpTimeout);
-            jumpTimeout = setTimeout(() => robot.classList.remove('jump-active'), 650);
-        });
-
-        // --- Auto-cycle message every 8 seconds (idle) ---
-        setInterval(() => {
-            msgIndex = (msgIndex + 1) % COZY_MESSAGES.length;
-            if (speechMsg) {
-                speechMsg.style.transition = 'opacity 0.4s';
-                speechMsg.style.opacity = '0';
-                setTimeout(() => {
-                    speechMsg.textContent = COZY_MESSAGES[msgIndex];
-                    speechMsg.style.opacity = '1';
-                }, 400);
-            }
-        }, 8000);
-    }
-
-    // Try immediately, then retry after panels finish rendering
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => setTimeout(setupRobot, 500));
-    } else {
-        setTimeout(setupRobot, 500);
-    }
-})();
-
-
