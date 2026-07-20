@@ -9,3 +9,5 @@ Thumbs.db
 node_modules/
 .system_generated/
 *.log
+backend/instance/kawanku_ai.db
+instance/kawanku_ai.db

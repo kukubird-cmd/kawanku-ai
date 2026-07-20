@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Login - MindBuddy</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-color: #fdf6e2;
+            --text-color: #4a3728;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ffb3c1;
+            --accent-peach: #ffd0b0;
+            --accent-mint: #a7f3d0;
+            --border-color: #4a3728;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle, #fdf6e2 40%, #ffdfd3 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            perspective: 1000px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 3px solid var(--border-color);
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: 8px 8px 0px 0px var(--border-color);
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-icon {
+            font-size: 3rem;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(3deg); }
+        }
+
+        h1 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2.2rem;
+            margin-top: 10px;
+            color: var(--text-color);
+            text-shadow: 2px 2px 0px var(--accent-pink);
+        }
+
+        p.subtitle {
+            font-size: 0.95rem;
+            color: #7a6655;
+            margin-top: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            padding-left: 4px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            font-family: inherit;
+            font-size: 1rem;
+            color: var(--text-color);
+            background: #faf6ef;
+            border: 3px solid var(--border-color);
+            border-radius: 14px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            background: #ffffff;
+            box-shadow: 4px 4px 0px 0px var(--border-color);
+            transform: translate(-2px, -2px);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-color);
+            border: 3px solid var(--border-color);
+            border-radius: 14px;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background: var(--accent-pink);
+            box-shadow: 4px 4px 0px 0px var(--border-color);
+        }
+
+        .btn-primary:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px 0px var(--border-color);
+        }
+
+        .btn-primary:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px 0px var(--border-color);
+        }
+
+        .toggle-text {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 0.9rem;
+            color: #7a6655;
+        }
+
+        .toggle-text a {
+            color: var(--accent-purple);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .toggle-text a:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+            color: #b91c1c;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            display: none;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .test-credentials {
+            margin-top: 20px;
+            padding: 12px;
+            background: #f1ebd9;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: #635345;
+            border: 2px dashed var(--border-color);
+        }
+
+        .test-credentials code {
+            font-weight: bold;
+            color: var(--accent-purple);
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(253, 246, 226, 0.8);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 5px solid #faf6ef;
+            border-top: 5px solid var(--accent-purple);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Card -->
+        <div class="card" id="authCard">
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="spinner"></div>
+            </div>
+
+            <div class="logo-section">
+                <span class="logo-icon">🎧🎒</span>
+                <h1 id="titleText">MindBuddy</h1>
+                <p class="subtitle" id="subtitleText">Student Login • Cozy companion room</p>
+            </div>
+
+            <div class="alert" id="alertBox">Error message here</div>
+
+            <!-- Login Form -->
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="studentId">Student ID</label>
+                    <input type="text" id="studentId" placeholder="e.g., STU001" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary">Enter Companion Room 🐻</button>
+            </form>
+
+            <!-- Register Form (hidden initially) -->
+            <form id="registerForm" onsubmit="handleRegister(event)" style="display: none;">
+                <div class="form-group">
+                    <label for="regStudentId">Student ID</label>
+                    <input type="text" id="regStudentId" placeholder="e.g., STU002" required>
+                </div>
+                <div class="form-group">
+                    <label for="regFullName">Full Name</label>
+                    <input type="text" id="regFullName" placeholder="e.g., Jane Doe" required>
+                </div>
+                <div class="form-group">
+                    <label for="regEmail">Email Address</label>
+                    <input type="email" id="regEmail" placeholder="jane@school.edu" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">Password</label>
+                    <input type="password" id="regPassword" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="background: var(--accent-mint);">Register Account 🎒</button>
+            </form>
+
+            <div class="toggle-text">
+                <span id="toggleQuestion">New to MindBuddy?</span> 
+                <a href="#" id="toggleBtn" onclick="toggleMode(event)">Register here</a>
+            </div>
+
+            <div class="test-credentials">
+                🐻 <strong>Default Test:</strong> Use ID <code>STU001</code> and password <code>password123</code> (offline mode is supported!).
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isLoginMode = true;
+        const API_BASE = 'http://localhost:5000/api';
+
+        // Pre-populate mock accounts in local storage if not present
+        if (!localStorage.getItem('kawanku_local_students')) {
+            localStorage.setItem('kawanku_local_students', JSON.stringify([
+                { student_id: 'STU001', password: 'password123', full_name: 'Super Star Student', email: 'stu001@school.edu' }
+            ]));
+        }
+
+        function toggleMode(e) {
+            e.preventDefault();
+            const alertBox = document.getElementById('alertBox');
+            alertBox.style.display = 'none';
+
+            isLoginMode = !isLoginMode;
+            if (isLoginMode) {
+                document.getElementById('loginForm').style.display = 'block';
+                document.getElementById('registerForm').style.display = 'none';
+                document.getElementById('titleText').innerText = 'MindBuddy';
+                document.getElementById('subtitleText').innerText = 'Student Login • Cozy companion room';
+                document.getElementById('toggleQuestion').innerText = 'New to MindBuddy?';
+                document.getElementById('toggleBtn').innerText = 'Register here';
+            } else {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('registerForm').style.display = 'block';
+                document.getElementById('titleText').innerText = 'Join MindBuddy';
+                document.getElementById('subtitleText').innerText = 'Create your student companion account';
+                document.getElementById('toggleQuestion').innerText = 'Already have an account?';
+                document.getElementById('toggleBtn').innerText = 'Login here';
+            }
+        }
+
+        function showAlert(msg) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.innerText = msg;
+            alertBox.style.display = 'block';
+        }
+
+        function showLoading(show) {
+            const loader = document.getElementById('loadingOverlay');
+            if (show) {
+                loader.classList.add('active');
+            } else {
+                loader.classList.remove('active');
+            }
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const studentId = document.getElementById('studentId').value.trim();
+            const password = document.getElementById('password').value;
+            const alertBox = document.getElementById('alertBox');
+            alertBox.style.display = 'none';
+
+            showLoading(true);
+
+            // Attempt backend API call first
+            try {
+                const response = await fetch(`${API_BASE}/auth/student/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ student_id: studentId, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    localStorage.setItem('kawanku_student_session', JSON.stringify({
+                        student_id: data.student_id,
+                        full_name: data.full_name,
+                        token: data.token
+                    }));
+                    window.location.href = '/index.html';
+                    return;
+                }
+            } catch (error) {
+                console.warn("Backend connection failed, falling back to offline localStorage login:", error);
+            }
+
+            // Offline localstorage fallback
+            setTimeout(() => {
+                showLoading(false);
+                const localStudents = JSON.parse(localStorage.getItem('kawanku_local_students') || '[]');
+                const student = localStudents.find(s => s.student_id === studentId);
+
+                if (student && student.password === password) {
+                    localStorage.setItem('kawanku_student_session', JSON.stringify({
+                        student_id: student.student_id,
+                        full_name: student.full_name,
+                        token: 'mock-offline-token'
+                    }));
+                    window.location.href = '/index.html';
+                } else {
+                    showAlert('Invalid student ID or password. Please try again.');
+                }
+            }, 500);
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            const studentId = document.getElementById('regStudentId').value.trim();
+            const fullName = document.getElementById('regFullName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const alertBox = document.getElementById('alertBox');
+            alertBox.style.display = 'none';
+
+            showLoading(true);
+
+            // Attempt backend registration
+            try {
+                const response = await fetch(`${API_BASE}/auth/student/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        student_id: studentId,
+                        full_name: fullName,
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showLoading(false);
+                    // Add locally for redundancy
+                    saveStudentLocally(studentId, password, fullName, email);
+                    showAlert('Account created! Please log in below.');
+                    setTimeout(() => { isLoginMode = false; toggleMode({ preventDefault: () => {} }); }, 1000);
+                    return;
+                } else {
+                    showLoading(false);
+                    showAlert(data.error || 'Registration failed');
+                    return;
+                }
+            } catch (error) {
+                console.warn("Backend connection failed, performing offline registration:", error);
+            }
+
+            // Offline registration fallback
+            setTimeout(() => {
+                showLoading(false);
+                const localStudents = JSON.parse(localStorage.getItem('kawanku_local_students') || '[]');
+                if (localStudents.some(s => s.student_id === studentId)) {
+                    showAlert('Student ID is already registered.');
+                } else {
+                    saveStudentLocally(studentId, password, fullName, email);
+                    alert('Registration successful! (Offline Mode)');
+                    isLoginMode = false;
+                    toggleMode({ preventDefault: () => {} });
+                    document.getElementById('studentId').value = studentId;
+                }
+            }, 500);
+        }
+
+        function saveStudentLocally(student_id, password, full_name, email) {
+            const localStudents = JSON.parse(localStorage.getItem('kawanku_local_students') || '[]');
+            localStudents.push({ student_id, password, full_name, email });
+            localStorage.setItem('kawanku_local_students', JSON.stringify(localStudents));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KawanKu AI - Counselor Portal</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="../../lucide.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-color: #fdf6e2;
+            --text-color: #4a3728;
+            --accent-purple: #8b5cf6;
+            --accent-mint: #a7f3d0;
+            --accent-blue: #bae6fd;
+            --accent-pink: #ffb3c1;
+            --accent-peach: #ffd0b0;
+            --border-color: #4a3728;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #faf6ef;
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar Nav */
+        aside.sidebar {
+            width: 280px;
+            background: #ffffff;
+            border-right: 3px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px dashed var(--border-color);
+        }
+
+        .logo-icon {
+            font-size: 2.2rem;
+            animation: bounce-slow 4s ease-in-out infinite;
+        }
+
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        .logo-text h2 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.4rem;
+            color: var(--text-color);
+        }
+
+        .logo-text span {
+            font-size: 0.75rem;
+            background: var(--accent-mint);
+            border: 1.5px solid var(--border-color);
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-grow: 1;
+        }
+
+        .nav-btn {
+            background: none;
+            border: 3px solid transparent;
+            padding: 12px 16px;
+            border-radius: 14px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .nav-btn:hover {
+            background: #faf6ef;
+            border-color: var(--border-color);
+        }
+
+        .nav-btn.active {
+            background: var(--accent-blue);
+            border-color: var(--border-color);
+            box-shadow: 3px 3px 0px 0px var(--border-color);
+            transform: translate(-1px, -1px);
+        }
+
+        .sidebar-footer {
+            border-top: 2px dashed var(--border-color);
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+
+        .counselor-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .profile-avatar {
+            font-size: 1.8rem;
+            background: #faf6ef;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .profile-role {
+            font-size: 0.75rem;
+            color: #7a6655;
+        }
+
+        .btn-logout {
+            width: 100%;
+            background: #fee2e2;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 8px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #b91c1c;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: #fca5a5;
+        }
+
+        /* Main Content Container */
+        main.main-content {
+            flex-grow: 1;
+            padding: 40px;
+            overflow-y: auto;
+            max-width: calc(100vw - 280px);
+        }
+
+        header.content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+        }
+
+        header.content-header h1 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2.2rem;
+            text-shadow: 2px 2px 0px var(--accent-blue);
+        }
+
+        /* Search Section */
+        .search-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-input {
+            padding: 10px 16px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            border: 3px solid var(--border-color);
+            border-radius: 12px;
+            outline: none;
+            width: 240px;
+            background: #ffffff;
+        }
+
+        .search-input:focus {
+            box-shadow: 3px 3px 0px 0px var(--border-color);
+        }
+
+        .btn-search {
+            background: var(--accent-pink);
+            border: 3px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px 18px;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px 0px var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .btn-search:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0px 0px var(--border-color);
+        }
+
+        .btn-search:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0px 0px var(--border-color);
+        }
+
+        /* Grid stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 35px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border: 3px solid var(--border-color);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 4px 4px 0px 0px var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-card.urgent {
+            background: #fee2e2;
+        }
+
+        .stat-info h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #7a6655;
+            margin-bottom: 5px;
+        }
+
+        .stat-info p.val {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+
+        .stat-icon {
+            font-size: 2.4rem;
+        }
+
+        /* Panels styling */
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        /* Cards list */
+        .main-card {
+            background: #ffffff;
+            border: 3px solid var(--border-color);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 6px 6px 0px 0px var(--border-color);
+            margin-bottom: 30px;
+        }
+
+        .main-card h2 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Table */
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+
+        .custom-table th {
+            text-align: left;
+            padding: 10px 15px;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: #7a6655;
+        }
+
+        .table-row {
+            background: #faf6ef;
+            border-radius: 12px;
+        }
+
+        .table-row td {
+            padding: 15px;
+            border-top: 3px solid var(--border-color);
+            border-bottom: 3px solid var(--border-color);
+        }
+
+        .table-row td:first-child {
+            border-left: 3px solid var(--border-color);
+            border-top-left-radius: 12px;
+            border-bottom-left-radius: 12px;
+            font-weight: bold;
+        }
+
+        .table-row td:last-child {
+            border-right: 3px solid var(--border-color);
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+
+        /* Badges */
+        .badge-risk {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 12px;
+            border: 2px solid var(--border-color);
+            display: inline-block;
+            box-shadow: 1.5px 1.5px 0px 0px var(--border-color);
+        }
+
+        .badge-risk.low { background: var(--accent-mint); }
+        .badge-risk.medium { background: var(--accent-peach); }
+        .badge-risk.high { background: var(--accent-pink); }
+        .badge-risk.urgent { background: #f87171; color: white; animation: pulse-border 1.5s infinite; }
+
+        @keyframes pulse-border {
+            0%, 100% { border-color: var(--border-color); }
+            50% { border-color: #ef4444; }
+        }
+
+        .btn-table {
+            background: #ffffff;
+            border: 2.5px solid var(--border-color);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 2px 2px 0px 0px var(--border-color);
+        }
+
+        .btn-table:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 3px 3px 0px 0px var(--border-color);
+        }
+
+        .btn-table.primary {
+            background: var(--accent-blue);
+        }
+
+        /* Weekly Scheduler Styling */
+        .weekly-banner {
+            background: var(--accent-peach);
+            border: 3px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 4px 4px 0px 0px var(--border-color);
+        }
+
+        .weekly-banner-icon {
+            font-size: 2rem;
+        }
+
+        .weekly-banner-text h3 {
+            font-family: 'Fredoka', sans-serif;
+            margin-bottom: 4px;
+        }
+
+        .weekly-banner-text p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .scheduler-card {
+            background: #faf6ef;
+            border: 2px dashed var(--border-color);
+            border-radius: 14px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        /* Report Modal Card */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(74, 55, 40, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: #ffffff;
+            border: 3.5px solid var(--border-color);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 680px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 10px 10px 0px 0px var(--border-color);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 3px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--accent-blue);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+
+        .modal-header h2 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.4rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+
+        .modal-body {
+            padding: 25px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .report-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2.5px dashed var(--border-color);
+        }
+
+        .report-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .report-section h3 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.15rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .report-field {
+            background: #faf6ef;
+            padding: 12px;
+            border-radius: 12px;
+            border: 2px solid var(--border-color);
+        }
+
+        .report-field strong {
+            display: block;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: #7a6655;
+            margin-bottom: 4px;
+        }
+
+        .report-field span {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .recommendation-item {
+            background: #eef2ff;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+            box-shadow: 2px 2px 0px 0px var(--border-color);
+        }
+
+        .recommendation-item.urgent {
+            background: #fee2e2;
+        }
+
+        .modal-footer {
+            padding: 15px 25px;
+            border-top: 3px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: #faf6ef;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+        }
+
+        .btn-modal {
+            padding: 10px 20px;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            border: 3px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px 0px var(--border-color);
+            transition: all 0.15s;
+        }
+
+        .btn-modal:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0px 0px var(--border-color);
+        }
+
+        .btn-modal.secondary {
+            background: #ffffff;
+        }
+
+        .btn-modal.primary {
+            background: var(--accent-pink);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="logo-section">
+            <span class="logo-icon">🩺🤖</span>
+            <div class="logo-text">
+                <h2>KawanKu AI</h2>
+                <span>Advisors Portal</span>
+            </div>
+        </div>
+
+        <nav class="nav-menu">
+            <button class="nav-btn active" onclick="switchPanel('dashboard')" id="nav-dashboard">
+                <i data-lucide="layout-dashboard"></i>
+                <span>Overview</span>
+            </button>
+            <button class="nav-btn" onclick="switchPanel('students')" id="nav-students">
+                <i data-lucide="users"></i>
+                <span>Student Directory</span>
+            </button>
+            <button class="nav-btn" onclick="switchPanel('weekly')" id="nav-weekly">
+                <i data-lucide="calendar"></i>
+                <span>Weekly Dispatch</span>
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="counselor-profile">
+                <div class="profile-avatar">👨‍⚕️</div>
+                <div class="profile-info">
+                    <span class="profile-name" id="counselorName">Advisor Henderson</span>
+                    <span class="profile-role" id="counselorId">COUN001</span>
+                </div>
+            </div>
+            <button class="btn-logout" onclick="logout()">Logout 🚪</button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Content Header -->
+        <header class="content-header">
+            <div>
+                <h1 id="panelTitle">Advisor Dashboard</h1>
+                <p style="color: #7a6655; margin-top: 4px;">Anonymized clinical overview & support triggers</p>
+            </div>
+
+            <!-- Search by student ID -->
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchStudentIdInput" placeholder="Search Student ID (e.g. STU001)">
+                <button class="btn-search" onclick="searchStudentById()">Search 🔍</button>
+            </div>
+        </header>
+
+        <!-- Stats Overview Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>Total Active Students</h3>
+                    <p class="val" id="stat-total-students">1</p>
+                </div>
+                <span class="stat-icon">🎒</span>
+            </div>
+            <div class="stat-card urgent" id="attentionCard">
+                <div class="stat-info">
+                    <h3>SOS Dispatches</h3>
+                    <p class="val text-rose" id="stat-attention-students">0</p>
+                </div>
+                <span class="stat-icon">🚨</span>
+            </div>
+            <div class="stat-card" style="background: var(--accent-mint);">
+                <div class="stat-info">
+                    <h3>Weekly Dispatch Cycle</h3>
+                    <p class="val" style="font-size: 1.15rem; font-family: inherit; font-weight: 700; margin-top: 10px;">
+                        Mondays (Active)
+                    </p>
+                </div>
+                <span class="stat-icon">📅</span>
+            </div>
+        </div>
+
+        <!-- PANEL: DASHBOARD -->
+        <div class="panel active" id="dashboard-panel">
+            <div class="main-card">
+                <h2><i data-lucide="bell" class="text-rose"></i> SOS Referrals Needing Immediate Outreach</h2>
+                <div style="overflow-x: auto;">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Student Name</th>
+                                <th>Stress Level</th>
+                                <th>Primary Sentiment</th>
+                                <th>Dispatch Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sosTableBody">
+                            <!-- Populated dynamically -->
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 20px; color: #7a6655;">
+                                    No active urgent SOS alerts at the moment.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="main-card">
+                <h2><i data-lucide="users"></i> Quick Directory List</h2>
+                <div style="overflow-x: auto;">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Name</th>
+                                <th>Wellness Index</th>
+                                <th>Status Alert</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="quickDirectoryBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL: STUDENT DIRECTORY -->
+        <div class="panel" id="students-panel">
+            <div class="main-card">
+                <h2><i data-lucide="users"></i> Complete Student List</h2>
+                <div style="overflow-x: auto;">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Full Name</th>
+                                <th>Register Email</th>
+                                <th>Overall Risk Level</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="directoryTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL: WEEKLY DISPATCH -->
+        <div class="panel" id="weekly-panel">
+            <div class="weekly-banner">
+                <span class="weekly-banner-icon">📩</span>
+                <div class="weekly-banner-text">
+                    <h3>Weekly Dispatch Report Cycle</h3>
+                    <p>Every Monday, the KawanKu Privacy Engine automatically compiles student wellness trajectories, scrubs raw conversation content, and compiles diagnostic report cards to counselor dashboards.</p>
+                </div>
+            </div>
+
+            <div class="main-card">
+                <h2><i data-lucide="settings"></i> Weekly Scheduler Configuration</h2>
+                <p style="color: #7a6655; margin-bottom: 20px;">Ensure counselors receive student reports once a week automatically without breaching communication trust.</p>
+                
+                <div class="scheduler-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                        <div>
+                            <p><strong>Scheduled Reports:</strong> Enabled</p>
+                            <p style="font-size: 0.9rem; color: #7a6655; margin-top: 4px;">Every Monday at 08:00 AM. Next scheduled dispatch: Today/Next Monday.</p>
+                        </div>
+                        <button class="btn-search" onclick="runWeeklyAggregationNow()" style="background: var(--accent-mint);">
+                            Run Weekly Aggregation Now 🔄
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-card">
+                <h2><i data-lucide="history"></i> Compiled Weekly Reports</h2>
+                <div style="overflow-x: auto;">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Weekly Date Range</th>
+                                <th>Active Student IDs</th>
+                                <th>Urgent Indicators</th>
+                                <th>Aggregated Risk Level</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="weeklyReportsBody">
+                            <tr class="table-row">
+                                <td>Jul 6, 2026 - Jul 12, 2026</td>
+                                <td>STU001</td>
+                                <td>0 flags</td>
+                                <td><span class="badge-risk low">Minimal</span></td>
+                                <td><button class="btn-table primary" onclick="viewWeeklyBundle('Jul 6 - Jul 12')">View Bundle 📂</button></td>
+                            </tr>
+                            <tr class="table-row">
+                                <td>Jun 29, 2026 - Jul 5, 2026</td>
+                                <td>STU001</td>
+                                <td>1 flag</td>
+                                <td><span class="badge-risk medium">Medium</span></td>
+                                <td><button class="btn-table primary" onclick="viewWeeklyBundle('Jun 29 - Jul 5')">View Bundle 📂</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Report Modal Overlay -->
+    <div class="modal-overlay" id="reportModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2 id="modalStudentTitle">Anonymized Student Wellness Report Card</h2>
+                <button class="close-btn" onclick="closeReportModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalReportContent">
+                <!-- Populated dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal secondary" onclick="closeReportModal()">Close 🐻</button>
+                <button class="btn-modal primary" onclick="printReport()">Download PDF 📑</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        let counselorSession = null;
+        let token = '';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const stored = localStorage.getItem('kawanku_counselor_session');
+            if (!stored) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                counselorSession = JSON.parse(stored);
+                token = counselorSession.token;
+                document.getElementById('counselorName').innerText = counselorSession.full_name || 'Advisor';
+                document.getElementById('counselorId').innerText = counselorSession.counselor_id || 'COUN001';
+            } catch(e) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Load Lucide icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+
+            loadDashboardData();
+        });
+
+        function logout() {
+            localStorage.removeItem('kawanku_counselor_session');
+            window.location.href = 'login.html';
+        }
+
+        function switchPanel(panelId) {
+            // Hide all panels
+            document.querySelectorAll('.panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            // Show target panel
+            document.getElementById(panelId + '-panel').classList.add('active');
+
+            // Set active navigation button
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById('nav-' + panelId).classList.add('active');
+
+            // Change header title
+            const titles = {
+                'dashboard': 'Advisor Dashboard',
+                'students': 'Student Directory',
+                'weekly': 'Weekly Dispatch Reports'
+            };
+            document.getElementById('panelTitle').innerText = titles[panelId];
+        }
+
+        // Search Student ID
+        function searchStudentById() {
+            const searchVal = document.getElementById('searchStudentIdInput').value.trim();
+            if (!searchVal) {
+                alert('Please enter a student ID (e.g., STU001)');
+                return;
+            }
+            viewReport(searchVal);
+        }
+
+        // Run weekly report aggregation
+        function runWeeklyAggregationNow() {
+            alert('Weekly aggregator executed! Compiled student report logs for the week and pushed PDF reports to advisor directories. (Auto-scheduled on Mondays)');
+            loadDashboardData();
+        }
+
+        function viewWeeklyBundle(range) {
+            alert(`Loading aggregated weekly student bundle for date range: ${range}`);
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.remove('active');
+        }
+
+        // Fetch students & compile lists
+        function loadDashboardData() {
+            // Attempt API call to backend, fallback to localStorage mock data
+            fetch(`${API_BASE}/counselor/students`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => {
+                if (res.ok) return res.json();
+                throw new Error("API call failed");
+            })
+            .then(data => {
+                renderStudents(data.students);
+            })
+            .catch(err => {
+                console.warn("Backend server not running, loading local mock students:", err);
+                const localStudents = JSON.parse(localStorage.getItem('kawanku_local_students') || '[]');
+                
+                // Construct standard student structures from localStorage registrations
+                const compiled = localStudents.map(student => {
+                    const studentId = student.student_id;
+                    const sosData = JSON.parse(localStorage.getItem(`kawanku_sos_dispatched_${studentId}`));
+                    
+                    return {
+                        student_id: studentId,
+                        full_name: student.full_name,
+                        email: student.email,
+                        last_login: new Date().toISOString(),
+                        risk_assessment: {
+                            overall_risk_level: sosData ? 'Urgent' : 'Low',
+                            immediate_intervention_needed: !!sosData
+                        },
+                        sentiment: sosData ? sosData.sentiment : 'Neutral',
+                        stressLevel: sosData ? sosData.stress_level : 'Low',
+                        dispatch_date: sosData ? sosData.timestamp : null
+                    };
+                });
+                
+                renderStudents(compiled);
+            });
+        }
+
+        function renderStudents(students) {
+            document.getElementById('stat-total-students').innerText = students.length;
+
+            // Urgent alerts count
+            const urgentAlerts = students.filter(s => s.risk_assessment?.overall_risk_level === 'Urgent');
+            document.getElementById('stat-attention-students').innerText = urgentAlerts.length;
+            const attnCard = document.getElementById('attentionCard');
+            if (urgentAlerts.length > 0) {
+                attnCard.style.background = '#fecaca';
+            } else {
+                attnCard.style.background = '#ffffff';
+            }
+
+            // Populate SOS Alert Table
+            const sosTable = document.getElementById('sosTableBody');
+            sosTable.innerHTML = '';
+            
+            if (urgentAlerts.length === 0) {
+                sosTable.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 25px; color: #7a6655;">
+                            No active urgent SOS alerts at the moment.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                urgentAlerts.forEach(student => {
+                    const row = document.createElement('tr');
+                    row.className = 'table-row';
+                    const dispatchDate = student.dispatch_date ? new Date(student.dispatch_date).toLocaleString() : 'Just now';
+                    row.innerHTML = `
+                        <td>${student.student_id}</td>
+                        <td>${student.full_name}</td>
+                        <td><span class="badge-risk urgent">Urgent</span></td>
+                        <td>${student.sentiment || 'Negative'}</td>
+                        <td>${dispatchDate}</td>
+                        <td><button class="btn-table primary" onclick="viewReport('${student.student_id}')">Generate Report 📋</button></td>
+                    `;
+                    sosTable.appendChild(row);
+                });
+            }
+
+            // Populate Quick Directory List
+            const dirBody = document.getElementById('quickDirectoryBody');
+            dirBody.innerHTML = '';
+            students.slice(0, 5).forEach(s => {
+                const row = document.createElement('tr');
+                row.className = 'table-row';
+                const isUrgent = s.risk_assessment?.overall_risk_level === 'Urgent';
+                const badgeHtml = isUrgent 
+                    ? `<span class="badge-risk urgent">Urgent Outreach</span>`
+                    : `<span class="badge-risk low">Stable</span>`;
+                row.innerHTML = `
+                    <td>${s.student_id}</td>
+                    <td>${s.full_name}</td>
+                    <td>${s.stressLevel || 'Minimal'}</td>
+                    <td>${badgeHtml}</td>
+                    <td><button class="btn-table" onclick="viewReport('${s.student_id}')">Review Report</button></td>
+                `;
+                dirBody.appendChild(row);
+            });
+
+            // Populate directory tab table
+            const dirTable = document.getElementById('directoryTableBody');
+            dirTable.innerHTML = '';
+            students.forEach(s => {
+                const row = document.createElement('tr');
+                row.className = 'table-row';
+                const risk = s.risk_assessment?.overall_risk_level || 'Low';
+                const badgeClass = risk.toLowerCase();
+                row.innerHTML = `
+                    <td>${s.student_id}</td>
+                    <td>${s.full_name}</td>
+                    <td>${s.email}</td>
+                    <td><span class="badge-risk ${badgeClass}">${risk}</span></td>
+                    <td><button class="btn-table primary" onclick="viewReport('${s.student_id}')">Access Report 📋</button></td>
+                `;
+                dirTable.appendChild(row);
+            });
+        }
+
+        // View Student Report
+        function viewReport(studentId) {
+            // First try calling backend /api/counselor/report/<student_id>
+            fetch(`${API_BASE}/counselor/report/${studentId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => {
+                if (res.ok) return res.json();
+                throw new Error("Report fetch failed");
+            })
+            .then(report => {
+                showReportModal(studentId, report);
+            })
+            .catch(err => {
+                console.warn("Backend report query failed, constructing from local student session:", err);
+                
+                // Construct offline mock report from student's local parameters
+                const localStudents = JSON.parse(localStorage.getItem('kawanku_local_students') || '[]');
+                const student = localStudents.find(s => s.student_id === studentId);
+                
+                if (!student) {
+                    alert(`Student ID ${studentId} not found in registered students database.`);
+                    return;
+                }
+
+                const sosData = JSON.parse(localStorage.getItem(`kawanku_sos_dispatched_${studentId}`));
+                
+                // Mock report object
+                const mockReport = {
+                    metadata: {
+                        total_sessions: sosData ? 3 : 1,
+                        total_messages: sosData ? 14 : 4,
+                        compiled_at: new Date().toLocaleString()
+                    },
+                    mood_state: {
+                        current_state: sosData ? sosData.sentiment : 'Neutral',
+                        trajectory: sosData ? 'Descending emotional trend' : 'Stable',
+                        description: sosData 
+                            ? 'Student voice parameters and chat indicators show elevated tension, speech rate fluctuations, and repeated stress patterns.'
+                            : 'Student has steady interaction logs. Broad indicators suggest calm or neutral state.'
+                    },
+                    stress_assessment: {
+                        overall_level: sosData ? 'High' : 'Minimal',
+                        breakdown: {
+                            cognitive_burnout: sosData ? 75 : 20,
+                            emotional_fatigue: sosData ? 80 : 15,
+                            social_stress: sosData ? 60 : 30,
+                            academic_pressure: sosData ? 85 : 45
+                        }
+                    },
+                    clinical_screening: {
+                        gad7: {
+                            score: sosData ? 14 : 3,
+                            risk_level: sosData ? 'Moderate Anxiety' : 'Minimal Anxiety'
+                        },
+                        phq9: {
+                            score: sosData ? 16 : 4,
+                            risk_level: sosData ? 'Moderately Severe Depression' : 'Minimal Depression'
+                        }
+                    },
+                    risk_assessment: {
+                        overall_risk_level: sosData ? 'Urgent' : 'Low',
+                        immediate_intervention_needed: !!sosData,
+                        follow_up_priority: sosData ? 'Urgent' : 'Low'
+                    },
+                    clinical_recommendations: sosData ? [
+                        { action: 'Schedule Direct Advisor Session', urgency: 'Critical', description: 'Reach out to the student immediately via their school email or schedule an in-person diagnostic meeting.' },
+                        { action: 'De-escalation exercises', urgency: 'Medium', description: 'Recommend specific breathing, journaling, or Spark Shop relaxation assets inside the MindBuddy hub.' }
+                    ] : [
+                        { action: 'Periodic Monitoring', urgency: 'Low', description: 'Student is operating within wellness baselines. No immediate follow-up required.' }
+                    ],
+                    privacy_notice: 'This report complies with student privacy protocols. Conversations are kept completely private and only aggregated stress indices are shared.'
+                };
+
+                showReportModal(studentId, mockReport);
+            });
+        }
+
+        function showReportModal(studentId, report) {
+            document.getElementById('modalStudentTitle').innerText = `Wellness Report Card: ${studentId}`;
+            
+            const contentDiv = document.getElementById('modalReportContent');
+            contentDiv.innerHTML = '';
+
+            const html = `
+                <div class="report-section">
+                    <h3>📊 Session Meta Overview</h3>
+                    <div class="report-grid">
+                        <div class="report-field">
+                            <strong>Total Chats Conducted</strong>
+                            <span>${report.metadata.total_sessions} sessions</span>
+                        </div>
+                        <div class="report-field">
+                            <strong>Total Client Logs</strong>
+                            <span>${report.metadata.total_messages} messages</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-section">
+                    <h3>😊 Emotional State & Sentiment</h3>
+                    <div class="report-grid">
+                        <div class="report-field">
+                            <strong>Sentiment Trend</strong>
+                            <span>${report.mood_state.current_state}</span>
+                        </div>
+                        <div class="report-field">
+                            <strong>Mood Trajectory</strong>
+                            <span>${report.mood_state.trajectory}</span>
+                        </div>
+                    </div>
+                    <p style="margin-top: 12px; font-size: 0.95rem; color: #635345; background: #faf6ef; padding: 12px; border-radius: 10px; border: 1.5px dashed var(--border-color);">
+                        ${report.mood_state.description}
+                    </p>
+                </div>
+
+                <div class="report-section">
+                    <h3>😰 Anonymized Stress Indices</h3>
+                    <div class="report-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <div class="report-field">
+                            <strong>Cognitive Burnout</strong>
+                            <span>${report.stress_assessment.breakdown.cognitive_burnout}%</span>
+                        </div>
+                        <div class="report-field">
+                            <strong>Emotional Fatigue</strong>
+                            <span>${report.stress_assessment.breakdown.emotional_fatigue}%</span>
+                        </div>
+                        <div class="report-field">
+                            <strong>Social Stress</strong>
+                            <span>${report.stress_assessment.breakdown.social_stress}%</span>
+                        </div>
+                        <div class="report-field">
+                            <strong>Academic Pressure</strong>
+                            <span>${report.stress_assessment.breakdown.academic_pressure}%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-section">
+                    <h3>🏥 Diagnostic Screenings</h3>
+                    <div class="report-grid">
+                        <div class="report-field">
+                            <strong>Anxiety Index (GAD-7)</strong>
+                            <span>${report.clinical_screening.gad7.score} (${report.clinical_screening.gad7.risk_level})</span>
+                        </div>
+                        <div class="report-field">
+                            <strong>Depression Index (PHQ-9)</strong>
+                            <span>${report.clinical_screening.phq9.score} (${report.clinical_screening.phq9.risk_level})</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-section">
+                    <h3>⚠️ Risk & Intervention Matrix</h3>
+                    <div class="report-grid">
+                        <div class="report-field" style="background: ${report.risk_assessment.immediate_intervention_needed ? '#fecaca' : '#faf6ef'}">
+                            <strong>Immediate Outreach Needed</strong>
+                            <span>${report.risk_assessment.immediate_intervention_needed ? '🚨 YES, URGENT' : 'No'}</span>
+                        </div>
+                        <div class="report-field">
+                            <strong>Follow-up Priority</strong>
+                            <span>${report.risk_assessment.follow_up_priority}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-section">
+                    <h3>💡 Advisor Intervention Guidelines</h3>
+                    <div id="recsListContainer"></div>
+                </div>
+
+                <p style="font-size: 0.8rem; opacity: 0.7; border-top: 2px dashed var(--border-color); padding-top: 12px; margin-top: 15px; font-style: italic;">
+                    🔒 ${report.privacy_notice || 'Privacy preserved. Conversation transcripts and exact word inputs are withheld to ensure safety and trust.'}
+                </p>
+            `;
+
+            contentDiv.innerHTML = html;
+
+            const recsContainer = document.getElementById('recsListContainer');
+            if (report.clinical_recommendations && report.clinical_recommendations.length > 0) {
+                report.clinical_recommendations.forEach(rec => {
+                    const item = document.createElement('div');
+                    const isUrgent = rec.urgency === 'Critical' || rec.urgency === 'High' || rec.urgency === 'Urgent';
+                    item.className = `recommendation-item ${isUrgent ? 'urgent' : ''}`;
+                    item.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <strong>${rec.action}</strong>
+                            <span class="badge-risk ${rec.urgency.toLowerCase()}">${rec.urgency}</span>
+                        </div>
+                        <p style="font-size: 0.9rem; opacity: 0.9;">${rec.description}</p>
+                    `;
+                    recsContainer.appendChild(item);
+                });
+            } else {
+                recsContainer.innerHTML = '<p style="color: #7a6655;">No specific recommendations generated.</p>';
+            }
+
+            document.getElementById('reportModal').classList.add('active');
+        }
+    </script>
+</body>
+</html>
