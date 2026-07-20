@@ -1,6 +1,6 @@
 # Simple PowerShell static file server for MindBuddy
 $port = 8086
-$localDir = "C:\Users\shaoh\.gemini\antigravity\scratch\git"
+$localDir = "C:\Users\zheho\.gemini\antigravity\scratch\kawanku-ai"
 
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://localhost:$port/")

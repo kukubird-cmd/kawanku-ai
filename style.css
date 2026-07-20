@@ -896,20 +896,25 @@ body {
     background: linear-gradient(135deg, #FFB3C1, #FFCDD7);
     border: 3.5px solid #4A3E3D !important; /* Thick, distinct dark border line */
     color: #4A3E3D !important;
-    border-radius: 50px;  /* pill shape */
-    padding: 12px 20px;
+    border-radius: 24px;  /* comfortable rounded corners for 2 lines */
+    padding: 10px 12px;
     font-family: var(--font-heading);
     font-weight: 700;
-    font-size: 0.82rem;
+    font-size: 0.76rem;   /* slightly smaller font to fit nicely */
     cursor: pointer;
     display: flex;
+    flex-direction: column; /* stack icon and text vertically to save horizontal space */
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
     box-shadow: 4px 4px 0px rgba(74, 62, 61, 0.15);
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
     overflow: hidden;
+    width: 100%;          /* fit sidebar width precisely */
+    box-sizing: border-box;
+    white-space: normal !important; /* allow text wrapping */
+    text-align: center;
 }
 
 .huggeet-btn:hover {
@@ -1573,6 +1578,18 @@ body {
 .scene-cozy-rain {
     background: linear-gradient(180deg, #cfd8dc 0%, #90a4ae 100%) !important; /* Soothing rain blue-grey */
 }
+.scene-magic-forest {
+    background: linear-gradient(135deg, #1e1b4b 0%, #311042 100%) !important;
+}
+.scene-candy-castle {
+    background: linear-gradient(135deg, #ddd6fe 0%, #ffd6e0 100%) !important;
+}
+.scene-coral-palace {
+    background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%) !important;
+}
+.scene-moon-carousel {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+}
 
 /* Customizer SVGs */
 .customizer-viewport #studio-avatar-container {
@@ -1757,7 +1774,7 @@ body {
 .sheet-subtabs {
     display: flex;
     gap: 8px;
-    overflow-x: auto;
+    flex-wrap: wrap;
     padding-bottom: 4px;
 }
 
@@ -3656,7 +3673,7 @@ body {
     display: flex; 
     flex-direction: column; 
     gap: 16px; 
-    min-height: 300px; 
+    min-height: 0; 
     background: #FCF9F2; 
 }
 .quiz-welcome-msg, .shop-welcome-msg { 
@@ -3786,7 +3803,8 @@ body {
 .shop-items-grid { display: flex; flex-direction: column; gap: 12px; }
 .shop-item-card { display: flex; align-items: center; gap: 16px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-glass); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.3s ease; }
 .shop-item-card:hover { border-color: var(--border-glass-hover); background: rgba(255,255,255,0.04); transform: translateX(4px); }
-.shop-item-icon { font-size: 1.8rem; width: 48px; text-align: center; }
+.shop-item-icon { font-size: 1.8rem; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; text-align: center; }
+.shop-item-icon svg { width: 48px; height: 48px; display: block; }
 .shop-item-info { display: flex; flex-direction: column; flex-grow: 1; }
 .shop-item-name { font-size: 0.92rem; font-weight: 600; color: var(--color-text-primary); }
 .shop-item-cost { font-size: 0.78rem; color: var(--color-amber); margin-top: 4px; }
@@ -3841,21 +3859,24 @@ body {
 .quiz-chat-options {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    padding: 16px 20px;
-    background: #E8F5E9; /* Comforting soft light green */
+    gap: 6px;
+    padding: 10px 16px;
+    background: #E8F5E9;
     border-top: 3px solid #4A3E3D;
+    max-height: 170px;
+    overflow-y: auto;
+    flex-shrink: 0;
 }
 .quiz-opt-btn {
     background: #FFFFFF;
-    border: 2.5px solid #4A3E3D;
+    border: 2px solid #4A3E3D;
     color: #4A3E3D;
-    padding: 12px 16px;
-    border-radius: 12px;
+    padding: 7px 14px;
+    border-radius: 10px;
     text-align: left;
     cursor: pointer;
     font-family: var(--font-body);
-    font-size: 0.88rem;
+    font-size: 0.82rem;
     font-weight: 700;
     transition: all 0.2s ease;
     box-shadow: 2px 2px 0px rgba(74, 62, 61, 0.12);
@@ -3917,7 +3938,7 @@ body {
 
 .games-selection-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 24px;
 }
 
@@ -5865,8 +5886,9 @@ body {
 
 .games-selection-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 32px !important;
+    align-items: stretch !important;
 }
 
 .menu-game-card {
@@ -6540,10 +6562,11 @@ body {
 /* Shifting Twilight Gradient Backdrop on games container - Brighter, more vibrant pastel transitions */
 .games-layout {
     position: relative;
-    background: linear-gradient(135deg, #ffd1d5, #fed7aa, #c7beff, #a7f3d0) !important;
+    background: linear-gradient(135deg, #fbcfe8, #c7beff, #e0f2fe, #a7f3d0) !important;
     background-size: 400% 400% !important;
     animation: cozyGradientShift 18s infinite ease-in-out !important;
     box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.45) !important;
+    border-radius: 32px !important;
     z-index: 1;
 }
 
@@ -6555,9 +6578,9 @@ body {
 /* The 2-column Portal Layout Grid */
 .games-portal-layout {
     display: grid;
-    grid-template-columns: 1.75fr 1.25fr;
+    grid-template-columns: 2fr 1fr;
     gap: 24px;
-    align-items: stretch;
+    align-items: start;
     box-sizing: border-box;
     width: 100%;
 }
@@ -6571,15 +6594,15 @@ body {
 .games-portal-sidebar {
     display: flex;
     flex-direction: column;
-    justify-content: stretch;
+    justify-content: start;
 }
 
 /* Frosted glass Cozy Companion Card - Brighter emerald-mint green tint */
 .comfort-lounge-card {
     background: linear-gradient(135deg, rgba(167, 243, 208, 0.82), rgba(110, 231, 183, 0.58)) !important;
-    border: 2px solid rgba(16, 185, 129, 0.8) !important;
-    border-radius: 28px !important;
-    padding: 24px !important;
+    border: 2.5px solid rgba(16, 185, 129, 0.8) !important;
+    border-radius: 32px !important;
+    padding: 28px 20px !important;
     box-shadow: 0 15px 40px rgba(16, 185, 129, 0.12), inset 0 4px 12px rgba(255, 255, 255, 0.3) !important;
     backdrop-filter: blur(16px) !important;
     display: flex;
@@ -6588,12 +6611,13 @@ body {
     height: 100%;
     box-sizing: border-box;
     gap: 20px;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
 }
 
 .comfort-lounge-card:hover {
     border-color: rgba(16, 185, 129, 1) !important;
-    box-shadow: 0 18px 45px rgba(16, 185, 129, 0.18), inset 0 4px 12px rgba(255, 255, 255, 0.4) !important;
+    transform: translateY(-6px) !important;
+    box-shadow: 0 20px 40px rgba(16, 185, 129, 0.15), 0 0 18px rgba(16, 185, 129, 0.3) !important;
 }
 
 
@@ -6734,25 +6758,25 @@ body {
 .zen-task-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
 .zen-task-item {
     background: rgba(255, 255, 255, 0.55);
     border: 1.5px solid rgba(255, 255, 255, 0.8);
-    border-radius: 14px;
-    padding: 10px 14px;
+    border-radius: 12px;
+    padding: 8px 12px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .zen-task-item .checkbox-indicator {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     border: 2px solid #a7f3d0;
-    border-radius: 6px;
+    border-radius: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -6762,7 +6786,7 @@ body {
 }
 
 .zen-task-item .task-label-text {
-    font-size: 0.76rem;
+    font-size: 0.72rem;
     font-weight: 600;
     color: #4b5563;
     transition: all 0.25s ease;
@@ -6788,7 +6812,7 @@ body {
 }
 
 .zen-task-item.completed .checkbox-indicator::after {
-    content: '✓';
+    content: "\2713";
     color: #ffffff;
     font-size: 0.72rem;
     font-weight: 900;
@@ -6796,8 +6820,7 @@ body {
 
 .zen-task-item.completed .task-label-text {
     color: #047857;
-    text-decoration: line-through;
-    opacity: 0.75;
+    opacity: 0.85;
 }
 
 /* Restyle Game cards into organic warm pastel glass gradients - Brighter, more saturated, rich colors */
@@ -6892,15 +6915,30 @@ body {
 .avatar-card.scene-cozy-rain {
     background: linear-gradient(180deg, #cfd8dc 0%, #90a4ae 100%) !important;
 }
+.avatar-card.scene-magic-forest {
+    background: linear-gradient(135deg, #1e1b4b 0%, #311042 100%) !important;
+}
+.avatar-card.scene-candy-castle {
+    background: linear-gradient(135deg, #ddd6fe 0%, #ffd6e0 100%) !important;
+}
+.avatar-card.scene-coral-palace {
+    background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%) !important;
+}
+.avatar-card.scene-moon-carousel {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+}
 
 /* Dark scene typography adjustments for readability */
-.avatar-card.scene-starry-night h3 {
+.avatar-card.scene-starry-night h3,
+.avatar-card.scene-magic-forest h3 {
     color: #ffffff !important;
 }
-.avatar-card.scene-starry-night .mini-label {
+.avatar-card.scene-starry-night .mini-label,
+.avatar-card.scene-magic-forest .mini-label {
     color: #e2e8f0 !important;
 }
-.avatar-card.scene-starry-night .mini-val {
+.avatar-card.scene-starry-night .mini-val,
+.avatar-card.scene-magic-forest .mini-val {
     color: #fef08a !important;
 }
 
