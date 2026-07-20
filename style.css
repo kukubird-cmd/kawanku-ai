@@ -1662,6 +1662,19 @@ body {
     background: linear-gradient(180deg, #cfd8dc 0%, #90a4ae 100%) !important; /* Soothing rain blue-grey */
 }
 
+.scene-magic-forest {
+    background: linear-gradient(135deg, #1e1b4b 0%, #311042 100%) !important;
+}
+.scene-candy-castle {
+    background: linear-gradient(135deg, #ddd6fe 0%, #ffd6e0 100%) !important;
+}
+.scene-coral-palace {
+    background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%) !important;
+}
+.scene-moon-carousel {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+}
+
 /* Customizer SVGs */
 .customizer-viewport #studio-avatar-container {
     width: 100%;
