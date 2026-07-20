@@ -1538,6 +1538,18 @@ body {
 .scene-cozy-rain {
     background: linear-gradient(180deg, #cfd8dc 0%, #90a4ae 100%) !important; /* Soothing rain blue-grey */
 }
+.scene-magic-forest {
+    background: linear-gradient(135deg, #1e1b4b 0%, #311042 100%) !important;
+}
+.scene-candy-castle {
+    background: linear-gradient(135deg, #ddd6fe 0%, #ffd6e0 100%) !important;
+}
+.scene-coral-palace {
+    background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%) !important;
+}
+.scene-moon-carousel {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+}
 
 /* Customizer SVGs */
 .customizer-viewport #studio-avatar-container {
@@ -6863,14 +6875,29 @@ body {
 .avatar-card.scene-cozy-rain {
     background: linear-gradient(180deg, #cfd8dc 0%, #90a4ae 100%) !important;
 }
+.avatar-card.scene-magic-forest {
+    background: linear-gradient(135deg, #1e1b4b 0%, #311042 100%) !important;
+}
+.avatar-card.scene-candy-castle {
+    background: linear-gradient(135deg, #ddd6fe 0%, #ffd6e0 100%) !important;
+}
+.avatar-card.scene-coral-palace {
+    background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%) !important;
+}
+.avatar-card.scene-moon-carousel {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+}
 
 /* Dark scene typography adjustments for readability */
-.avatar-card.scene-starry-night h3 {
+.avatar-card.scene-starry-night h3,
+.avatar-card.scene-magic-forest h3 {
     color: #ffffff !important;
 }
-.avatar-card.scene-starry-night .mini-label {
+.avatar-card.scene-starry-night .mini-label,
+.avatar-card.scene-magic-forest .mini-label {
     color: #e2e8f0 !important;
 }
-.avatar-card.scene-starry-night .mini-val {
+.avatar-card.scene-starry-night .mini-val,
+.avatar-card.scene-magic-forest .mini-val {
     color: #fef08a !important;
 }

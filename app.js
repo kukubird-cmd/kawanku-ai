@@ -1167,6 +1167,101 @@ document.addEventListener('DOMContentLoaded', () => {
                     <line x1="68" y1="65" x2="66" y2="75" stroke="#bae6fd" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
                 </svg>
             `;
+        } else if (currentScene === 'magic_forest') {
+            svgHtml = `
+                <svg class="scene-bg-element" viewBox="0 0 100 100">
+                    <!-- Giant Magic Mushroom Left -->
+                    <path d="M 12,90 L 12,65 Q 15,65 18,65 L 18,90 Z" fill="#ebcba4" stroke="#4A3E3D" stroke-width="2" />
+                    <path d="M 3,65 Q 15,35 27,65 Z" fill="#c084fc" stroke="#4A3E3D" stroke-width="2" />
+                    <circle cx="10" cy="50" r="2.5" fill="#fff" opacity="0.8" />
+                    <circle cx="20" cy="55" r="2.0" fill="#fff" opacity="0.8" />
+                    <!-- Small Magic Mushroom Right -->
+                    <path d="M 85,90 L 85,75 Q 87,75 89,75 L 89,90 Z" fill="#ebcba4" stroke="#4A3E3D" stroke-width="1.8" />
+                    <path d="M 78,75 Q 87,52 96,75 Z" fill="#f472b6" stroke="#4A3E3D" stroke-width="1.8" />
+                    <circle cx="84" cy="64" r="1.5" fill="#fff" opacity="0.8" />
+                    <circle cx="90" cy="66" r="1.5" fill="#fff" opacity="0.8" />
+                    <!-- Magical Fireflies / Glows -->
+                    <circle cx="25" cy="30" r="2" fill="#fef08a" opacity="0.9" />
+                    <circle cx="25" cy="30" r="5" fill="#fef08a" opacity="0.3" />
+                    <circle cx="75" cy="40" r="1.5" fill="#fef08a" opacity="0.8" />
+                    <circle cx="75" cy="40" r="4" fill="#fef08a" opacity="0.25" />
+                    <circle cx="45" cy="20" r="2.2" fill="#a78bfa" opacity="0.8" />
+                    <circle cx="45" cy="20" r="6" fill="#a78bfa" opacity="0.25" />
+                    <circle cx="55" cy="55" r="1.2" fill="#fef08a" opacity="0.7" />
+                    <!-- Ground / Moss -->
+                    <path d="M 0,90 Q 25,87 50,90 Q 75,93 100,90 L 100,100 L 0,100 Z" fill="#588157" stroke="#4A3E3D" stroke-width="2" />
+                </svg>
+            `;
+        } else if (currentScene === 'candy_castle') {
+            svgHtml = `
+                <svg class="scene-bg-element" viewBox="0 0 100 100">
+                    <!-- Rainbow -->
+                    <path d="M -10,65 Q 50,-10 110,65" fill="none" stroke="#ff85a2" stroke-width="14" opacity="0.3" />
+                    <path d="M -10,65 Q 50,-10 110,65" fill="none" stroke="#fcd34d" stroke-width="10" opacity="0.3" />
+                    <path d="M -10,65 Q 50,-10 110,65" fill="none" stroke="#a7f3d0" stroke-width="6" opacity="0.3" />
+                    <path d="M -10,65 Q 50,-10 110,65" fill="none" stroke="#bae6fd" stroke-width="2" opacity="0.3" />
+                    <!-- Far away Castle Silhouettes -->
+                    <path d="M 15,85 L 15,55 L 28,55 L 28,85 Z M 28,85 L 28,45 L 42,45 L 42,85 Z" fill="#f5d0fe" stroke="#4A3E3D" stroke-width="1.8" />
+                    <polygon points="15,55 21.5,38 28,55" fill="#e879f9" stroke="#4A3E3D" stroke-width="1.8" />
+                    <polygon points="28,45 35,25 42,45" fill="#e879f9" stroke="#4A3E3D" stroke-width="1.8" />
+                    
+                    <path d="M 65,85 L 65,48 L 78,48 L 78,85 Z M 78,85 L 78,58 L 90,58 L 90,85 Z" fill="#f5d0fe" stroke="#4A3E3D" stroke-width="1.8" />
+                    <polygon points="65,48 71.5,30 78,48" fill="#e879f9" stroke="#4A3E3D" stroke-width="1.8" />
+                    <polygon points="78,58 84,42 90,58" fill="#e879f9" stroke="#4A3E3D" stroke-width="1.8" />
+                    <!-- Twinkling Stars -->
+                    <polygon points="12,20 13,23 16,23 14,25 15,28 12,26 9,28 10,25 8,23 11,23" fill="#fcd34d" />
+                    <polygon points="88,18 89,21 92,21 90,23 91,26 88,24 85,26 86,23 84,21 87,21" fill="#fcd34d" />
+                    <!-- Cozy Fluffy Clouds at Bottom -->
+                    <path d="M -10,85 A 15,15 0 0,1 20,85 A 20,20 0 0,1 60,85 A 20,20 0 0,1 90,85 A 15,15 0 0,1 110,85 Z" fill="#ffffff" stroke="#4A3E3D" stroke-width="2.5" />
+                </svg>
+            `;
+        } else if (currentScene === 'coral_palace') {
+            svgHtml = `
+                <svg class="scene-bg-element" viewBox="0 0 100 100">
+                    <!-- Floating bubbles -->
+                    <circle cx="15" cy="45" r="3.5" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.6" />
+                    <circle cx="17" cy="43" r="1" fill="#ffffff" opacity="0.8" />
+                    <circle cx="20" cy="25" r="2" fill="none" stroke="#ffffff" stroke-width="1.2" opacity="0.5" />
+                    <circle cx="82" cy="35" r="4" fill="none" stroke="#ffffff" stroke-width="1.8" opacity="0.6" />
+                    <circle cx="84" cy="33" r="1.2" fill="#ffffff" opacity="0.8" />
+                    <circle cx="78" cy="18" r="2.5" fill="none" stroke="#ffffff" stroke-width="1.2" opacity="0.5" />
+                    <circle cx="50" cy="15" r="3" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.4" />
+                    <!-- Coral & Seaweed Left -->
+                    <path d="M 5,95 Q 12,65 18,95 Q 24,70 28,95" fill="none" stroke="#4ade80" stroke-width="4.5" stroke-linecap="round" />
+                    <path d="M 12,95 C 10,80 2,82 8,95" fill="#fecdd3" stroke="#4A3E3D" stroke-width="1.8" />
+                    <path d="M 22,95 C 25,75 12,78 18,95" fill="#fda4af" stroke="#4A3E3D" stroke-width="1.8" />
+                    <!-- Coral & Seaweed Right -->
+                    <path d="M 90,95 Q 85,60 78,95 Q 74,68 70,95" fill="none" stroke="#4ade80" stroke-width="4" stroke-linecap="round" />
+                    <path d="M 85,95 C 80,72 98,75 88,95" fill="#fef08a" stroke="#4A3E3D" stroke-width="1.8" />
+                    <path d="M 75,95 C 72,82 80,80 76,95" fill="#fed7aa" stroke="#4A3E3D" stroke-width="1.8" />
+                    <!-- Cute Little Starfish on Ground -->
+                    <polygon points="45,94 47,89 51,90 48,93 49,97 45,95 41,97 42,93 39,90 43,89" fill="#ff758f" stroke="#4A3E3D" stroke-width="1.5" stroke-linejoin="round" />
+                    <!-- Sandy Ocean Floor -->
+                    <path d="M 0,93 Q 25,90 50,93 Q 75,95 100,92 L 100,100 L 0,100 Z" fill="#fef3c7" stroke="#4A3E3D" stroke-width="2.2" />
+                </svg>
+            `;
+        } else if (currentScene === 'moon_carousel') {
+            svgHtml = `
+                <svg class="scene-bg-element" viewBox="0 0 100 100">
+                    <!-- Hanging Stars on Strings -->
+                    <line x1="20" y1="0" x2="20" y2="35" stroke="#4A3E3D" stroke-width="1.5" />
+                    <polygon points="20,35 22,38 25,38 23,40 24,43 20,41 16,43 17,40 15,38 18,38" fill="#fcd34d" stroke="#4A3E3D" stroke-width="1.2" />
+                    <line x1="80" y1="0" x2="80" y2="45" stroke="#4A3E3D" stroke-width="1.5" />
+                    <polygon points="80,45 82,48 85,48 83,50 84,53 80,51 76,53 77,50 75,48 78,48" fill="#fcd34d" stroke="#4A3E3D" stroke-width="1.2" />
+                    <line x1="50" y1="0" x2="50" y2="20" stroke="#4A3E3D" stroke-width="1.5" />
+                    <polygon points="50,20 52,23 55,23 53,25 54,28 50,26 46,28 47,25 45,23 48,23" fill="#fcd34d" stroke="#4A3E3D" stroke-width="1.2" />
+                    <!-- Big Crescent Golden Moon Swing (placed behind the mascot offset) -->
+                    <path d="M 68,25 A 28,28 0 1,0 68,81 A 23,23 0 1,1 68,25 Z" fill="#fdeb6e" stroke="#4A3E3D" stroke-width="2" transform="rotate(-10, 68, 53)" />
+                    <circle cx="56" cy="46" r="1.5" fill="#fff" opacity="0.8" />
+                    <circle cx="48" cy="62" r="2.0" fill="#fff" opacity="0.8" />
+                    <!-- Magic Sparkles -->
+                    <polygon points="35,60 36,62 38,62 36.5,63.5 37,65.5 35,64.2 33,65.5 33.5,63.5 32,62 34,62" fill="#ffffff" />
+                    <polygon points="78,72 79,74 81,74 79.5,75.5 80,77.5 78,76.2 76,77.5 76.5,75.5 75,74 77,74" fill="#ffffff" />
+                    <polygon points="25,25 26,27 28,27 26.5,28.5 27,30.5 25,29.2 23,30.5 23.5,28.5 22,27 24,27" fill="#ffffff" />
+                    <!-- Soft clouds at bottom -->
+                    <path d="M -10,92 Q 15,85 40,93 Q 65,86 90,92 Q 100,90 110,95 L 110,100 L -10,100 Z" fill="#ffffff" stroke="#4A3E3D" stroke-width="2" />
+                </svg>
+            `;
         }
 
         viewports.forEach(vp => {
@@ -3404,7 +3499,11 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
                     { id: 'boba_cafe', label: 'Dreamy Boba Cafe', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#F7F4EB" stroke="#4A3E3D" stroke-width="3"/><circle cx="30" cy="30" r="3" fill="#ffe066"/><circle cx="70" cy="30" r="3" fill="#ffe066"/></svg>' },
                     { id: 'pink_bedroom', label: 'Strawberry Dream Room 🌸', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#ffdeeb" stroke="#4A3E3D" stroke-width="3"/><circle cx="30" cy="25" r="3" fill="#fef08a" stroke="#4A3E3D"/><circle cx="50" cy="28" r="3" fill="#fef08a" stroke="#4A3E3D"/><circle cx="70" cy="25" r="3" fill="#fef08a" stroke="#4A3E3D"/><ellipse cx="50" cy="80" rx="20" ry="5" fill="#ffa2b6" opacity="0.4"/></svg>' },
                     { id: 'cozy_cabin', label: 'Warm Cabin Fireside 🪵', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#fef3c7" stroke="#4A3E3D" stroke-width="3"/><rect x="25" y="25" width="20" height="30" rx="2" fill="#fff" opacity="0.3" stroke="#4A3E3D" stroke-width="1.8"/><rect x="65" y="65" width="10" height="12" rx="1" fill="#f97316" stroke="#4A3E3D" stroke-width="1.8"/></svg>' },
-                    { id: 'cozy_rain', label: 'Rainy Day Window ☁️', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#90a4ae" stroke="#4A3E3D" stroke-width="3"/><path d="M 25,35 Q 35,25 45,35" fill="none" stroke="#fff" opacity="0.5" stroke-width="2" stroke-linecap="round"/><line x1="30" y1="55" x2="28" y2="65" stroke="#bae6fd" stroke-width="2" stroke-linecap="round"/><line x1="60" y1="50" x2="58" y2="60" stroke="#bae6fd" stroke-width="2" stroke-linecap="round"/></svg>' }
+                    { id: 'cozy_rain', label: 'Rainy Day Window ☁️', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#90a4ae" stroke="#4A3E3D" stroke-width="3"/><path d="M 25,35 Q 35,25 45,35" fill="none" stroke="#fff" opacity="0.5" stroke-width="2" stroke-linecap="round"/><line x1="30" y1="55" x2="28" y2="65" stroke="#bae6fd" stroke-width="2" stroke-linecap="round"/><line x1="60" y1="50" x2="58" y2="60" stroke="#bae6fd" stroke-width="2" stroke-linecap="round"/></svg>' },
+                    { id: 'magic_forest', label: 'Magic Forest 🍄', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#2d1b4e" stroke="#4A3E3D" stroke-width="3"/><path d="M 25,60 Q 30,35 45,60" fill="#a78bfa" stroke="#4A3E3D" stroke-width="2"/><path d="M 32,60 L 32,80 M 38,60 L 38,80" stroke="#4A3E3D" stroke-width="2"/><circle cx="28" cy="48" r="1.5" fill="#fff" /><circle cx="35" cy="42" r="1.5" fill="#fff" /><circle cx="42" cy="50" r="1.5" fill="#fff" /><path d="M 55,70 Q 60,50 70,70" fill="#f472b6" stroke="#4A3E3D" stroke-width="2"/><path d="M 60,70 L 60,85 M 65,70 L 65,85" stroke="#4A3E3D" stroke-width="2"/><circle cx="75" cy="35" r="2.5" fill="#fef08a" /><path d="M 75,35 L 75,30 M 75,35 L 75,40 M 75,35 L 70,35 M 75,35 L 80,35" stroke="#fef08a" stroke-width="1"/></svg>' },
+                    { id: 'candy_castle', label: 'Candy Castle 🏰', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#ddd6fe" stroke="#4A3E3D" stroke-width="3"/><path d="M 30,70 L 30,55 L 42,55 L 42,70 Z" fill="#ffd6e0" stroke="#4A3E3D" stroke-width="1.5"/><polygon points="30,55 36,40 42,55" fill="#ff85a2" stroke="#4A3E3D" stroke-width="1.5"/><path d="M 50,75 L 50,48 L 68,48 L 68,75 Z" fill="#ffd6e0" stroke="#4A3E3D" stroke-width="1.5"/><polygon points="50,48 59,30 68,48" fill="#ff85a2" stroke="#4A3E3D" stroke-width="1.5"/><path d="M 10,75 A 12,12 0 0,1 35,75 A 16,16 0 0,1 65,75 A 12,12 0 0,1 90,75 Z" fill="#fff" stroke="#4A3E3D" stroke-width="2"/><path d="M 15,30 Q 50,15 85,30" fill="none" stroke="#fcd34d" stroke-width="2" stroke-linecap="round"/></svg>' },
+                    { id: 'coral_palace', label: 'Coral Palace 🐚', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#bae6fd" stroke="#4A3E3D" stroke-width="3"/><circle cx="25" cy="30" r="4" fill="none" stroke="#4A3E3D" stroke-width="1.5" stroke-dasharray="1,1"/><circle cx="35" cy="22" r="2.5" fill="none" stroke="#4A3E3D" stroke-width="1.2"/><circle cx="75" cy="40" r="3" fill="none" stroke="#4A3E3D" stroke-width="1.5"/><path d="M 20,90 Q 25,65 35,90" fill="#fda4af" stroke="#4A3E3D" stroke-width="2"/><path d="M 70,90 Q 75,70 85,90" fill="#fef08a" stroke="#4A3E3D" stroke-width="2"/><path d="M 45,90 Q 52,78 60,90" fill="#a7f3d0" stroke="#4A3E3D" stroke-width="2"/></svg>' },
+                    { id: 'moon_carousel', label: 'Moon Swing 🌙', prop: 'currentScene', svg: '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="80" height="80" rx="10" fill="#fffbeb" stroke="#4A3E3D" stroke-width="3"/><path d="M 55,20 A 25,25 0 1,0 55,70 A 20,20 0 1,1 55,20 Z" fill="#fcd34d" stroke="#4A3E3D" stroke-width="2" transform="rotate(-15, 50, 45)"/><line x1="30" y1="10" x2="30" y2="90" stroke="#4A3E3D" stroke-width="1.5" stroke-dasharray="3,3"/><line x1="70" y1="10" x2="70" y2="90" stroke="#4A3E3D" stroke-width="1.5" stroke-dasharray="3,3"/><circle cx="30" cy="40" r="3" fill="#ff758f"/><circle cx="70" cy="60" r="3" fill="#ff758f"/></svg>' }
                 ]
             }
         }
@@ -3560,7 +3659,7 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
         const expressionOptions  = ['friendly', 'starry', 'wink', 'sleepy', 'blep', 'uwu', 'teary', 'cat'];
         const blushOptions       = ['circle', 'heart', 'star', 'sakura', 'sparkle', 'dots', 'crescent', 'butterfly'];
         const accOptions         = ['none', 'round_glasses', 'night_mask', 'sprout', 'heart_glasses', 'cat_glasses', 'flower_glasses', 'angel_glasses', 'boba_glasses', 'puppy_glasses'];
-        const sceneOptions       = ['starry_night', 'lofi_study', 'floating_garden', 'boba_cafe', 'pink_bedroom', 'cozy_cabin', 'cozy_rain'];
+        const sceneOptions       = ['starry_night', 'lofi_study', 'floating_garden', 'boba_cafe', 'pink_bedroom', 'cozy_cabin', 'cozy_rain', 'magic_forest', 'candy_castle', 'coral_palace', 'moon_carousel'];
 
         state.avatar.skinTone     = getRandomElement(mascotColors);
         state.avatar.expression   = getRandomElement(expressionOptions);
