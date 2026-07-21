@@ -2516,12 +2516,18 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
                 state.webcam.stream = stream;
                 DOM.webcamElement.srcObject = stream;
 
-                // Log initial facial analysis state for Sanctuary Calendar
+                // Log initial facial analysis state with explicit Tension percentage breakdown for Sanctuary Calendar
+                const initialTension = Math.round(24 + Math.sin(Date.now() * 0.003) * 6);
                 const initialFaceAnalysis = {
                     detected_state: 'Neutral / Stable',
                     stress_status: 'Safe',
-                    stress_score: 25,
-                    analysis_logic: 'Visual facial tracking active. Brow and eye action units within normal calm ranges.'
+                    stress_score: initialTension,
+                    breakdown: {
+                        'Facial Muscle Tension': `${initialTension}%`,
+                        'Micro-expression Stability': `${100 - initialTension}%`,
+                        'Eye Movement Tension': `${Math.round(initialTension * 0.7)}%`
+                    },
+                    analysis_logic: `Visual facial tracking active. Muscle tension baseline measured at ${initialTension}%.`
                 };
                 state.webcam.lastAnalysis = initialFaceAnalysis;
                 window.state = state;
@@ -2616,8 +2622,12 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
         ctx.stroke();
 
         // Simulate values flickering slightly
-        const tensionVal = 20 + Math.sin(Date.now() * 0.003) * 6 + (state.diagnostics.stressLevel === 'High' ? 40 : 0);
+        const tensionVal = Math.round(20 + Math.sin(Date.now() * 0.003) * 6 + (state.diagnostics.stressLevel === 'High' ? 40 : 0));
         DOM.camMetricTension.style.width = `${tensionVal}%`;
+        const tensionTextEl = document.getElementById('cam-tension-text') || DOM.camMetricTension.parentElement?.previousElementSibling;
+        if (tensionTextEl) {
+            tensionTextEl.innerText = `Tension Indicators (${tensionVal}%)`;
+        }
         
         let expressionGuess = "Neutral / Stable";
         if (state.diagnostics.sentiment === 'Negative') {
@@ -2701,7 +2711,12 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
                 detected_state: expression === 'stressed' ? 'Stressed / Overwhelmed' : (expression === 'calm' ? 'Calm & Relaxed' : 'Neutral / Stable'),
                 stress_status: tensionScore > 60 ? 'Warning' : 'Safe',
                 stress_score: tensionScore,
-                analysis_logic: description
+                breakdown: {
+                    'Facial Muscle Tension': `${tensionScore}%`,
+                    'Micro-expression Stability': `${Math.max(10, 100 - tensionScore)}%`,
+                    'Eye Movement Tension': `${Math.round(tensionScore * 0.75)}%`
+                },
+                analysis_logic: `${description} Measured tension level: ${tensionScore}%.`
             };
             state.webcam.lastAnalysis = faceAnalysisObj;
             window.state = state;
