@@ -5038,6 +5038,9 @@ Theme: Clinical Assessment | Cognitive Burnout: ${burnoutPct}% | Emotional Fatig
                     fatigue: fatiguePct,
                     social_stress: socialPct,
                     academic_pressure: academicPct,
+                    // Backward compatibility aliases for legacy reader fields
+                    self_esteem: fatiguePct,
+                    anxiety_level: socialPct,
                     summary: `Clinical Assessment Completed (${reportResult}). Cognitive Burnout: ${burnoutPct}%, Emotional Fatigue: ${fatiguePct}%, Social Stress: ${socialPct}%, Academic Pressure: ${academicPct}%.`
                 };
                 localStorage.setItem('kawanku_latest_quiz_report', JSON.stringify(latestQuizReport));

@@ -1070,6 +1070,11 @@
                 const sosData = JSON.parse(localStorage.getItem(`kawanku_sos_dispatched_${studentId}`));
                 const latestQuiz = JSON.parse(localStorage.getItem('kawanku_latest_quiz_report') || 'null');
                 
+                const burnoutVal = latestQuiz ? (latestQuiz.burnout !== undefined ? latestQuiz.burnout : (latestQuiz.academic_pressure || 20)) : (sosData ? 75 : 20);
+                const fatigueVal = latestQuiz ? (latestQuiz.fatigue !== undefined ? latestQuiz.fatigue : (latestQuiz.self_esteem || 15)) : (sosData ? 80 : 15);
+                const socialVal = latestQuiz ? (latestQuiz.social_stress !== undefined ? latestQuiz.social_stress : (latestQuiz.anxiety_level || 30)) : (sosData ? 60 : 30);
+                const academicVal = latestQuiz ? (latestQuiz.academic_pressure !== undefined ? latestQuiz.academic_pressure : 45) : (sosData ? 85 : 45);
+
                 // Report object incorporating real Quiz screening data if present
                 const mockReport = {
                     metadata: {
@@ -1087,28 +1092,28 @@
                                 : 'Student has steady interaction logs. Broad indicators suggest calm or neutral state.')
                     },
                     stress_assessment: {
-                        overall_level: sosData ? 'High' : (latestQuiz ? (latestQuiz.anxiety_level > 60 ? 'High' : 'Moderate') : 'Minimal'),
+                        overall_level: sosData ? 'High' : (socialVal > 60 || burnoutVal > 60 ? 'High' : 'Moderate'),
                         breakdown: {
-                            cognitive_burnout: latestQuiz ? latestQuiz.burnout : (sosData ? 75 : 20),
-                            emotional_fatigue: latestQuiz ? latestQuiz.self_esteem : (sosData ? 80 : 15),
-                            social_stress: latestQuiz ? latestQuiz.anxiety_level : (sosData ? 60 : 30),
-                            academic_pressure: latestQuiz ? latestQuiz.academic_pressure : (sosData ? 85 : 45)
+                            cognitive_burnout: burnoutVal,
+                            emotional_fatigue: fatigueVal,
+                            social_stress: socialVal,
+                            academic_pressure: academicVal
                         }
                     },
                     clinical_screening: {
                         gad7: {
-                            score: latestQuiz ? Math.round(latestQuiz.anxiety_level * 0.21) : (sosData ? 14 : 3),
-                            risk_level: latestQuiz ? (latestQuiz.anxiety_level > 60 ? 'Moderate Anxiety' : 'Mild Anxiety') : (sosData ? 'Moderate Anxiety' : 'Minimal Anxiety')
+                            score: Math.round(socialVal * 0.21),
+                            risk_level: socialVal > 60 ? 'Moderate Anxiety' : (socialVal > 30 ? 'Mild Anxiety' : 'Minimal Anxiety')
                         },
                         phq9: {
-                            score: latestQuiz ? Math.round(latestQuiz.academic_pressure * 0.27) : (sosData ? 16 : 4),
-                            risk_level: latestQuiz ? (latestQuiz.academic_pressure > 60 ? 'Moderately Severe' : 'Minimal Depression') : (sosData ? 'Moderately Severe Depression' : 'Minimal Depression')
+                            score: Math.round(burnoutVal * 0.27),
+                            risk_level: burnoutVal > 60 ? 'Moderately Severe' : (burnoutVal > 30 ? 'Mild Depression' : 'Minimal Depression')
                         }
                     },
                     risk_assessment: {
-                        overall_risk_level: sosData ? 'Urgent' : (latestQuiz && latestQuiz.anxiety_level > 70 ? 'Moderate' : 'Low'),
+                        overall_risk_level: sosData ? 'Urgent' : (socialVal > 70 ? 'Moderate' : 'Low'),
                         immediate_intervention_needed: !!sosData,
-                        follow_up_priority: sosData ? 'Urgent' : (latestQuiz && latestQuiz.anxiety_level > 70 ? 'Medium' : 'Low')
+                        follow_up_priority: sosData ? 'Urgent' : (socialVal > 70 ? 'Medium' : 'Low')
                     },
                     clinical_recommendations: sosData ? [
                         { action: 'Schedule Direct Advisor Session', urgency: 'Critical', description: 'Reach out to the student immediately via their school email or schedule an in-person diagnostic meeting.' },
