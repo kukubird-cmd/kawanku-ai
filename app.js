@@ -2144,17 +2144,58 @@ Keep your conversational reply warm, healing and concise. The student should fee
         });
     }
 
-    // ----------------------------------------------------------------------
-    // SAFETY PROTOCOL TRIGGERS (Core Operating Rule 3)
-    // ----------------------------------------------------------------------
+    let sosAutoCloseTimer = null;
+    let sosCountdownInterval = null;
+
     function triggerSafetyProtocol() {
-        // 1. Alert user directly with counselor dispatch overlay
+        // Clear any previous active timers
+        if (sosAutoCloseTimer) clearTimeout(sosAutoCloseTimer);
+        if (sosCountdownInterval) clearInterval(sosCountdownInterval);
+
+        // 1. Auto-dispatch SOS referral package to Counselor storage immediately
+        const studentId = 'STU-88421';
+        const autoDispatchData = {
+            student_id: studentId,
+            student_name: 'Shaoh (Kawan Student)',
+            sentiment: 'Crisis Flagged',
+            stressLevel: 'Severe High',
+            timestamp: new Date().toLocaleString(),
+            source: 'Sensitive Keyword Auto-Trigger'
+        };
+        try {
+            localStorage.setItem(`kawanku_sos_dispatched_${studentId}`, JSON.stringify(autoDispatchData));
+        } catch(e) {}
+
+        // 2. Hide manual dispatch buttons and show auto-dispatch countdown notice
+        if (DOM.sosConfirmBtn) DOM.sosConfirmBtn.classList.add('hidden');
+        if (DOM.sosCancelBtn) DOM.sosCancelBtn.classList.add('hidden');
+
+        const autoNotice = document.getElementById('sos-auto-dispatch-notice');
+        const countdownEl = document.getElementById('sos-countdown');
+        if (autoNotice) autoNotice.classList.remove('hidden');
+
+        let secondsLeft = 5;
+        if (countdownEl) countdownEl.innerText = secondsLeft;
+
+        sosCountdownInterval = setInterval(() => {
+            secondsLeft--;
+            if (countdownEl) countdownEl.innerText = Math.max(0, secondsLeft);
+            if (secondsLeft <= 0) {
+                clearInterval(sosCountdownInterval);
+            }
+        }, 1000);
+
+        // Auto-close modal after 5 seconds
+        sosAutoCloseTimer = setTimeout(() => {
+            if (DOM.sosModal) DOM.sosModal.classList.add('hidden');
+        }, 5000);
+
+        // 3. Show overlay & play warm emergency dialogue
         DOM.sosModal.classList.remove('hidden');
         
-        // 2. Play warm emergency dialogue
-        const safeText = "Hey, I'm listening. Please hear me: you don't have to go through this alone. I want to keep you safe, and there are human professionals who care deeply and can support you right now. I've brought up their phone numbers on your screen. Please reach out to them immediately.";
+        const safeText = "Hey, I'm listening. Please hear me: you don't have to go through this alone. I want to keep you safe, and there are human professionals who care deeply and can support you right now. I have automatically dispatched an urgent notice to the counseling team for you.";
         speakResponse(safeText, true);
-        appendChatMessage('Buddy', "⚠️ **Safety Alert triggered:** I'm very concerned about you. Please utilize the resources on your screen or reach out to a counselor right now. You are not alone.");
+        appendChatMessage('Buddy', "⚠️ **Safety Alert Auto-Dispatched:** Sensitive keywords detected. Your wellness profile has been automatically forwarded to the counselor department. A school advisor will receive it shortly.");
         
         // Update SOS telemetry status preview inside the modal
         state.diagnostics.sentiment = "Crisis Flagged";
@@ -2162,7 +2203,7 @@ Keep your conversational reply warm, healing and concise. The student should fee
         updateHeaderStatusBars();
         syncSOSReportPreview();
 
-        showToast("Safety Protocol activated. Immediate helper hotlines listed.", "error");
+        showToast("Sensitive keyword detected: Auto-dispatched to Counselor (Closing in 5s).", "error");
     }
 
     function syncSOSReportPreview() {
@@ -3469,6 +3510,16 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
         // SOS modal triggers
         if (DOM.sosOpenBtn) {
             DOM.sosOpenBtn.addEventListener('click', () => {
+                // Clear any previous active timers
+                if (sosAutoCloseTimer) clearTimeout(sosAutoCloseTimer);
+                if (sosCountdownInterval) clearInterval(sosCountdownInterval);
+
+                // Show manual dispatch buttons & hide auto-dispatch notice
+                if (DOM.sosConfirmBtn) DOM.sosConfirmBtn.classList.remove('hidden');
+                if (DOM.sosCancelBtn) DOM.sosCancelBtn.classList.remove('hidden');
+                const autoNotice = document.getElementById('sos-auto-dispatch-notice');
+                if (autoNotice) autoNotice.classList.add('hidden');
+
                 syncSOSReportPreview();
                 if (DOM.sosModal) DOM.sosModal.classList.remove('hidden');
             });
@@ -3479,6 +3530,21 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
         if (DOM.sosConfirmBtn) {
             DOM.sosConfirmBtn.addEventListener('click', () => {
                 if (DOM.sosModal) DOM.sosModal.classList.add('hidden');
+
+                // Save dispatched SOS status for STU-88421
+                const studentId = 'STU-88421';
+                const dispatchPayload = {
+                    student_id: studentId,
+                    student_name: 'Shaoh (Kawan Student)',
+                    sentiment: 'Manual SOS Dispatch',
+                    stressLevel: 'Elevated High',
+                    timestamp: new Date().toLocaleString(),
+                    source: 'Manual SOS Counselor Dispatch'
+                };
+                try {
+                    localStorage.setItem(`kawanku_sos_dispatched_${studentId}`, JSON.stringify(dispatchPayload));
+                } catch(e) {}
+
                 showToast("Anonymized diagnostics successfully dispatched to counselor.", "success");
                 appendChatMessage('Buddy', "📬 **Notification:** I've packaged and forwarded your current physiological indicators and stress indices to the counselor department. A school advisor will receive it shortly. Hang in there!");
             });
