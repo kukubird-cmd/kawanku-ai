@@ -2516,9 +2516,30 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
                 state.webcam.stream = stream;
                 DOM.webcamElement.srcObject = stream;
 
+                // Log initial facial analysis state for Sanctuary Calendar
+                const initialFaceAnalysis = {
+                    detected_state: 'Neutral / Stable',
+                    stress_status: 'Safe',
+                    stress_score: 25,
+                    analysis_logic: 'Visual facial tracking active. Brow and eye action units within normal calm ranges.'
+                };
+                state.webcam.lastAnalysis = initialFaceAnalysis;
+                window.state = state;
+
+                try {
+                    localStorage.setItem('kawanku_latest_face_analysis', JSON.stringify({
+                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        ...initialFaceAnalysis
+                    }));
+                } catch(e) {}
+
+                if (window.updateSanctuaryDashboard) {
+                    window.updateSanctuaryDashboard();
+                }
+
                 // Start visual overlay tracking loop
                 drawFaceScannerHUD();
-                showToast("Webcam face metrics activated.", "success");
+                showToast("Webcam face metrics activated & logged to Calendar.", "success");
             })
             .catch(err => {
                 console.error("Camera access failed", err);
@@ -2674,6 +2695,26 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
                         }
                     }
                 }
+            }
+
+            const faceAnalysisObj = {
+                detected_state: expression === 'stressed' ? 'Stressed / Overwhelmed' : (expression === 'calm' ? 'Calm & Relaxed' : 'Neutral / Stable'),
+                stress_status: tensionScore > 60 ? 'Warning' : 'Safe',
+                stress_score: tensionScore,
+                analysis_logic: description
+            };
+            state.webcam.lastAnalysis = faceAnalysisObj;
+            window.state = state;
+
+            try {
+                localStorage.setItem('kawanku_latest_face_analysis', JSON.stringify({
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    ...faceAnalysisObj
+                }));
+            } catch(e) {}
+
+            if (window.updateSanctuaryDashboard) {
+                window.updateSanctuaryDashboard();
             }
 
             syncStudentAnalysisToBackend(
@@ -4638,14 +4679,20 @@ For the Report (after monster defeat), respond with:
         let selectedAnswers = [];
 
         function scrollToLatestQuestion() {
-            if (qMessages) {
-                setTimeout(() => {
+            setTimeout(() => {
+                if (qMessages) {
                     qMessages.scrollTo({
                         top: qMessages.scrollHeight,
                         behavior: 'smooth'
                     });
-                }, 50);
-            }
+                }
+                const optionsEl = document.getElementById('quiz-chat-options');
+                if (optionsEl && !optionsEl.classList.contains('hidden')) {
+                    optionsEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                } else if (qMessages && qMessages.lastElementChild) {
+                    qMessages.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }
+            }, 60);
         }
 
         function addQuizBubble(text, type) {

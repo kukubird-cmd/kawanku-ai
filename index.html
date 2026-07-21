@@ -2011,22 +2011,37 @@
                     }
                     
                     let liveFace = null;
+                    let storedFaceAnalysis = null;
+                    try {
+                        const s = localStorage.getItem('kawanku_latest_face_analysis');
+                        if (s) storedFaceAnalysis = JSON.parse(s);
+                    } catch(e) {}
+
                     if (state.webcam && state.webcam.lastAnalysis) {
                         const analysis = state.webcam.lastAnalysis;
                         liveFace = {
                             time: "Live Scan",
                             breakdown: { 
                                 Neutral: analysis.stress_status === 'Safe' ? "85%" : "25%", 
-                                Stress: `${analysis.stress_score}%` 
+                                Stress: `${analysis.stress_score || 35}%` 
                             },
-                            notes: `${analysis.detected_state}. ${analysis.analysis_logic}`
+                            notes: `${analysis.detected_state || 'Neutral / Stable'}. ${analysis.analysis_logic || 'Visual facial muscle tracking.'}`
                         };
                         if (analysis.stress_status === 'Warning' || analysis.stress_status === 'Critical') {
                             moodType = 'stress';
                             emoji = '☁️';
-                            title = analysis.detected_state;
+                            title = analysis.detected_state || 'Stressed / Overwhelmed';
                             color = 'bg-sky-100 text-sky-800 border-sky-200';
                         }
+                    } else if (storedFaceAnalysis) {
+                        liveFace = {
+                            time: storedFaceAnalysis.time || "Recent Scan",
+                            breakdown: { 
+                                Neutral: storedFaceAnalysis.stress_status === 'Safe' ? "85%" : "25%", 
+                                Stress: `${storedFaceAnalysis.stress_score || 35}%` 
+                            },
+                            notes: `${storedFaceAnalysis.detected_state || 'Neutral / Stable'}. ${storedFaceAnalysis.analysis_logic || 'Visual facial muscle tracking.'}`
+                        };
                     }
 
                     let liveQuiz = null;
