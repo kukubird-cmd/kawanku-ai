@@ -929,7 +929,14 @@
             })
             .catch(err => {
                 console.warn("Backend server not running, loading local mock students:", err);
-                const localStudents = JSON.parse(localStorage.getItem('kawanku_local_students') || '[]');
+                let localStudents = JSON.parse(localStorage.getItem('kawanku_local_students') || 'null');
+                if (!localStudents || localStudents.length === 0) {
+                    localStudents = [
+                        { student_id: 'STU-88421', full_name: 'Shaoh (Kawan Student)', email: 'shaoh@kawanku-ai.com' },
+                        { student_id: 'STU-10245', full_name: 'Zhehong (Student)', email: 'zhehong@kawanku-ai.com' }
+                    ];
+                    try { localStorage.setItem('kawanku_local_students', JSON.stringify(localStudents)); } catch(e) {}
+                }
                 
                 // Construct standard student structures from localStorage registrations
                 const compiled = localStudents.map(student => {
@@ -1057,8 +1064,7 @@
                 const student = localStudents.find(s => s.student_id === studentId);
                 
                 if (!student) {
-                    alert(`Student ID ${studentId} not found in registered students database.`);
-                    return;
+                    console.warn(`Student ID ${studentId} not found in registered students, proceeding with session report.`);
                 }
 
                 const sosData = JSON.parse(localStorage.getItem(`kawanku_sos_dispatched_${studentId}`));

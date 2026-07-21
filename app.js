@@ -4864,12 +4864,12 @@ Strictly adhere to the following layout and do NOT add any extra introductory te
                     removeQuizTyping();
                     if (data) {
                         const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                        if (reply && reply.includes('Clinical Mental Health Report')) {
+                        if (reply && reply.length > 15) {
                             addQuizBubble(reply, 'ai');
                             reportGenerated = true;
 
                             // Parse and apply state
-                            const dashMatch = reply.match(/精力耗竭[：:]\s*(\d+)%/);
+                            const dashMatch = reply.match(/精力耗竭[：:]\s*(\d+)%/) || reply.match(/学习压力.*?(\d+)%/);
                             const tagMatch = reply.match(/\*{3}(.+?)\*{3}/) || reply.match(/\*\*(.+?)\*\*/);
                             
                             if (dashMatch) {
