@@ -3483,6 +3483,75 @@ Reply as MindBuddy in 2-3 warm sentences. Validate the feeling, gently reflect t
                 appendChatMessage('Buddy', "📬 **Notification:** I've packaged and forwarded your current physiological indicators and stress indices to the counselor department. A school advisor will receive it shortly. Hang in there!");
             });
         }
+
+        initMascotInteractions();
+    }
+
+    function initMascotInteractions() {
+        const robotTrigger = document.getElementById('lounge-robot-trigger');
+        const speechMsg = document.getElementById('lounge-speech-msg');
+
+        const COZY_WISDOM = [
+            "Remember: You are doing so much better than you give yourself credit for ✨",
+            "Take a slow, deep breath and let your shoulders drop below your ears 🌿",
+            "You don't have to figure everything out today. Just take one small step 🐾",
+            "Your hard work is quiet, but it is building something wonderful 🌱",
+            "It's completely okay to take a pause. Resting is part of the progress 💛",
+            "You are worthy of kindness, especially from yourself 🌸",
+            "Inhale peace, exhale worry. I'm right here cheering for you, Kawan 🍀"
+        ];
+
+        let wisdomIdx = 0;
+
+        function triggerRobotWisdom(targetRobot) {
+            // Bouncy animation
+            if (targetRobot) {
+                targetRobot.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                targetRobot.style.transform = 'translateY(-14px) scale(1.15)';
+                setTimeout(() => {
+                    targetRobot.style.transform = 'translateY(0) scale(1)';
+                }, 350);
+            }
+
+            // Cycle local wisdom first
+            const msg = COZY_WISDOM[wisdomIdx % COZY_WISDOM.length];
+            wisdomIdx++;
+
+            if (speechMsg) {
+                speechMsg.style.transition = 'opacity 0.2s ease';
+                speechMsg.style.opacity = '0';
+                setTimeout(() => {
+                    speechMsg.innerText = msg;
+                    speechMsg.style.opacity = '1';
+                }, 180);
+            }
+
+            showToast("🌸 Cozy Mascot Wisdom: " + msg.substring(0, 42) + "...", "info");
+
+            // Attempt Gemini AI generated cozy message
+            if (typeof canAttemptNonChatGemini === 'function' && canAttemptNonChatGemini(lastGeminiFaceAt, 4000)) {
+                callGemini('gemini-1.5-flash', {
+                    system_instruction: { parts: [{ text: "You are a warm, comforting 3D sprout robot mascot named Kawan. Generate one short (max 12 words) soothing, uplifting wisdom sentence for a student in English." }] },
+                    contents: [{ role: 'user', parts: [{ text: "Give me one warm cozy wisdom quote for today." }] }],
+                    generationConfig: { temperature: 0.8, maxOutputTokens: 50 }
+                }).then(data => {
+                    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (reply && reply.length > 5 && speechMsg) {
+                        speechMsg.innerText = `${reply.trim()} ✨`;
+                    }
+                }).catch(() => {});
+            }
+        }
+
+        if (robotTrigger) {
+            robotTrigger.addEventListener('click', () => triggerRobotWisdom(robotTrigger));
+        }
+
+        // Bind all mini robots across the page as well
+        document.querySelectorAll('.kawanku-robot-mini, .clay-robot').forEach(bot => {
+            bot.style.cursor = 'pointer';
+            bot.addEventListener('click', () => triggerRobotWisdom(bot));
+        });
     }
 
     function handleChatTextSubmit() {
